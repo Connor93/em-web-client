@@ -69,11 +69,14 @@ function handleSelectCharacter(
   client.statPoints = data.stats.statPoints;
   client.skillPoints = data.stats.skillPoints;
   client.karma = data.stats.karma;
+  // Note: eolib's EquipmentWelcome deserializes in a different order than the
+  // server's paperdoll array (boots/gloves/accessory/armor/belt vs
+  // boots/accessory/gloves/belt/armor), so we swap the mismatched fields.
   client.equipment.boots = data.equipment.boots;
-  client.equipment.gloves = data.equipment.gloves;
-  client.equipment.accessory = data.equipment.accessory;
-  client.equipment.armor = data.equipment.armor;
-  client.equipment.belt = data.equipment.belt;
+  client.equipment.gloves = data.equipment.accessory;
+  client.equipment.accessory = data.equipment.gloves;
+  client.equipment.armor = data.equipment.belt;
+  client.equipment.belt = data.equipment.armor;
   client.equipment.necklace = data.equipment.necklace;
   client.equipment.hat = data.equipment.hat;
   client.equipment.shield = data.equipment.shield;
@@ -154,11 +157,8 @@ function handleEnterGame(
   client.setState(GameState.InGame);
   client.emit('enterGame', { news: data.news });
   client.bus!.send(new GlobalOpenClientPacket());
-  const diffMap = client.atlas.mapId !== client.mapId;
   client.atlas.reset();
-  if (diffMap) {
-    client.atlas.mapId = -1;
-  }
+  client.atlas.mapId = -1; // Always force full rebuild — map data may differ from initial build
   client.atlas.refresh();
 }
 

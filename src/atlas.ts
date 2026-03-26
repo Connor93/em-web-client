@@ -134,7 +134,7 @@ const FRAME_TO_FRAME_NUMBER_MAP = {
   [CharacterFrame.RangeAttackUpLeft]: 0,
 };
 
-const WEAPON_VISIBLE_MAP = {
+const WEAPON_VISIBLE_MAP: Record<number, boolean> = {
   [CharacterFrame.StandingDownRight]: true,
   [CharacterFrame.StandingUpLeft]: true,
   [CharacterFrame.WalkingDownRight1]: true,
@@ -159,7 +159,7 @@ const WEAPON_VISIBLE_MAP = {
   [CharacterFrame.RangeAttackUpLeft]: true,
 };
 
-const WEAPON_FRAME_MAP = {
+const WEAPON_FRAME_MAP: Record<number, number> = {
   [CharacterFrame.StandingDownRight]: 0,
   [CharacterFrame.StandingUpLeft]: 1,
   [CharacterFrame.WalkingDownRight1]: 2,
@@ -180,7 +180,7 @@ const WEAPON_FRAME_MAP = {
   [CharacterFrame.RangeAttackUpLeft]: 18,
 };
 
-const BACK_FRAME_MAP = {
+const BACK_FRAME_MAP: Record<number, number> = {
   [CharacterFrame.StandingDownRight]: 0,
   [CharacterFrame.StandingUpLeft]: 1,
   [CharacterFrame.WalkingDownRight1]: 0,
@@ -255,9 +255,9 @@ type EmoteAtlasEntry = {
 
 type EffectAtlasEntry = {
   effectId: number;
-  behindFrames: Frame[];
-  transparentFrames: Frame[];
-  frontFrames: Frame[];
+  behindFrames: (Frame | undefined)[];
+  transparentFrames: (Frame | undefined)[];
+  frontFrames: (Frame | undefined)[];
 };
 
 type NpcAtlasEntry = {
@@ -799,9 +799,11 @@ export class Atlas {
           );
           if (character) {
             const frame = character.frames[placeable.frameIndex];
-            frame!.atlasIndex = this.currentAtlasIndex;
-            frame!.x = rect.x;
-            frame!.y = rect.y;
+            if (frame) {
+              frame.atlasIndex = this.currentAtlasIndex;
+              frame.x = rect.x;
+              frame.y = rect.y;
+            }
           }
           break;
         }
@@ -809,9 +811,11 @@ export class Atlas {
           const npc = this.npcs.find((n) => n.graphicId === placeable.typeId);
           if (npc) {
             const frame = npc.frames[placeable.frameIndex];
-            frame!.atlasIndex = this.currentAtlasIndex;
-            frame!.x = rect.x;
-            frame!.y = rect.y;
+            if (frame) {
+              frame.atlasIndex = this.currentAtlasIndex;
+              frame.x = rect.x;
+              frame.y = rect.y;
+            }
           }
           break;
         }
@@ -944,7 +948,7 @@ export class Atlas {
       MapTileSpec.ChairDownRight,
       MapTileSpec.ChairUpLeft,
     ];
-    this.mapHasChairs = this.client.map!.tileSpecRows.some((r) =>
+    this.mapHasChairs = this.client.map.tileSpecRows.some((r) =>
       r.tiles.some((t) => chairSpecs.includes(t.tileSpec)),
     );
 
@@ -955,15 +959,15 @@ export class Atlas {
   }
 
   private loadMapGraphicLayers() {
-    if (this.tiles.length) {
+    if (this.tiles.length && this.tiles.every((t) => t.atlasIndex !== -1)) {
       return;
     }
 
-    if (this.client.map!.fillTile > 0) {
-      this.addBmpToLoad(GfxType.MapTiles, this.client.map!.fillTile);
+    if (this.client.map.fillTile > 0) {
+      this.addBmpToLoad(GfxType.MapTiles, this.client.map.fillTile);
       this.tiles.push({
         gfxType: GfxType.MapTiles,
-        graphicId: this.client.map!.fillTile,
+        graphicId: this.client.map.fillTile,
         atlasIndex: -1,
         x: -1,
         y: -1,
@@ -974,7 +978,7 @@ export class Atlas {
       });
     }
 
-    for (const [index, layer] of this.client.map!.graphicLayers.entries()) {
+    for (const [index, layer] of this.client.map.graphicLayers.entries()) {
       for (const row of layer.graphicRows) {
         for (const tile of row.tiles) {
           if (!tile.graphic) {
@@ -1021,7 +1025,30 @@ export class Atlas {
       }
     }
 
-    for (const spawn of this.client.map!.npcs) {
+    // Also register tiles from the staticTileGrid to handle cases where
+    // client.map was replaced between buildCaches() and this function.
+    for (const tile of this.client.mapRenderer.getRequiredTileIds()) {
+      if (!tile.graphicId) continue;
+      const existing = this.bmpsToLoad.find(
+        (t) => t.gfxType === tile.gfxType && t.id === tile.graphicId,
+      );
+      if (!existing) {
+        this.addBmpToLoad(tile.gfxType, tile.graphicId);
+        this.tiles.push({
+          gfxType: tile.gfxType,
+          graphicId: tile.graphicId,
+          atlasIndex: -1,
+          x: -1,
+          y: -1,
+          w: -1,
+          h: -1,
+          xOffset: 0,
+          yOffset: 0,
+        });
+      }
+    }
+
+    for (const spawn of this.client.map.npcs) {
       const record = this.client.getEnfRecordById(spawn.id);
       if (!record) {
         continue;
@@ -1034,16 +1061,7 @@ export class Atlas {
 
       const npc = {
         graphicId: record.graphicId,
-        frames: [] as {
-          atlasIndex: number;
-          x: number;
-          y: number;
-          w: number;
-          h: number;
-          xOffset: number;
-          yOffset: number;
-          mirroredXOffset: number;
-        }[],
+        frames: [] as (Frame | undefined)[],
         keep: true,
         tickCount: 0,
         size: { w: 0, h: 0 },
@@ -1061,7 +1079,7 @@ export class Atlas {
           xOffset: 0,
           yOffset: 0,
           mirroredXOffset: 0,
-        });
+        } as Frame);
       }
 
       this.npcs.push(npc);
@@ -1708,7 +1726,7 @@ export class Atlas {
             continue;
           }
 
-          let frame: Frame;
+          let frame: Frame | undefined;
           let offset = 0;
           switch (placeable.type) {
             case FrameType.EffectBehind:
@@ -1733,11 +1751,13 @@ export class Atlas {
             continue;
           }
 
-          frame.atlasIndex = this.currentAtlasIndex;
-          sourceX = frame.x;
-          sourceY = frame.y;
-          frame.x = rect.x;
-          frame.y = rect.y;
+          if (frame) {
+            frame.atlasIndex = this.currentAtlasIndex;
+            sourceX = frame.x;
+            sourceY = frame.y;
+            frame.x = rect.x;
+            frame.y = rect.y;
+          }
           frameImg = bmp;
           break;
         }
@@ -1996,9 +2016,7 @@ export class Atlas {
           CHARACTER_FRAME_SIZE,
         );
 
-        const weaponVisible = (WEAPON_VISIBLE_MAP as Record<number, boolean>)[
-          index
-        ];
+        const weaponVisible = WEAPON_VISIBLE_MAP[index];
 
         const upLeft = [
           CharacterFrame.StandingUpLeft,
@@ -2267,7 +2285,11 @@ export class Atlas {
         maxY: 0,
       };
       const colors: Set<number> = new Set();
-      for (let y = 0; y < bmp.height; ++y) {
+      // Scan all rows except the last, which contains only registration
+      // marker pixels (pure R/G/B at x=0,2,4) used for alignment.
+      // The markers must be excluded from the bounding box so they are
+      // not drawn to the atlas.
+      for (let y = 0; y < bmp.height - 1; ++y) {
         for (let x = 0; x < bmp.width; ++x) {
           const base = (y * bmp.width + x) * 4;
           colors.add(
@@ -2601,7 +2623,7 @@ export class Atlas {
 
       // Mark blank frames as undefined
       for (const i of blankIndexes) {
-        frameArray[i] = undefined!;
+        frameArray![i] = undefined;
       }
     }
   }
@@ -2729,10 +2751,7 @@ export class Atlas {
     weapon: number,
     frame: CharacterFrame,
   ) {
-    const graphicId =
-      (weapon - 1) * 100 +
-      (WEAPON_FRAME_MAP as Record<number, number>)[frame] +
-      1;
+    const graphicId = (weapon - 1) * 100 + WEAPON_FRAME_MAP[frame] + 1;
 
     const bmp = this.getBmp(
       gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
@@ -2743,9 +2762,7 @@ export class Atlas {
       return;
     }
 
-    const offset = (
-      WEAPON_OFFSETS[gender] as Record<number, { x: number; y: number }>
-    )[frame];
+    const offset = WEAPON_OFFSETS[gender][frame];
 
     const destX = Math.floor(
       HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x,
@@ -2786,8 +2803,7 @@ export class Atlas {
     frame: number,
     behind = true,
   ) {
-    const graphicId =
-      (back - 1) * 50 + (BACK_FRAME_MAP as Record<number, number>)[frame] + 1;
+    const graphicId = (back - 1) * 50 + BACK_FRAME_MAP[frame] + 1;
 
     const bmp = this.getBmp(
       gender === Gender.Female ? GfxType.FemaleBack : GfxType.MaleBack,
@@ -2801,9 +2817,7 @@ export class Atlas {
       return;
     }
 
-    const offset = (
-      BACK_OFFSETS[gender] as Record<number, { x: number; y: number }>
-    )[frame];
+    const offset = BACK_OFFSETS[gender][frame];
     const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
 
@@ -2826,9 +2840,7 @@ export class Atlas {
       return;
     }
 
-    const offset = (
-      SHIELD_OFFSETS[gender] as Record<number, { x: number; y: number }>
-    )[frame];
+    const offset = SHIELD_OFFSETS[gender][frame];
 
     const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
@@ -3285,7 +3297,10 @@ const HAT_OFFSETS = {
   },
 };
 
-const WEAPON_OFFSETS = {
+const WEAPON_OFFSETS: Record<
+  number,
+  Record<number, { x: number; y: number }>
+> = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: -9, y: -6 },
     [CharacterFrame.StandingUpLeft]: { x: -9, y: -6 },
@@ -3328,7 +3343,10 @@ const WEAPON_OFFSETS = {
   },
 };
 
-const SHIELD_OFFSETS = {
+const SHIELD_OFFSETS: Record<
+  number,
+  Record<number, { x: number; y: number }>
+> = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: -5, y: 5 },
     [CharacterFrame.StandingUpLeft]: { x: -5, y: 5 },
@@ -3367,7 +3385,7 @@ const SHIELD_OFFSETS = {
   },
 };
 
-const BACK_OFFSETS = {
+const BACK_OFFSETS: Record<number, Record<number, { x: number; y: number }>> = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: 0, y: -17 },
     [CharacterFrame.StandingUpLeft]: { x: 0, y: -17 },
@@ -3418,7 +3436,10 @@ const BACK_OFFSETS = {
   },
 };
 
-export const CHARACTER_FRAME_OFFSETS = {
+export const CHARACTER_FRAME_OFFSETS: Record<
+  number,
+  Record<number, Record<number, { x: number; y: number }>>
+> = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: {
       [Direction.Down]: { x: 0, y: 0 },

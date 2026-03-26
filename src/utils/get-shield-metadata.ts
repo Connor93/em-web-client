@@ -11,5 +11,6 @@ export function getShieldMetaData(): Map<number, ShieldMetadata> {
     [16, new ShieldMetadata(true)], // fire arrows
     [18, new ShieldMetadata(true)], // good force wings
     [19, new ShieldMetadata(true)], // fire force wings
+    [27, new ShieldMetadata(true)], // custom wings
   ]);
 }

@@ -1,0 +1,566 @@
+{
+  "0": {
+    "slash": null,
+    "sfx": [10],
+    "ranged": false,
+    "name": "fist"
+  },
+  "1": {
+    "slash": 3,
+    "sfx": [15],
+    "ranged": false,
+    "name": "wood axe"
+  },
+  "2": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "sai"
+  },
+  "3": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "dragon blade"
+  },
+  "4": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "dagger"
+  },
+  "5": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "spear"
+  },
+  "6": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "saber"
+  },
+  "7": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "staff"
+  },
+  "8": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "book"
+  },
+  "9": {
+    "slash": 3,
+    "sfx": [15],
+    "ranged": false,
+    "name": "mace"
+  },
+  "10": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "spirit star"
+  },
+  "11": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "throw axe"
+  },
+  "12": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "dark katana"
+  },
+  "13": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "short sword"
+  },
+  "14": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "broadsword"
+  },
+  "15": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "broom"
+  },
+  "16": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "ninchackus"
+  },
+  "17": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "ancient star"
+  },
+  "18": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "battle axe"
+  },
+  "19": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "ancient sword"
+  },
+  "20": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "luna staff"
+  },
+  "21": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "lance"
+  },
+  "22": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "aura staff"
+  },
+  "23": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "forest staff"
+  },
+  "24": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "normal sword"
+  },
+  "25": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "jewel staff"
+  },
+  "26": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "thors hammer"
+  },
+  "27": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "light katana"
+  },
+  "28": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "polearm"
+  },
+  "29": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "sickle"
+  },
+  "30": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "trident"
+  },
+  "31": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "warlock sword"
+  },
+  "32": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "whip"
+  },
+  "33": {
+    "slash": 5,
+    "sfx": [15],
+    "ranged": false,
+    "name": "ultima"
+  },
+  "34": {
+    "slash": 5,
+    "sfx": [15],
+    "ranged": false,
+    "name": "ice blade"
+  },
+  "35": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "gold defender"
+  },
+  "36": {
+    "slash": 4,
+    "sfx": [15],
+    "ranged": false,
+    "name": "lotus sword"
+  },
+  "37": {
+    "slash": 4,
+    "sfx": [15],
+    "ranged": false,
+    "name": "cristal sword"
+  },
+  "38": {
+    "slash": 5,
+    "sfx": [15],
+    "ranged": false,
+    "name": "killing edge"
+  },
+  "39": {
+    "slash": 7,
+    "sfx": [30],
+    "ranged": false,
+    "name": "dark blade"
+  },
+  "40": {
+    "slash": 7,
+    "sfx": [30],
+    "ranged": false,
+    "name": "reaper scyth"
+  },
+  "41": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "crescent staff"
+  },
+  "42": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "bow"
+  },
+  "43": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "xbow"
+  },
+  "44": {
+    "slash": 8,
+    "sfx": [30],
+    "ranged": false,
+    "name": "reaper"
+  },
+  "45": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "hockey stick"
+  },
+  "46": {
+    "slash": 5,
+    "sfx": [15],
+    "ranged": false,
+    "name": "twin blades"
+  },
+  "47": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "lefor mace"
+  },
+  "48": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "cava staff"
+  },
+  "49": {
+    "slash": 0,
+    "sfx": [44, 45, 46],
+    "ranged": true,
+    "name": "harp"
+  },
+  "50": {
+    "slash": 0,
+    "sfx": [47, 48, 49],
+    "ranged": true,
+    "name": "guitar"
+  },
+  "51": {
+    "slash": 5,
+    "sfx": [15],
+    "ranged": false,
+    "name": "battle spear"
+  },
+  "52": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "flail"
+  },
+  "53": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "war axe"
+  },
+  "54": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "gastro"
+  },
+  "55": {
+    "slash": 7,
+    "sfx": [30],
+    "ranged": false,
+    "name": "ablo staff"
+  },
+  "56": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "fluon sword"
+  },
+  "57": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "rapier"
+  },
+  "58": {
+    "slash": 0,
+    "sfx": [53],
+    "ranged": true,
+    "name": "gun"
+  },
+  "59": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "knob staff"
+  },
+  "60": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "fladdat staff"
+  },
+  "61": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "gabrasto"
+  },
+  "62": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "battle spear 2"
+  },
+  "63": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "lens of truth"
+  },
+  "64": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "chopper"
+  },
+  "65": {
+    "slash": 3,
+    "sfx": [15],
+    "ranged": false,
+    "name": "adger"
+  },
+  "66": {
+    "slash": 1,
+    "sfx": [15],
+    "ranged": false,
+    "name": "chains"
+  },
+  "67": {
+    "slash": 2,
+    "sfx": [15],
+    "ranged": false,
+    "name": "mitova"
+  },
+  "68": {
+    "slash": 3,
+    "sfx": [15],
+    "ranged": false,
+    "name": "merhawk"
+  },
+  "69": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "kontra"
+  },
+  "70": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "jack spear"
+  },
+  "71": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "bazar staff"
+  },
+  "72": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "saw blade"
+  },
+  "73": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "scav bow"
+  },
+  "74": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "fan"
+  },
+  "75": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Cursed Gladius"
+  },
+  "76": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Corum"
+  },
+  "77": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Skullmorne"
+  },
+  "78": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Amaceng"
+  },
+  "79": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 79"
+  },
+  "80": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 80"
+  },
+  "81": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 81"
+  },
+  "82": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Giant Hammer"
+  },
+  "83": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Nifty Spear"
+  },
+  "84": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Harvester"
+  },
+  "85": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Ablo Sword"
+  },
+  "86": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 86"
+  },
+  "87": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 87"
+  },
+  "89": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Bazar Axe"
+  },
+  "91": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "Dragon Bow"
+  },
+  "93": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "Forrest Bow"
+  },
+  "94": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "Ice Bow"
+  },
+  "96": {
+    "slash": 0,
+    "sfx": [38],
+    "ranged": true,
+    "name": "Legendary Ice Bow"
+  },
+  "101": {
+    "slash": 0,
+    "sfx": [15],
+    "ranged": false,
+    "name": "Weapon 90"
+  }
+}

@@ -1,7 +1,9 @@
 import { Ecf, Eif, Emf, Enf, EoReader, EoWriter, Esf } from 'eolib';
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb';
 import { Edf } from './edf';
-import { padWithZeros } from './utils/pad-with-zeros';
+import { padWithZeros } from './utils';
+
+declare const __BUILD_VERSION__: string;
 
 type PubsKey = 'eif' | 'enf' | 'ecf' | 'esf';
 
@@ -18,25 +20,60 @@ interface DB extends DBSchema {
     key: number;
     value: Uint8Array;
   };
+  meta: {
+    key: string;
+    value: string;
+  };
 }
 
 let dbPromise: Promise<IDBPDatabase<DB>>;
 
 function getDb(): Promise<IDBPDatabase<DB>> {
   if (!dbPromise) {
-    dbPromise = openDB<DB>('db', 2, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('pubs')) {
-          db.createObjectStore('pubs');
+    dbPromise = (async () => {
+      const db = await openDB<DB>('db', 3, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains('pubs')) {
+            db.createObjectStore('pubs');
+          }
+          if (!db.objectStoreNames.contains('maps')) {
+            db.createObjectStore('maps');
+          }
+          if (!db.objectStoreNames.contains('edfs')) {
+            db.createObjectStore('edfs');
+          }
+          if (!db.objectStoreNames.contains('meta')) {
+            db.createObjectStore('meta');
+          }
+        },
+      });
+
+      // Check build version — clear stale caches on mismatch
+      try {
+        const storedVersion = await db.get('meta', 'buildVersion');
+        if (storedVersion !== __BUILD_VERSION__) {
+          console.log(
+            `Build version changed (${storedVersion ?? 'none'} → ${__BUILD_VERSION__}), clearing cached data`,
+          );
+          await db.clear('pubs');
+          await db.clear('maps');
+          await db.clear('edfs');
+          await db.put('meta', __BUILD_VERSION__, 'buildVersion');
         }
-        if (!db.objectStoreNames.contains('maps')) {
-          db.createObjectStore('maps');
+      } catch (e) {
+        console.warn('Failed to check build version, clearing caches', e);
+        try {
+          await db.clear('pubs');
+          await db.clear('maps');
+          await db.clear('edfs');
+          await db.put('meta', __BUILD_VERSION__, 'buildVersion');
+        } catch (_) {
+          // best effort
         }
-        if (!db.objectStoreNames.contains('edfs')) {
-          db.createObjectStore('edfs');
-        }
-      },
-    });
+      }
+
+      return db;
+    })();
   }
   return dbPromise;
 }
@@ -45,11 +82,32 @@ export async function getEmf(id: number): Promise<Emf | null> {
   const db = await getDb();
   const buf = await db.get('maps', id);
   if (!buf) {
+    console.log(
+      `[DB DEBUG] getEmf(${id}): NOT in IndexedDB, will fetch from server`,
+    );
     return null;
   }
 
-  const reader = new EoReader(buf);
-  return Emf.deserialize(reader);
+  try {
+    const reader = new EoReader(buf);
+    const emf = Emf.deserialize(reader);
+    console.log(`[DB DEBUG] getEmf(${id}): loaded from IndexedDB`, {
+      name: emf.name,
+      fillTile: emf.fillTile,
+      graphicLayers: emf.graphicLayers.length,
+      graphicLayerTileCounts: emf.graphicLayers.map((l) =>
+        l.graphicRows.reduce(
+          (sum, r) => sum + r.tiles.filter((t) => t.graphic).length,
+          0,
+        ),
+      ),
+    });
+    return emf;
+  } catch (e) {
+    console.warn(`Corrupt cached map ${id}, clearing`, e);
+    await db.delete('maps', id);
+    return null;
+  }
 }
 
 export function saveEmf(id: number, emf: Emf) {
@@ -74,10 +132,21 @@ export async function getEdf(id: number): Promise<Edf | null> {
 
     db.put('edfs', buf, id);
 
-    return Edf.deserialize(new Uint8Array(data));
+    try {
+      return Edf.deserialize(new Uint8Array(data));
+    } catch (e) {
+      console.warn(`Failed to deserialize fetched EDF ${id}`, e);
+      return null;
+    }
   }
 
-  return Edf.deserialize(buf);
+  try {
+    return Edf.deserialize(buf);
+  } catch (e) {
+    console.warn(`Corrupt cached EDF ${id}, clearing`, e);
+    await db.delete('edfs', id);
+    return null;
+  }
 }
 
 export async function getEif(): Promise<Eif | null> {
@@ -87,8 +156,14 @@ export async function getEif(): Promise<Eif | null> {
     return null;
   }
 
-  const reader = new EoReader(buf);
-  return Eif.deserialize(reader);
+  try {
+    const reader = new EoReader(buf);
+    return Eif.deserialize(reader);
+  } catch (e) {
+    console.warn('Corrupt cached EIF, clearing', e);
+    await db.delete('pubs', 'eif');
+    return null;
+  }
 }
 
 export function saveEif(eif: Eif) {
@@ -106,8 +181,14 @@ export async function getEcf(): Promise<Ecf | null> {
     return null;
   }
 
-  const reader = new EoReader(buf);
-  return Ecf.deserialize(reader);
+  try {
+    const reader = new EoReader(buf);
+    return Ecf.deserialize(reader);
+  } catch (e) {
+    console.warn('Corrupt cached ECF, clearing', e);
+    await db.delete('pubs', 'ecf');
+    return null;
+  }
 }
 
 export function saveEcf(ecf: Ecf) {
@@ -125,8 +206,14 @@ export async function getEnf(): Promise<Enf | null> {
     return null;
   }
 
-  const reader = new EoReader(buf);
-  return Enf.deserialize(reader);
+  try {
+    const reader = new EoReader(buf);
+    return Enf.deserialize(reader);
+  } catch (e) {
+    console.warn('Corrupt cached ENF, clearing', e);
+    await db.delete('pubs', 'enf');
+    return null;
+  }
 }
 
 export function saveEnf(enf: Enf) {
@@ -144,8 +231,14 @@ export async function getEsf(): Promise<Esf | null> {
     return null;
   }
 
-  const reader = new EoReader(buf);
-  return Esf.deserialize(reader);
+  try {
+    const reader = new EoReader(buf);
+    return Esf.deserialize(reader);
+  } catch (e) {
+    console.warn('Corrupt cached ESF, clearing', e);
+    await db.delete('pubs', 'esf');
+    return null;
+  }
 }
 
 export function saveEsf(esf: Esf) {

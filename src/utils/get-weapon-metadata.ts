@@ -1,3 +1,4 @@
+import { type Eif, ItemSubtype, ItemType } from 'eolib';
 import { SfxId } from '../sfx';
 
 export class WeaponMetadata {
@@ -8,89 +9,215 @@ export class WeaponMetadata {
   ) {}
 }
 
+interface WeaponMetadataJson {
+  slash: number | null;
+  sfx: number[];
+  ranged: boolean;
+  name: string;
+}
+
+type WeaponMetadataStore = Record<string, WeaponMetadataJson>;
+
+const STORAGE_KEY = 'weapon-metadata-merged';
+
+let weaponMetadataMap: Map<number, WeaponMetadata> = new Map();
+let weaponNameMap: Map<number, string> = new Map();
+let loadPromise: Promise<void> | null = null;
+
+/**
+ * Load weapon metadata from the static JSON file, then add any
+ * auto-detected entries from localStorage that aren't already
+ * in the JSON.
+ *
+ * The JSON file is always the source of truth for manually-configured
+ * entries. localStorage only contributes entries that don't exist
+ * in the JSON (i.e. auto-detected weapons from previous sessions).
+ */
+export async function loadWeaponMetadata(): Promise<void> {
+  let base: WeaponMetadataStore = {};
+
+  try {
+    const response = await fetch('/weapon-metadata.json');
+    if (response.ok) {
+      base = await response.json();
+    }
+  } catch {
+    console.warn('[WeaponMetadata] Failed to load weapon-metadata.json');
+  }
+
+  // Only add localStorage entries that are NEW (not in the base JSON).
+  // This ensures the JSON file always takes precedence for configured weapons,
+  // while auto-detected weapons from previous sessions are preserved.
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      const merged: WeaponMetadataStore = JSON.parse(stored);
+      for (const [key, entry] of Object.entries(merged)) {
+        if (!(key in base)) {
+          base[key] = entry;
+        }
+      }
+    } catch {
+      console.warn('[WeaponMetadata] Failed to parse stored weapon metadata');
+    }
+  }
+
+  weaponMetadataMap = storeToMap(base);
+  weaponNameMap = storeToNameMap(base);
+}
+
+/**
+ * Start loading weapon metadata and return a promise that resolves
+ * when loading is complete. Subsequent calls return the same promise.
+ */
+export function startLoadingWeaponMetadata(): Promise<void> {
+  if (!loadPromise) {
+    loadPromise = loadWeaponMetadata();
+  }
+  return loadPromise;
+}
+
+/**
+ * Returns a promise that resolves when weapon metadata is loaded.
+ * Must be called after startLoadingWeaponMetadata().
+ */
+export function waitForWeaponMetadata(): Promise<void> {
+  return loadPromise || Promise.resolve();
+}
+
+/**
+ * After the EIF is loaded, scan for any weapon graphic IDs that aren't
+ * in the current metadata map. Auto-generate default entries for new
+ * weapons using EIF data (subtype for ranged detection, name for labelling).
+ * Persist the merged result to localStorage.
+ */
+export function syncWeaponMetadataWithEif(eif: Eif): void {
+  const knownGraphicIds = new Set(weaponMetadataMap.keys());
+  let changed = false;
+  let weaponCount = 0;
+
+  for (const record of eif.items) {
+    if (record.type !== ItemType.Weapon) {
+      continue;
+    }
+
+    weaponCount++;
+
+    // spec1 is the "doll_graphic" — the weapon sprite ID that the server
+    // sends as character.equipment.weapon. This is what our metadata map
+    // is keyed by. (graphicId is the inventory icon, which is different)
+    const dollGraphic = record.spec1;
+
+    if (dollGraphic === 0) {
+      continue;
+    }
+
+    // Update names from EIF for existing weapons that have no name yet
+    if (knownGraphicIds.has(dollGraphic)) {
+      if (!weaponNameMap.has(dollGraphic) || !weaponNameMap.get(dollGraphic)) {
+        weaponNameMap.set(dollGraphic, record.name);
+        changed = true;
+      }
+      continue;
+    }
+
+    const ranged = record.subtype === ItemSubtype.Ranged;
+    const sfx = ranged ? [SfxId.AttackBow] : [SfxId.MeleeWeaponAttack];
+    weaponMetadataMap.set(dollGraphic, new WeaponMetadata(0, sfx, ranged));
+    weaponNameMap.set(dollGraphic, record.name);
+    knownGraphicIds.add(dollGraphic);
+    changed = true;
+
+    console.log(
+      `[WeaponMetadata] Auto-detected new weapon: dollGraphic=${dollGraphic} name="${record.name}" ranged=${ranged}`,
+    );
+  }
+
+  console.log(
+    `[WeaponMetadata] EIF sync complete. ${weaponCount} weapon items scanned, ${weaponMetadataMap.size} unique graphic IDs in metadata.`,
+  );
+
+  if (changed) {
+    persistToLocalStorage();
+  }
+}
+
+/**
+ * Returns the current in-memory weapon metadata map.
+ * This is called synchronously by consumers.
+ */
 export function getWeaponMetaData(): Map<number, WeaponMetadata> {
-  return new Map([
-    [0, new WeaponMetadata(null, [SfxId.PunchAttack], false)], // fist
-    [1, new WeaponMetadata(3, [SfxId.MeleeWeaponAttack], false)], // wood axe
-    [2, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // sai
-    [3, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // dragon blade
-    [4, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // dagger
-    [5, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // spear
-    [6, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // saber
-    [7, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // staff
-    [8, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // book
-    [9, new WeaponMetadata(3, [SfxId.MeleeWeaponAttack], false)], // mace
-    [10, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // spirit star
-    [11, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // throw axe
-    [12, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // dark katana
-    [13, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // short sword
-    [14, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // broadsword
-    [15, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // broom
-    [16, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // ninchackus
-    [17, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // ancient star
-    [18, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // battle axe
-    [19, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // ancient sword
-    [20, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // luna staff
-    [21, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // lance
-    [22, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // aura staff
-    [23, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // forest staff
-    [24, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // normal sword
-    [25, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // jewel staff
-    [26, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // thor's hammer
-    [27, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // light katana
-    [28, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // polearm
-    [29, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // sickle
-    [30, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // trident
-    [31, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // warlock sword
-    [32, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // whip
-    [33, new WeaponMetadata(5, [SfxId.MeleeWeaponAttack], false)], // ultima
-    [34, new WeaponMetadata(5, [SfxId.MeleeWeaponAttack], false)], // ice blade
-    [35, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // gold defender
-    [36, new WeaponMetadata(4, [SfxId.MeleeWeaponAttack], false)], // lotus sword
-    [37, new WeaponMetadata(4, [SfxId.MeleeWeaponAttack], false)], // cristal sword
-    [38, new WeaponMetadata(5, [SfxId.MeleeWeaponAttack], false)], // killing edge
-    [39, new WeaponMetadata(7, [SfxId.AlternateMeleeAttack], false)], // dark blade
-    [40, new WeaponMetadata(7, [SfxId.AlternateMeleeAttack], false)], // reaper scyth
-    [41, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // crescent staff
-    [42, new WeaponMetadata(0, [SfxId.AttackBow], true)], // bow
-    [43, new WeaponMetadata(0, [SfxId.AttackBow], true)], // xbow
-    [44, new WeaponMetadata(8, [SfxId.AlternateMeleeAttack], false)], // reaper
-    [45, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // hockey stick
-    [46, new WeaponMetadata(5, [SfxId.MeleeWeaponAttack], false)], // twin blades
-    [47, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // lefor mace
-    [48, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // cava staff
-    [49, new WeaponMetadata(0, [SfxId.Harp1, SfxId.Harp2, SfxId.Harp3], true)], // harp
-    [
-      50,
-      new WeaponMetadata(
-        0,
-        [SfxId.Guitar1, SfxId.Guitar2, SfxId.Guitar3],
-        true,
-      ),
-    ], // guitar
-    [51, new WeaponMetadata(5, [SfxId.MeleeWeaponAttack], false)], // battle spear
-    [52, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // flail
-    [53, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // war axe
-    [54, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // gastro
-    [55, new WeaponMetadata(7, [SfxId.AlternateMeleeAttack], false)], // ablo staff
-    [56, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // fluon sword
-    [57, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // rapier
-    [58, new WeaponMetadata(0, [SfxId.Gun], true)], // gun
-    [59, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // knob staff
-    [60, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // fladdat staff
-    [61, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // gabrasto
-    [62, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // battle spear 2
-    [63, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // lens of truth
-    [64, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // chopper
-    [65, new WeaponMetadata(3, [SfxId.MeleeWeaponAttack], false)], // adger
-    [66, new WeaponMetadata(1, [SfxId.MeleeWeaponAttack], false)], // chains
-    [67, new WeaponMetadata(2, [SfxId.MeleeWeaponAttack], false)], // mitova
-    [68, new WeaponMetadata(3, [SfxId.MeleeWeaponAttack], false)], // merhawk
-    [69, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // kontra
-    [70, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // jack spear
-    [71, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // bazar staff
-    [72, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // saw blade
-    [73, new WeaponMetadata(0, [SfxId.AttackBow], true)], // scav bow
-    [74, new WeaponMetadata(0, [SfxId.MeleeWeaponAttack], false)], // fan
-  ]);
+  return weaponMetadataMap;
+}
+
+/**
+ * Export the full weapon metadata as a formatted JSON string.
+ * Also triggers a file download of the JSON.
+ */
+export function exportWeaponMetadata(): string {
+  const store: WeaponMetadataStore = {};
+  const sortedKeys = [...weaponMetadataMap.keys()].sort((a, b) => a - b);
+
+  for (const key of sortedKeys) {
+    const meta = weaponMetadataMap.get(key)!;
+    store[String(key)] = {
+      slash: meta.slash,
+      sfx: meta.sfx.map((s) => Number(s)),
+      ranged: meta.ranged,
+      name: weaponNameMap.get(key) || '',
+    };
+  }
+
+  const json = JSON.stringify(store, null, 2);
+  console.log('[WeaponMetadata] Exported weapon metadata:');
+  console.log(json);
+
+  // Trigger a file download
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'weapon-metadata.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  return json;
+}
+
+// -- Internal helpers --
+
+function storeToMap(store: WeaponMetadataStore): Map<number, WeaponMetadata> {
+  const map = new Map<number, WeaponMetadata>();
+  for (const [key, entry] of Object.entries(store)) {
+    const graphicId = Number(key);
+    map.set(
+      graphicId,
+      new WeaponMetadata(entry.slash, entry.sfx as SfxId[], entry.ranged),
+    );
+  }
+  return map;
+}
+
+function storeToNameMap(store: WeaponMetadataStore): Map<number, string> {
+  const map = new Map<number, string>();
+  for (const [key, entry] of Object.entries(store)) {
+    if (entry.name) {
+      map.set(Number(key), entry.name);
+    }
+  }
+  return map;
+}
+
+function persistToLocalStorage(): void {
+  const store: WeaponMetadataStore = {};
+  for (const [key, meta] of weaponMetadataMap) {
+    store[String(key)] = {
+      slash: meta.slash,
+      sfx: meta.sfx.map((s) => Number(s)),
+      ranged: meta.ranged,
+      name: weaponNameMap.get(key) || '',
+    };
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }

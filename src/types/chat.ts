@@ -1,0 +1,35 @@
+export enum ChatIcon {
+  None = -1,
+  SpeechBubble = 0,
+  Note = 1,
+  Error = 2,
+  NoteLeftArrow = 3,
+  GlobalAnnounce = 4,
+  Star = 5,
+  Exclamation = 6,
+  LookingDude = 7,
+  Heart = 8,
+  Player = 9,
+  PlayerParty = 10,
+  PlayerPartyDark = 11,
+  GM = 12,
+  GMParty = 13,
+  HGM = 14,
+  HGMParty = 15,
+  DownArrow = 16,
+  UpArrow = 17,
+  DotDotDotDot = 18,
+  Guild = 19,
+  Skeleton = 20,
+  Trophy = 21,
+  Information = 22,
+  QuestMessage = 23,
+}
+
+// ChatTab has no implementation file counterpart, keep it here
+export enum ChatTab {
+  Local = 0,
+  Global = 1,
+  Group = 2,
+  System = 3,
+}

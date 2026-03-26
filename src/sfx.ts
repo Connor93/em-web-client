@@ -1,4 +1,5 @@
-import { padWithZeros } from './utils/pad-with-zeros';
+import { settings } from './settings';
+import { padWithZeros } from './utils';
 
 export enum SfxId {
   LayeredTechIntro = 1,
@@ -105,14 +106,18 @@ const SFX: HTMLAudioElement[] = [];
 const pool: HTMLAudioElement[] = [];
 
 export function playSfxById(id: SfxId, volume = 1.0) {
+  const sfxVolume = settings.getSfxVolume();
+  if (sfxVolume <= 0) return;
+
+  const finalVolume = volume * sfxVolume;
   const sfx = SFX[id];
   if (!sfx) {
-    loadSfxById(id, true, volume);
+    loadSfxById(id, true, finalVolume);
     return;
   }
 
   const dupe = sfx.cloneNode(true) as HTMLAudioElement;
-  dupe.volume = volume;
+  dupe.volume = finalVolume;
   dupe.play();
 
   dupe.addEventListener('ended', () => {

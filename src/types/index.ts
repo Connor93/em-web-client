@@ -1,6 +1,9 @@
 // Account & Character
 export type { AccountCreateData, CharacterCreateData } from './account';
 
+// Chat
+export { ChatIcon, ChatTab } from './chat';
+
 // Config
 export type { IConfig } from './config';
 
@@ -19,6 +22,9 @@ export { GameState, PlayerMenuItem, SpellTarget } from './game';
 
 // Graphics
 export { GfxType } from './gfx';
+
+// Input
+export { Input } from './input';
 
 // Metadata (interfaces)
 export type {
@@ -40,5 +46,8 @@ export type { IVector2 } from './render';
 // SFX (re-exported from sfx.ts)
 export { SfxId } from './sfx';
 
-// UI
-export { ChatIcon, ChatTab, DialogIcon, type ISlot, SlotType } from './ui';
+// UI (interfaces)
+export type { ISlot } from './ui';
+
+// UI (enums — re-exported from implementation files)
+export { DialogIcon, SlotType } from './ui';
