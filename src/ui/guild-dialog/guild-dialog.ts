@@ -40,7 +40,7 @@ export class GuildDialog extends Base {
   protected container = document.getElementById('guild-dialog')!;
   private dialogs = document.getElementById('dialogs')!;
   private cover = document.querySelector<HTMLDivElement>('#cover')!;
-  private inviteEl = document.getElementById('guild-create-invite')!;
+  private invite = document.getElementById('guild-create-invite')!;
   private currentView: GuildView = 'menu';
   private sessionId = 0;
 
@@ -57,6 +57,21 @@ export class GuildDialog extends Base {
   constructor(client: Client) {
     super();
     this.client = client;
+
+    // Wire static invite notification buttons
+    this.invite
+      .querySelector('[data-id="invite-accept"]')!
+      .addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.invite.classList.add('hidden');
+        this.handleInviteAccept();
+      });
+    this.invite
+      .querySelector('[data-id="invite-decline"]')!
+      .addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.invite.classList.add('hidden');
+      });
 
     // Guild NPC opened
     this.client.on('guildOpened', () => this.show());
@@ -229,23 +244,23 @@ export class GuildDialog extends Base {
     const rank = this.client.guildRank;
 
     if (!inGuild) {
-      this.addMenuBtn(body, 'Create Guild', () => {
+      this.addMenuButton(body, 'Create Guild', () => {
         this.currentView = 'create';
         this.render();
       });
-      this.addMenuBtn(body, 'Join Guild', () => {
+      this.addMenuButton(body, 'Join Guild', () => {
         this.currentView = 'join';
         this.render();
       });
     } else {
-      this.addMenuBtn(body, 'Guild Information', () => {
+      this.addMenuButton(body, 'Guild Information', () => {
         this.requestGuildInfo(this.client.guildTag);
       });
-      this.addMenuBtn(body, 'Member List', () => {
+      this.addMenuButton(body, 'Member List', () => {
         this.requestMemberList(this.client.guildTag);
       });
       // Guild bank is accessible to all members
-      this.addMenuBtn(body, 'Guild Bank', () => {
+      this.addMenuButton(body, 'Guild Bank', () => {
         const packet = new GuildTakeClientPacket();
         packet.sessionId = this.sessionId;
         packet.infoType = GuildInfoType.Bank;
@@ -254,21 +269,21 @@ export class GuildDialog extends Base {
       });
       // Management options only for leaders/recruiters (rank <= 2)
       if (rank <= 2) {
-        this.addMenuBtn(body, 'Manage Guild', () => {
+        this.addMenuButton(body, 'Manage Guild', () => {
           this.currentView = 'manage';
           this.render();
         });
       }
-      this.addMenuBtn(body, 'Leave Guild', () => {
+      this.addMenuButton(body, 'Leave Guild', () => {
         this.leaveGuild();
       });
     }
 
-    this.addMenuBtn(body, 'Look Up Guild', () => {
+    this.addMenuButton(body, 'Look Up Guild', () => {
       this.showLookupPrompt();
     });
 
-    this.addFooterBtn(footer, 'Close', () => this.close());
+    this.addFooterButton(footer, 'Close', () => this.close());
   }
 
   // ── Create ────────────────────────────────────────────────────────────
@@ -280,11 +295,11 @@ export class GuildDialog extends Base {
     const nameGroup = this.createInputGroup('Guild Name', 'name', 24);
     body.appendChild(nameGroup);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Begin Creation',
       () => {
@@ -310,22 +325,30 @@ export class GuildDialog extends Base {
   private renderCreateWaiting(body: Element, footer: Element) {
     const waiting = document.createElement('div');
     waiting.className = 'guild-waiting';
-    waiting.innerHTML = `Waiting for members to join<span class="guild-waiting-dot">.</span><span class="guild-waiting-dot">.</span><span class="guild-waiting-dot">.</span>`;
+
+    const textNode = document.createTextNode('Waiting for members to join');
+    waiting.appendChild(textNode);
+
+    for (let i = 0; i < 3; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'guild-waiting-dot';
+      dot.textContent = '.';
+      waiting.appendChild(dot);
+    }
+
     body.appendChild(waiting);
 
     if (this.createMembers.length > 0) {
       const list = document.createElement('div');
-      list.style.cssText = 'padding: 8px 0;';
+      list.className = 'guild-create-list';
       for (const name of this.createMembers) {
-        const row = document.createElement('div');
-        row.className = 'guild-member-row';
-        row.innerHTML = `<span class="guild-member-name">${name}</span><span class="guild-member-rank" style="color:#a5d6a7">Joined</span>`;
+        const row = this.createMemberRow(name, 'Joined', '#a5d6a7');
         list.appendChild(row);
       }
       body.appendChild(list);
     }
 
-    this.addFooterBtn(footer, 'Cancel', () => {
+    this.addFooterButton(footer, 'Cancel', () => {
       this.currentView = 'menu';
       this.render();
     });
@@ -339,24 +362,24 @@ export class GuildDialog extends Base {
     body.innerHTML = '';
     footer.innerHTML = '';
 
-    const msg = document.createElement('div');
-    msg.className = 'guild-message success';
-    msg.textContent = 'Enough members have joined! Enter a description.';
-    body.appendChild(msg);
+    const message = document.createElement('div');
+    message.className = 'guild-message success';
+    message.textContent = 'Enough members have joined! Enter a description.';
+    body.appendChild(message);
 
-    const descGroup = this.createInputGroup(
+    const descriptionGroup = this.createInputGroup(
       'Guild Description',
       'description',
       240,
       true,
     );
-    body.appendChild(descGroup);
+    body.appendChild(descriptionGroup);
 
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Create Guild',
       () => {
-        const desc = (
+        const description = (
           body.querySelector(
             'textarea[name="description"]',
           ) as HTMLTextAreaElement
@@ -365,7 +388,7 @@ export class GuildDialog extends Base {
         packet.sessionId = this.sessionId;
         packet.guildTag = this.createTag;
         packet.guildName = this.createName;
-        packet.description = desc;
+        packet.description = description;
         this.client.bus.send(packet);
       },
       'primary',
@@ -385,11 +408,11 @@ export class GuildDialog extends Base {
     );
     body.appendChild(recruiterGroup);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Request to Join',
       () => {
@@ -437,17 +460,16 @@ export class GuildDialog extends Base {
     ];
 
     for (const [label, value, highlight] of fields) {
-      const section = document.createElement('div');
-      section.className = 'guild-info-section';
-      section.innerHTML = `<div class="guild-info-label">${label}</div><div class="guild-info-value${highlight ? ' highlight' : ''}">${value}</div>`;
+      const section = this.createInfoSection(label, value, !!highlight);
       body.appendChild(section);
     }
 
     if (data.description) {
-      const descSection = document.createElement('div');
-      descSection.className = 'guild-info-section';
-      descSection.innerHTML = `<div class="guild-info-label">Description</div><div class="guild-info-value">${data.description}</div>`;
-      body.appendChild(descSection);
+      const descriptionSection = this.createInfoSection(
+        'Description',
+        data.description,
+      );
+      body.appendChild(descriptionSection);
     }
 
     if (data.staff.length > 0) {
@@ -458,19 +480,29 @@ export class GuildDialog extends Base {
       staffLabel.textContent = 'Staff';
       staffSection.appendChild(staffLabel);
 
-      for (const s of data.staff) {
+      for (const staffMember of data.staff) {
         const row = document.createElement('div');
         row.className = 'guild-staff-row';
-        row.innerHTML = `<span class="guild-staff-name">${s.name}</span><span class="guild-staff-type">${s.rank === 1 ? 'Leader' : 'Recruiter'}</span>`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'guild-staff-name';
+        nameSpan.textContent = staffMember.name;
+        row.appendChild(nameSpan);
+
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'guild-staff-type';
+        typeSpan.textContent = staffMember.rank === 1 ? 'Leader' : 'Recruiter';
+        row.appendChild(typeSpan);
+
         staffSection.appendChild(row);
       }
       body.appendChild(staffSection);
     }
 
-    this.addFooterBtn(footer, 'Member List', () => {
+    this.addFooterButton(footer, 'Member List', () => {
       this.requestMemberList(data.tag);
     });
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
@@ -489,14 +521,12 @@ export class GuildDialog extends Base {
     body.innerHTML = '';
     footer.innerHTML = '';
 
-    for (const m of members) {
-      const row = document.createElement('div');
-      row.className = 'guild-member-row';
-      row.innerHTML = `<span class="guild-member-name">${m.name}</span><span class="guild-member-rank">${m.rankName}</span>`;
+    for (const member of members) {
+      const row = this.createMemberRow(member.name, member.rankName);
       body.appendChild(row);
     }
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
@@ -509,14 +539,14 @@ export class GuildDialog extends Base {
 
     // Edit description/ranks: rank <= 2 (leaders)
     if (rank <= 2) {
-      this.addMenuBtn(body, 'Edit Description', () => {
+      this.addMenuButton(body, 'Edit Description', () => {
         const packet = new GuildTakeClientPacket();
         packet.sessionId = this.sessionId;
         packet.infoType = GuildInfoType.Description;
         packet.guildTag = this.client.guildTag.padEnd(3).slice(0, 3);
         this.client.bus.send(packet);
       });
-      this.addMenuBtn(body, 'Edit Ranks', () => {
+      this.addMenuButton(body, 'Edit Ranks', () => {
         const packet = new GuildTakeClientPacket();
         packet.sessionId = this.sessionId;
         packet.infoType = GuildInfoType.Ranks;
@@ -526,23 +556,23 @@ export class GuildDialog extends Base {
     }
     // Kick/rank changes: rank <= 2
     if (rank <= 2) {
-      this.addMenuBtn(body, 'Kick Member', () => {
+      this.addMenuButton(body, 'Kick Member', () => {
         this.currentView = 'kick';
         this.render();
       });
-      this.addMenuBtn(body, 'Change Member Rank', () => {
+      this.addMenuButton(body, 'Change Member Rank', () => {
         this.currentView = 'rank';
         this.render();
       });
     }
     // Disband: founder only (rank 0)
     if (rank === 0) {
-      this.addMenuBtn(body, 'Disband Guild', () => {
+      this.addMenuButton(body, 'Disband Guild', () => {
         this.disbandGuild();
       });
     }
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
@@ -561,11 +591,11 @@ export class GuildDialog extends Base {
     textarea.value = this.cachedDescription;
     body.appendChild(group);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'manage';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Save',
       () => {
@@ -593,11 +623,11 @@ export class GuildDialog extends Base {
       body.appendChild(group);
     }
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'manage';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Save',
       () => {
@@ -624,9 +654,11 @@ export class GuildDialog extends Base {
   // ── Bank ──────────────────────────────────────────────────────────────
 
   private renderBank(body: Element, footer: Element) {
-    const section = document.createElement('div');
-    section.className = 'guild-info-section';
-    section.innerHTML = `<div class="guild-info-label">Guild Bank Balance</div><div class="guild-info-value highlight">${this.cachedBankGold} gold</div>`;
+    const section = this.createInfoSection(
+      'Guild Bank Balance',
+      `${this.cachedBankGold} gold`,
+      true,
+    );
     body.appendChild(section);
 
     const group = this.createInputGroup('Deposit Amount', 'deposit', 10);
@@ -635,11 +667,11 @@ export class GuildDialog extends Base {
     input.min = '1';
     body.appendChild(group);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Deposit',
       () => {
@@ -660,11 +692,11 @@ export class GuildDialog extends Base {
     const group = this.createInputGroup('Member Name', 'kick-name', 12);
     body.appendChild(group);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'manage';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Kick',
       () => {
@@ -694,11 +726,11 @@ export class GuildDialog extends Base {
     rankInput.max = '9';
     body.appendChild(rankGroup);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'manage';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Update',
       () => {
@@ -719,66 +751,43 @@ export class GuildDialog extends Base {
 
   // ── Invite notifications ──────────────────────────────────────────────
 
+  private pendingInvitePlayerId = 0;
+  private pendingInviteType: 'create' | 'join' = 'create';
+
   private showCreateInvite(playerId: number, guildIdentity: string) {
-    const text = this.inviteEl.querySelector('.guild-invite-text')!;
-    text.innerHTML = `<span class="guild-invite-name">${guildIdentity}</span> is being created. Join?`;
+    this.pendingInvitePlayerId = playerId;
+    this.pendingInviteType = 'create';
 
-    const buttons = this.inviteEl.querySelector('.guild-invite-buttons')!;
-    buttons.innerHTML = '';
+    const nameSpan = this.invite.querySelector('.guild-invite-name')!;
+    nameSpan.textContent = guildIdentity;
+    const textSuffix = this.invite.querySelector('.guild-invite-suffix')!;
+    textSuffix.textContent = ' is being created. Join?';
 
-    const btnDecline = document.createElement('button');
-    btnDecline.className = 'guild-btn';
-    btnDecline.textContent = 'Decline';
-    btnDecline.addEventListener('click', () => {
-      playSfxById(SfxId.ButtonClick);
-      this.inviteEl.classList.add('hidden');
-    });
-    buttons.appendChild(btnDecline);
-
-    const btnAccept = document.createElement('button');
-    btnAccept.className = 'guild-btn primary';
-    btnAccept.textContent = 'Accept';
-    btnAccept.addEventListener('click', () => {
-      playSfxById(SfxId.ButtonClick);
-      this.inviteEl.classList.add('hidden');
-      const packet = new GuildAcceptClientPacket();
-      packet.inviterPlayerId = playerId;
-      this.client.bus.send(packet);
-    });
-    buttons.appendChild(btnAccept);
-
-    this.inviteEl.classList.remove('hidden');
+    this.invite.classList.remove('hidden');
   }
 
   private showJoinRequest(playerId: number, playerName: string) {
-    const text = this.inviteEl.querySelector('.guild-invite-text')!;
-    text.innerHTML = `<span class="guild-invite-name">${playerName}</span> wants to join your guild.`;
+    this.pendingInvitePlayerId = playerId;
+    this.pendingInviteType = 'join';
 
-    const buttons = this.inviteEl.querySelector('.guild-invite-buttons')!;
-    buttons.innerHTML = '';
+    const nameSpan = this.invite.querySelector('.guild-invite-name')!;
+    nameSpan.textContent = playerName;
+    const textSuffix = this.invite.querySelector('.guild-invite-suffix')!;
+    textSuffix.textContent = ' wants to join your guild.';
 
-    const btnDecline = document.createElement('button');
-    btnDecline.className = 'guild-btn';
-    btnDecline.textContent = 'Decline';
-    btnDecline.addEventListener('click', () => {
-      playSfxById(SfxId.ButtonClick);
-      this.inviteEl.classList.add('hidden');
-    });
-    buttons.appendChild(btnDecline);
+    this.invite.classList.remove('hidden');
+  }
 
-    const btnAccept = document.createElement('button');
-    btnAccept.className = 'guild-btn primary';
-    btnAccept.textContent = 'Accept';
-    btnAccept.addEventListener('click', () => {
-      playSfxById(SfxId.ButtonClick);
-      this.inviteEl.classList.add('hidden');
-      const packet = new GuildUseClientPacket();
-      packet.playerId = playerId;
+  private handleInviteAccept() {
+    if (this.pendingInviteType === 'create') {
+      const packet = new GuildAcceptClientPacket();
+      packet.inviterPlayerId = this.pendingInvitePlayerId;
       this.client.bus.send(packet);
-    });
-    buttons.appendChild(btnAccept);
-
-    this.inviteEl.classList.remove('hidden');
+    } else {
+      const packet = new GuildUseClientPacket();
+      packet.playerId = this.pendingInvitePlayerId;
+      this.client.bus.send(packet);
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────
@@ -794,11 +803,11 @@ export class GuildDialog extends Base {
     const group = this.createInputGroup('Guild Tag or Name', 'lookup', 24);
     body.appendChild(group);
 
-    this.addFooterBtn(footer, 'Back', () => {
+    this.addFooterButton(footer, 'Back', () => {
       this.currentView = 'menu';
       this.render();
     });
-    this.addFooterBtn(
+    this.addFooterButton(
       footer,
       'Look Up',
       () => {
@@ -838,31 +847,31 @@ export class GuildDialog extends Base {
     this.client.bus.send(packet);
   }
 
-  private addMenuBtn(parent: Element, text: string, onClick: () => void) {
-    const btn = document.createElement('button');
-    btn.className = 'guild-menu-btn';
-    btn.textContent = text;
-    btn.addEventListener('click', () => {
+  private addMenuButton(parent: Element, text: string, onClick: () => void) {
+    const button = document.createElement('button');
+    button.className = 'guild-menu-btn';
+    button.textContent = text;
+    button.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       onClick();
     });
-    parent.appendChild(btn);
+    parent.appendChild(button);
   }
 
-  private addFooterBtn(
+  private addFooterButton(
     parent: Element,
     text: string,
     onClick: () => void,
     variant?: string,
   ) {
-    const btn = document.createElement('button');
-    btn.className = `guild-btn${variant ? ` ${variant}` : ''}`;
-    btn.textContent = text;
-    btn.addEventListener('click', () => {
+    const button = document.createElement('button');
+    button.className = `guild-btn${variant ? ` ${variant}` : ''}`;
+    button.textContent = text;
+    button.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       onClick();
     });
-    parent.appendChild(btn);
+    parent.appendChild(button);
   }
 
   private createInputGroup(
@@ -874,9 +883,9 @@ export class GuildDialog extends Base {
     const group = document.createElement('div');
     group.className = 'guild-input-group';
 
-    const labelEl = document.createElement('label');
-    labelEl.textContent = label;
-    group.appendChild(labelEl);
+    const labelElement = document.createElement('label');
+    labelElement.textContent = label;
+    group.appendChild(labelElement);
 
     if (isTextarea) {
       const textarea = document.createElement('textarea');
@@ -884,7 +893,6 @@ export class GuildDialog extends Base {
       textarea.name = name;
       textarea.maxLength = maxLength;
       textarea.rows = 4;
-      textarea.style.resize = 'vertical';
       group.appendChild(textarea);
     } else {
       const input = document.createElement('input');
@@ -898,16 +906,61 @@ export class GuildDialog extends Base {
     return group;
   }
 
+  private createInfoSection(
+    label: string,
+    value: string,
+    highlight = false,
+  ): HTMLDivElement {
+    const section = document.createElement('div');
+    section.className = 'guild-info-section';
+
+    const labelElement = document.createElement('div');
+    labelElement.className = 'guild-info-label';
+    labelElement.textContent = label;
+    section.appendChild(labelElement);
+
+    const valueElement = document.createElement('div');
+    valueElement.className = `guild-info-value${highlight ? ' highlight' : ''}`;
+    valueElement.textContent = value;
+    section.appendChild(valueElement);
+
+    return section;
+  }
+
+  private createMemberRow(
+    name: string,
+    rankName: string,
+    rankColor?: string,
+  ): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'guild-member-row';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'guild-member-name';
+    nameSpan.textContent = name;
+    row.appendChild(nameSpan);
+
+    const rankSpan = document.createElement('span');
+    rankSpan.className = 'guild-member-rank';
+    rankSpan.textContent = rankName;
+    if (rankColor) {
+      rankSpan.style.color = rankColor;
+    }
+    row.appendChild(rankSpan);
+
+    return row;
+  }
+
   private showMessage(text: string, type: 'success' | 'error' | 'info') {
     const existing = this.container.querySelector('.guild-message');
     if (existing) existing.remove();
 
-    const msg = document.createElement('div');
-    msg.className = `guild-message ${type}`;
-    msg.textContent = text;
+    const message = document.createElement('div');
+    message.className = `guild-message ${type}`;
+    message.textContent = text;
 
     const body = this.container.querySelector('.guild-body')!;
-    body.insertBefore(msg, body.firstChild);
-    setTimeout(() => msg.remove(), 4000);
+    body.insertBefore(message, body.firstChild);
+    setTimeout(() => message.remove(), 4000);
   }
 }
