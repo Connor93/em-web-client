@@ -1,44 +1,59 @@
-#book {
-  position: relative;
-  background: url("/gfx/gfx002/152.png") #000;
-  height: 290px;
-  width: 284px;
-  z-index: 1050;
-}
+/* ── Book (Quest Log) ───────────────────────────────────────────── */
 
-#book button[data-id="ok"] {
-  position: absolute;
-  bottom: 8px;
-  right: 20px;
+#book {
+  width: 320px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  z-index: 1050;
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
 }
 
 #book .book-title {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  width: 220px;
-  color: #f0f0c8;
-  font-size: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 #book .quest-list {
-  position: absolute;
-  left: 18px;
-  top: 45px;
-  width: 222px;
-  height: 190px;
+  padding: 6px 12px;
+  max-height: 220px;
   overflow-y: auto;
   list-style: none;
   margin: 0;
-  padding: 0;
-  scrollbar-width: thin;
+}
+
+#book .quest-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+#book .quest-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
 }
 
 #book .quest-list li {
-  color: #f0f0c8;
+  color: #d4c4a8;
   font-size: 11px;
-  padding: 2px 4px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+#book .quest-list li:hover {
+  background: rgba(212, 184, 150, 0.06);
+}
+
+#book button[data-id="ok"] {
+  display: block;
+  margin: 6px 12px 10px auto;
 }

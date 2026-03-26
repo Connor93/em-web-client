@@ -1,3 +1,8 @@
+/* Spell book inherits from .dialog-md in style.css */
 #spell-book.dialog-md {
-  background-image: url("/gfx/gfx002/164.png");
+  background-color: rgba(18, 16, 12, 0.94);
+  background-image: none;
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }

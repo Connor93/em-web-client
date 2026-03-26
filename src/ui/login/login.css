@@ -1,49 +1,59 @@
+/* ── Login Form ──────────────────────────────────────────────────── */
+
 #login-form {
-  background: url("/gfx/gfx001/102.png");
-  background-color: #000;
-  width: 320px;
-  height: 159px;
+  width: 340px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   margin: auto;
-  position: relative;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  color: #e0daca;
+  font-family: inherit;
 }
 
-label[for="login-remember"] {
-  position: absolute;
-  top: 91px;
-  left: 126px;
+#login-form .login-field {
+  margin-bottom: 10px;
+}
+
+#login-form .login-field label {
+  display: block;
   font-size: 11px;
-  color: #fff;
+  color: #a89880;
+  margin-bottom: 3px;
 }
 
 input[type="text"],
 input[type="password"] {
-  background: #a38269;
-  color: #000;
-  border: 1px solid #000;
+  width: 100%;
+  padding: 6px 10px;
+  background: rgba(30, 25, 18, 0.7);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 4px;
+  color: #e0daca;
+  font-size: 12px;
+  font-family: inherit;
   outline: none;
+  box-sizing: border-box;
 }
 
-#login-username {
-  position: absolute;
-  top: 35px;
-  left: 130px;
-  width: 138px;
-  height: 17px;
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: rgba(212, 184, 150, 0.4);
 }
 
-#login-password {
-  position: absolute;
-  top: 72px;
-  left: 130px;
-  width: 138px;
-  height: 17px;
+label[for="login-remember"] {
+  font-size: 11px;
+  color: #a89880;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 #login-form .buttons {
-  position: absolute;
-  bottom: 20px;
   display: flex;
-  gap: 2px;
-  width: 100%;
+  gap: 6px;
   justify-content: center;
 }

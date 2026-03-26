@@ -1,18 +1,30 @@
+/* ── Inventory ───────────────────────────────────────────────────── */
+
 #inventory {
   position: absolute;
-  right: 40px;
-  width: 186px;
-  height: 270px;
-  padding: 6px;
-  border-image: url("/border-thin.png") 9 / 9px 9px;
-  background: #7b5a29;
+  right: 120px;
+  width: 210px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  padding: 0;
   user-select: none;
   z-index: 1050;
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
 }
+
+/* ── Top Bar ─────────────────────────────────────────────────────── */
 
 #inventory .top {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
 }
 
 #inventory .top > div {
@@ -20,21 +32,54 @@
 }
 
 #inventory .weight {
-  margin-right: 6px;
-  margin-top: 3px;
-  color: #ccc;
-  font-size: 12px;
+  color: #a89880;
+  font-size: 11px;
 }
 
+/* ── Tabs ────────────────────────────────────────────────────────── */
+
+#inventory .tabs {
+  display: flex;
+  gap: 0;
+  background: rgba(30, 25, 18, 0.85);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.12);
+}
+
+#inventory .tabs button {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #a89880;
+  font-size: 10px;
+  padding: 5px 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+#inventory .tabs button:hover {
+  color: #d4b896;
+  background: rgba(212, 184, 150, 0.06);
+}
+
+#inventory .tabs button.active {
+  color: #d4b896;
+  border-bottom-color: #d4b896;
+  background: rgba(212, 184, 150, 0.08);
+}
+
+/* ── Item Grid ──────────────────────────────────────────────────── */
+
 #inventory .grid {
-  height: 229px;
-  width: 185px;
+  height: 230px;
+  width: 100%;
   cursor: default;
   display: grid;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
-  grid-template-columns: repeat(8, 23px);
-  grid-template-rows: repeat(10, 23px);
+  grid-template-columns: repeat(8, 1fr);
+  grid-auto-rows: 23px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 #inventory .item {
@@ -42,19 +87,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 3px;
+  transition: background 0.1s;
 }
 
 #inventory .item .tooltip {
   position: absolute;
   bottom: 100%;
-  /* Position above the item */
   left: 50%;
   transform: translateX(-50%);
-  background-color: black;
-  color: white;
+  background: rgba(18, 16, 12, 0.95);
+  border: 1px solid rgba(212, 184, 150, 0.3);
+  color: #e0daca;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -62,22 +109,11 @@
 }
 
 #inventory .item:hover .tooltip {
-  opacity: 0.8;
+  opacity: 1;
 }
 
-#inventory .item::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: rgba(248, 248, 190, 0.3);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
-  box-sizing: border-box;
-}
-
-#inventory .item:hover::before {
-  opacity: 0.3 !important;
+#inventory .item:hover {
+  background: rgba(212, 184, 150, 0.08);
 }
 
 #inventory .item img {
@@ -89,73 +125,62 @@
   image-rendering: pixelated;
 }
 
+/* ── Item Sizes ─────────────────────────────────────────────────── */
+
 #inventory .item[data-size="Size1x1"] {
   grid-column: span 1;
   grid-row: span 1;
 }
-
 #inventory .item[data-size="Size1x2"] {
   grid-column: span 1;
   grid-row: span 2;
 }
-
 #inventory .item[data-size="Size1x3"] {
   grid-column: span 1;
   grid-row: span 3;
 }
-
 #inventory .item[data-size="Size1x4"] {
   grid-column: span 1;
   grid-row: span 4;
 }
-
 #inventory .item[data-size="Size2x1"] {
   grid-column: span 2;
   grid-row: span 1;
 }
-
 #inventory .item[data-size="Size2x2"] {
   grid-column: span 2;
   grid-row: span 2;
 }
-
 #inventory .item[data-size="Size2x3"] {
   grid-column: span 2;
   grid-row: span 3;
 }
-
 #inventory .item[data-size="Size2x4"] {
   grid-column: span 2;
   grid-row: span 4;
 }
 
-#inventory .tabs {
-  display: flex;
-  gap: 1px;
-}
-
-#inventory .tabs button,
-#inventory .buttons button {
-  background: transparent;
-  border: 1px solid #000;
-  border-bottom: none;
-  color: #8a8a8a;
-  padding: 2px 10px;
-  cursor: pointer;
-}
-
-#inventory .tabs button.active {
-  color: #cccccc;
-}
+/* ── Bottom Buttons ─────────────────────────────────────────────── */
 
 #inventory .buttons {
   display: flex;
-  gap: 1px;
-  position: absolute;
-  right: 5px;
-  bottom: 1px;
+  gap: 4px;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  border-top: 1px solid rgba(212, 184, 150, 0.12);
 }
 
 #inventory .buttons button {
-  color: #ccc;
+  background: none;
+  border: none;
+  color: #a89880;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 8px;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+
+#inventory .buttons button:hover {
+  color: #d4b896;
 }

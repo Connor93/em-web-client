@@ -1,116 +1,92 @@
+/* ── Board Dialog (NPC Quests) ───────────────────────────────────── */
+
 #board {
-  position: relative;
   user-select: none;
   box-sizing: border-box;
-  width: 484px;
-  height: 290px;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/159.png");
-  background-position: 0 0;
-  background-repeat: no-repeat;
+  width: 500px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
 }
 
-/* Switch to bottom half of the background sprite for post view/create */
-#board[data-state="view-post"],
-#board[data-state="create-post"] {
-  background-position: 0 -290px;
-}
+/* ── Title ───────────────────────────────────────────────────────── */
 
-/* ── Title ────────────────────────────────────────────────── */
-/* List state: X=18, Y=14 (title in header bar) */
 #board .board-title {
-  position: absolute;
-  left: 18px;
-  top: 14px;
-  width: 452px;
-  height: 19px;
-  color: #fff;
-  font-size: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 19px;
 }
 
-/* View/create post: author or "Posting New Message" beside Poster Name label — X=150, Y=14 */
-#board[data-state="view-post"] .board-title,
-#board[data-state="create-post"] .board-title {
-  left: 150px;
-  width: 315px;
-}
+/* ── List State ─────────────────────────────────────────────────── */
 
-/* ── List state ───────────────────────────────────────────── */
-/* Items start at X=2, Y=48; scrollbar at X=449 so usable width=447 */
 #board .post-list {
-  position: absolute;
-  top: 48px;
-  left: 17px;
-  width: 432px;
-  height: 199px;
-  overflow-y: scroll;
+  padding: 6px 12px;
+  max-height: 220px;
+  overflow-y: auto;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  color: #fff;
+  color: #d4c4a8;
   font-size: 12px;
 }
 
 #board .post-list::-webkit-scrollbar {
-  display: none;
+  width: 4px;
+}
+
+#board .post-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
 }
 
 #board .post-item {
-  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
   cursor: pointer;
-  height: 16px;
-  line-height: 16px;
   white-space: nowrap;
   overflow: hidden;
-  width: 432px;
+  transition: background 0.15s;
 }
 
 #board .post-item:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background: rgba(212, 184, 150, 0.08);
 }
 
 #board .post-author {
-  position: absolute;
-  left: 2px;
-  width: 96px;
-  color: #e8d0a0;
+  width: 100px;
+  color: #d4b896;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 #board .post-subject-text {
-  position: absolute;
-  left: 100px;
-  right: 0;
-  color: #c8c0b0;
+  color: #a89880;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
 }
 
-/* Scrollbar at X=449, Y=44 */
 #board .scroll-handle {
-  position: absolute;
-  left: 449px;
-  top: 44px;
-  width: 16px;
-  height: 15px;
-  background: url("/gfx/gfx002/129.png") 0 -75px;
-  touch-action: none;
-  user-select: none;
+  display: none;
 }
 
 #board .list-buttons {
-  position: absolute;
-  bottom: 8px;
-  left: 0;
-  width: 484px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.15);
 }
 
 /* Hide list elements when not in list state */
@@ -120,67 +96,77 @@
   display: none;
 }
 
-/* ── View/create shared: subject — X=150, Y=44, W=315, H=19 ── */
+/* ── View/Create Shared ─────────────────────────────────────────── */
+
 #board .post-subject-view,
 #board .create-subject {
-  position: absolute;
-  top: 44px;
-  left: 150px;
-  width: 315px;
-  height: 19px;
-  background: transparent;
-  border: none;
-  color: #fff;
+  display: block;
+  width: calc(100% - 24px);
+  margin: 8px 12px 0;
+  padding: 6px 10px;
+  background: rgba(30, 25, 18, 0.7);
+  border: 1px solid rgba(212, 184, 150, 0.15);
+  border-radius: 4px;
+  color: #e0daca;
   font-size: 12px;
+  font-family: inherit;
   outline: none;
-  padding: 0;
-  line-height: 19px;
+  box-sizing: border-box;
 }
 
-/* ── View/create shared: body — X=18, Y=80, W=430, H=168 ──── */
+#board .create-subject:focus {
+  border-color: rgba(212, 184, 150, 0.35);
+}
+
 #board .post-body,
 #board .create-body {
-  position: absolute;
-  top: 80px;
-  left: 18px;
-  width: 430px;
-  height: 168px;
-  background: transparent;
-  border: none;
-  color: #d0c8b8;
+  display: block;
+  width: calc(100% - 24px);
+  margin: 8px 12px;
+  padding: 8px 10px;
+  height: 180px;
+  background: rgba(30, 25, 18, 0.5);
+  border: 1px solid rgba(212, 184, 150, 0.1);
+  border-radius: 4px;
+  color: #d4c4a8;
   font-size: 12px;
-  outline: none;
-  padding: 0;
   font-family: inherit;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  outline: none;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 #board .post-body {
-  overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 #board .post-body::-webkit-scrollbar,
 #board .create-body::-webkit-scrollbar {
-  display: none;
+  width: 4px;
+}
+
+#board .post-body::-webkit-scrollbar-thumb,
+#board .create-body::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
 }
 
 #board .create-body {
   resize: none;
-  overflow-y: auto;
+}
+
+#board .create-body:focus {
+  border-color: rgba(212, 184, 150, 0.35);
 }
 
 #board .view-buttons,
 #board .create-buttons {
-  position: absolute;
-  bottom: 8px;
-  left: 0;
-  width: 484px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.15);
 }
 
 /* Hide view elements when not in view-post state */

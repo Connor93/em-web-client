@@ -1,71 +1,66 @@
+/* ── Quest Dialog ────────────────────────────────────────────────── */
+
 #quest-dialog {
-  position: relative;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/167.png");
-  width: 284px;
-  height: 190px;
   user-select: none;
+  box-sizing: border-box;
+  width: 320px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
   z-index: 1050;
 }
 
+/* ── Title ───────────────────────────────────────────────────────── */
+
 #quest-dialog .title {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  color: #fff;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+/* ── Entries ─────────────────────────────────────────────────────── */
 
 #quest-dialog .entries {
   list-style: none;
   margin: 0;
-  padding: 0;
-  position: absolute;
-  top: 48px;
-  left: 20px;
-  color: #fff;
+  padding: 10px 12px;
+  color: #d4c4a8;
   font-size: 12px;
-  width: 224px;
 }
 
 #quest-dialog li {
+  padding: 4px 8px;
+  border-radius: 4px;
   position: relative;
+  transition: background 0.15s;
 }
 
 #quest-dialog li.link {
   text-decoration: underline;
+  cursor: pointer;
+  color: #d4b896;
 }
 
-#quest-dialog li::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: rgba(248, 248, 190, 0.3);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
-  box-sizing: border-box;
+#quest-dialog li:hover {
+  background: rgba(212, 184, 150, 0.08);
 }
 
-#quest-dialog li:hover::before {
-  opacity: 0.3 !important;
-}
+/* ── Buttons ─────────────────────────────────────────────────────── */
 
-#quest-dialog button[data-id="quest-select"] {
-  position: absolute;
-  right: 17px;
-  top: 16px;
-}
-
-#quest-dialog button[data-id="cancel"],
-#quest-dialog button[data-id="back"] {
-  position: absolute;
-  right: 104px;
-  bottom: 10px;
-}
-
-#quest-dialog button[data-id="next"],
-#quest-dialog button[data-id="ok"] {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
+#quest-dialog .quest-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.15);
 }

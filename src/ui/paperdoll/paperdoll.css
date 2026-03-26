@@ -1,19 +1,25 @@
+/* ── Paperdoll ───────────────────────────────────────────────────── */
+
 #paperdoll {
   position: relative;
-  background: url("/gfx/gfx002/149.png") #000;
-  height: 290px;
-  width: 402px;
+  width: 420px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   z-index: 1050;
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
+  display: flex;
 }
 
-#paperdoll[data-gender="1"] {
-  background-position-y: -290px;
-}
+/* ── Equipment Area (left) ──────────────────────────────────────── */
 
-#paperdoll button[data-id="ok"] {
-  position: absolute;
-  bottom: 8px;
-  right: 35px;
+#paperdoll .equipment-area {
+  position: relative;
+  width: 220px;
+  min-height: 280px;
 }
 
 #paperdoll .item,
@@ -24,128 +30,128 @@
 #paperdoll .item {
   display: flex;
   justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(212, 184, 150, 0.1);
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+#paperdoll .item:hover {
+  background: rgba(212, 184, 150, 0.1);
+  border-color: rgba(212, 184, 150, 0.25);
 }
 
 #paperdoll img {
   align-self: center;
+  image-rendering: pixelated;
 }
 
-#paperdoll .item[data-id="boots"] {
-  left: 85px;
-  bottom: 17px;
-  width: 57px;
-  height: 55px;
-}
-
-#paperdoll .item[data-id="accessory"] {
-  left: 52px;
-  bottom: 16px;
-  width: 26px;
-  height: 26px;
-}
-
-#paperdoll .item[data-id="gloves"] {
-  left: 20px;
-  bottom: 48px;
-  width: 57px;
-  height: 55px;
-}
-
-#paperdoll .item[data-id="belt"] {
-  left: 86px;
-  bottom: 79px;
-  width: 56px;
-  height: 25px;
-}
-
-#paperdoll .item[data-id="armor"] {
-  left: 85px;
-  top: 81px;
-  height: 99px;
-  width: 57px;
-}
-
-#paperdoll .item[data-id="necklace"] {
-  left: 151px;
-  top: 50px;
-  width: 56px;
-  height: 25px;
-}
+/* ── Equipment Slots ────────────────────────────────────────────── */
 
 #paperdoll .item[data-id="hat"] {
-  left: 85px;
-  top: 19px;
-  width: 57px;
-  height: 55px;
+  left: 82px;
+  top: 14px;
+  width: 54px;
+  height: 52px;
 }
-
-#paperdoll .item[data-id="shield"] {
-  left: 150px;
-  top: 80px;
-  height: 99px;
-  width: 57px;
+#paperdoll .item[data-id="armor"] {
+  left: 82px;
+  top: 74px;
+  width: 54px;
+  height: 90px;
 }
-
 #paperdoll .item[data-id="weapon"] {
-  left: 20px;
-  top: 81px;
-  height: 99px;
-  width: 57px;
+  left: 18px;
+  top: 74px;
+  width: 54px;
+  height: 90px;
 }
-
+#paperdoll .item[data-id="shield"] {
+  left: 146px;
+  top: 74px;
+  width: 54px;
+  height: 90px;
+}
+#paperdoll .item[data-id="gloves"] {
+  left: 18px;
+  top: 44px;
+  width: 54px;
+  height: 52px;
+}
+#paperdoll .item[data-id="boots"] {
+  left: 82px;
+  bottom: 14px;
+  width: 54px;
+  height: 52px;
+}
+#paperdoll .item[data-id="belt"] {
+  left: 82px;
+  top: 170px;
+  width: 54px;
+  height: 22px;
+}
+#paperdoll .item[data-id="necklace"] {
+  left: 146px;
+  top: 44px;
+  width: 54px;
+  height: 22px;
+}
+#paperdoll .item[data-id="accessory"] {
+  left: 50px;
+  bottom: 14px;
+  width: 24px;
+  height: 24px;
+}
 #paperdoll .item[data-id="ring-1"] {
-  left: 150px;
-  top: 186px;
-  width: 26px;
-  height: 26px;
+  left: 146px;
+  top: 172px;
+  width: 24px;
+  height: 24px;
 }
-
 #paperdoll .item[data-id="ring-2"] {
-  left: 183px;
-  top: 186px;
-  width: 26px;
-  height: 26px;
+  left: 176px;
+  top: 172px;
+  width: 24px;
+  height: 24px;
 }
-
 #paperdoll .item[data-id="armlet-1"] {
-  left: 150px;
-  top: 217px;
-  width: 26px;
-  height: 26px;
+  left: 146px;
+  top: 202px;
+  width: 24px;
+  height: 24px;
 }
-
 #paperdoll .item[data-id="armlet-2"] {
-  left: 183px;
-  top: 217px;
-  width: 26px;
-  height: 26px;
+  left: 176px;
+  top: 202px;
+  width: 24px;
+  height: 24px;
 }
-
 #paperdoll .item[data-id="bracer-1"] {
-  left: 150px;
-  top: 248px;
-  width: 26px;
-  height: 26px;
+  left: 146px;
+  top: 232px;
+  width: 24px;
+  height: 24px;
+}
+#paperdoll .item[data-id="bracer-2"] {
+  left: 176px;
+  top: 232px;
+  width: 24px;
+  height: 24px;
 }
 
-#paperdoll .item[data-id="bracer-2"] {
-  left: 183px;
-  top: 248px;
-  width: 26px;
-  height: 26px;
-}
+/* ── Tooltips ───────────────────────────────────────────────────── */
 
 #paperdoll .item .tooltip {
   position: absolute;
   bottom: 100%;
-  /* Position above the item */
   left: 50%;
   transform: translateX(-50%);
-  background-color: black;
-  color: white;
+  background: rgba(18, 16, 12, 0.95);
+  border: 1px solid rgba(212, 184, 150, 0.3);
+  color: #e0daca;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -153,51 +159,55 @@
 }
 
 #paperdoll .item:hover .tooltip {
-  opacity: 0.8;
+  opacity: 1;
 }
+
+/* ── Character Info (right) ─────────────────────────────────────── */
 
 #paperdoll div.icon {
   position: absolute;
-  left: 240px;
-  top: 262px;
+  left: 230px;
+  top: 248px;
 }
 
 #paperdoll span {
-  color: #f0f0c8;
+  color: #d4c4a8;
   font-size: 12px;
 }
 
 #paperdoll span[data-id="name"] {
-  left: 248px;
-  top: 39px;
+  left: 238px;
+  top: 34px;
 }
-
-#paperdoll span[data-id="home"] {
-  left: 248px;
-  top: 174px;
-}
-
 #paperdoll span[data-id="class"] {
-  left: 248px;
-  top: 84px;
+  left: 238px;
+  top: 78px;
 }
-
-#paperdoll span[data-id="partner"] {
-  left: 248px;
-  top: 128px;
-}
-
 #paperdoll span[data-id="title"] {
-  left: 248px;
-  top: 106px;
+  left: 238px;
+  top: 100px;
 }
-
+#paperdoll span[data-id="partner"] {
+  left: 238px;
+  top: 122px;
+}
+#paperdoll span[data-id="home"] {
+  left: 238px;
+  top: 168px;
+}
 #paperdoll span[data-id="guild"] {
-  left: 248px;
-  top: 196px;
+  left: 238px;
+  top: 190px;
+}
+#paperdoll span[data-id="rank"] {
+  left: 238px;
+  top: 212px;
 }
 
-#paperdoll span[data-id="rank"] {
-  left: 248px;
-  top: 218px;
+/* ── Close Button ───────────────────────────────────────────────── */
+
+#paperdoll button[data-id="ok"] {
+  position: absolute;
+  bottom: 8px;
+  right: 30px;
 }

@@ -1,56 +1,53 @@
+/* ── Skill Master ────────────────────────────────────────────────── */
+
 #skill-master {
-  position: relative;
   user-select: none;
   box-sizing: border-box;
-  width: 284px;
-  height: 290px;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/152.png");
+  width: 320px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
 }
 
 #skill-master .name {
-  position: absolute;
-  color: #fff;
-  font-size: 12px;
-  left: 24px;
-  top: 18px;
-}
-
-#skill-master .buttons {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 260px;
-  display: flex;
-  gap: 3px;
-  justify-content: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
 }
 
 #skill-master .scroll-handle {
-  position: absolute;
-  right: 16px;
-  width: 16px;
-  height: 15px;
-  background: url("/gfx/gfx002/129.png") 0 -75px;
-  touch-action: none;
-  user-select: none;
+  display: none;
 }
 
 #skill-master .item-list {
-  position: absolute;
-  top: 50px;
-  left: 22px;
-  width: 232px;
-  height: 193px;
+  padding: 8px 12px;
+  max-height: 220px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  overflow-y: auto;
 }
 
 #skill-master .item-list::-webkit-scrollbar {
-  display: none;
+  width: 4px;
+}
+
+#skill-master .item-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
+}
+
+#skill-master .buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.15);
 }
