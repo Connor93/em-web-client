@@ -220,9 +220,6 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.guildPanel.showToggleButton();
     deps.resizeCanvases();
     deps.inventory.loadPositions();
-    if (!deps.isMobile()) {
-      deps.inventory.show();
-    }
   });
 
   client.on('passwordChanged', () => {
