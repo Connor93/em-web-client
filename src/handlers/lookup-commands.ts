@@ -171,14 +171,16 @@ function handleItemSourceResponse(client: Client, reader: EoReader) {
       shops.push({ npcName, price });
     } else if (type === 3) {
       // Craft
-      const numIngredients = reader.getChar();
+      const ingredientCount = reader.getChar();
       const ingredients: string[] = [];
-      for (let j = 0; j < numIngredients; j++) {
-        const ingId = reader.getShort();
-        const ingAmount = reader.getChar();
-        const ingRecord = client.getEifRecordById(ingId);
-        const ingName = ingRecord ? ingRecord.name : `Item #${ingId}`;
-        ingredients.push(`${ingAmount}x ${ingName}`);
+      for (let j = 0; j < ingredientCount; j++) {
+        const ingredientId = reader.getShort();
+        const ingredientAmount = reader.getChar();
+        const ingredientRecord = client.getEifRecordById(ingredientId);
+        const ingredientName = ingredientRecord
+          ? ingredientRecord.name
+          : `Item #${ingredientId}`;
+        ingredients.push(`${ingredientAmount}x ${ingredientName}`);
       }
       crafts.push({ npcName, ingredients: ingredients.join(', ') });
     }
@@ -195,12 +197,15 @@ function handleNpcSourceResponse(client: Client, reader: EoReader) {
   const drops: { itemName: string; amount: string; dropRate: number }[] = [];
   for (let i = 0; i < numDrops; i++) {
     const itemId = reader.getShort();
-    const minAmt = reader.getShort();
-    const maxAmt = reader.getShort();
+    const minimumAmount = reader.getShort();
+    const maximumAmount = reader.getShort();
     const dropRate = reader.getShort() / 100.0;
     const itemRecord = client.getEifRecordById(itemId);
     const itemName = itemRecord ? itemRecord.name : `Item #${itemId}`;
-    const amount = minAmt === maxAmt ? `${minAmt}` : `${minAmt}-${maxAmt}`;
+    const amount =
+      minimumAmount === maximumAmount
+        ? `${minimumAmount}`
+        : `${minimumAmount}-${maximumAmount}`;
     drops.push({ itemName, amount, dropRate });
   }
 
@@ -221,18 +226,20 @@ function handleNpcSourceResponse(client: Client, reader: EoReader) {
   }
 
   // Read craft recipes
-  const numCrafts = reader.getChar();
+  const craftCount = reader.getChar();
   const craftRecipes: { itemName: string; ingredients: string }[] = [];
-  for (let i = 0; i < numCrafts; i++) {
+  for (let i = 0; i < craftCount; i++) {
     const itemId = reader.getShort();
-    const numIngredients = reader.getChar();
+    const ingredientCount = reader.getChar();
     const ingredients: string[] = [];
-    for (let j = 0; j < numIngredients; j++) {
-      const ingId = reader.getShort();
-      const ingAmount = reader.getChar();
-      const ingRecord = client.getEifRecordById(ingId);
-      const ingName = ingRecord ? ingRecord.name : `Item #${ingId}`;
-      ingredients.push(`${ingAmount}x ${ingName}`);
+    for (let j = 0; j < ingredientCount; j++) {
+      const ingredientId = reader.getShort();
+      const ingredientAmount = reader.getChar();
+      const ingredientRecord = client.getEifRecordById(ingredientId);
+      const ingredientName = ingredientRecord
+        ? ingredientRecord.name
+        : `Item #${ingredientId}`;
+      ingredients.push(`${ingredientAmount}x ${ingredientName}`);
     }
     const craftRecord = client.getEifRecordById(itemId);
     const craftName = craftRecord ? craftRecord.name : `Item #${itemId}`;
@@ -243,9 +250,9 @@ function handleNpcSourceResponse(client: Client, reader: EoReader) {
   }
 
   // Read spawn maps
-  const numSpawns = reader.getChar();
+  const spawnCount = reader.getChar();
   const spawnMaps: number[] = [];
-  for (let i = 0; i < numSpawns; i++) {
+  for (let i = 0; i < spawnCount; i++) {
     spawnMaps.push(reader.getShort());
   }
 

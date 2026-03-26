@@ -1,4 +1,4 @@
-import type { EifRecord, EnfRecord } from 'eolib';
+import { type EifRecord, type EnfRecord, NpcType } from 'eolib';
 import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
 import { getItemMeta } from '../../utils';
@@ -24,20 +24,22 @@ export class InfoDialog extends Base {
   private client: Client;
   protected container = document.getElementById('info-dialog')!;
   private dialogs = document.getElementById('dialogs')!;
-  private btnCancel: HTMLButtonElement;
-  private txtName: HTMLSpanElement;
+  private cancelButton: HTMLButtonElement;
+  private nameDisplay: HTMLSpanElement;
   private itemList: HTMLDivElement;
   private scrollHandle: HTMLDivElement;
 
   constructor(client: Client) {
     super();
     this.client = client;
-    this.btnCancel = this.container.querySelector('button[data-id="cancel"]')!;
-    this.txtName = this.container.querySelector('.info-name')!;
+    this.cancelButton = this.container.querySelector(
+      'button[data-id="cancel"]',
+    )!;
+    this.nameDisplay = this.container.querySelector('.info-name')!;
     this.itemList = this.container.querySelector('.item-list')!;
     this.scrollHandle = this.container.querySelector('.scroll-handle')!;
 
-    this.btnCancel.addEventListener('click', () => {
+    this.cancelButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
@@ -87,7 +89,7 @@ export class InfoDialog extends Base {
 
   showItem(item: EifRecord, itemId: number) {
     this.itemList.innerHTML = '';
-    this.txtName.innerText = `${item.name} (ID: ${itemId})`;
+    this.nameDisplay.innerText = `${item.name} (ID: ${itemId})`;
 
     // Item graphic + type as clickable item row
     const meta = getItemMeta(item);
@@ -202,7 +204,7 @@ export class InfoDialog extends Base {
 
   showNpc(npc: EnfRecord, npcId: number) {
     this.itemList.innerHTML = '';
-    this.txtName.innerText = `${npc.name} (ID: ${npcId})`;
+    this.nameDisplay.innerText = `${npc.name} (ID: ${npcId})`;
 
     // NPC type
     this.addSection('Info');
@@ -289,7 +291,7 @@ export class InfoDialog extends Base {
     onSelect: (id: number) => void,
   ) {
     this.itemList.innerHTML = '';
-    this.txtName.innerText = title;
+    this.nameDisplay.innerText = title;
 
     for (const match of matches) {
       const row = createTextMenuItem(`[${match.id}] ${match.name}`, () => {
@@ -304,17 +306,17 @@ export class InfoDialog extends Base {
   // ── Helpers ──
 
   private addSection(label: string) {
-    const el = document.createElement('div');
-    el.classList.add('section-header');
-    el.innerText = label;
-    this.itemList.appendChild(el);
+    const element = document.createElement('div');
+    element.classList.add('section-header');
+    element.innerText = label;
+    this.itemList.appendChild(element);
   }
 
   private addRow(text: string) {
-    const el = document.createElement('div');
-    el.classList.add('info-row');
-    el.innerText = text;
-    this.itemList.appendChild(el);
+    const element = document.createElement('div');
+    element.classList.add('info-row');
+    element.innerText = text;
+    this.itemList.appendChild(element);
   }
 
   private removeLastSection() {
@@ -347,8 +349,6 @@ export class InfoDialog extends Base {
 }
 
 // ── NPC type label helper ──
-
-import { NpcType } from 'eolib';
 
 function getNpcTypeName(type: NpcType): string {
   switch (type) {

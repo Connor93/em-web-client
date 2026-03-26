@@ -11,7 +11,7 @@ export class Book extends Base {
   private dialogs = document.getElementById('dialogs')!;
   private client: Client;
   private cover = document.getElementById('cover')!;
-  private btnOk = this.container.querySelector<HTMLButtonElement>(
+  private okButton = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="ok"]',
   );
   private bookTitle: HTMLSpanElement =
@@ -25,7 +25,7 @@ export class Book extends Base {
   constructor(client: Client) {
     super();
     this.client = client;
-    this.btnOk!.addEventListener!('click', () => {
+    this.okButton!.addEventListener!('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });

@@ -74,27 +74,27 @@ export class MobileToolbar extends Base {
     this.container.innerHTML = '';
 
     // Exit button (X)
-    const exitBtn = document.createElement('button');
-    exitBtn.className = 'corner-btn';
-    exitBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
-    exitBtn.addEventListener('click', (e) => {
+    const exitButton = document.createElement('button');
+    exitButton.className = 'corner-btn';
+    exitButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+    exitButton.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('exit');
     });
 
     // Hamburger button (☰)
-    const menuBtn = document.createElement('button');
-    menuBtn.className = 'corner-btn';
-    menuBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>`;
-    menuBtn.addEventListener('click', (e) => {
+    const menuButton = document.createElement('button');
+    menuButton.className = 'corner-btn';
+    menuButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>`;
+    menuButton.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.toggleMenu();
     });
 
-    this.container.appendChild(exitBtn);
-    this.container.appendChild(menuBtn);
+    this.container.appendChild(exitButton);
+    this.container.appendChild(menuButton);
   }
 
   private buildMenuPanel() {
@@ -109,18 +109,18 @@ export class MobileToolbar extends Base {
     this.panel.id = 'mobile-menu-panel';
 
     for (const item of MENU_ITEMS) {
-      const btn = document.createElement('button');
-      btn.className = 'menu-item-btn';
-      btn.innerHTML = `${item.svg}<span>${item.label}</span>`;
+      const button = document.createElement('button');
+      button.className = 'menu-item-btn';
+      button.innerHTML = `${item.svg}<span>${item.label}</span>`;
 
-      btn.addEventListener('click', (e) => {
+      button.addEventListener('click', (e) => {
         e.stopPropagation();
         playSfxById(SfxId.ButtonClick);
         this.closeMenu();
         this.emitter.emit('toggle', item.id);
       });
 
-      this.panel.appendChild(btn);
+      this.panel.appendChild(button);
     }
 
     document.body.appendChild(this.panel);

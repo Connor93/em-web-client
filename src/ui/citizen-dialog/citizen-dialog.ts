@@ -87,45 +87,45 @@ export class CitizenDialog extends Base {
     const menu = this.body.querySelector('.citizen-menu')!;
 
     if (!isCitizenHere) {
-      const btnSubscribe = document.createElement('button');
-      btnSubscribe.className = 'citizen-menu-btn';
-      btnSubscribe.textContent = 'Register as Citizen';
-      btnSubscribe.addEventListener('click', () => {
+      const subscribeButton = document.createElement('button');
+      subscribeButton.className = 'citizen-menu-btn';
+      subscribeButton.textContent = 'Register as Citizen';
+      subscribeButton.addEventListener('click', () => {
         playSfxById(SfxId.ButtonClick);
         this.renderSubscribe();
       });
-      menu.appendChild(btnSubscribe);
+      menu.appendChild(subscribeButton);
     }
 
-    const btnSleep = document.createElement('button');
-    btnSleep.className = 'citizen-menu-btn';
-    btnSleep.textContent = 'Sleep at the Inn';
-    btnSleep.addEventListener('click', () => {
+    const sleepButton = document.createElement('button');
+    sleepButton.className = 'citizen-menu-btn';
+    sleepButton.textContent = 'Sleep at the Inn';
+    sleepButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.requestSleep();
     });
-    menu.appendChild(btnSleep);
+    menu.appendChild(sleepButton);
 
     if (isCitizenHere) {
-      const btnUnsub = document.createElement('button');
-      btnUnsub.className = 'citizen-menu-btn';
-      btnUnsub.textContent = 'Give up Citizenship';
-      btnUnsub.addEventListener('click', () => {
+      const unsubscribeButton = document.createElement('button');
+      unsubscribeButton.className = 'citizen-menu-btn';
+      unsubscribeButton.textContent = 'Give up Citizenship';
+      unsubscribeButton.addEventListener('click', () => {
         playSfxById(SfxId.ButtonClick);
         this.requestUnsubscribe();
       });
-      menu.appendChild(btnUnsub);
+      menu.appendChild(unsubscribeButton);
     }
 
     this.footer.innerHTML = '';
-    const btnCancel = document.createElement('button');
-    btnCancel.className = 'citizen-btn';
-    btnCancel.textContent = 'Close';
-    btnCancel.addEventListener('click', () => {
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'citizen-btn';
+    cancelButton.textContent = 'Close';
+    cancelButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
-    this.footer.appendChild(btnCancel);
+    this.footer.appendChild(cancelButton);
   }
 
   private renderSubscribe() {
@@ -133,42 +133,42 @@ export class CitizenDialog extends Base {
     const inputs: HTMLInputElement[] = [];
 
     for (let i = 0; i < 3; i++) {
-      const div = document.createElement('div');
-      div.className = 'citizen-question';
+      const questionContainer = document.createElement('div');
+      questionContainer.className = 'citizen-question';
       const label = document.createElement('label');
       label.textContent = this.questions[i] || `Question ${i + 1}`;
       const input = document.createElement('input');
       input.type = 'text';
       input.autocomplete = 'off';
-      div.appendChild(label);
-      div.appendChild(input);
-      this.body.appendChild(div);
+      questionContainer.appendChild(label);
+      questionContainer.appendChild(input);
+      this.body.appendChild(questionContainer);
       inputs.push(input);
     }
 
     this.footer.innerHTML = '';
 
-    const btnBack = document.createElement('button');
-    btnBack.className = 'citizen-btn';
-    btnBack.textContent = 'Back';
-    btnBack.addEventListener('click', () => {
+    const backButton = document.createElement('button');
+    backButton.className = 'citizen-btn';
+    backButton.textContent = 'Back';
+    backButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.renderMenu();
     });
-    this.footer.appendChild(btnBack);
+    this.footer.appendChild(backButton);
 
-    const btnSubmit = document.createElement('button');
-    btnSubmit.className = 'citizen-btn primary';
-    btnSubmit.textContent = 'Submit';
-    btnSubmit.addEventListener('click', () => {
+    const submitButton = document.createElement('button');
+    submitButton.className = 'citizen-btn primary';
+    submitButton.textContent = 'Submit';
+    submitButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       const packet = new CitizenReplyClientPacket();
       packet.sessionId = this.client.sessionId;
       packet.behaviorId = this.behaviorId;
-      packet.answers = inputs.map((inp) => inp.value);
+      packet.answers = inputs.map((input) => input.value);
       this.client.bus.send(packet);
     });
-    this.footer.appendChild(btnSubmit);
+    this.footer.appendChild(submitButton);
 
     if (inputs[0]) inputs[0].focus();
   }
@@ -188,30 +188,47 @@ export class CitizenDialog extends Base {
   }
 
   private showSleepCost(cost: number) {
-    this.body.innerHTML = `<div class="citizen-message">Sleeping will cost <span class="gold">${cost} gold</span>.<br>Would you like to rest?</div>`;
+    this.body.innerHTML = '';
+
+    const message = document.createElement('div');
+    message.className = 'citizen-message';
+
+    const costText = document.createTextNode('Sleeping will cost ');
+    message.appendChild(costText);
+
+    const goldSpan = document.createElement('span');
+    goldSpan.className = 'gold';
+    goldSpan.textContent = `${cost} gold`;
+    message.appendChild(goldSpan);
+
+    message.appendChild(document.createTextNode('.'));
+    message.appendChild(document.createElement('br'));
+    message.appendChild(document.createTextNode('Would you like to rest?'));
+
+    this.body.appendChild(message);
 
     this.footer.innerHTML = '';
 
-    const btnBack = document.createElement('button');
-    btnBack.className = 'citizen-btn';
-    btnBack.textContent = 'No';
-    btnBack.addEventListener('click', () => {
+    const noButton = document.createElement('button');
+    noButton.className = 'citizen-btn';
+    noButton.textContent = 'No';
+    noButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.renderMenu();
     });
-    this.footer.appendChild(btnBack);
+    this.footer.appendChild(noButton);
 
-    const btnConfirm = document.createElement('button');
-    btnConfirm.className = 'citizen-btn primary';
-    btnConfirm.textContent = 'Yes';
-    btnConfirm.addEventListener('click', () => {
+    const yesButton = document.createElement('button');
+    yesButton.className = 'citizen-btn primary';
+    yesButton.textContent = 'Yes';
+    yesButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       const packet = new CitizenAcceptClientPacket();
       packet.sessionId = this.client.sessionId;
       packet.behaviorId = this.behaviorId;
       this.client.bus.send(packet);
     });
-    this.footer.appendChild(btnConfirm);
+    this.footer.appendChild(yesButton);
   }
 
   private requestUnsubscribe() {
@@ -220,17 +237,22 @@ export class CitizenDialog extends Base {
     this.client.bus.send(packet);
   }
 
-  private showResult(message: string, success: boolean) {
-    this.body.innerHTML = `<div class="citizen-result ${success ? 'success' : 'error'}">${message}</div>`;
+  private showResult(text: string, success: boolean) {
+    this.body.innerHTML = '';
+
+    const result = document.createElement('div');
+    result.className = `citizen-result ${success ? 'success' : 'error'}`;
+    result.textContent = text;
+    this.body.appendChild(result);
 
     this.footer.innerHTML = '';
-    const btnOk = document.createElement('button');
-    btnOk.className = 'citizen-btn';
-    btnOk.textContent = 'OK';
-    btnOk.addEventListener('click', () => {
+    const okButton = document.createElement('button');
+    okButton.className = 'citizen-btn';
+    okButton.textContent = 'OK';
+    okButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
-    this.footer.appendChild(btnOk);
+    this.footer.appendChild(okButton);
   }
 }

@@ -32,8 +32,10 @@ export class SettingsDialog extends Base {
     super();
     this.container = document.getElementById('settings-dialog')!;
 
-    const btnCancel = this.container.querySelector('button[data-id="cancel"]')!;
-    btnCancel.addEventListener('click', () => {
+    const cancelButton = this.container.querySelector(
+      'button[data-id="cancel"]',
+    )!;
+    cancelButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
