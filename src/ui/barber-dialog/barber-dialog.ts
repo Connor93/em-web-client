@@ -12,7 +12,7 @@ export class BarberDialog extends Base {
   protected container = document.getElementById('barber-dialog')!;
   private dialogs = document.getElementById('dialogs')!;
   private cover = document.querySelector<HTMLDivElement>('#cover')!;
-  private previewImg = this.container.querySelector<HTMLImageElement>(
+  private previewImage = this.container.querySelector<HTMLImageElement>(
     '.barber-preview img',
   )!;
 
@@ -24,23 +24,24 @@ export class BarberDialog extends Base {
   private originalHairStyle = 0;
   private originalHairColor = 0;
   private character: CharacterMapInfo | null = null;
-  private open = false;
+  private _open = false;
 
   private offscreen: HTMLCanvasElement;
-  private offCtx: CanvasRenderingContext2D;
+  private offscreenContext: CanvasRenderingContext2D;
   private lastRenderTime: DOMHighResTimeStamp | undefined;
 
-  private txtStyle = this.container.querySelector<HTMLSpanElement>(
+  private styleValue = this.container.querySelector<HTMLSpanElement>(
     '[data-id="style-val"]',
   )!;
-  private txtColor = this.container.querySelector<HTMLSpanElement>(
+  private colorValue = this.container.querySelector<HTMLSpanElement>(
     '[data-id="color-val"]',
   )!;
-  private controlsEl =
+  private controls =
     this.container.querySelector<HTMLDivElement>('.barber-controls')!;
-  private footerEl =
+  private footer =
     this.container.querySelector<HTMLDivElement>('.barber-footer')!;
-  private confirmEl: HTMLDivElement | null = null;
+  private confirmation =
+    this.container.querySelector<HTMLDivElement>('.barber-confirm')!;
 
   constructor(client: Client) {
     super();
@@ -49,7 +50,7 @@ export class BarberDialog extends Base {
     this.offscreen = document.createElement('canvas');
     this.offscreen.width = CHARACTER_WIDTH + 40;
     this.offscreen.height = CHARACTER_HEIGHT + 40;
-    this.offCtx = this.offscreen.getContext('2d')!;
+    this.offscreenContext = this.offscreen.getContext('2d')!;
 
     this.container
       .querySelector('[data-id="style-prev"]')!
@@ -74,6 +75,20 @@ export class BarberDialog extends Base {
         this.hide();
       });
 
+    this.confirmation
+      .querySelector('[data-id="confirm-yes"]')!
+      .addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.buy();
+        this.hideConfirmation();
+      });
+    this.confirmation
+      .querySelector('[data-id="confirm-no"]')!
+      .addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.hideConfirmation();
+      });
+
     this.client.on('barberPurchased', () => {
       // Update originals so hide() doesn't revert back
       this.originalHairStyle = this.hairStyle;
@@ -90,7 +105,7 @@ export class BarberDialog extends Base {
       this.hairStyle = this.character.hairStyle;
       this.hairColor = this.character.hairColor;
     }
-    this.open = true;
+    this._open = true;
     this.updateLabels();
     this.hideConfirmation();
     this.cover.classList.remove('hidden');
@@ -102,7 +117,7 @@ export class BarberDialog extends Base {
   }
 
   hide() {
-    this.open = false;
+    this._open = false;
 
     if (this.character) {
       this.character.hairStyle = this.originalHairStyle;
@@ -143,53 +158,25 @@ export class BarberDialog extends Base {
   }
 
   private updateLabels() {
-    this.txtStyle.textContent = String(this.hairStyle);
-    this.txtColor.textContent = String(this.hairColor);
+    this.styleValue.textContent = String(this.hairStyle);
+    this.colorValue.textContent = String(this.hairColor);
   }
 
   private showConfirmation() {
     playSfxById(SfxId.ButtonClick);
-    this.controlsEl.classList.add('hidden');
-    this.footerEl.classList.add('hidden');
-
-    if (!this.confirmEl) {
-      this.confirmEl = document.createElement('div');
-      this.confirmEl.className = 'barber-confirm';
-      this.confirmEl.innerHTML = `
-        <p class="barber-confirm-text">Change your hairstyle?</p>
-        <div class="barber-confirm-buttons">
-          <button class="barber-btn" data-id="confirm-no">No</button>
-          <button class="barber-btn primary" data-id="confirm-yes">Yes</button>
-        </div>
-      `;
-      this.confirmEl
-        .querySelector('[data-id="confirm-yes"]')!
-        .addEventListener('click', () => {
-          playSfxById(SfxId.ButtonClick);
-          this.buy();
-          this.hideConfirmation();
-        });
-      this.confirmEl
-        .querySelector('[data-id="confirm-no"]')!
-        .addEventListener('click', () => {
-          playSfxById(SfxId.ButtonClick);
-          this.hideConfirmation();
-        });
-      this.container.insertBefore(this.confirmEl, this.footerEl);
-    }
-    this.confirmEl.classList.remove('hidden');
+    this.controls.classList.add('hidden');
+    this.footer.classList.add('hidden');
+    this.confirmation.classList.remove('hidden');
   }
 
   private hideConfirmation() {
-    if (this.confirmEl) {
-      this.confirmEl.classList.add('hidden');
-    }
-    this.controlsEl.classList.remove('hidden');
-    this.footerEl.classList.remove('hidden');
+    this.confirmation.classList.add('hidden');
+    this.controls.classList.remove('hidden');
+    this.footer.classList.remove('hidden');
   }
 
   private renderPreview(now: DOMHighResTimeStamp) {
-    if (!this.open) return;
+    if (!this._open) return;
 
     if (this.lastRenderTime) {
       const elapsed = now - this.lastRenderTime;
@@ -200,7 +187,12 @@ export class BarberDialog extends Base {
     }
     this.lastRenderTime = now;
 
-    this.offCtx.clearRect(0, 0, this.offscreen.width, this.offscreen.height);
+    this.offscreenContext.clearRect(
+      0,
+      0,
+      this.offscreen.width,
+      this.offscreen.height,
+    );
 
     const downRight = [Direction.Down, Direction.Right].includes(
       this.character?.direction ?? Direction.Down,
@@ -229,12 +221,12 @@ export class BarberDialog extends Base {
     );
 
     if (mirrored) {
-      this.offCtx.save();
-      this.offCtx.scale(-1, 1);
-      this.offCtx.translate(-this.offscreen.width, 0);
+      this.offscreenContext.save();
+      this.offscreenContext.scale(-1, 1);
+      this.offscreenContext.translate(-this.offscreen.width, 0);
     }
 
-    this.offCtx.drawImage(
+    this.offscreenContext.drawImage(
       atlas,
       frame.x,
       frame.y,
@@ -250,10 +242,10 @@ export class BarberDialog extends Base {
     );
 
     if (mirrored) {
-      this.offCtx.restore();
+      this.offscreenContext.restore();
     }
 
-    this.previewImg.src = this.offscreen.toDataURL();
+    this.previewImage.src = this.offscreen.toDataURL();
 
     requestAnimationFrame((n) => this.renderPreview(n));
   }
