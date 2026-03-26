@@ -282,6 +282,7 @@
         <button class="img-btn" type="button" data-id="stats"></button>
         <button class="img-btn" type="button" data-id="online"></button>
         <button class="img-btn" type="button" data-id="party"></button>
+        <button class="img-btn" type="button" data-id="settings"></button>
       </div>
 
       <div id="dialogs" class="hidden">
@@ -369,6 +370,12 @@
           <span data-id="job"></span>
           <span data-id="guild"></span>
           <span data-id="rank"></span>
+          <button class="img-btn" data-id="ok"></button>
+        </div>
+
+        <div id="book" class="hidden">
+          <span class="book-title"></span>
+          <ul class="quest-list"></ul>
           <button class="img-btn" data-id="ok"></button>
         </div>
 
@@ -503,7 +510,86 @@
             <button class="img-btn" type="button" data-id="cancel"></button>
           </div>
         </div>
+
+        <div id="info-dialog" class="hidden">
+          <span class="info-name"></span>
+          <div class="item-list"></div>
+          <div class="scroll-handle"></div>
+          <div class="buttons">
+            <button class="img-btn" type="button" data-id="cancel"></button>
+          </div>
+        </div>
+
+        <div id="settings-dialog" class="hidden">
+          <span class="label">Settings</span>
+          <div class="settings-columns">
+            <div class="settings-column" data-col="left"></div>
+            <div class="settings-column" data-col="right"></div>
+          </div>
+          <button class="img-btn" type="button" data-id="cancel"></button>
+        </div>
+
+        <div id="barber-dialog" class="hidden">
+          <div class="barber-header">Barber</div>
+          <div class="barber-preview">
+            <img src="" alt="Preview" />
+          </div>
+          <div class="barber-controls">
+            <div class="barber-row">
+              <span class="barber-row-label">Hair Style</span>
+              <div class="barber-row-controls">
+                <button class="barber-arrow" data-id="style-prev">◀</button>
+                <span data-id="style-val">0</span>
+                <button class="barber-arrow" data-id="style-next">▶</button>
+              </div>
+            </div>
+            <div class="barber-row">
+              <span class="barber-row-label">Hair Color</span>
+              <div class="barber-row-controls">
+                <button class="barber-arrow" data-id="color-prev">◀</button>
+                <span data-id="color-val">0</span>
+                <button class="barber-arrow" data-id="color-next">▶</button>
+              </div>
+            </div>
+          </div>
+          <div class="barber-footer">
+            <button class="barber-btn" data-id="cancel">Cancel</button>
+            <button class="barber-btn primary" data-id="buy">Buy</button>
+          </div>
+        </div>
+
+        <div id="citizen-dialog" class="hidden">
+          <div class="citizen-header">Inn</div>
+          <div class="citizen-body"></div>
+          <div class="citizen-footer"></div>
+        </div>
+
+        <div id="trade-dialog" class="hidden">
+          <div class="trade-header">Trade</div>
+          <div class="trade-columns"></div>
+          <div class="trade-footer"></div>
+        </div>
+
+        <div id="guild-dialog" class="hidden">
+          <div class="guild-header">Guild</div>
+          <div class="guild-body"></div>
+          <div class="guild-footer"></div>
+        </div>
       </div>
+
+      <div id="trade-request-notification" class="hidden">
+        <div class="trade-req-text">
+          <span class="trade-req-name"></span> wants to trade with you.
+        </div>
+        <div class="trade-req-buttons"></div>
+      </div>
+
+      <div id="guild-create-invite" class="hidden">
+        <div class="guild-invite-text"></div>
+        <div class="guild-invite-buttons"></div>
+      </div>
+
+      <div id="guild-panel" class="hidden"></div>
 
       <div id="item-amount-dialog" class="hidden">
         <div class="header" data-id="drop"></div>
@@ -552,6 +638,27 @@
         </div>
       </div>
 
+      <div id="mobile-toolbar" class="hidden"></div>
+
+      <div id="mobile-hud" class="hidden">
+        <div class="hud-header">
+          <span class="hud-name"></span>
+          <span class="hud-level"></span>
+        </div>
+        <div class="hud-bar-row">
+          <span class="hud-bar-label">HP</span>
+          <div class="hud-bar-track"><div class="hud-bar-fill hp"></div></div>
+        </div>
+        <div class="hud-bar-row">
+          <span class="hud-bar-label">TP</span>
+          <div class="hud-bar-track"><div class="hud-bar-fill tp"></div></div>
+        </div>
+        <div class="hud-bar-row">
+          <span class="hud-bar-label">EXP</span>
+          <div class="hud-bar-track"><div class="hud-bar-fill exp"></div></div>
+        </div>
+      </div>
+
       <div id="hud" class="hidden">
         <div class="stat-container" data-id="hp">
           <div class="bar">
@@ -583,6 +690,21 @@
       </div>
 
       <div id="hotbar" class="hidden"></div>
+    </div>
+  </div>
+  <div id="reconnect-overlay" class="hidden" style="
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+  ">
+    <div style="
+      color: #e0daca; font-size: 16px; font-family: sans-serif;
+      background: rgba(0,0,0,0.85); border: 1px solid rgba(212,184,150,0.3);
+      border-radius: 6px; padding: 16px 28px; text-align: center;
+    ">
+      <span class="reconnect-text">Reconnecting...</span>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>

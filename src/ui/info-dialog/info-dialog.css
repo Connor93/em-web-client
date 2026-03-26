@@ -1,0 +1,77 @@
+#info-dialog {
+  position: relative;
+  user-select: none;
+  box-sizing: border-box;
+  width: 284px;
+  height: 290px;
+  background-color: #000;
+  background-image: url("/gfx/gfx002/152.png");
+}
+
+#info-dialog .info-name {
+  position: absolute;
+  color: #fff;
+  font-size: 12px;
+  left: 24px;
+  top: 18px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#info-dialog .item-list {
+  position: absolute;
+  top: 50px;
+  left: 22px;
+  width: 232px;
+  height: 193px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+#info-dialog .item-list::-webkit-scrollbar {
+  display: none;
+}
+
+#info-dialog .buttons {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 260px;
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+
+#info-dialog .section-header {
+  color: #d4b896;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 0 2px 0;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.3);
+  margin-top: 4px;
+}
+
+#info-dialog .info-row {
+  color: #ccc;
+  font-size: 11px;
+  padding: 1px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#info-dialog .info-row.clickable {
+  cursor: pointer;
+}
+
+#info-dialog .info-row.clickable:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
