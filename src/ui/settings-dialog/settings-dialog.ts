@@ -14,14 +14,15 @@ const LEFT_KEYS: (keyof GameSettings)[] = [
   'soundEffect',
   'gameMusic',
   'privateMessage',
+  'logChat',
 ];
 
 /** Right column settings, in display order. */
 const RIGHT_KEYS: (keyof GameSettings)[] = [
-  'logChat',
   'interactions',
   'ghostNpcs',
   'movementSmoothing',
+  'uiScale',
 ];
 
 export class SettingsDialog extends Base {
@@ -32,12 +33,23 @@ export class SettingsDialog extends Base {
     super();
     this.container = document.getElementById('settings-dialog')!;
 
-    const cancelButton = this.container.querySelector(
+    const closeButton = this.container.querySelector(
       'button[data-id="cancel"]',
     )!;
-    cancelButton.addEventListener('click', () => {
+    closeButton.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
+    });
+
+    // Apply saved UI scale on startup
+    this.applyUiScale(settings.getUiScale());
+
+    // Live-update UI scale when changed
+    settings.on('change', ({ key, value }) => {
+      if (key === 'uiScale') {
+        const scale = Number.parseFloat(value) || 1;
+        this.applyUiScale(scale);
+      }
     });
   }
 
@@ -56,22 +68,22 @@ export class SettingsDialog extends Base {
   }
 
   private render() {
-    const leftCol = this.container.querySelector(
+    const leftColumn = this.container.querySelector(
       '.settings-column[data-col="left"]',
     )!;
-    const rightCol = this.container.querySelector(
+    const rightColumn = this.container.querySelector(
       '.settings-column[data-col="right"]',
     )!;
 
-    leftCol.innerHTML = '';
-    rightCol.innerHTML = '';
+    leftColumn.innerHTML = '';
+    rightColumn.innerHTML = '';
 
     for (const key of LEFT_KEYS) {
-      leftCol.appendChild(this.createRow(key));
+      leftColumn.appendChild(this.createRow(key));
     }
 
     for (const key of RIGHT_KEYS) {
-      rightCol.appendChild(this.createRow(key));
+      rightColumn.appendChild(this.createRow(key));
     }
   }
 
@@ -83,19 +95,19 @@ export class SettingsDialog extends Base {
     label.className = 'setting-label';
     label.textContent = SETTING_LABELS[key];
 
-    const valueWrap = document.createElement('div');
-    valueWrap.className = 'setting-value';
+    const valueWrapper = document.createElement('div');
+    valueWrapper.className = 'setting-value';
 
     const select = document.createElement('select');
     const options = SETTING_OPTIONS[key] as readonly string[];
     const current = settings.get(key);
 
-    for (const opt of options) {
-      const option = document.createElement('option');
-      option.value = opt;
-      option.textContent = opt;
-      if (opt === current) option.selected = true;
-      select.appendChild(option);
+    for (const option of options) {
+      const optionElement = document.createElement('option');
+      optionElement.value = option;
+      optionElement.textContent = option;
+      if (option === current) optionElement.selected = true;
+      select.appendChild(optionElement);
     }
 
     select.addEventListener('change', () => {
@@ -103,9 +115,19 @@ export class SettingsDialog extends Base {
       playSfxById(SfxId.ButtonClick);
     });
 
-    valueWrap.appendChild(select);
+    valueWrapper.appendChild(select);
     row.appendChild(label);
-    row.appendChild(valueWrap);
+    row.appendChild(valueWrapper);
     return row;
+  }
+
+  private applyUiScale(scale: number) {
+    const uiElement = document.getElementById('ui');
+    if (!uiElement) return;
+
+    uiElement.style.transform = `scale(${scale})`;
+    uiElement.style.transformOrigin = 'top left';
+    uiElement.style.width = `${100 / scale}%`;
+    uiElement.style.height = `${100 / scale}%`;
   }
 }

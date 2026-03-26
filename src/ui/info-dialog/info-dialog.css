@@ -1,77 +1,97 @@
+/* ── Info Dialog ─────────────────────────────────────────────────── */
+
 #info-dialog {
-  position: relative;
   user-select: none;
   box-sizing: border-box;
-  width: 284px;
-  height: 290px;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/152.png");
+  width: 320px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
 }
+
+/* ── Header ─────────────────────────────────────────────────────── */
 
 #info-dialog .info-name {
-  position: absolute;
-  color: #fff;
-  font-size: 12px;
-  left: 24px;
-  top: 18px;
-  max-width: 200px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
+/* ── Item List ──────────────────────────────────────────────────── */
+
 #info-dialog .item-list {
-  position: absolute;
-  top: 50px;
-  left: 22px;
-  width: 232px;
-  height: 193px;
+  padding: 10px 12px;
+  max-height: 220px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 #info-dialog .item-list::-webkit-scrollbar {
-  display: none;
+  width: 4px;
 }
 
-#info-dialog .buttons {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 260px;
-  display: flex;
-  gap: 3px;
-  justify-content: center;
+#info-dialog .item-list::-webkit-scrollbar-track {
+  background: transparent;
 }
+
+#info-dialog .item-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+
+#info-dialog .buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.15);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Sections ───────────────────────────────────────────────────── */
 
 #info-dialog .section-header {
   color: #d4b896;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 600;
   padding: 4px 0 2px 0;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.3);
-  margin-top: 4px;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  margin-top: 6px;
 }
 
 #info-dialog .info-row {
-  color: #ccc;
+  color: #d4c4a8;
   font-size: 11px;
-  padding: 1px 0;
+  padding: 2px 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: 3px;
 }
 
 #info-dialog .info-row.clickable {
   cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 #info-dialog .info-row.clickable:hover {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.08);
+  color: #e8d4b2;
+  background: rgba(212, 184, 150, 0.1);
 }

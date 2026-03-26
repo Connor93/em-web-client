@@ -8,6 +8,7 @@ export interface GameSettings {
   interactions: 'enabled' | 'disabled';
   ghostNpcs: 'enabled' | 'disabled';
   movementSmoothing: 'enabled' | 'disabled';
+  uiScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x' | '2.5x' | '3x';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -20,6 +21,7 @@ const DEFAULTS: GameSettings = {
   interactions: 'enabled',
   ghostNpcs: 'disabled',
   movementSmoothing: 'enabled',
+  uiScale: '1x',
 };
 
 export const SETTING_OPTIONS: {
@@ -32,6 +34,7 @@ export const SETTING_OPTIONS: {
   interactions: ['enabled', 'disabled'],
   ghostNpcs: ['enabled', 'disabled'],
   movementSmoothing: ['enabled', 'disabled'],
+  uiScale: ['1x', '1.25x', '1.5x', '1.75x', '2x', '2.5x', '3x'],
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -41,7 +44,8 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   logChat: 'Log Chat',
   interactions: 'Interactions',
   ghostNpcs: 'Ghost NPCs',
-  movementSmoothing: 'Movement Smoothing',
+  movementSmoothing: 'Movement',
+  uiScale: 'UI Scale',
 };
 
 type SettingsEvents = {
@@ -75,6 +79,11 @@ class SettingsStore {
   getSfxVolume(): number {
     const val = this.data.soundEffect;
     return Number.parseInt(val, 10) / 100;
+  }
+
+  /** Returns the UI scale as a numeric multiplier (e.g. 1, 1.25, 2). */
+  getUiScale(): number {
+    return Number.parseFloat(this.data.uiScale) || 1;
   }
 
   private load(): void {
