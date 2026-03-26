@@ -4,6 +4,7 @@
   user-select: none;
   box-sizing: border-box;
   width: 320px;
+  min-height: 200px;
   background: rgba(18, 16, 12, 0.94);
   border: 1px solid rgba(212, 184, 150, 0.25);
   border-radius: 8px;
@@ -27,10 +28,13 @@
 }
 
 #locker .locker-items {
-  padding: 8px 12px;
+  padding: 8px;
   font-size: 12px;
   max-height: 220px;
   overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
 }
 
 #locker .locker-items::-webkit-scrollbar {
@@ -44,41 +48,47 @@
 
 #locker .locker-item {
   position: relative;
-  display: grid;
-  grid-template-columns: 48px auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 4px 8px;
+  padding: 6px;
   cursor: pointer;
   border-radius: 4px;
+  border: 1px solid rgba(212, 184, 150, 0.1);
   transition: background 0.15s;
 }
 
 #locker .locker-item:hover {
   background: rgba(212, 184, 150, 0.08);
+  border-color: rgba(212, 184, 150, 0.25);
 }
 
 #locker .locker-item .item-image {
-  max-width: 48px;
-  max-height: 48px;
+  max-width: 36px;
+  max-height: 36px;
   object-fit: contain;
   image-rendering: pixelated;
-  justify-self: center;
 }
 
 #locker .locker-item .item-text {
-  flex: 1;
+  text-align: center;
+  margin-top: 4px;
 }
 
 #locker .locker-item .item-name {
   color: #d4b896;
-  font-size: 12px;
+  font-size: 10px;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60px;
 }
 
 #locker .locker-item .item-quantity {
   color: #a89880;
-  font-size: 11px;
-  margin: 2px 0 0 0;
+  font-size: 9px;
+  margin: 1px 0 0;
 }
 
 #locker button[data-id="cancel"] {

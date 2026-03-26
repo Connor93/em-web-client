@@ -3,6 +3,7 @@
 #paperdoll {
   position: relative;
   width: 420px;
+  min-height: 300px;
   background: rgba(18, 16, 12, 0.94);
   border: 1px solid rgba(212, 184, 150, 0.25);
   border-radius: 8px;
@@ -14,20 +15,10 @@
   display: flex;
 }
 
-/* ── Equipment Area (left) ──────────────────────────────────────── */
-
-#paperdoll .equipment-area {
-  position: relative;
-  width: 220px;
-  min-height: 280px;
-}
-
-#paperdoll .item,
-#paperdoll span {
-  position: absolute;
-}
+/* ── Equipment Slots (left half) ────────────────────────────────── */
 
 #paperdoll .item {
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,7 +37,7 @@
   image-rendering: pixelated;
 }
 
-/* ── Equipment Slots ────────────────────────────────────────────── */
+/* ── Equipment Slot Positions ───────────────────────────────────── */
 
 #paperdoll .item[data-id="hat"] {
   left: 82px;
@@ -80,7 +71,7 @@
 }
 #paperdoll .item[data-id="boots"] {
   left: 82px;
-  bottom: 14px;
+  top: 200px;
   width: 54px;
   height: 52px;
 }
@@ -98,7 +89,7 @@
 }
 #paperdoll .item[data-id="accessory"] {
   left: 50px;
-  bottom: 14px;
+  top: 210px;
   width: 24px;
   height: 24px;
 }
@@ -152,7 +143,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
-  white-space: nowrap;
+  white-space: pre-wrap;
   opacity: 0;
   pointer-events: none;
   z-index: 10;
@@ -162,46 +153,39 @@
   opacity: 1;
 }
 
-/* ── Character Info (right) ─────────────────────────────────────── */
+/* ── Info Panel (right side) ────────────────────────────────────── */
 
-#paperdoll div.icon {
+#paperdoll .info-panel {
   position: absolute;
-  left: 230px;
-  top: 248px;
+  left: 215px;
+  top: 12px;
+  right: 12px;
+  bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
 }
 
-#paperdoll span {
+#paperdoll .info-panel .icon {
+  margin-bottom: 4px;
+}
+
+#paperdoll .info-row {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  padding: 2px 0;
+}
+
+#paperdoll .info-label {
+  color: #a89880;
+  min-width: 50px;
+  font-weight: 600;
+}
+
+#paperdoll .info-row span:last-child {
   color: #d4c4a8;
-  font-size: 12px;
-}
-
-#paperdoll span[data-id="name"] {
-  left: 238px;
-  top: 34px;
-}
-#paperdoll span[data-id="class"] {
-  left: 238px;
-  top: 78px;
-}
-#paperdoll span[data-id="title"] {
-  left: 238px;
-  top: 100px;
-}
-#paperdoll span[data-id="partner"] {
-  left: 238px;
-  top: 122px;
-}
-#paperdoll span[data-id="home"] {
-  left: 238px;
-  top: 168px;
-}
-#paperdoll span[data-id="guild"] {
-  left: 238px;
-  top: 190px;
-}
-#paperdoll span[data-id="rank"] {
-  left: 238px;
-  top: 212px;
 }
 
 /* ── Close Button ───────────────────────────────────────────────── */

@@ -14,7 +14,7 @@
   font-family: inherit;
 }
 
-/* ── Top Section (name/level/guild/meta) ─────────────────────────── */
+/* ── Top Section (base stats + secondary) ────────────────────────── */
 
 #stats > div:first-child {
   background: rgba(45, 38, 28, 0.9);
@@ -22,25 +22,25 @@
   padding: 8px 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 12px;
+  gap: 2px 12px;
 }
 
-/* ── Bottom Section (base stats + secondary stats) ───────────────── */
+/* ── Bottom Section (character info) ─────────────────────────────── */
 
 #stats > div:nth-child(2) {
   padding: 8px 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 12px;
+  gap: 2px 12px;
 }
 
-/* ── Stat values ─────────────────────────────────────────────────── */
+/* ── Stat row ────────────────────────────────────────────────────── */
 
 #stats .stat {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 2px 6px;
+  gap: 4px;
+  padding: 3px 6px;
   border-radius: 3px;
   font-size: 11px;
   color: #d4c4a8;
@@ -48,6 +48,17 @@
 
 #stats .stat:hover {
   background: rgba(212, 184, 150, 0.06);
+}
+
+/* ── Stat label ─────────────────────────────────────────────────── */
+
+#stats .stat-label {
+  color: #a89880;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-width: 46px;
+  letter-spacing: 0.5px;
 }
 
 /* ── Upgrade buttons ─────────────────────────────────────────────── */
@@ -60,7 +71,7 @@
   font-size: 10px;
   cursor: pointer;
   padding: 1px 6px;
-  margin-left: 4px;
+  margin-left: auto;
   transition:
     background 0.15s,
     border-color 0.15s;

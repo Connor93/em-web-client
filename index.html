@@ -60,8 +60,14 @@
 
       <div id="login-form" class="hidden">
         <form autocomplete="off">
-          <input type="text" id="login-username" />
-          <input type="password" id="login-password" />
+          <div class="login-field">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" placeholder="Enter username" />
+          </div>
+          <div class="login-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Enter password" />
+          </div>
           <label for="login-remember">
             <input type="checkbox" id="login-remember" />
             Remember me?
@@ -382,15 +388,16 @@
             <div class="tooltip"></div>
             <img src="" />
           </div>
-          <div class="icon" data-id="player"></div>
-          <span data-id="name"></span>
-          <span data-id="home"></span>
-          <span data-id="class"></span>
-          <span data-id="partner"></span>
-          <span data-id="title"></span>
-          <span data-id="job"></span>
-          <span data-id="guild"></span>
-          <span data-id="rank"></span>
+          <div class="info-panel">
+            <div class="icon" data-id="player"></div>
+            <div class="info-row"><span class="info-label">Name</span><span data-id="name"></span></div>
+            <div class="info-row"><span class="info-label">Class</span><span data-id="class"></span></div>
+            <div class="info-row"><span class="info-label">Title</span><span data-id="title"></span></div>
+            <div class="info-row"><span class="info-label">Partner</span><span data-id="partner"></span></div>
+            <div class="info-row"><span class="info-label">Home</span><span data-id="home"></span></div>
+            <div class="info-row"><span class="info-label">Guild</span><span data-id="guild"></span></div>
+            <div class="info-row"><span class="info-label">Rank</span><span data-id="rank"></span></div>
+          </div>
           <button class="img-btn" data-id="ok"></button>
         </div>
 
@@ -451,36 +458,30 @@
 
         <div id="stats" class="hidden">
           <div>
-            <span class="stat" data-id="str">0</span>
-            <button class="upgrade img-btn hidden" data-target="str" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="int">0</span>
-            <button class="upgrade img-btn hidden" data-target="int" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="wis">0</span>
-            <button class="upgrade img-btn hidden" data-target="wis" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="agi">0</span>
-            <button class="upgrade img-btn hidden" data-target="agi" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="con">0</span>
-            <button class="upgrade img-btn hidden" data-target="con" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="cha">0</span>
-            <button class="upgrade img-btn hidden" data-target="cha" data-id="upgrade-stat"></button>
-            <span class="stat" data-id="hp">0</span>
-            <span class="stat" data-id="tp">0</span>
-            <span class="stat" data-id="dam">0</span>
-            <span class="stat" data-id="acc">0</span>
-            <span class="stat" data-id="arm">0</span>
-            <span class="stat" data-id="eva">0</span>
+            <div class="stat"><span class="stat-label">STR</span><span data-id="str">0</span><button class="upgrade img-btn hidden" data-target="str" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">INT</span><span data-id="int">0</span><button class="upgrade img-btn hidden" data-target="int" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">WIS</span><span data-id="wis">0</span><button class="upgrade img-btn hidden" data-target="wis" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">AGI</span><span data-id="agi">0</span><button class="upgrade img-btn hidden" data-target="agi" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">CON</span><span data-id="con">0</span><button class="upgrade img-btn hidden" data-target="con" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">CHA</span><span data-id="cha">0</span><button class="upgrade img-btn hidden" data-target="cha" data-id="upgrade-stat"></button></div>
+            <div class="stat"><span class="stat-label">HP</span><span data-id="hp">0</span></div>
+            <div class="stat"><span class="stat-label">TP</span><span data-id="tp">0</span></div>
+            <div class="stat"><span class="stat-label">DMG</span><span data-id="dam">0</span></div>
+            <div class="stat"><span class="stat-label">ACC</span><span data-id="acc">0</span></div>
+            <div class="stat"><span class="stat-label">ARM</span><span data-id="arm">0</span></div>
+            <div class="stat"><span class="stat-label">EVA</span><span data-id="eva">0</span></div>
           </div>
           <div>
-            <span class="stat" data-id="name"></span>
-            <span class="stat" data-id="lvl">0</span>
-            <span class="stat" data-id="guild"></span>
-            <span class="stat" data-id="weight"></span>
-            <span class="stat" data-id="stat-points">0</span>
-            <span class="stat" data-id="skill-points">0</span>
-            <span class="stat" data-id="gold">0</span>
-            <span class="stat" data-id="exp">0</span>
-            <span class="stat" data-id="tnl">0</span>
-            <span class="stat" data-id="karma">0</span>
+            <div class="stat"><span class="stat-label">Name</span><span data-id="name"></span></div>
+            <div class="stat"><span class="stat-label">Level</span><span data-id="lvl">0</span></div>
+            <div class="stat"><span class="stat-label">Guild</span><span data-id="guild"></span></div>
+            <div class="stat"><span class="stat-label">Weight</span><span data-id="weight"></span></div>
+            <div class="stat"><span class="stat-label">Stat Pts</span><span data-id="stat-points">0</span></div>
+            <div class="stat"><span class="stat-label">Skill Pts</span><span data-id="skill-points">0</span></div>
+            <div class="stat"><span class="stat-label">Gold</span><span data-id="gold">0</span></div>
+            <div class="stat"><span class="stat-label">EXP</span><span data-id="exp">0</span></div>
+            <div class="stat"><span class="stat-label">TNL</span><span data-id="tnl">0</span></div>
+            <div class="stat"><span class="stat-label">Karma</span><span data-id="karma">0</span></div>
           </div>
           <button class="img-btn" type="button" data-id="cancel"></button>
         </div>

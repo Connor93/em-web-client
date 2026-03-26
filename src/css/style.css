@@ -970,39 +970,33 @@ body.is-mobile #change-password-form {
 }
 
 .dialog-md {
-  position: relative;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/152.png");
-  color: #ddd;
-  width: 284px;
-  height: 290px;
+  width: 320px;
+  min-height: 260px;
+  background: rgba(18, 16, 12, 0.94);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  color: #e0daca;
   user-select: none;
+  overflow: hidden;
+  font-family: inherit;
 }
 
 .dialog-md .dialog-contents .player {
   flex-direction: column;
   width: 103px;
   font-size: 12px;
-  color: #b4a08c;
+  color: #a89880;
   align-items: center;
   padding: 5px;
   z-index: 1;
+  border-radius: 4px;
+  transition: background 0.15s;
 }
 
 .dialog-md .dialog-contents .player:hover {
   position: relative;
-}
-
-.dialog-md .dialog-contents .player:hover::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(123, 90, 41, 0.5);
-  pointer-events: none;
-  z-index: -1;
+  background: rgba(212, 184, 150, 0.08);
 }
 
 .dialog-md .dialog-contents .player .nameplate {
@@ -1013,36 +1007,43 @@ body.is-mobile #change-password-form {
 .dialog-md .dialog-contents .player .nameplate .name {
   text-transform: capitalize;
   font-weight: bold;
-  color: #f0f0c8;
-  padding: 0 2px 0 2px;
+  color: #d4b896;
+  padding: 0 2px;
 }
 
 .dialog-md .dialog-contents .player .nameplate .guild,
 .dialog-md .dialog-contents .player .nameplate .name,
 .dialog-md .dialog-contents .player .nameplate .icon {
-  margin: 0 1px 0 1px;
+  margin: 0 1px;
 }
 
 .dialog-md .dialog-contents .player .title {
   font-style: italic;
   text-align: center;
+  color: #8a7e6e;
 }
 
 .dialog-md .dialog-contents {
-  position: absolute;
-  top: 44px;
-  left: 15px;
-  width: 233px;
-  height: 198px;
+  padding: 10px 12px;
+  max-height: 220px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
   gap: 6px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
   touch-action: pan-y;
+}
+
+.dialog-md .dialog-contents::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dialog-md .dialog-contents::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
 }
 
 .dialog-md .dialog-contents > div {
@@ -1052,14 +1053,14 @@ body.is-mobile #change-password-form {
 }
 
 .dialog-md .spell-name {
-  color: #fff;
+  color: #d4c4a8;
   font-size: 10px;
-  max-width: 32px;
+  max-width: 40px;
   text-align: center;
 }
 
 .dialog-md .spell-level {
-  color: #b4a08c;
+  color: #8a7e6e;
   font-size: 9px;
   position: relative;
 }
@@ -1078,25 +1079,26 @@ body.is-mobile #change-password-form {
 }
 
 .dialog-md .scroll-handle {
-  position: absolute;
-  right: 16px;
-  width: 16px;
-  height: 15px;
-  background: url("/gfx/gfx002/129.png") 0 -75px;
-  touch-action: none;
-  user-select: none;
+  display: none;
 }
 
 .dialog-md .label {
-  position: absolute;
-  top: 18px;
-  left: 24px;
-  color: #fff;
-  font-size: 12px;
+  display: block;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+}
+
+.dialog-md .player-count {
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #a89880;
 }
 
 .dialog-md button[data-id="cancel"] {
-  position: absolute;
-  bottom: 10px;
-  left: 98px;
+  display: block;
+  margin: 6px auto 10px;
 }
