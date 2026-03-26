@@ -8,8 +8,8 @@
   background: rgba(18, 16, 12, 0.88);
   border: 1px solid rgba(212, 184, 150, 0.18);
   border-radius: 8px;
-  padding: 8px 14px 10px 14px;
-  min-width: 170px;
+  padding: 12px 18px 14px 18px;
+  min-width: 260px;
   color: #e0daca;
   user-select: none;
   pointer-events: auto;
@@ -25,17 +25,17 @@
 }
 
 #hud .hud-name {
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 600;
   color: #d4b896;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 200px;
 }
 
 #hud .hud-level {
-  font-size: 11px;
+  font-size: 14px;
   color: #a89880;
   white-space: nowrap;
 }
@@ -45,20 +45,20 @@
 #hud .hud-bar-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
 #hud .hud-bar-label {
-  font-size: 10px;
-  width: 26px;
+  font-size: 13px;
+  width: 34px;
   color: #a89880;
   flex-shrink: 0;
 }
 
 #hud .hud-bar-track {
   flex: 1;
-  height: 12px;
+  height: 16px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 6px;
   overflow: hidden;
@@ -94,7 +94,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.7);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   pointer-events: none;
