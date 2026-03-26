@@ -6,26 +6,28 @@
   height: 100%;
   justify-content: center;
   z-index: 1050;
-  gap: 2px;
-  padding: 0 4px;
+  gap: 3px;
+  padding: 0 6px;
 }
 
 .menu-btn {
-  display: block;
-  width: 72px;
-  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 108px;
+  padding: 7px 10px;
   background: linear-gradient(
     180deg,
     rgba(30, 26, 20, 0.85),
     rgba(22, 19, 15, 0.92)
   );
   border: 1px solid rgba(212, 184, 150, 0.18);
-  border-radius: 3px;
+  border-radius: 4px;
   color: #d4b896;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.3px;
-  text-align: center;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -45,4 +47,11 @@
 
 .menu-btn:active {
   background: rgba(212, 184, 150, 0.12);
+}
+
+.menu-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  flex-shrink: 0;
 }

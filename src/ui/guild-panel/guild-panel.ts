@@ -57,14 +57,15 @@ export class GuildPanel extends Base {
     // Build the toggle button
     this.toggleBtn = document.createElement('button');
     this.toggleBtn.id = 'guild-panel-toggle';
+    this.toggleBtn.className = 'menu-btn';
     this.toggleBtn.title = 'Guild Panel';
-    this.toggleBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 9.04-7 10.2-3.87-1.16-7-5.53-7-10.2V6.3l7-3.12zM12 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-4 6.5c0-1.33 2.67-2 4-2s4 .67 4 2V17H8v-.5z"/></svg>`;
+    this.toggleBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 9.04-7 10.2-3.87-1.16-7-5.53-7-10.2V6.3l7-3.12zM12 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-4 6.5c0-1.33 2.67-2 4-2s4 .67 4 2V17H8v-.5z"/></svg> Guild`;
     this.toggleBtn.classList.add('hidden');
     this.toggleBtn.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.toggle();
     });
-    document.body.appendChild(this.toggleBtn);
+    document.getElementById('in-game-menu')!.appendChild(this.toggleBtn);
 
     // Build panel structure
     this.buildPanel();
