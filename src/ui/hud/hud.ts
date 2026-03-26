@@ -33,10 +33,6 @@ export class HUD extends Base {
     '.hud-bar-row[data-id="exp"] .hud-bar-text',
   )!;
 
-  constructor() {
-    super();
-  }
-
   setStats(client: Client) {
     // Name and level
     this.nameDisplay.textContent = client.name || '';
