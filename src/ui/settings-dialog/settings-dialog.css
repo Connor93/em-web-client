@@ -1,0 +1,100 @@
+#settings-dialog {
+  user-select: none;
+  box-sizing: border-box;
+  background-color: #000;
+  background-image: url("/gfx/gfx002/152.png");
+  width: 284px;
+  height: 290px;
+  position: relative;
+}
+
+#settings-dialog .label {
+  color: #fff;
+  font-size: 12px;
+  position: absolute;
+  top: 18px;
+  left: 24px;
+}
+
+#settings-dialog .settings-columns {
+  display: flex;
+  gap: 4px;
+  position: absolute;
+  top: 44px;
+  left: 18px;
+  width: 232px;
+  height: 200px;
+}
+
+#settings-dialog .settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+#settings-dialog .setting-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  height: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid #3a2a10;
+  padding: 0 4px;
+}
+
+#settings-dialog .setting-row:hover {
+  background-color: rgba(123, 90, 41, 0.3);
+}
+
+#settings-dialog .setting-label {
+  color: #f0f0c8;
+  font-size: 10px;
+  font-weight: bold;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#settings-dialog .setting-value {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+#settings-dialog .setting-value select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #d4c4a8;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  padding: 0 14px 0 2px;
+}
+
+#settings-dialog .setting-value select option {
+  background: #1a1206;
+  color: #d4c4a8;
+}
+
+#settings-dialog .setting-value::after {
+  content: "▼";
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #d4c4a8;
+  font-size: 7px;
+  pointer-events: none;
+}
+
+#settings-dialog button[data-id="cancel"] {
+  position: absolute;
+  bottom: 10px;
+  left: 98px;
+}
