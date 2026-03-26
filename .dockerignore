@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE and OS files
+.DS_Store
+*.swp
+*.swo
+.vscode
+.idea
+
+# Documentation (keep README)
+*.md
+!README.md
+
+# Gemini artifacts
+.gemini
+
+# Docker files (not needed in build context recursively)
+docker-compose.yml
+
+# Screenshots
+screenshots

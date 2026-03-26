@@ -5,4 +5,5 @@ public/mfx*
 public/maps
 public/data
 dist
-.DS_Store
+.DS_Store*.egf
+*.DS_Store

@@ -194,6 +194,14 @@ Key files:
 - `src/ui/hud/hud.ts`, `in-game-menu/in-game-menu.ts`, `chat/chat.ts`, `paperdoll/paperdoll.ts`
 - Various other UI files — mostly minor import/feature changes
 
+### UI Positioning Fixes (from backup)
+
+These are visual fixes from the fork that must be ported:
+
+1. **HP/TP/SP bar CSS** — CSS changes for the stat bars at the top of the screen
+2. **Paperdoll text positioning** — CSS changes to move text labels to correct spots
+3. **Right-hand side icon position swapping** — Icon layout corrections
+
 ---
 
 ## Phase 5: Verify & Push

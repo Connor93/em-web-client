@@ -1,0 +1,11 @@
+services:
+  em-web-client:
+    image: ghcr.io/connor93/em-web-client:latest
+    container_name: em-web-client
+    restart: unless-stopped
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

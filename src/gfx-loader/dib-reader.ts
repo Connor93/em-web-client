@@ -160,7 +160,6 @@ class Bitfields {
   }
 }
 
-const HAT_FILE_IDS = [15, 16];
 export class DIBReader {
   data: ArrayBuffer;
   dataView: DataView;
@@ -172,12 +171,20 @@ export class DIBReader {
   paletteColors: PaletteColor[] | null = null;
 
   private initialized = false;
-  fileID: number;
+  transparentColors: number[][];
 
-  constructor(buffer: ArrayBuffer, fileID: number) {
+  constructor(buffer: ArrayBuffer, transparentColors: number[][] | number[]) {
     this.data = buffer;
     this.dataView = new DataView(buffer);
-    this.fileID = fileID;
+    // Support both single color [r,g,b] and multiple colors [[r,g,b], [r,g,b]]
+    if (
+      transparentColors.length > 0 &&
+      typeof transparentColors[0] === 'number'
+    ) {
+      this.transparentColors = [transparentColors as number[]];
+    } else {
+      this.transparentColors = transparentColors as number[][];
+    }
   }
 
   readUint8(position: number): number {
@@ -660,32 +667,6 @@ export class DIBReader {
     const outputSize = this.width * Math.abs(this.height) * 4;
     const imageData = new Uint8ClampedArray(outputSize);
     this.readStrategy?.read(imageData);
-
-    let has_8_0_0 = false;
-    if (HAT_FILE_IDS.includes(this.fileID)) {
-      for (let i = 0; i < imageData.length; i += 4) {
-        if (
-          imageData[i] === 8 &&
-          imageData[i + 1] === 0 &&
-          imageData[i + 2] === 0
-        ) {
-          has_8_0_0 = true;
-          break;
-        }
-      }
-    }
-
-    const transparentColor = has_8_0_0 ? [8, 0, 0] : [0, 0, 0];
-    for (let i = 0; i < imageData.length; i += 4) {
-      if (
-        imageData[i] === transparentColor[0] &&
-        imageData[i + 1] === transparentColor[1] &&
-        imageData[i + 2] === transparentColor[2]
-      ) {
-        imageData[i + 3] = 0;
-      }
-    }
-
     return imageData;
   }
 }
@@ -702,6 +683,15 @@ abstract class ReadStrategy {
   }
 
   abstract read(outBuffer: Uint8ClampedArray): void;
+
+  protected getAlpha(r: number, g: number, b: number): number {
+    for (const tc of this.reader.transparentColors) {
+      if (r === tc[0] && g === tc[1] && b === tc[2]) {
+        return 0x00;
+      }
+    }
+    return 0xff;
+  }
 }
 
 abstract class LineByLineReadStrategy extends ReadStrategy {
@@ -747,7 +737,7 @@ class RGBReadStrategy extends LineByLineReadStrategy {
       outBuffer[outPos++] = r;
       outBuffer[outPos++] = g;
       outBuffer[outPos++] = b;
-      outBuffer[outPos++] = 0xff;
+      outBuffer[outPos++] = this.getAlpha(r, g, b);
 
       linePos += this.bytesPerPixel;
     }
@@ -823,7 +813,7 @@ class PalettedReadStrategy extends LineByLineReadStrategy {
         outBuffer[outPos++] = r;
         outBuffer[outPos++] = g;
         outBuffer[outPos++] = b;
-        outBuffer[outPos++] = 0xff;
+        outBuffer[outPos++] = this.getAlpha(r, g, b);
 
         if (++written === this.width) return;
       }
@@ -956,7 +946,7 @@ class RLEReadStrategy extends ReadStrategy {
     outBuffer[pos + 0] = r;
     outBuffer[pos + 1] = g;
     outBuffer[pos + 2] = b;
-    outBuffer[pos + 3] = 0xff;
+    outBuffer[pos + 3] = this.getAlpha(r, g, b);
 
     this.x++;
   }
@@ -1121,7 +1111,7 @@ class HuffmanReadStrategy extends ReadStrategy {
           outBuffer[pos++] = color;
           outBuffer[pos++] = color;
           outBuffer[pos++] = color;
-          outBuffer[pos++] = color;
+          outBuffer[pos++] = this.getAlpha(color, color, color);
           this.x++;
         }
       }

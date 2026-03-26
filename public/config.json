@@ -1,0 +1,7 @@
+{
+  "host": "ws://localhost:8081",
+  "staticHost": true,
+  "title": "Endless Memories",
+  "slogan": "Web Edition!",
+  "creditsUrl": "https://github.com/sorokya/eoweb"
+}
