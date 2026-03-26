@@ -22,59 +22,17 @@ export class InGameMenu extends Base {
     super();
     this.container = document.querySelector('#in-game-menu')!;
 
-    const btnInventory = this.container.querySelector(
-      'button[data-id="inventory"]',
-    );
-    const btnMap = this.container.querySelector('button[data-id="map"]')!;
-    const btnSpells = this.container.querySelector('button[data-id="spells"]')!;
-    const btnStats = this.container.querySelector('button[data-id="stats"]')!;
-    const btnOnline = this.container.querySelector('button[data-id="online"]')!;
-    const btnParty = this.container.querySelector('button[data-id="party"]')!;
-    const btnSettings = this.container.querySelector(
-      'button[data-id="settings"]',
-    )!;
+    const buttons =
+      this.container.querySelectorAll<HTMLButtonElement>('button[data-id]');
 
-    btnInventory!.addEventListener!('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'inventory');
-    });
-
-    btnMap.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'map');
-    });
-
-    btnSpells.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'spells');
-    });
-
-    btnStats.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'stats');
-    });
-
-    btnOnline.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'online');
-    });
-
-    btnParty.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'party');
-    });
-
-    btnSettings.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('toggle', 'settings');
-    });
+    for (const button of buttons) {
+      const target = button.dataset.id as Events['toggle'];
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        playSfxById(SfxId.ButtonClick);
+        this.emitter.emit('toggle', target);
+      });
+    }
   }
 
   on<Event extends keyof Events>(
