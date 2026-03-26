@@ -1,5 +1,4 @@
 import type { Client } from '../../client';
-import { playSfxById, SfxId } from '../../sfx';
 import { calculateTnl, getExpForLevel } from '../../utils';
 import { Base } from '../base-ui';
 
@@ -7,90 +6,65 @@ import './hud.css';
 
 export class HUD extends Base {
   protected container = document.getElementById('hud')!;
-  private hpText: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="hp"] span',
-  )!;
+
+  private nameDisplay: HTMLSpanElement =
+    this.container.querySelector('.hud-name')!;
+  private levelDisplay: HTMLSpanElement =
+    this.container.querySelector('.hud-level')!;
+
   private hpFill: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="hp"] .stat-fill',
+    '.hud-bar-row[data-id="hp"] .hud-bar-fill',
   )!;
-  private hpBar: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="hp"] .bar',
-  )!;
-  private hpDropdown: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="hp"] .dropdown',
+  private hpText: HTMLSpanElement = this.container.querySelector(
+    '.hud-bar-row[data-id="hp"] .hud-bar-text',
   )!;
 
-  private tpText: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="tp"] span',
-  )!;
   private tpFill: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="tp"] .stat-fill',
+    '.hud-bar-row[data-id="tp"] .hud-bar-fill',
   )!;
-  private tpBar: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="tp"] .bar',
-  )!;
-  private tpDropdown: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="tp"] .dropdown',
+  private tpText: HTMLSpanElement = this.container.querySelector(
+    '.hud-bar-row[data-id="tp"] .hud-bar-text',
   )!;
 
-  private expText: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="exp"] span',
-  )!;
   private expFill: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="exp"] .stat-fill',
+    '.hud-bar-row[data-id="exp"] .hud-bar-fill',
   )!;
-  private expBar: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="exp"] .bar',
+  private expText: HTMLSpanElement = this.container.querySelector(
+    '.hud-bar-row[data-id="exp"] .hud-bar-text',
   )!;
-  private expDropdown: HTMLDivElement = this.container.querySelector(
-    '.stat-container[data-id="exp"] .dropdown',
-  )!;
-  private readonly LEFT_SIDE_WIDTH = 24;
-  private readonly STAT_WIDTH = 79;
-
-  setStats(client: Client) {
-    this.hpText.innerText = `${client.hp}/${client.maxHp}`;
-    this.hpFill.style.width = `${this.LEFT_SIDE_WIDTH + Math.floor((client.hp / client.maxHp) * this.STAT_WIDTH)}px`;
-
-    this.tpText.innerText = `${client.tp}/${client.maxTp}`;
-    this.tpFill.style.width = `${this.LEFT_SIDE_WIDTH + Math.floor((client.tp / client.maxTp) * this.STAT_WIDTH)}px`;
-
-    const tnl = calculateTnl(client.experience);
-    const currentLevelExp = getExpForLevel(client.level);
-    const nextLevelExp = getExpForLevel(client.level + 1);
-
-    const progress = client.experience - currentLevelExp;
-    const range = nextLevelExp - currentLevelExp;
-
-    const percent = progress / range;
-
-    this.expText.innerText = `${tnl}`;
-    this.expFill.style.width = `${this.LEFT_SIDE_WIDTH + Math.floor(percent * this.STAT_WIDTH)}px`;
-  }
-
-  show() {
-    this.hpDropdown.classList.add('hidden');
-    this.tpDropdown.classList.add('hidden');
-    this.expDropdown.classList.add('hidden');
-    this.container.classList.remove('hidden');
-  }
 
   constructor() {
     super();
+  }
 
-    this.hpBar.addEventListener('click', () => {
-      playSfxById(SfxId.HudStatusBarClick);
-      this.hpDropdown.classList.toggle('hidden');
-    });
+  setStats(client: Client) {
+    // Name and level
+    this.nameDisplay.textContent = client.name || '';
+    this.levelDisplay.textContent = `Lv. ${client.level}`;
 
-    this.tpBar.addEventListener('click', () => {
-      playSfxById(SfxId.HudStatusBarClick);
-      this.tpDropdown.classList.toggle('hidden');
-    });
+    // HP bar
+    const hpPercent = client.maxHp > 0 ? (client.hp / client.maxHp) * 100 : 0;
+    this.hpFill.style.width = `${hpPercent}%`;
+    this.hpText.textContent = `${client.hp} / ${client.maxHp}`;
 
-    this.expBar.addEventListener('click', () => {
-      playSfxById(SfxId.HudStatusBarClick);
-      this.expDropdown.classList.toggle('hidden');
-    });
+    // TP bar
+    const tpPercent = client.maxTp > 0 ? (client.tp / client.maxTp) * 100 : 0;
+    this.tpFill.style.width = `${tpPercent}%`;
+    this.tpText.textContent = `${client.tp} / ${client.maxTp}`;
+
+    // EXP bar
+    const tnl = calculateTnl(client.experience);
+    const currentLevelExp = getExpForLevel(client.level);
+    const nextLevelExp = getExpForLevel(client.level + 1);
+    const progress = client.experience - currentLevelExp;
+    const range = nextLevelExp - currentLevelExp;
+    const expPercent = range > 0 ? (progress / range) * 100 : 0;
+
+    this.expFill.style.width = `${expPercent}%`;
+    this.expText.textContent = `${tnl} TNL`;
+  }
+
+  show() {
+    this.container.classList.remove('hidden');
   }
 }

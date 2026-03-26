@@ -1,89 +1,101 @@
+/* ── Desktop HUD — Character Info Panel ──────────────────────────── */
+
 #hud {
   position: fixed;
   z-index: 1020;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 8px;
+  left: 8px;
+  background: rgba(18, 16, 12, 0.88);
+  border: 1px solid rgba(212, 184, 150, 0.18);
+  border-radius: 8px;
+  padding: 8px 14px 10px 14px;
+  min-width: 170px;
+  color: #e0daca;
   user-select: none;
-  pointer-events: none;
-  display: flex;
-  gap: 8px;
+  pointer-events: auto;
 }
 
-#hud .stat-container {
+/* ── Header ─────────────────────────────────────────────────────── */
+
+#hud .hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+#hud .hud-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+#hud .hud-level {
+  font-size: 11px;
+  color: #a89880;
+  white-space: nowrap;
+}
+
+/* ── Bar Rows ───────────────────────────────────────────────────── */
+
+#hud .hud-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+#hud .hud-bar-label {
+  font-size: 10px;
+  width: 26px;
+  color: #a89880;
+  flex-shrink: 0;
+}
+
+#hud .hud-bar-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
   position: relative;
 }
 
-#hud .bar {
-  width: 110px;
-  height: 14px;
-  background: none;
-  border-radius: 10px;
-  overflow: hidden;
-  transform: scale(var(--ui-scale, 1));
-  transform-origin: left center;
-  pointer-events: auto;
-  cursor: pointer;
-  z-index: 20;
+#hud .hud-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
 }
 
-#hud .dropdown {
-  width: 110px;
-  height: 20px;
-  background-image: url("/gfx/gfx002/158.png");
-  background-position: -221px -30px;
-  background-repeat: no-repeat;
-  background-size: 439px 104px;
-  pointer-events: auto;
-  z-index: 10;
-  white-space: nowrap;
-  color: #d4c4a8;
-  font-size: 12px;
-  line-height: 21px;
-
-  position: absolute;
-  bottom: calc(-17px * var(--ui-scale));
-
-  transform: scale(var(--ui-scale));
-  /* scales visually with rest of UI */
-  transform-origin: left center;
-  /* scaling doesn't shift it sideways */
+#hud .hud-bar-fill.hp {
+  background: linear-gradient(to right, #c03030, #e05050);
 }
 
-#hud .dropdown span {
-  padding: 2px 6px;
-  line-height: 18px;
+#hud .hud-bar-fill.tp {
+  background: linear-gradient(to right, #2090a0, #40c0d0);
 }
 
-#hud .stat-empty {
+#hud .hud-bar-fill.exp {
+  background: linear-gradient(to right, #b0982c, #d8c040);
+}
+
+/* ── Bar Text Overlay ───────────────────────────────────────────── */
+
+#hud .hud-bar-text {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("/gfx/gfx002/158.png");
-  background-repeat: no-repeat;
-  background-size: 439px 104px;
-}
-
-#hud .stat-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100%;
-  background-image: url("/gfx/gfx002/158.png");
-  background-repeat: no-repeat;
-  background-size: 439px 104px;
-  background-position-y: -14px;
-}
-
-#hud .stat-container[data-id="tp"] .stat-empty,
-#hud .stat-container[data-id="tp"] .stat-fill {
-  background-position-x: -110px;
-}
-
-#hud .stat-container[data-id="exp"] .stat-empty,
-#hud .stat-container[data-id="exp"] .stat-fill {
-  background-position-x: -329px;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }

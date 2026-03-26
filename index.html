@@ -704,31 +704,29 @@
       </div>
 
       <div id="hud" class="hidden">
-        <div class="stat-container" data-id="hp">
-          <div class="bar">
-            <div class="stat-empty"></div>
-            <div class="stat-fill"></div>
-          </div>
-          <div class="dropdown hidden">
-            <span>0/0</span>
+        <div class="hud-header">
+          <span class="hud-name"></span>
+          <span class="hud-level"></span>
+        </div>
+        <div class="hud-bar-row" data-id="hp">
+          <span class="hud-bar-label">HP</span>
+          <div class="hud-bar-track">
+            <div class="hud-bar-fill hp"></div>
+            <span class="hud-bar-text">0/0</span>
           </div>
         </div>
-        <div class="stat-container" data-id="tp">
-          <div class="bar">
-            <div class="stat-empty"></div>
-            <div class="stat-fill"></div>
-          </div>
-          <div class="dropdown hidden">
-            <span>0/0</span>
+        <div class="hud-bar-row" data-id="tp">
+          <span class="hud-bar-label">TP</span>
+          <div class="hud-bar-track">
+            <div class="hud-bar-fill tp"></div>
+            <span class="hud-bar-text">0/0</span>
           </div>
         </div>
-        <div class="stat-container" data-id="exp">
-          <div class="bar">
-            <div class="stat-empty"></div>
-            <div class="stat-fill"></div>
-          </div>
-          <div class="dropdown hidden">
-            <span>0</span>
+        <div class="hud-bar-row" data-id="exp">
+          <span class="hud-bar-label">EXP</span>
+          <div class="hud-bar-track">
+            <div class="hud-bar-fill exp"></div>
+            <span class="hud-bar-text">0</span>
           </div>
         </div>
       </div>
