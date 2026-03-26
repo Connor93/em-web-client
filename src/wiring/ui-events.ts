@@ -53,6 +53,10 @@ export interface UiEventDeps {
     show(): void;
     on(event: string, cb: (...args: any[]) => void): void;
   };
+  playerContextMenu: {
+    on(event: string, cb: (...args: any[]) => void): void;
+    hide(): void;
+  };
   chat: {
     focus(): void;
     addMessage(tab: ChatTab, msg: string, icon: ChatIcon, name?: string): void;
@@ -135,6 +139,37 @@ export function wireUiEvents(deps: UiEventDeps): void {
     });
     deps.smallConfirm.show();
   });
+
+  // Player context menu
+  deps.playerContextMenu.on(
+    'action',
+    (data: { action: string; playerId: number }) => {
+      switch (data.action) {
+        case 'paperdoll':
+          client.requestPaperdoll(data.playerId);
+          break;
+        case 'book':
+          client.requestBook(data.playerId);
+          break;
+        case 'whisper': {
+          const character = client.getCharacterById(data.playerId);
+          if (character) {
+            client.emit('setChat', `!${character.name} `);
+          }
+          break;
+        }
+        case 'join':
+          client.requestToJoinParty(data.playerId);
+          break;
+        case 'invite':
+          client.inviteToParty(data.playerId);
+          break;
+        case 'trade':
+          client.requestTrade(data.playerId);
+          break;
+      }
+    },
+  );
 
   // Main menu
   deps.mainMenu.on('play-game', () => {

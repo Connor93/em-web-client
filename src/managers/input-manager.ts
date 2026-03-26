@@ -9,53 +9,13 @@ import {
   getNpcIntersecting,
   getSignIntersecting,
 } from '../collision';
-import {
-  PLAYER_MENU_ITEM_HEIGHT,
-  PLAYER_MENU_OFFSET_Y,
-  PLAYER_MENU_WIDTH,
-} from '../consts';
 import { EOResourceID } from '../edf';
 import { CursorClickAnimation } from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { GameState, PlayerMenuItem } from '../types';
+import { GameState } from '../types';
 import { capitalize } from '../utils';
 
 export function handleClick(client: Client, e: MouseEvent): void {
-  if (client.menuPlayerId) {
-    const hovered = getHoveredPlayerMenuItem(client);
-    if (hovered !== undefined) {
-      playSfxById(SfxId.ButtonClick);
-      switch (hovered) {
-        case PlayerMenuItem.Paperdoll:
-          client.requestPaperdoll(client.menuPlayerId);
-          break;
-        case PlayerMenuItem.Book:
-          client.requestBook(client.menuPlayerId);
-          break;
-        case PlayerMenuItem.Whisper: {
-          const character = client.getCharacterById(client.menuPlayerId);
-          if (character) {
-            client.emit('setChat', `!${character.name} `);
-          }
-          break;
-        }
-        case PlayerMenuItem.Join:
-          client.requestToJoinParty(client.menuPlayerId);
-          break;
-        case PlayerMenuItem.Invite:
-          client.inviteToParty(client.menuPlayerId);
-          break;
-        case PlayerMenuItem.Trade:
-          client.requestTrade(client.menuPlayerId);
-          break;
-      }
-      client.menuPlayerId = 0;
-      return;
-    }
-
-    client.menuPlayerId = 0;
-  }
-
   const ui = document.getElementById('ui')!;
   if (client.state !== GameState.InGame || client.typing || e.target !== ui) {
     return;
@@ -224,40 +184,13 @@ export function handleRightClick(client: Client, e: MouseEvent): void {
       if (characterAt.id === client.playerId) {
         client.requestPaperdoll(client.playerId);
       } else {
-        client.menuPlayerId = character.playerId;
+        // Show HTML context menu at mouse position
+        client.emit('showPlayerMenu', {
+          playerId: character.playerId,
+          screenX: e.clientX,
+          screenY: e.clientY,
+        });
       }
-      return;
     }
   }
-
-  if (client.menuPlayerId) {
-    client.menuPlayerId = 0;
-  }
-}
-
-export function getHoveredPlayerMenuItem(
-  client: Client,
-): PlayerMenuItem | undefined {
-  if (!client.mousePosition || !client.menuPlayerId) {
-    return;
-  }
-
-  const rect = getCharacterRectangle(client.menuPlayerId);
-  if (!rect) {
-    return;
-  }
-
-  const menuX = rect.position.x + rect.width + 10;
-
-  if (
-    client.mousePosition.x < menuX ||
-    client.mousePosition.x > menuX + PLAYER_MENU_WIDTH
-  ) {
-    return;
-  }
-
-  const relativeY =
-    client.mousePosition.y - rect.position.y - PLAYER_MENU_OFFSET_Y;
-  const itemIndex = Math.floor(relativeY / PLAYER_MENU_ITEM_HEIGHT);
-  return itemIndex in PlayerMenuItem ? itemIndex : undefined;
 }

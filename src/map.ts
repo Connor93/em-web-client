@@ -773,57 +773,9 @@ export class MapRenderer {
     this.client.sans11.render(ctx, name, { x: drawX, y: drawY }, color);
   }
 
-  renderPlayerMenu(ctx: CanvasRenderingContext2D) {
-    if (!this.client.menuPlayerId) {
-      return;
-    }
-
-    const rect = getCharacterRectangle(this.client.menuPlayerId);
-    if (!rect) {
-      this.client.menuPlayerId = 0;
-      return;
-    }
-
-    const frame = this.client.atlas.getStaticEntry(
-      StaticAtlasEntryType.PlayerMenu,
-    );
-    if (!frame) {
-      return;
-    }
-
-    const atlas = this.client.atlas.getAtlas(frame.atlasIndex);
-    if (!atlas) {
-      return;
-    }
-
-    ctx.drawImage(
-      atlas,
-      frame.x,
-      frame.y,
-      PLAYER_MENU_WIDTH,
-      PLAYER_MENU_HEIGHT,
-      rect.position.x + rect.width + 10,
-      rect.position.y,
-      PLAYER_MENU_WIDTH,
-      PLAYER_MENU_HEIGHT,
-    );
-
-    const hovered = this.client.getHoveredPlayerMenuItem();
-    if (hovered !== undefined) {
-      ctx.drawImage(
-        atlas,
-        frame.x + PLAYER_MENU_WIDTH,
-        frame.y + PLAYER_MENU_OFFSET_Y + hovered * PLAYER_MENU_ITEM_HEIGHT,
-        PLAYER_MENU_WIDTH,
-        PLAYER_MENU_ITEM_HEIGHT,
-        rect.position.x + rect.width + 10,
-        rect.position.y +
-          PLAYER_MENU_OFFSET_Y +
-          hovered * PLAYER_MENU_ITEM_HEIGHT,
-        PLAYER_MENU_WIDTH,
-        PLAYER_MENU_ITEM_HEIGHT,
-      );
-    }
+  renderPlayerMenu(_ctx: CanvasRenderingContext2D) {
+    // Player menu is now rendered as an HTML overlay (PlayerContextMenu)
+    return;
   }
 
   renderTile(

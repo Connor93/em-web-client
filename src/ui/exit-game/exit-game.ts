@@ -1,5 +1,5 @@
 import mitt from 'mitt';
-import { Base } from '../base-ui';
+import { playSfxById, SfxId } from '../../sfx';
 
 import './exit-game.css';
 
@@ -7,16 +7,17 @@ type Events = {
   click: undefined;
 };
 
-export class ExitGame extends Base {
-  protected container = document.getElementById('exit-game')!;
-  private button: HTMLButtonElement = this.container.querySelector(
-    'button[data-id="exit-game"]',
-  )!;
+export class ExitGame {
+  private button: HTMLButtonElement;
   private emitter = mitt<Events>();
 
   constructor() {
-    super();
-    this.button.addEventListener('click', () => {
+    this.button = document.querySelector<HTMLButtonElement>(
+      'button[data-id="exit-game"]',
+    )!;
+    this.button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      playSfxById(SfxId.ButtonClick);
       this.emitter.emit('click', undefined);
     });
   }
@@ -27,4 +28,8 @@ export class ExitGame extends Base {
   ) {
     this.emitter.on(event, handler);
   }
+
+  // Button lives inside #in-game-menu which handles its own visibility
+  show() {}
+  hide() {}
 }

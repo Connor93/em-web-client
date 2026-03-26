@@ -999,10 +999,6 @@ export class Client {
     Managers.playSpellEffect(this, spellId, target);
   }
 
-  getHoveredPlayerMenuItem(): PlayerMenuItem | undefined {
-    return InputManager.getHoveredPlayerMenuItem(this);
-  }
-
   requestBook(playerId: number) {
     Managers.requestBook(this, playerId);
   }

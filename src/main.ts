@@ -60,6 +60,7 @@ import { MobileToolbar } from './ui/mobile-toolbar/mobile-toolbar';
 import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
+import { PlayerContextMenu } from './ui/player-context-menu';
 import { QuestDialog } from './ui/quest-dialog';
 import { SettingsDialog } from './ui/settings-dialog';
 import { ShopDialog } from './ui/shop-dialog';
@@ -218,6 +219,7 @@ const createCharacterForm = new CreateCharacterForm(client);
 const changePasswordForm = new ChangePasswordForm(client);
 const smallAlertLargeHeader = new SmallAlertLargeHeader();
 const exitGame = new ExitGame();
+const playerContextMenu = new PlayerContextMenu();
 const smallConfirm = new SmallConfirm();
 const chat = new Chat(client);
 //const offsetTweaker = new OffsetTweaker();
@@ -361,6 +363,7 @@ wireClientEvents({
   hotbar,
   inGameMenu,
   exitGame,
+  playerContextMenu,
   inventory,
   stats,
   questDialog,
@@ -396,6 +399,7 @@ wireUiEvents({
   createCharacterForm,
   changePasswordForm,
   exitGame,
+  playerContextMenu,
   chat,
   smallConfirm,
   smallAlertLargeHeader,
@@ -492,23 +496,7 @@ window.addEventListener('contextmenu', (e) => {
 
 // ── DOM Init ─────────────────────────────────────────────────────────────
 
-function loadInventoryGrid() {
-  const img = new Image();
-  img.src = '/gfx/gfx002/144.png';
-  img.onload = () => {
-    const canvas: HTMLCanvasElement = document.createElement('canvas');
-    canvas.width = 23;
-    canvas.height = 23;
-    const ctx = canvas.getContext('2d');
-    ctx!.fillStyle! = '#000';
-    ctx!.fillRect!(0, 0, 23, 23);
-    ctx!.drawImage!(img, 12, 10, 23, 23, 0, 0, 23, 23);
-
-    const dataUrl = canvas.toDataURL();
-    const grid = document.querySelector<HTMLDivElement>('#inventory .grid')!;
-    grid.style.background = `url(${dataUrl})`;
-  };
-}
+// Inventory grid background now handled by CSS (gap + cell backgrounds)
 
 window.addEventListener('DOMContentLoaded', async () => {
   const response = await fetch('/maps/00005.emf');
@@ -542,7 +530,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   //setTimeout(setDebugData, 300);
 
-  loadInventoryGrid();
   requestAnimationFrame(render);
 });
 

@@ -1,9 +1,18 @@
 /**
  * Makes a dialog element draggable by its header/title area.
  * Stores last position in localStorage so windows reopen where the user left them.
+ * Accounts for CSS transform: scale() on the #ui container.
  */
 
 const STORAGE_PREFIX = 'ui-pos-';
+
+function getUiScale(): number {
+  const ui = document.getElementById('ui');
+  if (!ui) return 1;
+  const transform = ui.style.transform;
+  const match = transform.match(/scale\(([^)]+)\)/);
+  return match ? Number.parseFloat(match[1]) : 1;
+}
 
 export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   const id = element.id;
@@ -16,16 +25,16 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   if (!handle) return;
 
   let isDragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
+  let startX = 0;
+  let startY = 0;
+  let startLeft = 0;
+  let startTop = 0;
 
   handle.style.cursor = 'move';
   handle.style.userSelect = 'none';
 
   const onPointerDown = (event: PointerEvent) => {
-    // Only left-click
     if (event.button !== 0) return;
-    // Don't drag if clicking a button or input
     const target = event.target as HTMLElement;
     if (
       target.closest('button') ||
@@ -35,9 +44,14 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
       return;
 
     isDragging = true;
+    const scale = getUiScale();
+
+    startX = event.clientX;
+    startY = event.clientY;
+
     const rect = element.getBoundingClientRect();
-    offsetX = event.clientX - rect.left;
-    offsetY = event.clientY - rect.top;
+    startLeft = rect.left / scale;
+    startTop = rect.top / scale;
 
     handle.setPointerCapture(event.pointerId);
     event.preventDefault();
@@ -46,12 +60,13 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   const onPointerMove = (event: PointerEvent) => {
     if (!isDragging) return;
 
-    const x = event.clientX - offsetX;
-    const y = event.clientY - offsetY;
+    const scale = getUiScale();
+    const dx = (event.clientX - startX) / scale;
+    const dy = (event.clientY - startY) / scale;
 
     element.style.position = 'fixed';
-    element.style.left = `${x}px`;
-    element.style.top = `${y}px`;
+    element.style.left = `${startLeft + dx}px`;
+    element.style.top = `${startTop + dy}px`;
     element.style.right = 'auto';
     element.style.bottom = 'auto';
     element.style.margin = '0';
@@ -63,10 +78,12 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
     handle.releasePointerCapture(event.pointerId);
 
     // Save position
-    const rect = element.getBoundingClientRect();
     localStorage.setItem(
       STORAGE_PREFIX + id,
-      JSON.stringify({ x: rect.left, y: rect.top }),
+      JSON.stringify({
+        x: Number.parseFloat(element.style.left),
+        y: Number.parseFloat(element.style.top),
+      }),
     );
   };
 
@@ -83,13 +100,14 @@ export function restoreOrCenter(element: HTMLElement) {
   const id = element.id;
   if (!id) return;
 
+  const scale = getUiScale();
+
   const saved = localStorage.getItem(STORAGE_PREFIX + id);
   if (saved) {
     try {
       const { x, y } = JSON.parse(saved);
-      // Clamp to viewport
-      const maxX = window.innerWidth - 50;
-      const maxY = window.innerHeight - 50;
+      const maxX = window.innerWidth / scale - 50;
+      const maxY = window.innerHeight / scale - 50;
       element.style.position = 'fixed';
       element.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
       element.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
@@ -102,20 +120,16 @@ export function restoreOrCenter(element: HTMLElement) {
     }
   }
 
-  // Center on screen
+  // Center on screen (in scaled coordinates)
+  const viewW = window.innerWidth / scale;
+  const viewH = window.innerHeight / scale;
+  const elW = element.offsetWidth;
+  const elH = element.offsetHeight;
+
   element.style.position = 'fixed';
-  element.style.left = '50%';
-  element.style.top = '50%';
+  element.style.left = `${(viewW - elW) / 2}px`;
+  element.style.top = `${(viewH - elH) / 2}px`;
   element.style.right = 'auto';
   element.style.bottom = 'auto';
-  element.style.transform = 'translate(-50%, -50%)';
   element.style.margin = '0';
-
-  // After centering, read the actual position and switch to px so dragging works
-  requestAnimationFrame(() => {
-    const rect = element.getBoundingClientRect();
-    element.style.left = `${rect.left}px`;
-    element.style.top = `${rect.top}px`;
-    element.style.transform = '';
-  });
 }

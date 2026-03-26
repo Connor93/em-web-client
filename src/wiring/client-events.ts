@@ -37,6 +37,10 @@ export interface ClientEventDeps {
   hotbar: { show(): void; refresh(): void };
   inGameMenu: { show(): void };
   exitGame: { show(): void };
+  playerContextMenu: {
+    show(playerId: number, screenX: number, screenY: number): void;
+    hide(): void;
+  };
   inventory: { loadPositions(): void; show(): void };
   stats: { render(): void };
   questDialog: {
@@ -211,6 +215,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
     deps.characterSelect.hide();
     deps.exitGame.show();
+
+    client.on('showPlayerMenu', ({ playerId, screenX, screenY }) => {
+      deps.playerContextMenu.show(playerId, screenX, screenY);
+    });
     deps.chat.show();
     deps.hud.setStats(client);
     deps.mobileHud.setStats(client);

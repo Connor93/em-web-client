@@ -44,6 +44,7 @@ export type ClientEvents = {
   statsUpdate: undefined;
   reconnect: undefined;
   playersListUpdated: OnlinePlayer[];
+  showPlayerMenu: { playerId: number; screenX: number; screenY: number };
   openQuestDialog: {
     name: string;
     dialogId: number;
