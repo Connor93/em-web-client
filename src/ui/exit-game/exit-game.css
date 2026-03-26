@@ -1,6 +1,34 @@
+/* ── Exit Game (Logout) Button ────────────────────────────────────── */
+
 #exit-game {
   position: absolute;
-  z-index: 1050;
-  top: 0;
-  right: 0;
+  z-index: 1060;
+  top: 8px;
+  right: 8px;
+}
+
+#exit-game button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(18, 16, 12, 0.85);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 4px;
+  color: #a89880;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
+  font-family: inherit;
+}
+
+#exit-game button:hover {
+  color: #ef9a9a;
+  border-color: rgba(239, 154, 154, 0.3);
+  background: rgba(30, 16, 12, 0.92);
 }

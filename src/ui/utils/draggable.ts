@@ -39,7 +39,17 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
     if (
       target.closest('button') ||
       target.closest('input') ||
-      target.closest('textarea')
+      target.closest('textarea') ||
+      target.closest('select') ||
+      target.closest('.grid') ||
+      target.closest('.item') ||
+      target.closest('.item-list') ||
+      target.closest('.chest-items') ||
+      target.closest('.locker-items') ||
+      target.closest('.dialog-contents') ||
+      target.closest('.spell-grid') ||
+      target.tagName === 'IMG' ||
+      target.tagName === 'CANVAS'
     )
       return;
 
