@@ -19,24 +19,24 @@ export class TradeDialog extends Base {
   private dialogs = document.getElementById('dialogs')!;
   private cover = document.querySelector<HTMLDivElement>('#cover')!;
   private notification = document.getElementById('trade-request-notification')!;
-  private columnsEl = this.container.querySelector('.trade-columns')!;
+  private columns = this.container.querySelector('.trade-columns')!;
   private btnAgree = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="agree"]',
   )!;
 
   private partnerPlayerName = '';
-  private yourPlayerId = 0;
-  private yourPlayerName = '';
+  private localPlayerId = 0;
+  private localPlayerName = '';
   private pendingRequestPlayerId = 0;
 
-  private yourItems: Item[] = [];
+  private localItems: Item[] = [];
   private partnerItems: Item[] = [];
-  private yourAgreed = false;
+  private localAgreed = false;
   private partnerAgreed = false;
-  private _isOpen = false;
+  private _open = false;
 
-  get isTradeOpen() {
-    return this._isOpen;
+  get isOpen() {
+    return this._open;
   }
 
   constructor(client: Client) {
@@ -53,8 +53,8 @@ export class TradeDialog extends Base {
 
     this.btnAgree.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
-      if (!this.yourAgreed) {
-        if (this.yourItems.length === 0) {
+      if (!this.localAgreed) {
+        if (this.localItems.length === 0) {
           this.showTradeMessage('You must offer at least one item.');
           return;
         }
@@ -66,7 +66,7 @@ export class TradeDialog extends Base {
         }
       }
       const packet = new TradeAgreeClientPacket();
-      packet.agree = !this.yourAgreed;
+      packet.agree = !this.localAgreed;
       this.client.bus.send(packet);
     });
 
@@ -100,7 +100,7 @@ export class TradeDialog extends Base {
     // Client event listeners
     this.client.on('tradeUpdated', ({ tradeData }) => {
       this.applyTradeData(tradeData);
-      this.yourAgreed = false;
+      this.localAgreed = false;
       this.partnerAgreed = false;
       this.renderColumns();
       this.updateAgreeButton();
@@ -112,7 +112,7 @@ export class TradeDialog extends Base {
     });
 
     this.client.on('tradeOwnAgree', ({ agree }) => {
-      this.yourAgreed = agree;
+      this.localAgreed = agree;
       this.updateAgreeButton();
     });
 
@@ -134,17 +134,17 @@ export class TradeDialog extends Base {
 
   open(
     partnerPlayerName: string,
-    yourPlayerId: number,
-    yourPlayerName: string,
+    localPlayerId: number,
+    localPlayerName: string,
   ) {
     this.partnerPlayerName = partnerPlayerName;
-    this.yourPlayerId = yourPlayerId;
-    this.yourPlayerName = yourPlayerName;
-    this.yourItems = [];
+    this.localPlayerId = localPlayerId;
+    this.localPlayerName = localPlayerName;
+    this.localItems = [];
     this.partnerItems = [];
-    this.yourAgreed = false;
+    this.localAgreed = false;
     this.partnerAgreed = false;
-    this._isOpen = true;
+    this._open = true;
 
     this.container.querySelector('.trade-header')!.textContent =
       `Trade with ${partnerPlayerName}`;
@@ -158,7 +158,7 @@ export class TradeDialog extends Base {
   }
 
   close() {
-    this._isOpen = false;
+    this._open = false;
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
@@ -168,7 +168,7 @@ export class TradeDialog extends Base {
   }
 
   offerItem(itemId: number) {
-    if (!this._isOpen) return;
+    if (!this._open) return;
     const item = this.client.items.find((i) => i.id === itemId);
     if (!item) return;
     const record = this.client.getEifRecordById(itemId);
@@ -179,8 +179,8 @@ export class TradeDialog extends Base {
 
   private applyTradeData(tradeData: TradeItemData[]) {
     for (const data of tradeData) {
-      if (data.playerId === this.yourPlayerId) {
-        this.yourItems = [...data.items];
+      if (data.playerId === this.localPlayerId) {
+        this.localItems = [...data.items];
       } else {
         this.partnerItems = [...data.items];
       }
@@ -188,7 +188,7 @@ export class TradeDialog extends Base {
   }
 
   private updateAgreeButton() {
-    if (this.yourAgreed) {
+    if (this.localAgreed) {
       this.btnAgree.textContent = 'Agreed ✓';
       this.btnAgree.classList.add('active');
     } else {
@@ -198,18 +198,18 @@ export class TradeDialog extends Base {
   }
 
   private renderColumns() {
-    if (!this._isOpen) return;
-    this.columnsEl.innerHTML = '';
+    if (!this._open) return;
+    this.columns.innerHTML = '';
 
-    this.columnsEl.appendChild(
+    this.columns.appendChild(
       this.createColumn(
-        this.yourPlayerName,
-        this.yourItems,
-        this.yourAgreed,
+        this.localPlayerName,
+        this.localItems,
+        this.localAgreed,
         true,
       ),
     );
-    this.columnsEl.appendChild(
+    this.columns.appendChild(
       this.createColumn(
         this.partnerPlayerName,
         this.partnerItems,
@@ -223,7 +223,7 @@ export class TradeDialog extends Base {
     name: string,
     items: Item[],
     agreed: boolean,
-    isYours: boolean,
+    isLocal: boolean,
   ): HTMLDivElement {
     const col = document.createElement('div');
     col.className = 'trade-column';
@@ -233,7 +233,7 @@ export class TradeDialog extends Base {
 
     const nameEl = document.createElement('span');
     nameEl.className = 'trade-col-name';
-    nameEl.textContent = isYours ? 'You' : name;
+    nameEl.textContent = isLocal ? 'You' : name;
     header.appendChild(nameEl);
 
     const badge = document.createElement('span');
@@ -254,7 +254,7 @@ export class TradeDialog extends Base {
     } else {
       for (const item of items) {
         const row = document.createElement('div');
-        row.className = `trade-item-row${isYours ? ' removable' : ''}`;
+        row.className = `trade-item-row${isLocal ? ' removable' : ''}`;
 
         const record = this.client.getEifRecordById(item.id);
         const nameSpan = document.createElement('span');
@@ -267,7 +267,7 @@ export class TradeDialog extends Base {
         amountSpan.textContent = `x${item.amount}`;
         row.appendChild(amountSpan);
 
-        if (isYours) {
+        if (isLocal) {
           row.title = 'Click to remove';
           row.addEventListener('click', () => {
             playSfxById(SfxId.ButtonClick);
@@ -311,10 +311,10 @@ export class TradeDialog extends Base {
       nameSpan.textContent = record?.name ?? `Item #${item.id}`;
       row.appendChild(nameSpan);
 
-      const amtSpan = document.createElement('span');
-      amtSpan.className = 'item-amount';
-      amtSpan.textContent = `x${item.amount}`;
-      row.appendChild(amtSpan);
+      const amountSpan = document.createElement('span');
+      amountSpan.className = 'item-amount';
+      amountSpan.textContent = `x${item.amount}`;
+      row.appendChild(amountSpan);
 
       row.addEventListener('click', () => {
         playSfxById(SfxId.ButtonClick);
@@ -360,8 +360,8 @@ export class TradeDialog extends Base {
     input.className = 'trade-prompt-input';
     overlay.appendChild(input);
 
-    const btns = document.createElement('div');
-    btns.className = 'trade-prompt-buttons';
+    const buttons = document.createElement('div');
+    buttons.className = 'trade-prompt-buttons';
 
     const btnCancel = document.createElement('button');
     btnCancel.className = 'trade-btn';
@@ -370,7 +370,7 @@ export class TradeDialog extends Base {
       playSfxById(SfxId.ButtonClick);
       overlay.remove();
     });
-    btns.appendChild(btnCancel);
+    buttons.appendChild(btnCancel);
 
     const btnOk = document.createElement('button');
     btnOk.className = 'trade-btn primary';
@@ -383,8 +383,8 @@ export class TradeDialog extends Base {
       overlay.remove();
       this.addItem(itemId, amount);
     });
-    btns.appendChild(btnOk);
-    overlay.appendChild(btns);
+    buttons.appendChild(btnOk);
+    overlay.appendChild(buttons);
 
     this.container.appendChild(overlay);
     input.focus();

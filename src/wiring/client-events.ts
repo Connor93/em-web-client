@@ -83,8 +83,8 @@ export interface ClientEventDeps {
     showRequest(playerId: number, playerName: string): void;
     open(
       partnerPlayerName: string,
-      yourPlayerId: number,
-      yourPlayerName: string,
+      localPlayerId: number,
+      localPlayerName: string,
     ): void;
   };
   infoDialog: {
@@ -310,8 +310,8 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('tradeOpened', (data) => {
     deps.tradeDialog.open(
       data.partnerPlayerName,
-      data.yourPlayerId,
-      data.yourPlayerName,
+      data.localPlayerId,
+      data.localPlayerName,
     );
   });
 

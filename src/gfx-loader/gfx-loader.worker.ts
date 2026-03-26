@@ -5,11 +5,6 @@ import { PEReader } from './pe-reader';
 const egfs = new Map<number, PEReader>();
 
 function loadDIB(data: { fileID: number; resourceID: number }) {
-  // Hat GFX files (15, 16) may use either (0,0,0) or (8,0,0) as their
-  // transparency color. We detect which one by scanning the raw DIB data
-  // for (8,0,0) pixels — if found, use that; otherwise fall back to (0,0,0).
-  // We cannot use both because (0,0,0) pixels serve as hair-clipping masks
-  // in hats that use (8,0,0) for background transparency.
   let transparentColors: number[][] = [[0, 0, 0]];
   try {
     const egf = egfs.get(data.fileID);
@@ -18,11 +13,6 @@ function loadDIB(data: { fileID: number; resourceID: number }) {
       if (info) {
         const dib = egf.readResource(info);
 
-        // For hat GFX files, detect the correct transparency color.
-        // Some hats use (8,0,0) as background; those need (0,0,0) kept
-        // opaque for hair clipping. Others use standard (0,0,0).
-        // Scan the decoded pixels for any (8,0,0) — if found, that's
-        // the background color.
         if ([15, 16].includes(data.fileID)) {
           const probe = new DIBReader(dib, []);
           const probePixels = probe.read();

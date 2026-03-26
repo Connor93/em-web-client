@@ -27,8 +27,8 @@ function handleTradeOpen(client: Client, reader: EoReader) {
   client.emit('tradeOpened', {
     partnerPlayerId: packet.partnerPlayerId,
     partnerPlayerName: packet.partnerPlayerName,
-    yourPlayerId: packet.yourPlayerId,
-    yourPlayerName: packet.yourPlayerName,
+    localPlayerId: packet.yourPlayerId,
+    localPlayerName: packet.yourPlayerName,
   });
 }
 
@@ -57,15 +57,14 @@ function handleTradeSpec(client: Client, reader: EoReader) {
 
 function handleTradeUse(client: Client, reader: EoReader) {
   const packet = TradeUseServerPacket.deserialize(reader);
-  // tradeData[0] is the partner's items (what we receive)
-  // tradeData[1] is our items (what we gave)
-  // Update inventory: remove what we gave, add what we received
-  const partnerData = packet.tradeData[0];
-  const ourData = packet.tradeData[1];
+  // tradeData[0] contains items we receive from partner
+  // tradeData[1] contains items we gave to partner
+  const receivedItems = packet.tradeData[0];
+  const givenItems = packet.tradeData[1];
 
   // Remove items we gave away
-  if (ourData) {
-    for (const item of ourData.items) {
+  if (givenItems) {
+    for (const item of givenItems.items) {
       const existing = client.items.find((i) => i.id === item.id);
       if (existing) {
         existing.amount -= item.amount;
@@ -78,8 +77,8 @@ function handleTradeUse(client: Client, reader: EoReader) {
   }
 
   // Add items we received
-  if (partnerData) {
-    for (const item of partnerData.items) {
+  if (receivedItems) {
+    for (const item of receivedItems.items) {
       const existing = client.items.find((i) => i.id === item.id);
       if (existing) {
         existing.amount += item.amount;
