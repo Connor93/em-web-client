@@ -7,12 +7,15 @@ import {
   PacketFamily,
 } from 'eolib';
 import type { Client } from '../client';
-import { CharacterAttackAnimation } from '../render/character-attack';
-import { CharacterRangedAttackAnimation } from '../render/character-attack-ranged';
-import { EffectAnimation, EffectTargetCharacter } from '../render/effect';
-import { Emote } from '../render/emote';
+import {
+  CharacterAttackAnimation,
+  CharacterRangedAttackAnimation,
+  EffectAnimation,
+  EffectTargetCharacter,
+  Emote,
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { randomRange } from '../utils/random-range';
+import { randomRange } from '../utils';
 
 function handleAttackPlayer(client: Client, reader: EoReader) {
   const packet = AttackPlayerServerPacket.deserialize(reader);
@@ -20,14 +23,14 @@ function handleAttackPlayer(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
   character.direction = packet.direction;
 
   const metadata = client.getWeaponMetadata(character.equipment.weapon);
-  client.animationController.characterAnimations.set(
+  client.characterAnimations.set(
     packet.playerId,
     metadata.ranged
       ? new CharacterRangedAttackAnimation()
@@ -38,20 +41,20 @@ function handleAttackPlayer(client: Client, reader: EoReader) {
   playSfxById(metadata.sfx[index]);
 
   if (metadata.sfx[0] === SfxId.Harp1 || metadata.sfx[0] === SfxId.Guitar1) {
-    client.animationController.characterEmotes.set(
+    client.characterEmotes.set(
       packet.playerId,
       new Emote(EmoteType.Playful + 1),
     );
   }
 
-  const spec = client!
-    .map!.tileSpecRows.find((r) => r.y === character.coords.y)
+  const spec = client.map.tileSpecRows
+    .find((r) => r.y === character.coords.y)
     ?.tiles.find((t) => t.x === character.coords.x);
 
   if (spec && spec.tileSpec === MapTileSpec.Water) {
     const metadata = client.getEffectMetadata(9);
     playSfxById(metadata.sfx);
-    client.animationController.effects.push(
+    client.effects.push(
       new EffectAnimation(
         9,
         new EffectTargetCharacter(packet.playerId),
@@ -62,7 +65,7 @@ function handleAttackPlayer(client: Client, reader: EoReader) {
 }
 
 export function registerAttackHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Attack,
     PacketAction.Player,
     (reader) => handleAttackPlayer(client, reader),

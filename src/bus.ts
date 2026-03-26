@@ -1,5 +1,6 @@
 import {
   CHAR_MAX,
+  decodeNumber,
   deinterleave,
   EoReader,
   EoWriter,
@@ -18,6 +19,7 @@ export class PacketBus {
   private sequencer: PacketSequencer;
   private encodeMultiple = 0;
   private decodeMultiple = 0;
+  private recvBuffer: Uint8Array = new Uint8Array(0);
   private handlers: Map<
     PacketFamily,
     Map<PacketAction, (reader: EoReader) => void>
@@ -29,7 +31,12 @@ export class PacketBus {
       const promise = e.data.arrayBuffer();
       promise
         .then((buf: ArrayBuffer) => {
-          this.handlePacket(new Uint8Array(buf));
+          this.appendToBuffer(new Uint8Array(buf));
+          try {
+            this.processBuffer();
+          } catch (err) {
+            console.error('Error processing packet', err);
+          }
         })
         .catch((err: Error) => {
           console.error('Failed to get array buffer', err);
@@ -50,8 +57,28 @@ export class PacketBus {
     this.decodeMultiple = decodeMultiple;
   }
 
-  private handlePacket(buf: Uint8Array) {
-    const data = buf.slice(2);
+  private appendToBuffer(data: Uint8Array) {
+    const combined = new Uint8Array(this.recvBuffer.length + data.length);
+    combined.set(this.recvBuffer);
+    combined.set(data, this.recvBuffer.length);
+    this.recvBuffer = combined;
+  }
+
+  private processBuffer() {
+    while (this.recvBuffer.length >= 2) {
+      const packetLength = decodeNumber(this.recvBuffer.slice(0, 2));
+
+      if (this.recvBuffer.length < 2 + packetLength) {
+        break;
+      }
+
+      const packetData = this.recvBuffer.slice(2, 2 + packetLength);
+      this.recvBuffer = this.recvBuffer.slice(2 + packetLength);
+      this.handlePacket(packetData);
+    }
+  }
+
+  private handlePacket(data: Uint8Array) {
     if (data[0] !== 0xff && data[1] !== 0xff) {
       deinterleave(data);
       flipMsb(data);
@@ -126,6 +153,6 @@ export class PacketBus {
     }
 
     const actionMap = this.handlers.get(family);
-    actionMap!.set(action, callback);
+    actionMap!.set!(action, callback);
   }
 }

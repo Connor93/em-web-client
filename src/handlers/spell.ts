@@ -8,15 +8,17 @@ import {
   SpellTargetSelfServerPacket,
 } from 'eolib';
 import type { Client } from '../client';
-import { CharacterSpellChantAnimation } from '../render/character-spell-chant';
-import { EffectTargetCharacter } from '../render/effect';
-import { HealthBar } from '../render/health-bar';
+import {
+  CharacterSpellChantAnimation,
+  EffectTargetCharacter,
+  HealthBar,
+} from '../render';
 
 function handleSpellRequest(client: Client, reader: EoReader) {
   const packet = SpellRequestServerPacket.deserialize(reader);
   const character = client.getCharacterById(packet.playerId);
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
@@ -25,10 +27,10 @@ function handleSpellRequest(client: Client, reader: EoReader) {
     return;
   }
 
-  client.animationController.characterAnimations.set(
+  client.characterAnimations.set(
     packet.playerId,
     new CharacterSpellChantAnimation(
-      client.sans11!,
+      client.sans11,
       packet.spellId,
       record.chant,
       record.castTime,
@@ -52,16 +54,16 @@ function handleSpellTargetSelf(client: Client, reader: EoReader) {
 
   const character = client.getCharacterById(packet.playerId);
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.playerId,
     new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),
   );
 
-  client.spellController.playSpellEffect(
+  client.playSpellEffect(
     packet.spellId,
     new EffectTargetCharacter(packet.playerId),
   );
@@ -78,21 +80,21 @@ function handleSpellTargetOther(client: Client, reader: EoReader) {
   if (caster) {
     caster.direction = packet.casterDirection;
   } else {
-    client.sessionController.requestCharacterRange([packet.casterId]);
+    client.requestCharacterRange([packet.casterId]);
   }
 
   const character = client.getCharacterById(packet.victimId);
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.victimId]);
+    client.requestCharacterRange([packet.victimId]);
     return;
   }
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.victimId,
     new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),
   );
 
-  client.spellController.playSpellEffect(
+  client.playSpellEffect(
     packet.spellId,
     new EffectTargetCharacter(packet.victimId),
   );
@@ -119,12 +121,12 @@ function handleSpellTargetGroup(client: Client, reader: EoReader) {
       continue;
     }
 
-    client.animationController.characterHealthBars.set(
+    client.characterHealthBars.set(
       player.playerId,
       new HealthBar(player.hpPercentage, 0, packet.spellHealHp),
     );
 
-    client.spellController.playSpellEffect(
+    client.playSpellEffect(
       packet.spellId,
       new EffectTargetCharacter(player.playerId),
     );
@@ -136,22 +138,22 @@ function handleSpellTargetGroup(client: Client, reader: EoReader) {
 }
 
 export function registerSpellHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Spell,
     PacketAction.Request,
     (reader) => handleSpellRequest(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Spell,
     PacketAction.TargetSelf,
     (reader) => handleSpellTargetSelf(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Spell,
     PacketAction.TargetOther,
     (reader) => handleSpellTargetOther(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Spell,
     PacketAction.TargetGroup,
     (reader) => handleSpellTargetGroup(client, reader),

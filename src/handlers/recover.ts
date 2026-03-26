@@ -10,8 +10,7 @@ import {
   RecoverTargetGroupServerPacket,
 } from 'eolib';
 import type { Client } from '../client';
-import { Emote } from '../render/emote';
-import { HealthBar } from '../render/health-bar';
+import { Emote, HealthBar } from '../render';
 import { playSfxById, SfxId } from '../sfx';
 
 function handleRecoverPlayer(client: Client, reader: EoReader) {
@@ -21,7 +20,7 @@ function handleRecoverPlayer(client: Client, reader: EoReader) {
     const amount = packet.hp - client.hp;
     const percentage = (packet.hp / client.maxHp) * 100;
     client.hp = packet.hp;
-    client.animationController.characterHealthBars.set(
+    client.characterHealthBars.set(
       client.playerId,
       new HealthBar(percentage, 0, amount),
     );
@@ -35,12 +34,12 @@ function handleRecoverAgree(client: Client, reader: EoReader) {
   const packet = RecoverAgreeServerPacket.deserialize(reader);
   const character = client.getCharacterById(packet.playerId);
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
   character.hp += packet.healHp;
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.playerId,
     new HealthBar(packet.hpPercentage, 0, packet.healHp),
   );
@@ -75,14 +74,11 @@ function handleRecoverReply(client: Client, reader: EoReader) {
   client.experience = packet.experience;
 
   if (packet.levelUp) {
-    client.animationController.characterEmotes.set(
-      client.playerId,
-      new Emote(EmoteType.LevelUp),
-    );
+    client.characterEmotes.set(client.playerId, new Emote(EmoteType.LevelUp));
     playSfxById(SfxId.LevelUp);
     client.level = packet.levelUp;
-    client.statPoints = packet.statPoints!;
-    client.skillPoints = packet.skillPoints!;
+    client.statPoints = packet.statPoints ?? client.statPoints;
+    client.skillPoints = packet.skillPoints ?? client.skillPoints;
   }
 }
 
@@ -97,27 +93,27 @@ function handleRecoverTargetGroup(client: Client, reader: EoReader) {
 }
 
 export function registerRecoverHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Recover,
     PacketAction.Player,
     (reader) => handleRecoverPlayer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Recover,
     PacketAction.Agree,
     (reader) => handleRecoverAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Recover,
     PacketAction.List,
     (reader) => handleRecoverList(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Recover,
     PacketAction.Reply,
     (reader) => handleRecoverReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Recover,
     PacketAction.TargetGroup,
     (reader) => handleRecoverTargetGroup(client, reader),

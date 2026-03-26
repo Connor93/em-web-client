@@ -10,7 +10,7 @@ import {
   EffectAnimation,
   EffectTargetCharacter,
   EffectTargetTile,
-} from '../render/effect';
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
 
 function handleAdminInteractRemove(client: Client, reader: EoReader) {
@@ -20,7 +20,7 @@ function handleAdminInteractRemove(client: Client, reader: EoReader) {
   const character = client.getCharacterById(packet.playerId);
   if (character) {
     const metadata = client.getEffectMetadata(25);
-    client.animationController.effects.push(
+    client.effects.push(
       new EffectAnimation(25, new EffectTargetTile(character.coords), metadata),
     );
     playSfxById(SfxId.AdminHide);
@@ -35,7 +35,7 @@ function handleAdminInteractAgree(client: Client, reader: EoReader) {
   const character = client.getCharacterById(packet.playerId);
   if (character) {
     const metadata = client.getEffectMetadata(25);
-    client.animationController.effects.push(
+    client.effects.push(
       new EffectAnimation(
         25,
         new EffectTargetCharacter(character.playerId),
@@ -48,12 +48,12 @@ function handleAdminInteractAgree(client: Client, reader: EoReader) {
 }
 
 export function registerAdminInteractHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.AdminInteract,
     PacketAction.Remove,
     (reader) => handleAdminInteractRemove(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.AdminInteract,
     PacketAction.Agree,
     (reader) => handleAdminInteractAgree(client, reader),

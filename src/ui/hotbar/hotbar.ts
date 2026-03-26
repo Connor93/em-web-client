@@ -1,13 +1,15 @@
 import type { Client } from '../../client';
 import { HOTBAR_SLOTS } from '../../consts';
-import { SlotType } from '../../types/ui';
+import { getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
-import {
-  setItemImageFromGfx,
-  setSkillBackgroundFromGfx,
-} from '../utils/gfx-resource';
 
 import './hotbar.css';
+
+export enum SlotType {
+  Empty = 0,
+  Item = 1,
+  Skill = 2,
+}
 
 export class Slot {
   type: SlotType;
@@ -32,7 +34,7 @@ export class Hotbar extends Base {
       slot.classList.add('slot');
 
       slot.addEventListener('click', () => {
-        this.client.spellController.useHotbarSlot(i);
+        this.client.useHotbarSlot(i);
       });
 
       this.container.appendChild(slot);
@@ -78,9 +80,9 @@ export class Hotbar extends Base {
 
         const img = document.createElement('div');
         img.classList.add('skill');
-        void setSkillBackgroundFromGfx(img, skill.iconId);
+        img.style.backgroundImage = `url(/gfx/gfx025/${skill.iconId + 100}.png)`;
 
-        if (this.client.spellController.selectedSpellId === slot.typeId) {
+        if (this.client.selectedSpellId === slot.typeId) {
           img.style.backgroundPositionX = '-34px';
         }
 
@@ -95,7 +97,7 @@ export class Hotbar extends Base {
         itemContainer.classList.add('item');
 
         const img = document.createElement('img');
-        void setItemImageFromGfx(img, slot.typeId, item.graphicId);
+        img.src = getItemGraphicPath(slot.typeId, item.graphicId);
         itemContainer.appendChild(img);
 
         element.appendChild(itemContainer);
@@ -106,7 +108,14 @@ export class Hotbar extends Base {
   private loadSlots() {
     const json = localStorage.getItem(`${this.client.name}-hotbar`);
     if (json) {
-      this.client.hotbarSlots = JSON.parse(json);
+      try {
+        this.client.hotbarSlots = JSON.parse(json);
+      } catch {
+        console.warn('[Hotbar] Failed to parse saved slots, resetting');
+        for (let i = 0; i < HOTBAR_SLOTS; ++i) {
+          this.client.hotbarSlots.push(new Slot(SlotType.Empty));
+        }
+      }
     } else {
       for (let i = 0; i < HOTBAR_SLOTS; ++i) {
         this.client.hotbarSlots.push(new Slot(SlotType.Empty));

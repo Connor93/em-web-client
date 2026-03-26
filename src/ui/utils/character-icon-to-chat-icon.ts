@@ -1,5 +1,5 @@
 import { CharacterIcon } from 'eolib';
-import { ChatIcon } from '../../types';
+import { ChatIcon } from '../chat/chat';
 
 export function characterIconToChatIcon(icon: CharacterIcon): ChatIcon {
   switch (icon) {
@@ -15,5 +15,7 @@ export function characterIconToChatIcon(icon: CharacterIcon): ChatIcon {
       return ChatIcon.HGM;
     case CharacterIcon.HgmParty:
       return ChatIcon.HGMParty;
+    default:
+      return ChatIcon.Player;
   }
 }

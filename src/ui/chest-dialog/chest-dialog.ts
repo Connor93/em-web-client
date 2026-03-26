@@ -1,30 +1,30 @@
-import type { ThreeItem } from 'eolib';
+import type { EifRecord, ThreeItem } from 'eolib';
 import { Gender, ItemType } from 'eolib';
 import type { Client } from '../../client';
 import { EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
+import { getItemGraphicId } from '../../utils';
 import { Base } from '../base-ui';
-import { setItemImageFromGfx } from '../utils/gfx-resource';
 
 import './chest-dialog.css';
 
 export class ChestDialog extends Base {
   private client: Client;
   protected container = document.getElementById('chest')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover');
-  private btnCancel = this.container!.querySelector<HTMLButtonElement>(
+  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+  private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );
-  private dialogs = document.getElementById('dialogs');
+  private dialogs = document.getElementById('dialogs')!;
   private itemsList =
-    this.container!.querySelector<HTMLDivElement>('.chest-items');
+    this.container.querySelector<HTMLDivElement>('.chest-items')!;
   private items: ThreeItem[] = [];
 
   constructor(client: Client) {
     super();
     this.client = client;
 
-    this.btnCancel!.addEventListener('click', () => {
+    this.btnCancel!.addEventListener!('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
@@ -36,24 +36,34 @@ export class ChestDialog extends Base {
   }
 
   show() {
-    this.cover!.classList.remove('hidden');
-    this.container!.classList.remove('hidden');
-    this.dialogs!.classList.remove('hidden');
+    this.cover.classList.remove('hidden');
+    this.container.classList.remove('hidden');
+    this.dialogs.classList.remove('hidden');
     this.client.typing = true;
   }
 
   hide() {
-    this.cover!.classList.add('hidden');
-    this.container!.classList.add('hidden');
+    this.cover.classList.add('hidden');
+    this.container.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
-      this.dialogs!.classList.add('hidden');
+      this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
   }
 
+  private getChestItemGraphicPath(
+    id: number,
+    eifRecord: EifRecord,
+    amount: number,
+  ): string {
+    const graphicId = getItemGraphicId(id, eifRecord.graphicId, amount);
+    const fileId = 100 + graphicId;
+    return `/gfx/gfx023/${fileId}.png`;
+  }
+
   private render() {
-    this.itemsList!.innerHTML = '';
+    this.itemsList.innerHTML = '';
 
     if (this.items.length === 0) {
       return;
@@ -69,10 +79,9 @@ export class ChestDialog extends Base {
       itemElement.className = 'chest-item';
 
       const itemImage = document.createElement('img');
-      void setItemImageFromGfx(
-        itemImage,
+      itemImage.src = this.getChestItemGraphicPath(
         item.id,
-        record.graphicId,
+        record,
         item.amount,
       );
       itemImage.classList.add('item-image');
@@ -103,11 +112,11 @@ export class ChestDialog extends Base {
       }
 
       itemElement.addEventListener('contextmenu', () => {
-        this.client.chestController.takeItem(item.id);
+        this.client.takeChestItem(item.id);
       });
 
       itemElement.appendChild(itemText);
-      this.itemsList!.appendChild(itemElement);
+      this.itemsList.appendChild(itemElement);
     }
   }
 }

@@ -5,7 +5,7 @@ import {
   PacketFamily,
 } from 'eolib';
 import type { Client } from '../client';
-import { Emote } from '../render/emote';
+import { Emote } from '../render';
 
 function handleEmotePlayer(client: Client, reader: EoReader) {
   const packet = EmotePlayerServerPacket.deserialize(reader);
@@ -13,18 +13,15 @@ function handleEmotePlayer(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
-  client.animationController.characterEmotes.set(
-    character.playerId,
-    new Emote(packet.emote),
-  );
+  client.characterEmotes.set(character.playerId, new Emote(packet.emote));
 }
 
 export function registerEmoteHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Emote,
     PacketAction.Player,
     (reader) => handleEmotePlayer(client, reader),

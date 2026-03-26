@@ -7,12 +7,12 @@ import {
   WarpRequestServerPacket,
   WarpType,
 } from 'eolib';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { getEmf } from '../db';
 import { EOResourceID } from '../edf';
-import { EffectAnimation, EffectTargetCharacter } from '../render/effect';
+import { EffectAnimation, EffectTargetCharacter } from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
 
 function handleWarpRequest(client: Client, reader: EoReader) {
   const packet = WarpRequestServerPacket.deserialize(reader);
@@ -34,7 +34,7 @@ function handleWarpRequest(client: Client, reader: EoReader) {
           map.rid[1] !== data.mapRid[1] ||
           map.byteSize !== data.mapFileSize
         ) {
-          client.sessionController.requestWarpMap(packet.mapId);
+          client.requestWarpMap(packet.mapId);
           return;
         }
         client.warpQueued = true;
@@ -54,7 +54,7 @@ function handleWarpAgree(client: Client, reader: EoReader) {
     if (packet.warpTypeData.warpEffect === WarpEffect.Admin) {
       const metadata = client.getEffectMetadata(4);
       playSfxById(SfxId.AdminWarp);
-      client.animationController.effects.push(
+      client.effects.push(
         new EffectAnimation(
           4,
           new EffectTargetCharacter(client.playerId),
@@ -66,32 +66,31 @@ function handleWarpAgree(client: Client, reader: EoReader) {
 
   if (client.mapId !== client.warpMapId) {
     getEmf(client.warpMapId).then((map) => {
-      if (!map) return;
-      if (map.name) {
+      if (map!.name!) {
         client.emit('chat', {
           tab: ChatTab.System,
-          message: `${client.getResourceString(EOResourceID.STATUS_LABEL_YOU_ENTERED)} ${map.name}`,
+          message: `${client.getResourceString(EOResourceID.STATUS_LABEL_YOU_ENTERED)} ${map!.name!}`,
           icon: ChatIcon.NoteLeftArrow,
         });
       }
       client.mapId = client.warpMapId;
-      client.setMap(map);
+      client.setMap(map!);
       client.atlas.refresh();
-      client.keyboardController.unfreeze();
+      client.movementController.freeze = false;
     });
   } else {
     client.atlas.refresh();
-    client.keyboardController.unfreeze();
+    client.movementController.freeze = false;
   }
 }
 
 export function registerWarpHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Warp,
     PacketAction.Request,
     (reader) => handleWarpRequest(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Warp,
     PacketAction.Agree,
     (reader) => handleWarpAgree(client, reader),

@@ -2,8 +2,8 @@
   position: relative;
   background: url("/gfx/gfx002/149.png") #000;
   height: 290px;
-  width: 380px;
-  z-index: 1020;
+  width: 402px;
+  z-index: 1050;
 }
 
 #paperdoll[data-gender="1"] {
@@ -13,7 +13,7 @@
 #paperdoll button[data-id="ok"] {
   position: absolute;
   bottom: 8px;
-  right: 13px;
+  right: 35px;
 }
 
 #paperdoll .item,
@@ -168,41 +168,36 @@
 }
 
 #paperdoll span[data-id="name"] {
-  left: 230px;
-  top: 24px;
+  left: 248px;
+  top: 39px;
 }
 
 #paperdoll span[data-id="home"] {
-  left: 230px;
-  top: 54px;
+  left: 248px;
+  top: 174px;
 }
 
 #paperdoll span[data-id="class"] {
-  left: 230px;
+  left: 248px;
   top: 84px;
 }
 
 #paperdoll span[data-id="partner"] {
-  left: 230px;
-  top: 114px;
+  left: 248px;
+  top: 128px;
 }
 
 #paperdoll span[data-id="title"] {
-  left: 230px;
-  top: 144px;
-}
-
-#paperdoll span[data-id="job"] {
-  left: 230px;
-  top: 174px;
+  left: 248px;
+  top: 106px;
 }
 
 #paperdoll span[data-id="guild"] {
-  left: 230px;
-  top: 204px;
+  left: 248px;
+  top: 196px;
 }
 
 #paperdoll span[data-id="rank"] {
-  left: 230px;
-  top: 234px;
+  left: 248px;
+  top: 218px;
 }

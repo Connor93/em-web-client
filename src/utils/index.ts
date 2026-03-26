@@ -15,7 +15,15 @@ export { getNpcMetaData, NPCMetadata } from './get-npc-metadata';
 export { getPrevCoords } from './get-prev-coords';
 export { getShieldMetaData, ShieldMetadata } from './get-shield-metadata';
 export { getVolumeFromDistance } from './get-volume-from-distance';
-export { getWeaponMetaData, WeaponMetadata } from './get-weapon-metadata';
+export {
+  exportWeaponMetadata,
+  getWeaponMetaData,
+  loadWeaponMetadata,
+  startLoadingWeaponMetadata,
+  syncWeaponMetadataWithEif,
+  WeaponMetadata,
+  waitForWeaponMetadata,
+} from './get-weapon-metadata';
 export { isoToScreen } from './iso-to-screen';
 export { makeDrunk } from './make-drunk';
 export { padWithZeros } from './pad-with-zeros';

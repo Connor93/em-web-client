@@ -9,7 +9,7 @@ import {
 } from 'eolib';
 import type { Client } from '../client';
 import { EOResourceID } from '../edf';
-import { EffectAnimation, EffectTargetCharacter } from '../render/effect';
+import { EffectAnimation, EffectTargetCharacter } from '../render';
 import { playSfxById, SfxId } from '../sfx';
 
 function handlePlayersAgree(client: Client, reader: EoReader) {
@@ -22,7 +22,7 @@ function handlePlayersAgree(client: Client, reader: EoReader) {
     switch (character.warpEffect) {
       case WarpEffect.Admin: {
         const metadata = client.getEffectMetadata(4);
-        client.animationController.effects.push(
+        client.effects.push(
           new EffectAnimation(
             4,
             new EffectTargetCharacter(character.playerId),
@@ -69,22 +69,22 @@ function handlePlayersNet242(client: Client, reader: EoReader) {
 }
 
 export function registerPlayersHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Players,
     PacketAction.Agree,
     (reader) => handlePlayersAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Players,
     PacketAction.Ping,
     (reader) => handlePlayersPing(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Players,
     PacketAction.Pong,
     (reader) => handlePlayersPong(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Players,
     PacketAction.Net242,
     (reader) => handlePlayersNet242(client, reader),

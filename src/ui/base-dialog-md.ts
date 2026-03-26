@@ -9,7 +9,7 @@ export abstract class BaseDialogMd<
   protected dialogContents: HTMLDivElement;
   protected client: Client;
   protected emitter = mitt<TEvent>();
-  protected dialogs = document.getElementById('dialogs');
+  protected dialogs = document.getElementById('dialogs')!;
 
   private btnCancel: HTMLButtonElement;
   private label: HTMLSpanElement;
@@ -87,7 +87,7 @@ export abstract class BaseDialogMd<
   show() {
     this.render();
     this.container.classList.remove('hidden');
-    this.dialogs!.classList.remove('hidden');
+    this.dialogs.classList.remove('hidden');
     this.setScrollThumbPosition();
   }
 
@@ -95,7 +95,7 @@ export abstract class BaseDialogMd<
     this.container.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
-      this.dialogs!.classList.add('hidden');
+      this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
   }

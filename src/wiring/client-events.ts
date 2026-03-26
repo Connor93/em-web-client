@@ -1,7 +1,8 @@
 import type { Client } from '../client';
+import { ChatTab } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab, GameState } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
 
 export interface ClientEventDeps {
   client: Client;
@@ -32,6 +33,7 @@ export interface ClientEventDeps {
     setMessage(msg: string): void;
   };
   hud: { setStats(client: Client): void; show(): void };
+  mobileHud: { setStats(client: Client): void };
   hotbar: { show(): void; refresh(): void };
   inGameMenu: { show(): void };
   exitGame: { show(): void };
@@ -51,12 +53,25 @@ export interface ClientEventDeps {
     setData(icon: unknown, details: unknown, equipment: unknown): void;
     show(): void;
   };
+  book: {
+    setData(icon: unknown, details: unknown, questNames: unknown): void;
+    show(): void;
+  };
   chestDialog: { setItems(items: unknown): void; show(): void };
   shopDialog: {
     setData(name: string, craftItems: unknown, tradeItems: unknown): void;
     show(): void;
   };
   bankDialog: { show(): void };
+  barberDialog: { show(): void };
+  citizenDialog: {
+    setData(
+      behaviorId: number,
+      currentHomeId: number,
+      questions: string[],
+    ): void;
+    show(): void;
+  };
   boardDialog: { setData(posts: unknown): void; show(): void };
   lockerDialog: { setItems(items: unknown): void; show(): void };
   skillMasterDialog: {
@@ -64,9 +79,40 @@ export interface ClientEventDeps {
     show(): void;
     refresh(): void;
   };
+  tradeDialog: {
+    showRequest(playerId: number, playerName: string): void;
+    open(
+      partnerPlayerId: number,
+      partnerPlayerName: string,
+      yourPlayerId: number,
+      yourPlayerName: string,
+    ): void;
+  };
+  infoDialog: {
+    showItem(item: unknown, id: number): void;
+    showNpc(npc: unknown, id: number): void;
+    showSearchResults(
+      title: string,
+      matches: unknown,
+      cb: (id: number) => void,
+    ): void;
+    updateItemSources(sources: unknown): void;
+    updateNpcSources(sources: unknown): void;
+  };
   partyDialog: { refresh(): void };
-  mobileControls: { show(): void; hide(): void };
+  guildPanel: {
+    showToggleButton(): void;
+    hideToggleButton(): void;
+    hide(): void;
+    toggle(): void;
+  };
+  mobileToolbar: { refresh(): void };
+  reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
+  resizeCanvases: () => void;
+  isMobile: () => boolean;
+  handleItemCommand: (client: Client, id: string) => void;
+  handleNpcCommand: (client: Client, id: string) => void;
 }
 
 let reconnectAttempts = 0;
@@ -111,7 +157,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     const text = client.getDialogStrings(
       DialogResourceID.ACCOUNT_CREATE_SUCCESS_WELCOME,
     );
-    deps.smallAlertLargeHeader.setContent(text[1], text[0]);
+    deps.smallAlertLargeHeader.setContent(text![1]!, text![0]!);
     deps.smallAlertLargeHeader.show();
     deps.createAccountForm.hide();
     deps.mainMenu.show();
@@ -140,7 +186,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     const text = client.getDialogStrings(
       DialogResourceID.CHARACTER_CREATE_SUCCESS,
     );
-    deps.smallAlertLargeHeader.setContent(text[1], text[0]);
+    deps.smallAlertLargeHeader.setContent(text![1]!, text![0]!);
     deps.smallAlertLargeHeader.show();
     deps.characterSelect.setCharacters(characters);
   });
@@ -168,12 +214,14 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.exitGame.show();
     deps.chat.show();
     deps.hud.setStats(client);
+    deps.mobileHud.setStats(client);
     deps.hud.show();
     deps.hotbar.show();
     deps.inGameMenu.show();
-    deps.client.viewportController.resizeCanvases();
+    deps.guildPanel.showToggleButton();
+    deps.resizeCanvases();
     deps.inventory.loadPositions();
-    if (!client.viewportController.isMobile()) {
+    if (!deps.isMobile()) {
       deps.inventory.show();
     }
   });
@@ -183,17 +231,24 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     const text = client.getDialogStrings(
       DialogResourceID.CHANGE_PASSWORD_SUCCESS,
     );
-    deps.smallAlertLargeHeader.setContent(text[1], text[0]);
+    deps.smallAlertLargeHeader.setContent(text![1]!, text![0]!);
     deps.smallAlertLargeHeader.show();
   });
 
   client.on('statsUpdate', () => {
     deps.hud.setStats(client);
+    deps.mobileHud.setStats(client);
     deps.stats.render();
   });
 
   client.on('reconnect', () => {
     deps.initializeSocket('login');
+  });
+
+  client.on('reconnected', () => {
+    resetReconnectAttempts();
+    deps.reconnectOverlay.classList.add('hidden');
+    console.log('Successfully reconnected to server');
   });
 
   client.on('openQuestDialog', (data) => {
@@ -213,6 +268,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.paperdoll.show();
   });
 
+  client.on('openBook', ({ icon, details, questNames }) => {
+    deps.book.setData(icon, details, questNames);
+    deps.book.show();
+  });
+
   client.on('chestOpened', ({ items }) => {
     deps.chestDialog.setItems(items);
     deps.chestDialog.show();
@@ -229,6 +289,32 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('bankOpened', () => {
     deps.bankDialog.show();
+  });
+
+  client.on('barberOpened', () => {
+    deps.barberDialog.show();
+  });
+
+  client.on('citizenOpened', (data) => {
+    deps.citizenDialog.setData(
+      data.behaviorId,
+      data.currentHomeId,
+      data.questions,
+    );
+    deps.citizenDialog.show();
+  });
+
+  client.on('tradeRequested', ({ playerId, playerName }) => {
+    deps.tradeDialog.showRequest(playerId, playerName);
+  });
+
+  client.on('tradeOpened', (data) => {
+    deps.tradeDialog.open(
+      data.partnerPlayerId,
+      data.partnerPlayerName,
+      data.yourPlayerId,
+      data.yourPlayerName,
+    );
   });
 
   client.on('boardOpened', ({ posts }) => {
@@ -250,12 +336,45 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.skillMasterDialog.show();
   });
 
+  client.on('showItemInfo', ({ itemId }) => {
+    const item = client.getEifRecordById(itemId);
+    if (item) {
+      deps.infoDialog.showItem(item, itemId);
+    }
+  });
+
+  client.on('showNpcInfo', ({ npcId }) => {
+    const npc = client.getEnfRecordById(npcId);
+    if (npc) {
+      deps.infoDialog.showNpc(npc, npcId);
+    }
+  });
+
+  client.on('showSearchResults', ({ title, type, matches }) => {
+    deps.infoDialog.showSearchResults(title, matches, (id) => {
+      if (type === 'item') {
+        deps.handleItemCommand(client, `${id}`);
+      } else {
+        deps.handleNpcCommand(client, `${id}`);
+      }
+    });
+  });
+
+  client.on('updateItemSources', (sources) => {
+    deps.infoDialog.updateItemSources(sources);
+  });
+
+  client.on('updateNpcSources', (sources) => {
+    deps.infoDialog.updateNpcSources(sources);
+  });
+
   client.on('skillsChanged', () => {
     deps.skillMasterDialog.refresh();
   });
 
   client.on('spellQueued', () => {
     deps.hotbar.refresh();
+    deps.mobileToolbar.refresh();
   });
 
   client.on('setChat', (message) => {
@@ -264,16 +383,5 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('partyUpdated', () => {
     deps.partyDialog.refresh();
-  });
-
-  client.on('resize', () => {
-    if (
-      client.state === GameState.InGame &&
-      client.viewportController.isMobile()
-    ) {
-      deps.mobileControls.show();
-    } else {
-      deps.mobileControls.hide();
-    }
   });
 }

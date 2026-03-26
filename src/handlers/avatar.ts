@@ -11,13 +11,13 @@ import {
   WarpEffect,
 } from 'eolib';
 import type { Client } from '../client';
-import { CharacterDeathAnimation } from '../render/character-death';
 import {
+  CharacterDeathAnimation,
   EffectAnimation,
   EffectTargetCharacter,
   EffectTargetTile,
-} from '../render/effect';
-import { HealthBar } from '../render/health-bar';
+  HealthBar,
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
 
 function handleAvatarRemove(client: Client, reader: EoReader) {
@@ -34,7 +34,7 @@ function handleAvatarRemove(client: Client, reader: EoReader) {
   switch (packet.warpEffect) {
     case WarpEffect.Admin: {
       const metadata = client.getEffectMetadata(3);
-      client.animationController.effects.push(
+      client.effects.push(
         new EffectAnimation(
           3,
           new EffectTargetTile(character.coords),
@@ -49,9 +49,7 @@ function handleAvatarRemove(client: Client, reader: EoReader) {
       break;
   }
 
-  const animation = client.animationController.characterAnimations.get(
-    packet.playerId,
-  );
+  const animation = client.characterAnimations.get(packet.playerId);
   if (animation instanceof CharacterDeathAnimation) {
     return;
   }
@@ -110,11 +108,11 @@ function handleAvatarReply(client: Client, reader: EoReader) {
 
   const victim = client.getCharacterById(packet.victimId);
   if (!victim) {
-    client.sessionController.requestCharacterRange([packet.victimId]);
+    client.requestCharacterRange([packet.victimId]);
     return;
   }
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.victimId,
     new HealthBar(packet.hpPercentage, packet.damage),
   );
@@ -138,11 +136,11 @@ function handleAvatarAdmin(client: Client, reader: EoReader) {
 
   const victim = client.getCharacterById(packet.victimId);
   if (!victim) {
-    client.sessionController.requestCharacterRange([packet.victimId]);
+    client.requestCharacterRange([packet.victimId]);
     return;
   }
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.victimId,
     new HealthBar(packet.hpPercentage, packet.damage),
   );
@@ -162,7 +160,7 @@ function handleAvatarAdmin(client: Client, reader: EoReader) {
     playSfxById(meta.sfx);
   }
 
-  client.animationController.effects.push(
+  client.effects.push(
     new EffectAnimation(
       record.graphicId,
       new EffectTargetCharacter(packet.victimId),
@@ -172,22 +170,22 @@ function handleAvatarAdmin(client: Client, reader: EoReader) {
 }
 
 export function registerAvatarHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Avatar,
     PacketAction.Remove,
     (reader) => handleAvatarRemove(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Avatar,
     PacketAction.Agree,
     (reader) => handleAvatarAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Avatar,
     PacketAction.Reply,
     (reader) => handleAvatarReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Avatar,
     PacketAction.Admin,
     (reader) => handleAvatarAdmin(client, reader),

@@ -15,11 +15,16 @@ import {
   PacketFamily,
   serverVerificationHash,
 } from 'eolib';
-import type { Client } from '../client';
+import { ChatTab, type Client, GameState } from '../client';
 import { saveEcf, saveEif, saveEmf, saveEnf, saveEsf } from '../db';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab, GameState } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
+import {
+  getWeaponMetaData,
+  syncWeaponMetadataWithEif,
+  waitForWeaponMetadata,
+} from '../utils';
 
 function handleInitInit(client: Client, reader: EoReader) {
   const packet = InitInitServerPacket.deserialize(reader);
@@ -101,7 +106,7 @@ function handleInitOk(
     const text = client.getDialogStrings(
       DialogResourceID.CONNECTION_LOST_CONNECTION,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     client.disconnect();
     return;
   }
@@ -127,7 +132,7 @@ function handleInitOk(
   bus.send(packet);
   client.setState(GameState.Connected);
 
-  if (client.rememberMe && client.loginToken) {
+  if ((client.reconnecting || client.rememberMe) && client.loginToken) {
     const writer = new EoWriter();
     writer.addString(client.loginToken);
     bus.sendBuf(PacketFamily.Login, PacketAction.Use, writer.toByteArray());
@@ -158,14 +163,17 @@ function handleInitBanned(
     const text = client.getDialogStrings(
       DialogResourceID.CONNECTION_IP_BAN_PERM,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     return;
   }
 
   const banData =
     data.banTypeData as InitInitServerPacket.ReplyCodeDataBanned.BanTypeData0;
   const text = client.getDialogStrings(DialogResourceID.CONNECTION_IP_BAN_TEMP);
-  client.showError(`${text[0]} ${banData.minutesRemaining} minutes`, text[1]);
+  client.showError(
+    `${text![0]!} ${banData.minutesRemaining} minutes`,
+    text![1]!,
+  );
 }
 
 function handleInitFileEcf(
@@ -178,9 +186,9 @@ function handleInitFileEcf(
 
   if (client.downloadQueue.length > 0) {
     const download = client.downloadQueue.pop();
-    client.sessionController.requestFile(download!.type, download!.id);
+    client.requestFile(download!.type!, download!.id!);
   } else {
-    client.sessionController.enterGame();
+    client.enterGame();
   }
 }
 
@@ -192,11 +200,17 @@ function handleInitFileEif(
   client.eif = Eif.deserialize(reader);
   saveEif(client.eif);
 
+  // Sync weapon metadata with freshly downloaded EIF
+  waitForWeaponMetadata().then(() => {
+    syncWeaponMetadataWithEif(client.eif);
+    client.weaponMetadata = getWeaponMetaData();
+  });
+
   if (client.downloadQueue.length > 0) {
     const download = client.downloadQueue.pop();
-    client.sessionController.requestFile(download!.type, download!.id);
+    client.requestFile(download!.type!, download!.id!);
   } else {
-    client.sessionController.enterGame();
+    client.enterGame();
   }
 }
 
@@ -210,9 +224,9 @@ function handleInitFileEnf(
 
   if (client.downloadQueue.length > 0) {
     const download = client.downloadQueue.pop();
-    client.sessionController.requestFile(download!.type, download!.id);
+    client.requestFile(download!.type!, download!.id!);
   } else {
-    client.sessionController.enterGame();
+    client.enterGame();
   }
 }
 
@@ -226,9 +240,9 @@ function handleInitFileEsf(
 
   if (client.downloadQueue.length > 0) {
     const download = client.downloadQueue.pop();
-    client.sessionController.requestFile(download!.type, download!.id);
+    client.requestFile(download!.type!, download!.id!);
   } else {
-    client.sessionController.enterGame();
+    client.enterGame();
   }
 }
 
@@ -238,13 +252,14 @@ function handleInitFileEmf(
 ) {
   const reader = new EoReader(data.mapFile.content);
   client.setMap(Emf.deserialize(reader));
-  saveEmf(client.mapId, client.map!);
+  saveEmf(client.mapId, client.map);
+  client.atlas.mapId = 0; // Force atlas to reload map tiles on next refresh
 
   if (client.downloadQueue.length > 0) {
     const download = client.downloadQueue.pop();
-    client.sessionController.requestFile(download!.type, download!.id);
+    client.requestFile(download!.type!, download!.id!);
   } else {
-    client.sessionController.enterGame();
+    client.enterGame();
   }
 }
 
@@ -284,7 +299,7 @@ function handleInitMapMutation(
 }
 
 export function registerInitHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Init,
     PacketAction.Init,
     (reader) => handleInitInit(client, reader),

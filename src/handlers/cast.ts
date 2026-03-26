@@ -8,20 +8,18 @@ import {
   PacketAction,
   PacketFamily,
 } from 'eolib';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { ITEM_PROTECT_TICKS_NPC } from '../consts';
 import { EOResourceID } from '../edf';
-import { EffectTargetNpc } from '../render/effect';
-import { Emote } from '../render/emote';
-import { HealthBar } from '../render/health-bar';
+import { EffectTargetNpc, Emote, HealthBar } from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
 
 function handleCastReply(client: Client, reader: EoReader) {
   const packet = CastReplyServerPacket.deserialize(reader);
   const npc = client.getNpcByIndex(packet.npcIndex);
   if (!npc) {
-    client.sessionController.requestNpcRange([packet.npcIndex]);
+    client.requestNpcRange([packet.npcIndex]);
     return;
   }
 
@@ -30,22 +28,19 @@ function handleCastReply(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     packet.npcIndex,
     new HealthBar(packet.hpPercentage, packet.damage),
   );
 
-  client.spellController.playSpellEffect(
-    packet.spellId,
-    new EffectTargetNpc(packet.npcIndex),
-  );
+  client.playSpellEffect(packet.spellId, new EffectTargetNpc(packet.npcIndex));
 }
 
 function handleCastSpec(client: Client, reader: EoReader) {
   const packet = CastSpecServerPacket.deserialize(reader);
   const npc = client.getNpcByIndex(packet.npcKilledData.npcIndex);
   if (!npc) {
-    client.sessionController.requestNpcRange([packet.npcKilledData.npcIndex]);
+    client.requestNpcRange([packet.npcKilledData.npcIndex]);
     return;
   }
 
@@ -54,12 +49,12 @@ function handleCastSpec(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, packet.npcKilledData.damage),
   );
 
-  client.spellController.playSpellEffect(
+  client.playSpellEffect(
     packet.spellId,
     new EffectTargetNpc(packet.npcKilledData.npcIndex),
   );
@@ -83,7 +78,7 @@ function handleCastSpec(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
   }
 
@@ -107,7 +102,7 @@ function handleCastAccept(client: Client, reader: EoReader) {
   const packet = CastAcceptServerPacket.deserialize(reader);
   const npc = client.getNpcByIndex(packet.npcKilledData.npcIndex);
   if (!npc) {
-    client.sessionController.requestNpcRange([packet.npcKilledData.npcIndex]);
+    client.requestNpcRange([packet.npcKilledData.npcIndex]);
     return;
   }
 
@@ -116,12 +111,12 @@ function handleCastAccept(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, packet.npcKilledData.damage),
   );
 
-  client.spellController.playSpellEffect(
+  client.playSpellEffect(
     packet.spellId,
     new EffectTargetNpc(packet.npcKilledData.npcIndex),
   );
@@ -145,11 +140,11 @@ function handleCastAccept(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
   }
 
-  client.animationController.characterEmotes.set(
+  client.characterEmotes.set(
     packet.npcKilledData.killerId,
     new Emote(EmoteType.LevelUp),
   );
@@ -180,17 +175,17 @@ function handleCastAccept(client: Client, reader: EoReader) {
 }
 
 export function registerCastHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Cast,
     PacketAction.Reply,
     (reader) => handleCastReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Cast,
     PacketAction.Spec,
     (reader) => handleCastSpec(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Cast,
     PacketAction.Accept,
     (reader) => handleCastAccept(client, reader),

@@ -15,16 +15,18 @@ import {
   PlayerKilledState,
 } from 'eolib';
 import { ChatBubble } from '../chat-bubble';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { ITEM_PROTECT_TICKS_NPC } from '../consts';
 import { EOResourceID } from '../edf';
-import { Emote } from '../render/emote';
-import { HealthBar } from '../render/health-bar';
-import { NpcAttackAnimation } from '../render/npc-attack';
-import { NpcWalkAnimation } from '../render/npc-walk';
+import {
+  Emote,
+  HealthBar,
+  NpcAttackAnimation,
+  NpcWalkAnimation,
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
-import { capitalize } from '../utils/capitalize';
+import { ChatIcon } from '../ui/chat/chat';
+import { capitalize } from '../utils';
 
 function handleNpcPlayer(client: Client, reader: EoReader) {
   const packet = NpcPlayerServerPacket.deserialize(reader);
@@ -38,7 +40,7 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
 
     npc.direction = position.direction;
     if (npc.coords !== position.coords) {
-      client.animationController.npcAnimations.set(
+      client.npcAnimations.set(
         npc.index,
         new NpcWalkAnimation(npc.coords, position.coords, position.direction),
       );
@@ -61,11 +63,8 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
 
     npc.direction = attack.direction;
     playSfxById(SfxId.PunchAttack);
-    client.animationController.npcAnimations.set(
-      npc.index,
-      new NpcAttackAnimation(),
-    );
-    client.animationController.characterHealthBars.set(
+    client.npcAnimations.set(npc.index, new NpcAttackAnimation());
+    client.characterHealthBars.set(
       attack.playerId,
       new HealthBar(attack.hpPercentage, attack.damage),
     );
@@ -92,14 +91,11 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
       continue;
     }
 
-    client.animationController.npcChats.set(
-      npc.index,
-      new ChatBubble(client.sans11!, chat.message),
-    );
+    client.npcChats.set(npc.index, new ChatBubble(client.sans11, chat.message));
   }
 
   if (unknownNpcsIndexes.size) {
-    client.sessionController.requestNpcRange(Array.from(unknownNpcsIndexes));
+    client.requestNpcRange(Array.from(unknownNpcsIndexes));
   }
 }
 
@@ -120,7 +116,7 @@ function handleNpcAgree(client: Client, reader: EoReader) {
 
 function handleNpcSpec(client: Client, reader: EoReader) {
   const packet = NpcSpecServerPacket.deserialize(reader);
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, packet.npcKilledData.damage),
   );
@@ -144,7 +140,7 @@ function handleNpcSpec(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
   }
 
@@ -166,7 +162,7 @@ function handleNpcSpec(client: Client, reader: EoReader) {
 
 function handleNpcAccept(client: Client, reader: EoReader) {
   const packet = NpcAcceptServerPacket.deserialize(reader);
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, packet.npcKilledData.damage),
   );
@@ -189,11 +185,11 @@ function handleNpcAccept(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
   }
 
-  client.animationController.characterEmotes.set(
+  client.characterEmotes.set(
     packet.npcKilledData.killerId,
     new Emote(EmoteType.LevelUp),
   );
@@ -229,10 +225,7 @@ function handleNpcJunk(client: Client, reader: EoReader) {
     .filter((n) => n.id === packet.npcId)
     .map((n) => n.index)
     .forEach((npcIndex) => {
-      client.animationController.npcHealthBars.set(
-        npcIndex,
-        new HealthBar(0, 1),
-      );
+      client.npcHealthBars.set(npcIndex, new HealthBar(0, 1));
       client.setNpcDeathAnimation(npcIndex);
     });
 }
@@ -249,10 +242,7 @@ function handleNpcDialog(client: Client, reader: EoReader) {
     return;
   }
 
-  client.animationController.npcChats.set(
-    npc.index,
-    new ChatBubble(client.sans11!, packet.message),
-  );
+  client.npcChats.set(npc.index, new ChatBubble(client.sans11, packet.message));
   client.emit('chat', {
     tab: ChatTab.Local,
     message: `${packet.message}`,
@@ -272,7 +262,7 @@ function handleNpcReply(client: Client, reader: EoReader) {
     return;
   }
 
-  client.animationController.npcHealthBars.set(
+  client.npcHealthBars.set(
     npc.index,
     new HealthBar(packet.hpPercentage, packet.damage),
   );
@@ -283,43 +273,43 @@ function handleNpcReply(client: Client, reader: EoReader) {
   ) {
     client.setStatusLabel(
       EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
-      client.getResourceString(EOResourceID.STATUS_LABEL_UNABLE_TO_ATTACK),
+      client.getResourceString(EOResourceID.STATUS_LABEL_UNABLE_TO_ATTACK)!,
     );
   }
 }
 
 export function registerNpcHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Player,
     (reader) => handleNpcPlayer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Agree,
     (reader) => handleNpcAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Accept,
     (reader) => handleNpcAccept(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Spec,
     (reader) => handleNpcSpec(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Junk,
     (reader) => handleNpcJunk(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Dialog,
     (reader) => handleNpcDialog(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Npc,
     PacketAction.Reply,
     (reader) => handleNpcReply(client, reader),

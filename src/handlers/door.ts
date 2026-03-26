@@ -10,7 +10,7 @@ import { playSfxById, SfxId } from '../sfx';
 
 function handleDoorOpen(client: Client, reader: EoReader) {
   const packet = DoorOpenServerPacket.deserialize(reader);
-  const door = client.mapController.getDoor(packet.coords);
+  const door = client.getDoor(packet.coords);
   if (!door) {
     return;
   }
@@ -21,7 +21,7 @@ function handleDoorOpen(client: Client, reader: EoReader) {
 }
 
 export function registerDoorHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Door,
     PacketAction.Open,
     (reader) => handleDoorOpen(client, reader),

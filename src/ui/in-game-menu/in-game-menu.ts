@@ -5,7 +5,14 @@ import { Base } from '../base-ui';
 import './in-game-menu.css';
 
 type Events = {
-  toggle: 'inventory' | 'map' | 'spells' | 'stats' | 'online' | 'party';
+  toggle:
+    | 'inventory'
+    | 'map'
+    | 'spells'
+    | 'stats'
+    | 'online'
+    | 'party'
+    | 'settings';
 };
 
 export class InGameMenu extends Base {
@@ -18,46 +25,55 @@ export class InGameMenu extends Base {
     const btnInventory = this.container.querySelector(
       'button[data-id="inventory"]',
     );
-    const btnMap = this.container.querySelector('button[data-id="map"]');
-    const btnSpells = this.container.querySelector('button[data-id="spells"]');
-    const btnStats = this.container.querySelector('button[data-id="stats"]');
-    const btnOnline = this.container.querySelector('button[data-id="online"]');
-    const btnParty = this.container.querySelector('button[data-id="party"]');
+    const btnMap = this.container.querySelector('button[data-id="map"]')!;
+    const btnSpells = this.container.querySelector('button[data-id="spells"]')!;
+    const btnStats = this.container.querySelector('button[data-id="stats"]')!;
+    const btnOnline = this.container.querySelector('button[data-id="online"]')!;
+    const btnParty = this.container.querySelector('button[data-id="party"]')!;
+    const btnSettings = this.container.querySelector(
+      'button[data-id="settings"]',
+    )!;
 
-    btnInventory!.addEventListener('click', (e) => {
+    btnInventory!.addEventListener!('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'inventory');
     });
 
-    btnMap!.addEventListener('click', (e) => {
+    btnMap.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'map');
     });
 
-    btnSpells!.addEventListener('click', (e) => {
+    btnSpells.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'spells');
     });
 
-    btnStats!.addEventListener('click', (e) => {
+    btnStats.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'stats');
     });
 
-    btnOnline!.addEventListener('click', (e) => {
+    btnOnline.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'online');
     });
 
-    btnParty!.addEventListener('click', (e) => {
+    btnParty.addEventListener('click', (e) => {
       e.stopPropagation();
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('toggle', 'party');
+    });
+
+    btnSettings.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playSfxById(SfxId.ButtonClick);
+      this.emitter.emit('toggle', 'settings');
     });
   }
 

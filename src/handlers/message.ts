@@ -1,16 +1,17 @@
 import {
   type EoReader,
+  MessageAcceptServerPacket,
   MessageOpenServerPacket,
   PacketAction,
   PacketFamily,
 } from 'eolib';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { EOResourceID } from '../edf';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
 
 function handleMessagePing(client: Client) {
-  const delta = Date.now() - client.commandController.pingStart;
+  const delta = Date.now() - client.pingStart;
 
   client.emit('serverChat', {
     message: `${delta}ms ping`,
@@ -25,6 +26,15 @@ function handleMessageOpen(client: Client, reader: EoReader) {
     icon: ChatIcon.QuestMessage,
     message: packet.message,
   });
+  // Also emit for guild panel buff aggregation
+  client.emit('statusMessage', { message: packet.message });
+}
+
+function handleMessageAccept(client: Client, reader: EoReader) {
+  const packet = MessageAcceptServerPacket.deserialize(reader);
+  const title = packet.messages[0] || 'Message';
+  const body = packet.messages[1] || '';
+  client.emit('scrollMessage', { title, body });
 }
 
 function handleMessageClose(client: Client) {
@@ -52,17 +62,22 @@ function handleMessageClose(client: Client) {
 }
 
 export function registerMessageHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Message,
     PacketAction.Pong,
     (_) => handleMessagePing(client),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Message,
     PacketAction.Open,
     (reader) => handleMessageOpen(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
+    PacketFamily.Message,
+    PacketAction.Accept,
+    (reader) => handleMessageAccept(client, reader),
+  );
+  client.bus.registerPacketHandler(
     PacketFamily.Message,
     PacketAction.Close,
     (_reader) => handleMessageClose(client),

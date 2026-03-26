@@ -4,7 +4,7 @@
   height: 240px;
   background-color: #000;
   background-image: url("/gfx/gfx001/120.png");
-  z-index: 1020;
+  z-index: 1050;
 }
 
 #create-character-preview {

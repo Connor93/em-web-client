@@ -1,14 +1,16 @@
 import { type Item, ItemSize } from 'eolib';
 import mitt from 'mitt';
-import type { Client } from '../../client';
+import {
+  type Client,
+  type EquipmentSlot,
+  getEquipmentSlotFromString,
+} from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
-import { getItemMeta } from '../../utils/get-item-meta';
+import { getItemMeta } from '../../utils';
 import type { Vector2 } from '../../vector';
 import { Base } from '../base-ui';
-import { setItemGridImageFromGfx } from '../utils/gfx-resource';
 
 import './inventory.css';
-import { type EquipmentSlot, getEquipmentSlotFromString } from '../../types';
 
 type ItemPosition = {
   id: number;
@@ -41,6 +43,7 @@ type Events = {
   junkItem: number;
   addChestItem: number;
   addLockerItem: number;
+  addTradeItem: number;
   assignToSlot: { itemId: number; slotIndex: number };
 };
 
@@ -51,7 +54,7 @@ export class Inventory extends Base {
   private grid: HTMLDivElement = this.container.querySelector('.grid')!;
   private positions: ItemPosition[] = [];
   private tab = 0;
-  private uiContainer = document.getElementById('ui');
+  private uiContainer = document.getElementById('ui')!;
   private pointerDownAt = 0;
 
   private dragging: {
@@ -170,7 +173,7 @@ export class Inventory extends Base {
 
     const slot = target.closest('.slot') as HTMLDivElement;
     if (slot) {
-      const slots = document.querySelectorAll('#hotbar .slot');
+      const slots = document.querySelectorAll('#hotbar .slot')!;
       const slotIndex = Array.from(slots).indexOf(slot);
       if (slotIndex === -1) return;
 
@@ -211,6 +214,12 @@ export class Inventory extends Base {
     const lockerItems = target.closest('.locker-items');
     if (lockerItems) {
       this.emitter.emit('addLockerItem', item.id);
+      return;
+    }
+
+    const tradeDialog = target.closest('#trade-dialog');
+    if (tradeDialog) {
+      this.emitter.emit('addTradeItem', item.id);
       return;
     }
 
@@ -412,7 +421,7 @@ export class Inventory extends Base {
       imgContainer.classList.add('item');
       const img = document.createElement('img');
 
-      void setItemGridImageFromGfx(img, record.graphicId);
+      img.src = `/gfx/gfx023/${100 + record.graphicId * 2}.png`;
 
       const size = ITEM_SIZE[record.size];
 
@@ -441,6 +450,11 @@ export class Inventory extends Base {
         this.onPointerDown(e, imgContainer, item);
       });
 
+      imgContainer.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.emitter.emit('useItem', item.id);
+      });
+
       this.grid.appendChild(imgContainer);
     }
   }
@@ -463,7 +477,13 @@ export class Inventory extends Base {
       return;
     }
 
-    this.positions = JSON.parse(json);
+    try {
+      this.positions = JSON.parse(json) as ItemPosition[];
+    } catch {
+      console.warn('[Inventory] Failed to parse saved positions, resetting');
+      this.setInitialItemPositions();
+      return;
+    }
 
     let changed = false;
     for (let i = this.positions.length - 1; i >= 0; --i) {

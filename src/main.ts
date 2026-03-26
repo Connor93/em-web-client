@@ -16,22 +16,35 @@ import {
 import './css/style.css';
 import 'notyf/notyf.min.css';
 import { PacketBus } from './bus';
-import { Client } from './client';
+import { Client, GameState } from './client';
 import { GAME_FPS, MAX_CHALLENGE } from './consts';
 import { DialogResourceID } from './edf';
-import { GameState } from './types';
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  setGameSize,
+  setZoom,
+  ZOOM,
+} from './game-state';
+import { handleItemCommand, handleNpcCommand } from './handlers';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
+import { BarberDialog } from './ui/barber-dialog/barber-dialog';
 import { BoardDialog } from './ui/board-dialog';
+import { Book } from './ui/book/book';
 import { ChangePasswordForm } from './ui/change-password';
 import { CharacterSelect } from './ui/character-select';
 import { Chat } from './ui/chat/chat';
 import { ChestDialog } from './ui/chest-dialog';
+import { CitizenDialog } from './ui/citizen-dialog/citizen-dialog';
 import { CreateAccountForm } from './ui/create-account';
 import { CreateCharacterForm } from './ui/create-character';
 import { ExitGame } from './ui/exit-game';
+import { GuildDialog } from './ui/guild-dialog/guild-dialog';
+import { GuildPanel } from './ui/guild-panel/guild-panel';
 import { Hotbar } from './ui/hotbar/hotbar';
 import { HUD } from './ui/hud/hud';
 import { InGameMenu } from './ui/in-game-menu/in-game-menu';
+import { InfoDialog } from './ui/info-dialog/info-dialog';
 import { Inventory } from './ui/inventory';
 import { ItemAmountDialog } from './ui/item-amount-dialog';
 import { LargeAlertSmallHeader } from './ui/large-alert-small-header';
@@ -40,11 +53,14 @@ import { LockerDialog } from './ui/locker-dialog';
 import { LoginForm } from './ui/login';
 import { MainMenu } from './ui/main-menu/main-menu';
 import { MobileControls } from './ui/mobile-controls/mobile-controls';
+import { MobileHUD } from './ui/mobile-hud/mobile-hud';
+import { MobileToolbar } from './ui/mobile-toolbar/mobile-toolbar';
 //import { OffsetTweaker } from './ui/offset-tweaker';
 import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
 import { QuestDialog } from './ui/quest-dialog';
+import { SettingsDialog } from './ui/settings-dialog';
 import { ShopDialog } from './ui/shop-dialog';
 import { SkillMasterDialog } from './ui/skill-master-dialog';
 import { SmallAlertLargeHeader } from './ui/small-alert-large-header';
@@ -52,6 +68,7 @@ import { SmallAlertSmallHeader } from './ui/small-alert-small-header';
 import { SmallConfirm } from './ui/small-confirm';
 import { SpellBook } from './ui/spell-book';
 import { Stats } from './ui/stats/stats';
+import { TradeDialog } from './ui/trade-dialog/trade-dialog';
 import { randomRange } from './utils';
 import {
   getReconnectAttempts,
@@ -61,10 +78,100 @@ import {
 } from './wiring/client-events';
 import { wireUiEvents } from './wiring/ui-events';
 
+// ── Canvas Setup ──────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('game') as HTMLCanvasElement;
+if (!canvas) throw new Error('Canvas not found!');
+
+const ctx = canvas.getContext('2d', { alpha: false });
+if (!ctx) {
+  throw new Error('Failed to get canvas context!');
+}
+ctx.imageSmoothingEnabled = false;
+
 // ── Client & Mobile ──────────────────────────────────────────────────────
 
 const client = new Client();
 const mobileControls = new MobileControls();
+const mobileToolbar = new MobileToolbar(client);
+const mobileHud = new MobileHUD();
+
+let userOverride = false;
+let _isMobile = false;
+
+export function isMobile(): boolean {
+  return _isMobile;
+}
+
+export function zoomIn() {
+  userOverride = true;
+  setZoom(Math.min(4, ZOOM + 1));
+  resizeCanvases();
+}
+
+export function zoomOut() {
+  userOverride = true;
+  setZoom(Math.max(1, ZOOM - 1));
+  resizeCanvases();
+}
+
+function resizeCanvases() {
+  const container = document.getElementById('container')!;
+  if (!container) return;
+  const viewportWidth =
+    window.visualViewport?.width ?? container.getBoundingClientRect().width;
+  const viewportHeight =
+    window.visualViewport?.height ?? container.getBoundingClientRect().height;
+  if (!userOverride) setZoom(viewportWidth >= 1280 ? 2 : 1);
+  const w = Math.floor(viewportWidth / ZOOM);
+  const h = Math.floor(viewportHeight / ZOOM);
+  const snapshot =
+    canvas.width > 0
+      ? ctx!.getImageData!(0, 0, canvas.width, canvas.height)
+      : null;
+  const prevW = canvas.width;
+  const prevH = canvas.height;
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.width = `${w * ZOOM}px`;
+  canvas.style.height = `${h * ZOOM}px`;
+  ctx!.imageSmoothingEnabled! = false;
+  if (snapshot && prevW > 0) {
+    const temp = document.createElement('canvas');
+    temp.width = prevW;
+    temp.height = prevH;
+    const tempCtx = temp.getContext('2d');
+    if (tempCtx) {
+      tempCtx.putImageData(snapshot, 0, 0);
+      ctx!.drawImage!(temp, 0, 0, w, h);
+    }
+  } else {
+    ctx!.fillStyle! = '#000';
+    ctx!.fillRect!(0, 0, w, h);
+  }
+  setGameSize(w, h);
+  _isMobile = viewportWidth < 940;
+  if (_isMobile) {
+    document.body.classList.add('is-mobile');
+    if (client.state === GameState.InGame) {
+      mobileControls.show();
+      mobileToolbar.show();
+      mobileHud.show();
+    }
+  } else {
+    document.body.classList.remove('is-mobile');
+    mobileControls.hide();
+    mobileToolbar.hide();
+    mobileHud.hide();
+  }
+}
+
+resizeCanvases();
+let resizeRaf = 0;
+window.addEventListener('resize', () => {
+  cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(resizeCanvases);
+});
 
 // ── Render Loop ──────────────────────────────────────────────────────────
 
@@ -93,7 +200,10 @@ const render = (now: DOMHighResTimeStamp) => {
   lastTime = now;
 
   const interpolation = accumulator / TICK;
-  client.render(interpolation);
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  client.render(ctx, interpolation);
   requestAnimationFrame(render);
 };
 
@@ -115,6 +225,7 @@ const inventory = new Inventory(client);
 const stats = new Stats(client);
 const onlineList = new OnlineList(client);
 const paperdoll = new Paperdoll(client);
+const book = new Book(client);
 const hud = new HUD();
 const itemAmountDialog = new ItemAmountDialog();
 const questDialog = new QuestDialog(client);
@@ -122,14 +233,21 @@ const chestDialog = new ChestDialog(client);
 const shopDialog = new ShopDialog(client);
 const boardDialog = new BoardDialog(client);
 const bankDialog = new BankDialog(client);
+const barberDialog = new BarberDialog(client);
+const citizenDialog = new CitizenDialog(client);
 const lockerDialog = new LockerDialog(client);
 const skillMasterDialog = new SkillMasterDialog(client);
+const tradeDialog = new TradeDialog(client);
+const _guildDialog = new GuildDialog(client);
+const guildPanel = new GuildPanel(client);
 const smallAlert = new SmallAlertSmallHeader();
 const largeAlertSmallHeader = new LargeAlertSmallHeader();
 const largeConfirmSmallHeader = new LargeConfirmSmallHeader();
 const hotbar = new Hotbar(client);
 const spellBook = new SpellBook(client);
 const partyDialog = new PartyDialog(client);
+const infoDialog = new InfoDialog(client);
+const settingsDialog = new SettingsDialog();
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -212,7 +330,7 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
         const text = client.getDialogStrings(
           DialogResourceID.CONNECTION_LOST_CONNECTION,
         );
-        smallAlertLargeHeader.setContent(text[1], text[0]);
+        smallAlertLargeHeader.setContent(text![1]!, text![0]!);
         smallAlertLargeHeader.show();
       }
     }
@@ -238,6 +356,7 @@ wireClientEvents({
   changePasswordForm,
   chat,
   hud,
+  mobileHud,
   hotbar,
   inGameMenu,
   exitGame,
@@ -245,15 +364,26 @@ wireClientEvents({
   stats,
   questDialog,
   paperdoll,
+  book,
   chestDialog,
   shopDialog,
   bankDialog,
+  barberDialog,
+  citizenDialog,
   boardDialog,
   lockerDialog,
   skillMasterDialog,
+  tradeDialog,
+  infoDialog,
   partyDialog,
-  mobileControls,
+  guildPanel,
+  mobileToolbar,
+  reconnectOverlay,
   initializeSocket,
+  resizeCanvases,
+  isMobile,
+  handleItemCommand,
+  handleNpcCommand,
 });
 
 wireUiEvents({
@@ -283,8 +413,60 @@ wireUiEvents({
   hotbar,
   itemAmountDialog,
   partyDialog,
+  settingsDialog,
+  tradeDialog,
+  guildPanel,
+  mobileToolbar,
   hideAllUi,
   initializeSocket,
+});
+
+// ── Input Listeners ──────────────────────────────────────────────────────
+
+window.addEventListener(
+  'touchmove',
+  (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    client.setMousePosition({
+      x: Math.min(
+        Math.max(Math.floor((e.touches[0].clientX - rect.left) * scaleX), 0),
+        canvas.width,
+      ),
+      y: Math.min(
+        Math.max(Math.floor((e.touches[0].clientY - rect.top) * scaleY), 0),
+        canvas.height,
+      ),
+    });
+    e.preventDefault();
+  },
+  { passive: false },
+);
+
+window.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  client.setMousePosition({
+    x: Math.min(
+      Math.max(Math.floor((e.clientX - rect.left) * scaleX), 0),
+      canvas.width,
+    ),
+    y: Math.min(
+      Math.max(Math.floor((e.clientY - rect.top) * scaleY), 0),
+      canvas.height,
+    ),
+  });
+});
+
+window.addEventListener('click', (e) => {
+  client.handleClick(e);
+});
+
+window.addEventListener('contextmenu', (e) => {
+  client.handleRightClick(e);
+  e.preventDefault();
 });
 
 // ── DOM Init ─────────────────────────────────────────────────────────────

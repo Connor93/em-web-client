@@ -7,7 +7,7 @@
   border-image: url("/border-thin.png") 9 / 9px 9px;
   background: #7b5a29;
   user-select: none;
-  z-index: 1030;
+  z-index: 1050;
 }
 
 #inventory .top {

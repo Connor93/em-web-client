@@ -8,10 +8,9 @@ import {
   WelcomeCode,
   WelcomeReplyServerPacket,
 } from 'eolib';
-import type { Client } from '../client';
+import { type Client, GameState } from '../client';
 import { USAGE_TICKS } from '../consts';
 import { DialogResourceID } from '../edf';
-import { GameState } from '../types';
 
 function handleWelcomeReply(client: Client, reader: EoReader) {
   const packet = WelcomeReplyServerPacket.deserialize(reader);
@@ -19,7 +18,7 @@ function handleWelcomeReply(client: Client, reader: EoReader) {
     const text = client.getDialogStrings(
       DialogResourceID.CONNECTION_SERVER_BUSY,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     return;
   }
 
@@ -53,7 +52,7 @@ function handleSelectCharacter(
   client.admin = data.admin;
   client.level = data.level;
   client.experience = data.experience;
-  client.usageController.usage = data.usage;
+  client.usage = data.usage;
   client.baseStats.str = data.stats.base.str;
   client.baseStats.intl = data.stats.base.intl;
   client.baseStats.wis = data.stats.base.wis;
@@ -131,9 +130,9 @@ function handleSelectCharacter(
 
     if (client.downloadQueue.length > 0) {
       const download = client.downloadQueue.pop();
-      client.sessionController.requestFile(download!.type, download!.id);
+      client.requestFile(download!.type!, download!.id!);
     } else {
-      client.sessionController.enterGame();
+      client.enterGame();
     }
   });
 }
@@ -153,17 +152,17 @@ function handleEnterGame(
   client.spells = data.spells;
   client.weight = data.weight;
   client.nearby = data.nearby;
-  client.usageController.usageTicks = USAGE_TICKS;
+  client.usageTicks = USAGE_TICKS;
   client.setState(GameState.InGame);
   client.emit('enterGame', { news: data.news });
-  client.bus!.send(new GlobalOpenClientPacket());
+  client.bus.send(new GlobalOpenClientPacket());
   client.atlas.reset();
   client.atlas.mapId = -1; // Always force full rebuild — map data may differ from initial build
   client.atlas.refresh();
 }
 
 export function registerWelcomeHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Welcome,
     PacketAction.Reply,
     (reader) => handleWelcomeReply(client, reader),

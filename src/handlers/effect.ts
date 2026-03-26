@@ -16,11 +16,10 @@ import {
   EffectAnimation,
   EffectTargetCharacter,
   EffectTargetTile,
-} from '../render/effect';
-import { HealthBar } from '../render/health-bar';
+  HealthBar,
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
-import { getVolumeFromDistance } from '../utils/get-volume-from-distance';
-import { getDistance } from '../utils/range';
+import { getDistance, getVolumeFromDistance } from '../utils';
 import type { Vector2 } from '../vector';
 
 function handleEffectReport(client: Client) {
@@ -28,11 +27,11 @@ function handleEffectReport(client: Client) {
   const playerAt = client.getPlayerCoords();
   const spikeTiles: Vector2[] = [];
   for (let x = playerAt.x - 6; x < playerAt.x + 6; ++x) {
-    if (x < 0 || x > client!.map!.width) continue;
+    if (x < 0 || x > client.map.width) continue;
     for (let y = playerAt.y - 6; y < playerAt.y + 6; ++y) {
-      if (y < 0 || y > client!.map!.height) continue;
-      const spec = client!
-        .map!.tileSpecRows.find((r) => r.y === y)
+      if (y < 0 || y > client.map.height) continue;
+      const spec = client.map.tileSpecRows
+        .find((r) => r.y === y)
         ?.tiles.find((t) => t.x === x);
       if (spec && spec.tileSpec === MapTileSpec.TimedSpikes) {
         spikeTiles.push({ x, y });
@@ -73,7 +72,7 @@ function handleEffectSpec(client: Client, reader: EoReader) {
   client.hp = data.hp;
   playSfxById(SfxId.Spikes);
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     client.playerId,
     new HealthBar(Math.floor((client.hp / client.maxHp) * 100), damage),
   );
@@ -89,9 +88,9 @@ function handleEffectUse(client: Client, reader: EoReader) {
   const packet = EffectUseServerPacket.deserialize(reader);
   if (packet.effect === MapEffect.Quake) {
     const data = packet.effectData as EffectUseServerPacket.EffectDataQuake;
-    client.quakeController.quakeTicks = 3 * data.quakeStrength + 10;
-    client.quakeController.quakePower = 4 * data.quakeStrength + 10;
-    client.quakeController.quakeOffset = 0;
+    client.quakeTicks = 3 * data.quakeStrength + 10;
+    client.quakePower = 4 * data.quakeStrength + 10;
+    client.quakeOffset = 0;
     playSfxById(SfxId.Earthquake);
   }
 }
@@ -103,7 +102,7 @@ function handleEffectAgree(client: Client, reader: EoReader) {
     if (meta.sfx) {
       playSfxById(meta.sfx);
     }
-    client.animationController.effects.push(
+    client.effects.push(
       new EffectAnimation(
         effect.effectId + 1,
         new EffectTargetTile(effect.coords),
@@ -120,7 +119,7 @@ function handleEffectPlayer(client: Client, reader: EoReader) {
     if (meta.sfx) {
       playSfxById(meta.sfx);
     }
-    client.animationController.effects.push(
+    client.effects.push(
       new EffectAnimation(
         effect.effectId + 1,
         new EffectTargetCharacter(effect.playerId),
@@ -146,7 +145,7 @@ function handleEffectAdmin(client: Client, reader: EoReader) {
     playSfxById(SfxId.Spikes, volume);
   }
 
-  client.animationController.characterHealthBars.set(
+  client.characterHealthBars.set(
     packet.playerId,
     new HealthBar(packet.hpPercentage, packet.damage),
   );
@@ -158,32 +157,32 @@ function handleEffectAdmin(client: Client, reader: EoReader) {
 }
 
 export function registerEffectHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Report,
     () => handleEffectReport(client),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Spec,
     (reader) => handleEffectSpec(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Use,
     (reader) => handleEffectUse(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Agree,
     (reader) => handleEffectAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Player,
     (reader) => handleEffectPlayer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Effect,
     PacketAction.Admin,
     (reader) => handleEffectAdmin(client, reader),

@@ -9,6 +9,40 @@
   #chat {
     top: unset !important;
     bottom: 0;
+    left: 10px !important;
+    transform: none !important;
+  }
+}
+
+/*
+
+         Mobile chat: top-center, between HUD and hamburger
+*/
+@media screen and (max-width: 939px) {
+  #chat {
+    top: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%);
+    width: min(55%, 340px) !important;
+  }
+
+  #chat ul {
+    height: 80px !important;
+  }
+
+  #chat-message {
+    height: 22px;
+    font-size: 12px;
+  }
+
+  #chat-tab-bar button {
+    padding: 2px 5px;
+    font-size: 11px;
+  }
+
+  #btn-toggle-chat {
+    padding: 2px 5px;
+    font-size: 11px;
   }
 }
 

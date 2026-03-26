@@ -21,7 +21,7 @@ function handleLockerBuy(client: Client, reader: EoReader) {
   }
 
   gold.amount = packet.goldAmount;
-  client.bankController.lockerUpgrades = packet.lockerUpgrades;
+  client.lockerUpgrades = packet.lockerUpgrades;
   playSfxById(SfxId.BuySell);
   client.emit('inventoryChanged', undefined);
 }
@@ -29,7 +29,7 @@ function handleLockerBuy(client: Client, reader: EoReader) {
 function handleLockerOpen(client: Client, reader: EoReader) {
   const packet = LockerOpenServerPacket.deserialize(reader);
   playSfxById(SfxId.ChestOpen);
-  client.lockerController.lockerCoords = packet.lockerCoords;
+  client.lockerCoords = packet.lockerCoords;
   client.emit('lockerOpened', { items: packet.lockerItems });
 }
 
@@ -80,33 +80,33 @@ function handleLockerSpec(client: Client, reader: EoReader) {
     DialogResourceID.LOCKER_FULL_DIFF_ITEMS_MAX,
   );
   client.showError(
-    strings[1].replace('25', packet.lockerMaxItems.toString()),
-    strings[0],
+    strings![1]!.replace('25', packet.lockerMaxItems.toString()),
+    strings![0]!,
   );
 }
 
 export function registerLockerHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Locker,
     PacketAction.Buy,
     (reader) => handleLockerBuy(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Locker,
     PacketAction.Open,
     (reader) => handleLockerOpen(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Locker,
     PacketAction.Get,
     (reader) => handleLockerGet(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Locker,
     PacketAction.Reply,
     (reader) => handleLockerReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Locker,
     PacketAction.Spec,
     (reader) => handleLockerSpec(client, reader),

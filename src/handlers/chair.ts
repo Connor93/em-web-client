@@ -16,7 +16,7 @@ function handleChairPlayer(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
@@ -32,7 +32,7 @@ function handleChairRemove(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
@@ -47,7 +47,7 @@ function handleChairClose(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
@@ -62,7 +62,7 @@ function handleChairReply(client: Client, reader: EoReader) {
     (c) => c.playerId === packet.playerId,
   );
   if (!character) {
-    client.sessionController.requestCharacterRange([packet.playerId]);
+    client.requestCharacterRange([packet.playerId]);
     return;
   }
 
@@ -73,22 +73,22 @@ function handleChairReply(client: Client, reader: EoReader) {
 }
 
 export function registerChairHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Chair,
     PacketAction.Player,
     (reader) => handleChairPlayer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Chair,
     PacketAction.Remove,
     (reader) => handleChairRemove(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Chair,
     PacketAction.Close,
     (reader) => handleChairClose(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Chair,
     PacketAction.Reply,
     (reader) => handleChairReply(client, reader),

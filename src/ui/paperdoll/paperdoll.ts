@@ -1,90 +1,87 @@
 import { CharacterDetails, CharacterIcon, EquipmentPaperdoll } from 'eolib';
-import type { Client } from '../../client';
+import { type Client, EquipmentSlot } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
-import { capitalize } from '../../utils/capitalize';
-import { getItemMeta } from '../../utils/get-item-meta';
+import { capitalize, getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
-import { characterIconToChatIcon } from '../utils/character-icon-to-chat-icon';
-import { setItemGridImageFromGfx } from '../utils/gfx-resource';
+import { characterIconToChatIcon } from '../utils';
 
 import './paperdoll.css';
-import { EquipmentSlot } from '../../types';
 
 export class Paperdoll extends Base {
   protected container = document.getElementById('paperdoll')!;
-  private dialogs = document.getElementById('dialogs');
+  private dialogs = document.getElementById('dialogs')!;
   private client: Client;
-  private cover = document.getElementById('cover');
-  private bntOk = this.container!.querySelector<HTMLButtonElement>(
+  private cover = document.getElementById('cover')!;
+  private bntOk = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="ok"]',
   );
-  private imgBoots: HTMLDivElement = this.container!.querySelector(
+  private imgBoots: HTMLDivElement = this.container.querySelector(
     '.item[data-id="boots"]',
   )!;
-  private imgAccessory: HTMLDivElement = this.container!.querySelector(
+  private imgAccessory: HTMLDivElement = this.container.querySelector(
     '.item[data-id="accessory"]',
   )!;
-  private imgGloves: HTMLDivElement = this.container!.querySelector(
+  private imgGloves: HTMLDivElement = this.container.querySelector(
     '.item[data-id="gloves"]',
   )!;
-  private imgBelt: HTMLDivElement = this.container!.querySelector(
+  private imgBelt: HTMLDivElement = this.container.querySelector(
     '.item[data-id="belt"]',
   )!;
-  private imgArmor: HTMLDivElement = this.container!.querySelector(
+  private imgArmor: HTMLDivElement = this.container.querySelector(
     '.item[data-id="armor"]',
   )!;
-  private imgNecklace: HTMLDivElement = this.container!.querySelector(
+  private imgNecklace: HTMLDivElement = this.container.querySelector(
     '.item[data-id="necklace"]',
   )!;
-  private imgHat: HTMLImageElement = this.container!.querySelector(
+  private imgHat: HTMLImageElement = this.container.querySelector(
     '.item[data-id="hat"]',
   )!;
-  private imgShield: HTMLDivElement = this.container!.querySelector(
+  private imgShield: HTMLDivElement = this.container.querySelector(
     '.item[data-id="shield"]',
   )!;
-  private imgWeapon: HTMLDivElement = this.container!.querySelector(
+  private imgWeapon: HTMLDivElement = this.container.querySelector(
     '.item[data-id="weapon"]',
   )!;
-  private imgRing1: HTMLDivElement = this.container!.querySelector(
+  private imgRing1: HTMLDivElement = this.container.querySelector(
     '.item[data-id="ring-1"]',
   )!;
-  private imgRing2: HTMLDivElement = this.container!.querySelector(
+  private imgRing2: HTMLDivElement = this.container.querySelector(
     '.item[data-id="ring-2"]',
   )!;
-  private imgArmlet1: HTMLDivElement = this.container!.querySelector(
+  private imgArmlet1: HTMLDivElement = this.container.querySelector(
     '.item[data-id="armlet-1"]',
   )!;
-  private imgArmlet2: HTMLDivElement = this.container!.querySelector(
+  private imgArmlet2: HTMLDivElement = this.container.querySelector(
     '.item[data-id="armlet-2"]',
   )!;
-  private imgBracer1: HTMLDivElement = this.container!.querySelector(
+  private imgBracer1: HTMLDivElement = this.container.querySelector(
     '.item[data-id="bracer-1"]',
   )!;
-  private imgBracer2: HTMLDivElement = this.container!.querySelector(
+  private imgBracer2: HTMLDivElement = this.container.querySelector(
     '.item[data-id="bracer-2"]',
   )!;
-  private spanName: HTMLSpanElement = this.container!.querySelector(
+  private spanName: HTMLSpanElement = this.container.querySelector(
     'span[data-id="name"]',
   )!;
-  private spanHome: HTMLSpanElement = this.container!.querySelector(
+  private spanHome: HTMLSpanElement = this.container.querySelector(
     'span[data-id="home"]',
   )!;
-  private spanClass: HTMLSpanElement = this.container!.querySelector(
+  private spanClass: HTMLSpanElement = this.container.querySelector(
     'span[data-id="class"]',
   )!;
-  private spanPartner: HTMLSpanElement = this.container!.querySelector(
+  private spanPartner: HTMLSpanElement = this.container.querySelector(
     'span[data-id="partner"]',
   )!;
-  private spanTitle: HTMLSpanElement = this.container!.querySelector(
+  private spanTitle: HTMLSpanElement = this.container.querySelector(
     'span[data-id="title"]',
   )!;
-  private spanGuild: HTMLSpanElement = this.container!.querySelector(
+  private spanGuild: HTMLSpanElement = this.container.querySelector(
     'span[data-id="guild"]',
   )!;
-  private spanRank: HTMLSpanElement = this.container!.querySelector(
+  private spanRank: HTMLSpanElement = this.container.querySelector(
     'span[data-id="rank"]',
   )!;
-  private divIcon: HTMLDivElement = this.container!.querySelector('div.icon')!;
+  private divIcon: HTMLDivElement = this.container.querySelector('div.icon')!;
 
   private icon = CharacterIcon.Player;
   private details = new CharacterDetails();
@@ -93,7 +90,7 @@ export class Paperdoll extends Base {
   constructor(client: Client) {
     super();
     this.client = client;
-    this.bntOk!.addEventListener('click', () => {
+    this.bntOk!.addEventListener!('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
@@ -120,105 +117,105 @@ export class Paperdoll extends Base {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Accessory);
+      this.client.unequipItem(EquipmentSlot.Accessory);
     });
 
     this.imgArmlet1.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Armlet1);
+      this.client.unequipItem(EquipmentSlot.Armlet1);
     });
 
     this.imgArmlet2.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Armlet2);
+      this.client.unequipItem(EquipmentSlot.Armlet2);
     });
 
     this.imgArmor.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Armor);
+      this.client.unequipItem(EquipmentSlot.Armor);
     });
 
     this.imgBelt.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Belt);
+      this.client.unequipItem(EquipmentSlot.Belt);
     });
 
     this.imgBoots.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Boots);
+      this.client.unequipItem(EquipmentSlot.Boots);
     });
 
     this.imgBracer1.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Bracer1);
+      this.client.unequipItem(EquipmentSlot.Bracer1);
     });
 
     this.imgBracer2.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Bracer2);
+      this.client.unequipItem(EquipmentSlot.Bracer2);
     });
 
     this.imgGloves.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Gloves);
+      this.client.unequipItem(EquipmentSlot.Gloves);
     });
 
     this.imgHat.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Hat);
+      this.client.unequipItem(EquipmentSlot.Hat);
     });
 
     this.imgNecklace.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Necklace);
+      this.client.unequipItem(EquipmentSlot.Necklace);
     });
 
     this.imgRing1.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Ring1);
+      this.client.unequipItem(EquipmentSlot.Ring1);
     });
 
     this.imgRing2.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Ring2);
+      this.client.unequipItem(EquipmentSlot.Ring2);
     });
 
     this.imgShield.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Shield);
+      this.client.unequipItem(EquipmentSlot.Shield);
     });
 
     this.imgWeapon.addEventListener('contextmenu', () => {
       if (this.details.playerId !== this.client.playerId) {
         return;
       }
-      this.client.inventoryController.unequipItem(EquipmentSlot.Weapon);
+      this.client.unequipItem(EquipmentSlot.Weapon);
     });
   }
 
@@ -233,7 +230,10 @@ export class Paperdoll extends Base {
   }
 
   private render() {
-    this.container!.setAttribute('data-gender', this.details.gender.toString());
+    this.container.setAttribute(
+      'data-gender',
+      (this.details.gender ?? 0).toString(),
+    );
 
     this.spanName.innerText = capitalize(this.details.name);
     this.spanHome.innerText = this.details.home;
@@ -321,12 +321,12 @@ export class Paperdoll extends Base {
     itemId: number,
     el: HTMLDivElement,
   ) {
-    const img = el.querySelector<HTMLImageElement>('img');
-    const tooltip = el.querySelector<HTMLDivElement>('.tooltip');
+    const img = el.querySelector<HTMLImageElement>('img')!;
+    const tooltip = el.querySelector<HTMLDivElement>('.tooltip')!;
 
-    img!.src = '';
-    tooltip!.innerText = '';
-    tooltip!.classList.add('hidden');
+    img.src = '';
+    tooltip.innerText = '';
+    tooltip.classList.add('hidden');
 
     if (!itemId) {
       return;
@@ -338,25 +338,25 @@ export class Paperdoll extends Base {
     }
 
     const meta = getItemMeta(record);
-    void setItemGridImageFromGfx(img!, record.graphicId);
-    tooltip!.innerText = `${record.name}\n${meta.join('\n')}`;
-    tooltip!.classList.remove('hidden');
+    img.src = `/gfx/gfx023/${100 + record.graphicId * 2}.png`;
+    tooltip.innerText = `${record.name}\n${meta.join('\n')}`;
+    tooltip.classList.remove('hidden');
   }
 
   show() {
     this.render();
-    this.cover!.classList.remove('hidden');
-    this.container!.classList.remove('hidden');
-    this.dialogs!.classList.remove('hidden');
+    this.cover.classList.remove('hidden');
+    this.container.classList.remove('hidden');
+    this.dialogs.classList.remove('hidden');
     this.client.typing = true;
   }
 
   hide() {
-    this.container!.classList.add('hidden');
-    this.cover!.classList.add('hidden');
+    this.container.classList.add('hidden');
+    this.cover.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
-      this.dialogs!.classList.add('hidden');
+      this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
   }

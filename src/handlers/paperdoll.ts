@@ -1,4 +1,6 @@
 import {
+  type AvatarChange,
+  AvatarChangeType,
   type EoReader,
   Item,
   PacketAction,
@@ -7,9 +9,12 @@ import {
   PaperdollRemoveServerPacket,
   PaperdollReplyServerPacket,
 } from 'eolib';
-import type { Client } from '../client';
+import {
+  type Client,
+  EquipmentSlot,
+  getEquipmentSlotForItemType,
+} from '../client';
 import { playSfxById, SfxId } from '../sfx';
-import { EquipmentSlot, getEquipmentSlotForItemType } from '../types';
 
 function handlePaperdollReply(client: Client, reader: EoReader) {
   const packet = PaperdollReplyServerPacket.deserialize(reader);
@@ -27,7 +32,7 @@ function handlePaperdollRemove(client: Client, reader: EoReader) {
     return;
   }
 
-  const equipment = client.inventoryController.getEquipmentArray();
+  const equipment = client.getEquipmentArray();
   let slot = equipment.indexOf(packet.itemId);
   if (slot === -1) {
     return;
@@ -48,17 +53,12 @@ function handlePaperdollRemove(client: Client, reader: EoReader) {
     return;
   }
 
-  client.inventoryController.setEquipmentSlot(slot, 0);
+  client.setEquipmentSlot(slot, 0);
   client.emit('equipmentChanged', undefined);
 
-  const isVisibleChange =
-    client.inventoryController.isVisibleEquipmentChange(slot);
-  if (isVisibleChange && !client.inventoryController.equipmentSwap) {
-    client.inventoryController.setNearbyCharacterEquipment(
-      client.playerId,
-      slot,
-      0,
-    );
+  const isVisibleChange = client.isVisibleEquipmentChange(slot);
+  if (isVisibleChange && !client.equipmentSwap) {
+    updatePlayerVisualEquipment(client, packet.change);
   }
 
   client.baseStats.str = packet.stats.baseStats.str;
@@ -92,21 +92,17 @@ function handlePaperdollRemove(client: Client, reader: EoReader) {
 
   client.emit('inventoryChanged', undefined);
 
-  if (client.inventoryController.equipmentSwap) {
+  if (client.equipmentSwap) {
     if (
-      !client.inventoryController.equipItem(
-        client.inventoryController.equipmentSwap.slot,
-        client.inventoryController.equipmentSwap.itemId,
+      !client.equipItem(
+        client.equipmentSwap.slot,
+        client.equipmentSwap.itemId,
       ) &&
       isVisibleChange
     ) {
-      client.inventoryController.setNearbyCharacterEquipment(
-        client.playerId,
-        slot,
-        0,
-      );
+      updatePlayerVisualEquipment(client, packet.change);
     }
-    client.inventoryController.equipmentSwap = null;
+    client.equipmentSwap = null;
   }
 }
 
@@ -117,21 +113,17 @@ function handlePaperdollAgree(client: Client, reader: EoReader) {
     return;
   }
 
-  const equipment = client.inventoryController.getEquipmentArray();
+  const equipment = client.getEquipmentArray();
   const slot = getEquipmentSlotForItemType(record.type, packet.subLoc);
-  if (equipment[slot!]) {
+  if (slot === undefined || equipment[slot]) {
     return;
   }
 
-  client.inventoryController.setEquipmentSlot(slot!, packet.itemId);
+  client.setEquipmentSlot(slot!, packet.itemId);
   client.emit('equipmentChanged', undefined);
 
-  if (client.inventoryController.isVisibleEquipmentChange(slot!)) {
-    client.inventoryController.setNearbyCharacterEquipment(
-      client.playerId,
-      slot!,
-      record.spec1,
-    );
+  if (client.isVisibleEquipmentChange(slot!)) {
+    updatePlayerVisualEquipment(client, packet.change);
   }
 
   client.baseStats.str = packet.stats.baseStats.str;
@@ -168,18 +160,37 @@ function handlePaperdollAgree(client: Client, reader: EoReader) {
   client.emit('inventoryChanged', undefined);
 }
 
+function updatePlayerVisualEquipment(client: Client, change: AvatarChange) {
+  if (change.changeType !== AvatarChangeType.Equipment) {
+    return;
+  }
+
+  const update = change.changeTypeData as AvatarChange.ChangeTypeDataEquipment;
+  const player = client.getPlayerCharacter();
+  if (!player) {
+    return;
+  }
+
+  player.equipment.boots = update.equipment.boots;
+  player.equipment.armor = update.equipment.armor;
+  player.equipment.hat = update.equipment.hat;
+  player.equipment.weapon = update.equipment.weapon;
+  player.equipment.shield = update.equipment.shield;
+  client.atlas.refresh();
+}
+
 export function registerPaperdollHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Paperdoll,
     PacketAction.Reply,
     (reader) => handlePaperdollReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Paperdoll,
     PacketAction.Remove,
     (reader) => handlePaperdollRemove(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Paperdoll,
     PacketAction.Agree,
     (reader) => handlePaperdollAgree(client, reader),

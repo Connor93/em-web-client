@@ -6,9 +6,8 @@ import {
   PacketFamily,
   WelcomeRequestClientPacket,
 } from 'eolib';
-import type { Client } from '../client';
+import { type Client, GameState } from '../client';
 import { DialogResourceID } from '../edf';
-import { GameState } from '../types';
 
 function handleLoginReply(client: Client, reader: EoReader) {
   const packet = LoginReplyServerPacket.deserialize(reader);
@@ -17,7 +16,7 @@ function handleLoginReply(client: Client, reader: EoReader) {
     const text = client.getDialogStrings(
       DialogResourceID.LOGIN_BANNED_FROM_SERVER,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     return;
   }
 
@@ -26,7 +25,7 @@ function handleLoginReply(client: Client, reader: EoReader) {
     const text = client.getDialogStrings(
       DialogResourceID.LOGIN_ACCOUNT_ALREADY_LOGGED_ON,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     return;
   }
 
@@ -38,7 +37,7 @@ function handleLoginReply(client: Client, reader: EoReader) {
     const text = client.getDialogStrings(
       DialogResourceID.LOGIN_ACCOUNT_NAME_OR_PASSWORD_NOT_FOUND,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
     return;
   }
 
@@ -46,25 +45,28 @@ function handleLoginReply(client: Client, reader: EoReader) {
     const text = client.getDialogStrings(
       DialogResourceID.CONNECTION_SERVER_BUSY,
     );
-    client.showError(text[1], text[0]);
+    client.showError(text![1]!, text![0]!);
   }
 
   if (reader.remaining > 0) {
     const token = reader.getFixedString(reader.remaining);
-    localStorage.setItem('login-token', token);
+    client.loginToken = token;
+    if (client.rememberMe) {
+      localStorage.setItem('login-token', token);
+    }
   }
 
   const data = packet.replyCodeData as LoginReplyServerPacket.ReplyCodeDataOk;
   client.setState(GameState.LoggedIn);
 
   if (
-    client.rememberMe &&
+    (client.reconnecting || client.rememberMe) &&
     client.loginToken &&
     data.characters.some((c) => c.id === client.lastCharacterId)
   ) {
     const packet = new WelcomeRequestClientPacket();
     packet.characterId = client.lastCharacterId;
-    client.bus!.send(packet);
+    client.bus.send(packet);
     return;
   }
 
@@ -72,7 +74,7 @@ function handleLoginReply(client: Client, reader: EoReader) {
 }
 
 export function registerLoginHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Login,
     PacketAction.Reply,
     (reader) => handleLoginReply(client, reader),

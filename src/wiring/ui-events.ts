@@ -1,5 +1,6 @@
 import type { ItemSpecial } from 'eolib';
 import type { Client } from '../client';
+import { ChatTab, GameState } from '../client';
 import {
   LOCKER_MAX_ITEM_AMOUNT,
   LOCKER_UPGRADE_BASE_COST,
@@ -7,57 +8,55 @@ import {
   MAX_LOCKER_UPGRADES,
 } from '../consts';
 import { DialogResourceID, EOResourceID } from '../edf';
-import { ChatIcon, ChatTab, GameState, SlotType } from '../types';
+import { ChatIcon } from '../ui/chat/chat';
+import { SlotType } from '../ui/hotbar/hotbar';
 import { capitalize } from '../utils';
-
-// biome-ignore lint/suspicious/noExplicitAny: Event emitter callbacks require flexible argument types
-type EventCallback = (...args: any[]) => void;
 
 export interface UiEventDeps {
   client: Client;
   mainMenu: {
     show(): void;
     hide(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   loginForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   createAccountForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   characterSelect: {
     show(): void;
     hide(): void;
     confirmed: boolean;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
     selectCharacter(index: number): void;
     isOpen?(): boolean;
   };
   createCharacterForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
     isOpen(): boolean;
   };
   changePasswordForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
     isOpen(): boolean;
   };
   exitGame: {
     show(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   chat: {
     focus(): void;
     addMessage(tab: ChatTab, msg: string, icon: ChatIcon, name?: string): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
     show(): void;
   };
   smallConfirm: {
@@ -83,22 +82,22 @@ export interface UiEventDeps {
   inventory: {
     toggle(): void;
     show(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   stats: {
     toggle(): void;
     setTrainingConfirmed(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   spellBook: {
     toggle(): void;
-    on(event: string, cb: EventCallback): void;
+    on(event: string, cb: (...args: any[]) => void): void;
   };
   onlineList: { toggle(): void };
-  inGameMenu: { on(event: string, cb: EventCallback): void };
-  questDialog: { on(event: string, cb: EventCallback): void };
-  shopDialog: { on(event: string, cb: EventCallback): void };
-  bankDialog: { on(event: string, cb: EventCallback): void };
+  inGameMenu: { on(event: string, cb: (...args: any[]) => void): void };
+  questDialog: { on(event: string, cb: (...args: any[]) => void): void };
+  shopDialog: { on(event: string, cb: (...args: any[]) => void): void };
+  bankDialog: { on(event: string, cb: (...args: any[]) => void): void };
   lockerDialog: {
     getItemAmount(id: number): number;
   };
@@ -112,6 +111,10 @@ export interface UiEventDeps {
     hide(): void;
   };
   partyDialog: { toggle(): void };
+  settingsDialog: { toggle(): void };
+  tradeDialog: { offerItem(itemId: number): void };
+  guildPanel: { toggle(): void };
+  mobileToolbar: { on(event: string, cb: (...args: any[]) => void): void };
   hideAllUi: () => void;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
 }
@@ -124,7 +127,7 @@ export function wireUiEvents(deps: UiEventDeps): void {
     const text = client.getDialogStrings(
       DialogResourceID.EXIT_GAME_ARE_YOU_SURE,
     );
-    deps.smallConfirm.setContent(text[1], text[0]);
+    deps.smallConfirm.setContent(text![1]!, text![0]!);
     deps.smallConfirm.setCallback(() => {
       client.disconnect();
       deps.hideAllUi();
@@ -176,10 +179,8 @@ export function wireUiEvents(deps: UiEventDeps): void {
   );
 
   deps.createAccountForm.on('create', (data: unknown) => {
-    client.authenticationController.requestAccountCreation(
-      data as Parameters<
-        typeof client.authenticationController.requestAccountCreation
-      >[0],
+    client.requestAccountCreation(
+      data as Parameters<typeof client.requestAccountCreation>[0],
     );
   });
 
@@ -195,7 +196,7 @@ export function wireUiEvents(deps: UiEventDeps): void {
       password: string;
       rememberMe: boolean;
     }) => {
-      client.authenticationController.login(username, password, rememberMe);
+      client.login(username, password, rememberMe);
     },
   );
 
@@ -216,7 +217,7 @@ export function wireUiEvents(deps: UiEventDeps): void {
   });
 
   deps.characterSelect.on('selectCharacter', (id: unknown) => {
-    client.authenticationController.selectCharacter(id as number);
+    client.selectCharacter(id as number);
   });
 
   deps.characterSelect.on(
@@ -226,11 +227,11 @@ export function wireUiEvents(deps: UiEventDeps): void {
         DialogResourceID.CHARACTER_DELETE_FIRST_CHECK,
       );
       deps.smallConfirm.setContent(
-        `${capitalize(name)} ${strings[1]}`,
-        strings[0],
+        `${capitalize(name)} ${strings![1]!}`,
+        strings![0]!,
       );
       deps.smallConfirm.setCallback(() => {
-        client.authenticationController.requestCharacterDeletion(id);
+        client.requestCharacterDeletion(id);
         deps.characterSelect.confirmed = true;
       });
       deps.smallConfirm.show();
@@ -244,11 +245,11 @@ export function wireUiEvents(deps: UiEventDeps): void {
         DialogResourceID.CHARACTER_DELETE_CONFIRM,
       );
       deps.smallConfirm.setContent(
-        `${capitalize(name)} ${strings[1]}`,
-        strings[0],
+        `${capitalize(name)} ${strings![1]!}`,
+        strings![0]!,
       );
       deps.smallConfirm.setCallback(() => {
-        client.authenticationController.deleteCharacter(id);
+        client.deleteCharacter(id);
       });
       deps.smallConfirm.show();
     },
@@ -268,10 +269,8 @@ export function wireUiEvents(deps: UiEventDeps): void {
 
   // Character creation
   deps.createCharacterForm.on('create', (data: unknown) => {
-    client.authenticationController.requestCharacterCreation(
-      data as Parameters<
-        typeof client.authenticationController.requestCharacterCreation
-      >[0],
+    client.requestCharacterCreation(
+      data as Parameters<typeof client.requestCharacterCreation>[0],
     );
   });
 
@@ -295,17 +294,13 @@ export function wireUiEvents(deps: UiEventDeps): void {
       oldPassword: string;
       newPassword: string;
     }) => {
-      client.authenticationController.changePassword(
-        username,
-        oldPassword,
-        newPassword,
-      );
+      client.changePassword(username, oldPassword, newPassword);
     },
   );
 
   // Chat
   deps.chat.on('chat', (message: unknown) => {
-    client.chatController.chat(message as string);
+    client.chat(message as string);
   });
 
   deps.chat.on('focus', () => {
@@ -337,10 +332,30 @@ export function wireUiEvents(deps: UiEventDeps): void {
       case 'online':
         deps.onlineList.toggle();
         break;
+      case 'guild':
+        deps.guildPanel.toggle();
+        break;
+      case 'settings':
+        deps.settingsDialog.toggle();
+        break;
     }
   };
 
   deps.inGameMenu.on('toggle', handleToggle);
+  deps.mobileToolbar.on('toggle', handleToggle);
+
+  deps.mobileToolbar.on('exit', () => {
+    const text = client.getDialogStrings(
+      DialogResourceID.EXIT_GAME_ARE_YOU_SURE,
+    );
+    deps.smallConfirm.setContent(text![1]!, text![0]!);
+    deps.smallConfirm.setCallback(() => {
+      client.disconnect();
+      deps.hideAllUi();
+      deps.mainMenu.show();
+    });
+    deps.smallConfirm.show();
+  });
 
   // Inventory events
   wireInventoryEvents(deps);
@@ -355,9 +370,9 @@ export function wireUiEvents(deps: UiEventDeps): void {
     }: {
       questId: number;
       dialogId: number;
-      action: number | null;
+      action: number;
     }) => {
-      client.questController.questReply(questId, dialogId, action);
+      client.questReply(questId, dialogId, action);
       client.typing = false;
     },
   );
@@ -398,21 +413,18 @@ export function wireUiEvents(deps: UiEventDeps): void {
   );
 
   deps.inventory.on('openPaperdoll', () => {
-    client.socialController.requestPaperdoll(client.playerId);
+    client.requestPaperdoll(client.playerId);
   });
 
   deps.inventory.on(
     'equipItem',
     ({ slot, itemId }: { slot: unknown; itemId: number }) => {
-      client.inventoryController.equipItem(
-        slot as Parameters<typeof client.inventoryController.equipItem>[0],
-        itemId,
-      );
+      client.equipItem(slot as Parameters<typeof client.equipItem>[0], itemId);
     },
   );
 
   deps.inventory.on('useItem', (itemId: unknown) => {
-    client.inventoryController.useItem(itemId as number);
+    client.useItem(itemId as number);
   });
 
   // Keyboard
@@ -441,18 +453,18 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       const item = client.items.find((i) => i.id === itemId);
       if (!item) return;
 
-      if (at === 'cursor' && !client.mapController.cursorInDropRange()) {
+      if (at === 'cursor' && !client.cursorInDropRange()) {
         client.setStatusLabel(
           EOResourceID.STATUS_LABEL_TYPE_WARNING,
           client.getResourceString(
             EOResourceID.STATUS_LABEL_ITEM_DROP_OUT_OF_RANGE,
-          ),
+          ) ?? '',
         );
         deps.chat.addMessage(
           ChatTab.System,
           client.getResourceString(
             EOResourceID.STATUS_LABEL_ITEM_DROP_OUT_OF_RANGE,
-          ),
+          ) ?? '',
           ChatIcon.DotDotDotDot,
         );
         return;
@@ -479,7 +491,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
         const strings = client.getDialogStrings(
           DialogResourceID.ITEM_IS_LORE_ITEM,
         );
-        deps.smallAlert.setContent(strings[1], strings[0]);
+        deps.smallAlert.setContent(strings![1]!, strings![0]!);
         deps.smallAlert.show();
         return;
       }
@@ -493,7 +505,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
         );
         deps.itemAmountDialog.setCallback(
           (amount) => {
-            client.inventoryController.dropItem(itemId, amount, coords!);
+            client.dropItem(itemId, amount, coords!);
             client.typing = false;
           },
           () => {
@@ -502,7 +514,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
         );
         deps.itemAmountDialog.show();
       } else {
-        client.inventoryController.dropItem(itemId, 1, coords!);
+        client.dropItem(itemId, 1, coords!);
       }
     },
   );
@@ -524,7 +536,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.setCallback(
         (amount) => {
-          client.inventoryController.junkItem(id, amount);
+          client.junkItem(id, amount);
           client.typing = false;
         },
         () => {
@@ -533,7 +545,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.show();
     } else {
-      client.inventoryController.junkItem(id, 1);
+      client.junkItem(id, 1);
     }
   });
 
@@ -554,7 +566,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.setCallback(
         (amount) => {
-          client.chestController.addItem(id, amount);
+          client.addChestItem(id, amount);
           client.typing = false;
         },
         () => {
@@ -563,7 +575,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.show();
     } else {
-      client.chestController.addItem(id, 1);
+      client.addChestItem(id, 1);
     }
   });
 
@@ -579,7 +591,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       const strings = client.getDialogStrings(
         DialogResourceID.LOCKER_DEPOSIT_GOLD_ERROR,
       );
-      deps.smallAlert.setContent(strings[1], strings[0]);
+      deps.smallAlert.setContent(strings![1]!, strings![0]!);
       deps.smallAlert.show();
       return;
     }
@@ -589,7 +601,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       const strings = client.getDialogStrings(
         DialogResourceID.LOCKER_FULL_SINGLE_ITEM_MAX,
       );
-      deps.smallAlert.setContent(strings[1], strings[0]);
+      deps.smallAlert.setContent(strings![1]!, strings![0]!);
       deps.smallAlert.show();
       return;
     }
@@ -605,7 +617,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.setCallback(
         (amount) => {
-          client.lockerController.addItem(id, amount);
+          client.addLockerItem(id, amount);
           client.typing = false;
         },
         () => {
@@ -614,8 +626,12 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       );
       deps.itemAmountDialog.show();
     } else {
-      client.lockerController.addItem(id, 1);
+      client.addLockerItem(id, 1);
     }
+  });
+
+  deps.inventory.on('addTradeItem', (itemId: unknown) => {
+    deps.tradeDialog.offerItem(itemId as number);
   });
 }
 
@@ -634,7 +650,7 @@ function wireShopEvents(deps: UiEventDeps): void {
       const text = client.getDialogStrings(
         DialogResourceID.WARNING_YOU_HAVE_NOT_ENOUGH,
       );
-      deps.smallAlert.setContent(text[1], text[0]);
+      deps.smallAlert.setContent(text![1]!, text![0]!);
       deps.smallAlert.show();
       return;
     }
@@ -653,7 +669,7 @@ function wireShopEvents(deps: UiEventDeps): void {
           const text = client.getDialogStrings(
             DialogResourceID.WARNING_YOU_HAVE_NOT_ENOUGH,
           );
-          deps.smallAlert.setContent(text[1], text[0]);
+          deps.smallAlert.setContent(text![1]!, text![0]!);
           deps.smallAlert.show();
         } else {
           const wordBuy = client.getResourceString(
@@ -668,7 +684,7 @@ function wireShopEvents(deps: UiEventDeps): void {
             client.getResourceString(EOResourceID.DIALOG_SHOP_BUY_ITEMS) ?? '',
           );
           deps.smallConfirm.setCallback(() => {
-            client.shopController.buyItem(shopItem.id, amount);
+            client.buyShopItem(shopItem.id, amount);
           }, true);
           deps.smallConfirm.show();
         }
@@ -690,7 +706,7 @@ function wireShopEvents(deps: UiEventDeps): void {
         client.getResourceString(EOResourceID.DIALOG_SHOP_SELL_ITEMS) ?? '',
       );
       deps.smallConfirm.setCallback(() => {
-        client.shopController.sellItem(shopItem.id, amount);
+        client.sellShopItem(shopItem.id, amount);
       });
       deps.smallConfirm.show();
     };
@@ -748,7 +764,7 @@ function wireShopEvents(deps: UiEventDeps): void {
       `${client.getResourceString(EOResourceID.DIALOG_SHOP_CRAFT_INGREDIENTS)} ${craftItem.name}`,
     );
     deps.largeConfirmSmallHeader.setCallback(() => {
-      client.shopController.craftItem(craftItem.id);
+      client.craftShopItem(craftItem.id);
       deps.largeConfirmSmallHeader.hide();
     });
     deps.largeConfirmSmallHeader.show();
@@ -764,6 +780,7 @@ function wireBankEvents(deps: UiEventDeps): void {
       const strings = client.getDialogStrings(
         DialogResourceID.BANK_ACCOUNT_UNABLE_TO_DEPOSIT,
       );
+      if (!strings) throw new Error('Failed to fetch dialog strings');
       deps.smallAlert.setContent(strings[1], strings[0]);
       deps.smallAlert.show();
       return;
@@ -778,58 +795,59 @@ function wireBankEvents(deps: UiEventDeps): void {
         `${client.getResourceString(EOResourceID.DIALOG_TRANSFER_HOW_MUCH)} ${record.name} ${client.getResourceString(EOResourceID.DIALOG_TRANSFER_DEPOSIT)}`,
       );
       deps.itemAmountDialog.setCallback((amount) => {
-        client.bankController.depositGold(amount);
+        client.depositGold(amount);
         deps.itemAmountDialog.hide();
       });
       deps.itemAmountDialog.show();
       return;
     }
 
-    client.bankController.depositGold(1);
+    client.depositGold(1);
   });
 
   deps.bankDialog.on('withdraw', () => {
-    if (client.bankController.goldBank <= 0) {
+    if (client.goldBank <= 0) {
       const strings = client.getDialogStrings(
         DialogResourceID.BANK_ACCOUNT_UNABLE_TO_WITHDRAW,
       );
+      if (!strings) throw new Error('Failed to fetch dialog strings');
       deps.smallAlert.setContent(strings[1], strings[0]);
       deps.smallAlert.show();
       return;
     }
 
-    if (client.bankController.goldBank > 1) {
+    if (client.goldBank > 1) {
       const record = client.getEifRecordById(1);
       if (!record) throw new Error('Failed to fetch gold record');
       deps.itemAmountDialog.setHeader('bank');
-      deps.itemAmountDialog.setMaxAmount(client.bankController.goldBank);
+      deps.itemAmountDialog.setMaxAmount(client.goldBank);
       deps.itemAmountDialog.setLabel(
         `${client.getResourceString(EOResourceID.DIALOG_TRANSFER_HOW_MUCH)} ${record.name} ${client.getResourceString(EOResourceID.DIALOG_TRANSFER_WITHDRAW)}`,
       );
       deps.itemAmountDialog.setCallback((amount) => {
-        client.bankController.withdrawGold(amount);
+        client.withdrawGold(amount);
         deps.itemAmountDialog.hide();
       });
       deps.itemAmountDialog.show();
       return;
     }
 
-    client.bankController.withdrawGold(1);
+    client.withdrawGold(1);
   });
 
   deps.bankDialog.on('upgrade', () => {
-    if (client.bankController.lockerUpgrades >= MAX_LOCKER_UPGRADES) {
+    if (client.lockerUpgrades >= MAX_LOCKER_UPGRADES) {
       const strings = client.getDialogStrings(
         DialogResourceID.LOCKER_UPGRADE_IMPOSSIBLE,
       );
-      deps.smallAlert.setContent(strings[1], strings[0]);
+      deps.smallAlert.setContent(strings![1]!, strings![0]!);
       deps.smallAlert.show();
       return;
     }
 
     const requiredGold =
       LOCKER_UPGRADE_BASE_COST +
-      LOCKER_UPGRADE_COST_STEP * client.bankController.lockerUpgrades;
+      LOCKER_UPGRADE_COST_STEP * client.lockerUpgrades;
     const gold = client.items.find((i) => i.id === 1)?.amount || 0;
 
     const record = client.getEifRecordById(1);
@@ -839,7 +857,10 @@ function wireBankEvents(deps: UiEventDeps): void {
       const strings = client.getDialogStrings(
         DialogResourceID.WARNING_YOU_HAVE_NOT_ENOUGH,
       );
-      deps.smallAlert.setContent(`${strings[1]} ${record.name}`, strings[0]);
+      deps.smallAlert.setContent(
+        `${strings![1]!} ${record.name}`,
+        strings![0]!,
+      );
       deps.smallAlert.show();
       return;
     }
@@ -848,11 +869,11 @@ function wireBankEvents(deps: UiEventDeps): void {
       DialogResourceID.LOCKER_UPGRADE_UNIT,
     );
     deps.smallConfirm.setContent(
-      `${strings[1]} ${requiredGold} ${record.name}`,
-      strings[0],
+      `${strings![1]!} ${requiredGold} ${record.name}`,
+      strings![0]!,
     );
     deps.smallConfirm.setCallback(() => {
-      client.lockerController.upgradeLocker();
+      client.upgradeLocker();
     });
     deps.smallConfirm.show();
   });

@@ -14,12 +14,13 @@ import {
   PartyRequestType,
   PartyTargetGroupServerPacket,
 } from 'eolib';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
-import { Emote } from '../render/emote';
+import { Emote } from '../render';
+import { settings } from '../settings';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
-import { capitalize } from '../utils/capitalize';
+import { ChatIcon } from '../ui/chat/chat';
+import { capitalize } from '../utils';
 
 function handlePartyReply(client: Client, reader: EoReader) {
   const packet = PartyReplyServerPacket.deserialize(reader);
@@ -61,14 +62,14 @@ function handlePartyReply(client: Client, reader: EoReader) {
         EOResourceID.STATUS_LABEL_TYPE_WARNING,
         client.getResourceString(
           EOResourceID.STATUS_LABEL_PARTY_THE_PARTY_IS_FULL,
-        ),
+        )!,
       );
       client.emit('chat', {
         tab: ChatTab.System,
         icon: ChatIcon.Error,
         message: client.getResourceString(
           EOResourceID.STATUS_LABEL_PARTY_THE_PARTY_IS_FULL,
-        ),
+        )!,
       });
       return;
     }
@@ -76,10 +77,11 @@ function handlePartyReply(client: Client, reader: EoReader) {
 }
 
 function handlePartyRequest(client: Client, reader: EoReader) {
+  if (settings.get('interactions') === 'disabled') return;
   const packet = PartyRequestServerPacket.deserialize(reader);
   const inviter = client.getCharacterById(packet.inviterPlayerId);
   if (!inviter) {
-    client.sessionController.requestCharacterRange([packet.inviterPlayerId]);
+    client.requestCharacterRange([packet.inviterPlayerId]);
   }
 
   const strings = client.getDialogStrings(
@@ -89,13 +91,10 @@ function handlePartyRequest(client: Client, reader: EoReader) {
   );
 
   client.showConfirmation(
-    `${capitalize(packet.playerName)} ${strings[1]}`,
-    strings[0],
+    `${capitalize(packet.playerName)} ${strings![1]!}`,
+    strings![0]!,
     () => {
-      client.socialController.acceptPartyRequest(
-        packet.inviterPlayerId,
-        packet.requestType,
-      );
+      client.acceptPartyRequest(packet.inviterPlayerId, packet.requestType);
     },
   );
 }
@@ -106,14 +105,14 @@ function handlePartyCreate(client: Client, reader: EoReader) {
   playSfxById(SfxId.JoinParty);
   client.setStatusLabel(
     EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
-    client.getResourceString(EOResourceID.STATUS_LABEL_PARTY_YOU_JOINED),
+    client.getResourceString(EOResourceID.STATUS_LABEL_PARTY_YOU_JOINED)!,
   );
   client.emit('chat', {
     tab: ChatTab.System,
     icon: ChatIcon.PlayerParty,
     message: client.getResourceString(
       EOResourceID.STATUS_LABEL_PARTY_YOU_JOINED,
-    ),
+    )!,
   });
   client.emit('partyUpdated', undefined);
 }
@@ -218,10 +217,7 @@ function handlePartyTargetGroup(client: Client, reader: EoReader) {
       const memberCharacter = client.getCharacterById(gain.playerId);
       if (memberCharacter) {
         playSfxById(SfxId.LevelUp);
-        client.animationController.characterEmotes.set(
-          gain.playerId,
-          new Emote(EmoteType.LevelUp),
-        );
+        client.characterEmotes.set(gain.playerId, new Emote(EmoteType.LevelUp));
       }
 
       const member = client.partyMembers.find(
@@ -238,47 +234,45 @@ function handlePartyTargetGroup(client: Client, reader: EoReader) {
 }
 
 export function registerPartyHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Reply,
     (reader) => handlePartyReply(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Request,
     (reader) => handlePartyRequest(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Create,
     (reader) => handlePartyCreate(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Add,
     (reader) => handlePartyAdd(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Remove,
     (reader) => handlePartyRemove(client, reader),
   );
-  client.bus!.registerPacketHandler(
-    PacketFamily.Party,
-    PacketAction.Close,
-    () => handlePartyClose(client),
+  client.bus.registerPacketHandler(PacketFamily.Party, PacketAction.Close, () =>
+    handlePartyClose(client),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.List,
     (reader) => handlePartyList(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.Agree,
     (reader) => handlePartyAgree(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Party,
     PacketAction.TargetGroup,
     (reader) => handlePartyTargetGroup(client, reader),

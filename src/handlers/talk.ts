@@ -14,12 +14,13 @@ import {
   TalkTellServerPacket,
 } from 'eolib';
 import { ChatBubble } from '../chat-bubble';
-import type { Client } from '../client';
+import { ChatTab, type Client } from '../client';
 import { COLORS } from '../consts';
 import { EOResourceID } from '../edf';
+import { settings } from '../settings';
 import { playSfxById, SfxId } from '../sfx';
-import { ChatIcon, ChatTab } from '../types';
-import { capitalize } from '../utils/capitalize';
+import { ChatIcon } from '../ui/chat/chat';
+import { capitalize } from '../utils';
 
 function handleTalkPlayer(client: Client, reader: EoReader) {
   const packet = TalkPlayerServerPacket.deserialize(reader);
@@ -30,9 +31,9 @@ function handleTalkPlayer(client: Client, reader: EoReader) {
     return;
   }
 
-  client.animationController.characterChats.set(
+  client.characterChats.set(
     character.playerId,
-    new ChatBubble(client.sans11!, packet.message),
+    new ChatBubble(client.sans11, packet.message),
   );
 
   client.emit('chat', {
@@ -71,6 +72,7 @@ function handleTalkAdmin(client: Client, reader: EoReader) {
 }
 
 function handleTalkTell(client: Client, reader: EoReader) {
+  if (settings.get('privateMessage') === 'disabled') return;
   const packet = TalkTellServerPacket.deserialize(reader);
   client.emit('chat', {
     icon: ChatIcon.Note,
@@ -83,9 +85,9 @@ function handleTalkTell(client: Client, reader: EoReader) {
 
 function handleTalkAnnounce(client: Client, reader: EoReader) {
   const packet = TalkAnnounceServerPacket.deserialize(reader);
-  client.animationController.characterChats.set(
+  client.characterChats.set(
     client.playerId,
-    new ChatBubble(client.sans11!, packet.message),
+    new ChatBubble(client.sans11, packet.message),
   );
   client.emit('chat', {
     tab: ChatTab.Local,
@@ -131,10 +133,10 @@ function handleTalkOpen(client: Client, reader: EoReader) {
         (!c.invisible || client.admin !== AdminLevel.Player),
     )
   ) {
-    client.animationController.characterChats.set(
+    client.characterChats.set(
       packet.playerId,
       new ChatBubble(
-        client.sans11!,
+        client.sans11,
         packet.message,
         COLORS.ChatBubble,
         COLORS.ChatBubbleBackgroundParty,
@@ -158,42 +160,42 @@ function handleTalkReply(client: Client, reader: EoReader) {
 }
 
 export function registerTalkHandlers(client: Client) {
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Player,
     (reader) => handleTalkPlayer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Server,
     (reader) => handleTalkServer(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Announce,
     (reader) => handleTalkAnnounce(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Msg,
     (reader) => handleTalkMsg(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Admin,
     (reader) => handleTalkAdmin(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Tell,
     (reader) => handleTalkTell(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Open,
     (reader) => handleTalkOpen(client, reader),
   );
-  client.bus!.registerPacketHandler(
+  client.bus.registerPacketHandler(
     PacketFamily.Talk,
     PacketAction.Reply,
     (reader) => handleTalkReply(client, reader),
