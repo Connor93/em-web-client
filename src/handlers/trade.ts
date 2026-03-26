@@ -34,18 +34,12 @@ function handleTradeOpen(client: Client, reader: EoReader) {
 
 function handleTradeReply(client: Client, reader: EoReader) {
   const packet = TradeReplyServerPacket.deserialize(reader);
-  client.emit('tradeUpdated', {
-    tradeData: packet.tradeData,
-    partnerAgreed: false,
-  });
+  client.emit('tradeUpdated', { tradeData: packet.tradeData });
 }
 
 function handleTradeAdmin(client: Client, reader: EoReader) {
   const packet = TradeAdminServerPacket.deserialize(reader);
-  client.emit('tradeUpdated', {
-    tradeData: packet.tradeData,
-    partnerAgreed: true,
-  });
+  client.emit('tradeUpdated', { tradeData: packet.tradeData });
 }
 
 function handleTradeAgree(client: Client, reader: EoReader) {

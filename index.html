@@ -567,7 +567,13 @@
         <div id="trade-dialog" class="hidden">
           <div class="trade-header">Trade</div>
           <div class="trade-columns"></div>
-          <div class="trade-footer"></div>
+          <div class="trade-footer">
+            <div class="trade-footer-left">
+              <button class="trade-btn" data-id="add-item">Add Item</button>
+              <button class="trade-btn primary" data-id="agree">Agree</button>
+            </div>
+            <button class="trade-btn" data-id="cancel">Cancel</button>
+          </div>
         </div>
 
         <div id="guild-dialog" class="hidden">
@@ -581,7 +587,10 @@
         <div class="trade-req-text">
           <span class="trade-req-name"></span> wants to trade with you.
         </div>
-        <div class="trade-req-buttons"></div>
+        <div class="trade-req-buttons">
+          <button class="trade-btn" data-id="decline">Decline</button>
+          <button class="trade-btn primary" data-id="accept">Accept</button>
+        </div>
       </div>
 
       <div id="guild-create-invite" class="hidden">
