@@ -17,7 +17,6 @@
 /* ── Top Section (base stats + secondary) ────────────────────────── */
 
 #stats > div:first-child {
-  background: rgba(45, 38, 28, 0.9);
   border-bottom: 1px solid rgba(212, 184, 150, 0.15);
   padding: 8px 12px;
   display: grid;

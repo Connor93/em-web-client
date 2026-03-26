@@ -29,6 +29,7 @@ import {
 import { handleItemCommand, handleNpcCommand } from './handlers';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
 import { BarberDialog } from './ui/barber-dialog/barber-dialog';
+import { initDraggableDialogs } from './ui/base-ui';
 import { BoardDialog } from './ui/board-dialog';
 import { Book } from './ui/book/book';
 import { ChangePasswordForm } from './ui/change-password';
@@ -420,6 +421,26 @@ wireUiEvents({
   hideAllUi,
   initializeSocket,
 });
+
+// ── Draggable Dialog Windows ─────────────────────────────────────────────
+
+initDraggableDialogs([
+  'inventory',
+  'stats',
+  'spell-book',
+  'online-list',
+  'party',
+  'paperdoll',
+  'bank',
+  'board',
+  'book',
+  'chest',
+  'locker',
+  'settings-dialog',
+  'quest-dialog',
+  'info-dialog',
+  'guild-panel',
+]);
 
 // ── Input Listeners ──────────────────────────────────────────────────────
 
