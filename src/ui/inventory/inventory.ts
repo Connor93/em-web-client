@@ -1,10 +1,11 @@
-import { type Item, ItemSize } from 'eolib';
+import { type Item, ItemSize, ItemType } from 'eolib';
 import mitt from 'mitt';
 import {
   type Client,
   type EquipmentSlot,
   getEquipmentSlotFromString,
 } from '../../client';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { getItemMeta } from '../../utils';
 import type { Vector2 } from '../../vector';
@@ -87,9 +88,18 @@ export class Inventory extends Base {
     '.tabs > button:nth-child(2)',
   )!;
   private lastItemSelected = 0;
+  private mobileActionBar: HTMLDivElement | null = null;
 
   private onPointerDown(e: PointerEvent, el: HTMLDivElement, item: Item) {
     if (e.button !== 0 && e.pointerType !== 'touch') return;
+
+    // On mobile: tap to select + show action bar (no drag)
+    if (isMobile()) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.selectMobileItem(el, item);
+      return;
+    }
 
     const now = new Date();
     if (this.pointerDownAt) {
@@ -626,11 +636,132 @@ export class Inventory extends Base {
     return true;
   }
 
+  /* ── Mobile Action Bar ─────────────────────────────────────────── */
+
+  private selectMobileItem(el: HTMLDivElement, item: Item) {
+    // Clear previous selection
+    this.grid.querySelectorAll('.mobile-selected').forEach((e) => {
+      e.classList.remove('mobile-selected');
+    });
+
+    // Highlight new selection
+    el.classList.add('mobile-selected');
+
+    playSfxById(SfxId.InventoryPickup);
+    this.showMobileActionBar(item);
+  }
+
+  private showMobileActionBar(item: Item) {
+    this.hideMobileActionBar();
+
+    const bar = document.createElement('div');
+    bar.className = 'mobile-action-bar';
+
+    const record = this.client.getEifRecordById(item.id);
+    const name = document.createElement('span');
+    name.className = 'action-item-name';
+    name.textContent = record?.name ?? `Item #${item.id}`;
+    bar.appendChild(name);
+
+    // Use button
+    const btnUse = document.createElement('button');
+    btnUse.textContent = 'Use';
+    btnUse.addEventListener('click', () => {
+      this.emitter.emit('useItem', item.id);
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(btnUse);
+
+    // Equip button — only for equippable items
+    if (record) {
+      const slot = getEquipmentSlotFromString(
+        this.getEquipSlotName(record.type),
+      );
+      if (typeof slot !== 'undefined') {
+        const btnEquip = document.createElement('button');
+        btnEquip.textContent = 'Equip';
+        btnEquip.addEventListener('click', () => {
+          this.emitter.emit('equipItem', { slot, itemId: item.id });
+          this.hideMobileActionBar();
+        });
+        bar.appendChild(btnEquip);
+      }
+    }
+
+    // Drop button
+    const btnDrop = document.createElement('button');
+    btnDrop.textContent = 'Drop';
+    btnDrop.addEventListener('click', () => {
+      this.emitter.emit('dropItem', { at: 'feet', itemId: item.id });
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(btnDrop);
+
+    // Junk button
+    const btnJunk = document.createElement('button');
+    btnJunk.textContent = 'Junk';
+    btnJunk.addEventListener('click', () => {
+      this.emitter.emit('junkItem', item.id);
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(btnJunk);
+
+    this.mobileActionBar = bar;
+    this.container.appendChild(bar);
+  }
+
+  private hideMobileActionBar() {
+    if (this.mobileActionBar) {
+      this.mobileActionBar.remove();
+      this.mobileActionBar = null;
+    }
+    this.mobileActionBar = null;
+    this.grid.querySelectorAll('.mobile-selected').forEach((e) => {
+      e.classList.remove('mobile-selected');
+    });
+  }
+
+  private getEquipSlotName(itemType: ItemType): string {
+    switch (itemType) {
+      case ItemType.Weapon:
+        return 'weapon';
+      case ItemType.Shield:
+        return 'shield';
+      case ItemType.Armor:
+        return 'armor';
+      case ItemType.Hat:
+        return 'hat';
+      case ItemType.Boots:
+        return 'boots';
+      case ItemType.Gloves:
+        return 'gloves';
+      case ItemType.Accessory:
+        return 'accessory';
+      case ItemType.Belt:
+        return 'belt';
+      case ItemType.Necklace:
+        return 'necklace';
+      case ItemType.Ring:
+        return 'ring-1';
+      case ItemType.Armlet:
+        return 'armlet-1';
+      case ItemType.Bracer:
+        return 'bracer-1';
+      default:
+        return '';
+    }
+  }
+
   show() {
     this.render();
     this.container.classList.remove('hidden');
     this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     addMobileCloseButton(this.container, () => this.hide());
+  }
+
+  hide() {
+    this.hideMobileActionBar();
+    super.hide();
   }
 
   toggle() {
