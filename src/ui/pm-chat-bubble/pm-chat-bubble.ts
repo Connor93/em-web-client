@@ -175,29 +175,38 @@ export class PmChatBubble {
   private setupDrag(header: HTMLDivElement) {
     let dragging = false;
     let didDrag = false;
-    let startX = 0;
-    let startY = 0;
-    let offsetX = 0;
-    let offsetY = 0;
+    let startMouseX = 0;
+    let startMouseY = 0;
+    let startLeft = 0;
+    let startTop = 0;
     const DRAG_THRESHOLD = 5;
+
+    const getScale = (): number => {
+      const ui = document.getElementById('ui');
+      if (!ui) return 1;
+      const m = ui.style.transform.match(/scale\(([^)]+)\)/);
+      return m ? Number.parseFloat(m[1]) : 1;
+    };
 
     const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('.pm-close-btn')) return;
 
+      const scale = getScale();
       dragging = true;
       didDrag = false;
-      startX = e.clientX;
-      startY = e.clientY;
+      startMouseX = e.clientX;
+      startMouseY = e.clientY;
+
       const rect = this.el.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
+      startLeft = rect.left / scale;
+      startTop = rect.top / scale;
       e.preventDefault();
     };
 
     // Listen on both the pill (collapsed) and header (expanded)
     this.el.addEventListener('mousedown', (e: MouseEvent) => {
-      if (this.expanded) return; // expanded uses header
+      if (this.expanded) return;
       onMouseDown(e);
     });
     header.addEventListener('mousedown', (e: MouseEvent) => {
@@ -206,13 +215,29 @@ export class PmChatBubble {
 
     document.addEventListener('mousemove', (e: MouseEvent) => {
       if (!dragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      if (!didDrag && Math.abs(dx) + Math.abs(dy) < DRAG_THRESHOLD) return;
+      const rawDx = e.clientX - startMouseX;
+      const rawDy = e.clientY - startMouseY;
+      if (!didDrag && Math.abs(rawDx) + Math.abs(rawDy) < DRAG_THRESHOLD)
+        return;
       didDrag = true;
+
+      const scale = getScale();
+      const dx = rawDx / scale;
+      const dy = rawDy / scale;
+
+      // Clamp to #ui container bounds
+      const uiEl = document.getElementById('ui');
+      const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
+      const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
+      const elW = this.el.offsetWidth;
+      const elH = this.el.offsetHeight;
+
+      const newLeft = Math.max(0, Math.min(startLeft + dx, containerW - elW));
+      const newTop = Math.max(0, Math.min(startTop + dy, containerH - elH));
+
       this.el.style.position = 'fixed';
-      this.el.style.left = `${e.clientX - offsetX}px`;
-      this.el.style.top = `${e.clientY - offsetY}px`;
+      this.el.style.left = `${newLeft}px`;
+      this.el.style.top = `${newTop}px`;
     });
 
     document.addEventListener('mouseup', () => {
