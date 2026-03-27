@@ -797,6 +797,28 @@ body.is-mobile #change-password-form {
   margin-top: auto;
 }
 
+.dialog-search {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 4px 12px;
+  padding: 5px 8px;
+  background: rgba(18, 16, 12, 0.8);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 4px;
+  color: #d4b896;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+}
+
+.dialog-search::placeholder {
+  color: rgba(212, 184, 150, 0.35);
+}
+
+.dialog-search:focus {
+  border-color: rgba(212, 184, 150, 0.45);
+}
+
 .dialog-md .dialog-contents .player {
   flex-direction: column;
   width: 103px;

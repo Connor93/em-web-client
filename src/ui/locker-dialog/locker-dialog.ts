@@ -25,6 +25,8 @@ export class LockerDialog extends Base {
   );
   private items: ThreeItem[] = [];
   private activeFilter: FilterType = 'all';
+  private searchInput =
+    this.container.querySelector<HTMLInputElement>('.dialog-search')!;
 
   constructor(client: Client) {
     super();
@@ -44,6 +46,11 @@ export class LockerDialog extends Base {
         this.render();
       });
     }
+
+    // Search filtering
+    this.searchInput.addEventListener('input', () => {
+      this.render();
+    });
   }
 
   setItems(items: ThreeItem[]) {
@@ -61,6 +68,7 @@ export class LockerDialog extends Base {
   }
 
   show() {
+    this.searchInput.value = '';
     this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
@@ -140,9 +148,14 @@ export class LockerDialog extends Base {
     this.grid.innerHTML = '';
     this.title.innerText = `${capitalize(this.client.name)}'s ${this.client.getResourceString(EOResourceID.DIALOG_TITLE_PRIVATE_LOCKER)} [${this.items.length}]`;
 
+    const searchTerm = this.searchInput.value.toLowerCase();
+
     const filtered = this.items.filter((item) => {
       const record = this.client.getEifRecordById(item.id);
-      return record && this.matchesFilter(record.type);
+      if (!record || !this.matchesFilter(record.type)) return false;
+      if (searchTerm && !record.name.toLowerCase().includes(searchTerm))
+        return false;
+      return true;
     });
 
     if (filtered.length === 0) {
