@@ -66,7 +66,7 @@
 
 .grid-card img {
   max-width: 56px;
-  height: 40px;
+  max-height: 40px;
   object-fit: contain;
   margin-bottom: 3px;
   image-rendering: pixelated;
