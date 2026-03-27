@@ -48,6 +48,9 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
       target.closest('.locker-items') ||
       target.closest('.dialog-contents') ||
       target.closest('.spell-grid') ||
+      target.closest('.shop-grid') ||
+      target.closest('.locker-grid') ||
+      target.closest('.grid-card') ||
       target.tagName === 'IMG' ||
       target.tagName === 'CANVAS'
     )
