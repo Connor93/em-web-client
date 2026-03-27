@@ -679,7 +679,7 @@ export class Inventory extends Base {
         'undefined';
     const isUsable = record && usableTypes.includes(record.type);
 
-    if (isUsable || isEquippable) {
+    if (isUsable) {
       const btnUse = document.createElement('button');
       btnUse.textContent = 'Use';
       btnUse.addEventListener('click', () => {
