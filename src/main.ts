@@ -440,6 +440,8 @@ initDraggableDialogs([
   'book',
   'chest',
   'locker',
+  'shop',
+  'skill-master',
   'settings-dialog',
   'quest-dialog',
   'info-dialog',

@@ -111,13 +111,17 @@ export function restoreOrCenter(element: HTMLElement) {
   if (!id) return;
 
   const scale = getUiScale();
+  const uiEl = document.getElementById('ui');
+  // Use the #ui container dimensions (CSS-space, before transform)
+  const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
+  const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
 
   const saved = localStorage.getItem(STORAGE_PREFIX + id);
   if (saved) {
     try {
       const { x, y } = JSON.parse(saved);
-      const maxX = window.innerWidth / scale - 50;
-      const maxY = window.innerHeight / scale - 50;
+      const maxX = containerW - 50;
+      const maxY = containerH - 50;
       element.style.position = 'fixed';
       element.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
       element.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
@@ -130,15 +134,13 @@ export function restoreOrCenter(element: HTMLElement) {
     }
   }
 
-  // Center on screen (in scaled coordinates)
-  const viewW = window.innerWidth / scale;
-  const viewH = window.innerHeight / scale;
+  // Center in the #ui container (in CSS-space coordinates)
   const elW = element.offsetWidth;
   const elH = element.offsetHeight;
 
   element.style.position = 'fixed';
-  element.style.left = `${(viewW - elW) / 2}px`;
-  element.style.top = `${(viewH - elH) / 2}px`;
+  element.style.left = `${(containerW - elW) / 2}px`;
+  element.style.top = `${(containerH - elH) / 2}px`;
   element.style.right = 'auto';
   element.style.bottom = 'auto';
   element.style.margin = '0';
