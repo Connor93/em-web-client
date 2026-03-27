@@ -24,8 +24,8 @@
   margin-bottom: 3px;
 }
 
-input[type="text"],
-input[type="password"] {
+#login input[type="text"],
+#login input[type="password"] {
   width: 100%;
   padding: 6px 10px;
   background: rgba(30, 25, 18, 0.7);
@@ -38,8 +38,8 @@ input[type="password"] {
   box-sizing: border-box;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
+#login input[type="text"]:focus,
+#login input[type="password"]:focus {
   border-color: rgba(212, 184, 150, 0.4);
 }
 
