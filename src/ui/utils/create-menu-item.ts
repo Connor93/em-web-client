@@ -160,10 +160,13 @@ export function createGridItemCard(
   tooltip.innerText = lines.join('\n');
   card.appendChild(tooltip);
 
-  // Position tooltip near the cursor
+  // Position tooltip near the cursor, accounting for UI scale
   card.addEventListener('mousemove', (e: MouseEvent) => {
-    tooltip.style.left = `${e.clientX + 12}px`;
-    tooltip.style.top = `${e.clientY + 12}px`;
+    const uiEl = document.getElementById('ui');
+    const m = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
+    const scale = m ? Number.parseFloat(m[1]) : 1;
+    tooltip.style.left = `${(e.clientX + 12) / scale}px`;
+    tooltip.style.top = `${(e.clientY + 12) / scale}px`;
   });
 
   return card;

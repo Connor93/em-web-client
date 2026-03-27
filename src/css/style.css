@@ -773,6 +773,8 @@ body.is-mobile #change-password-form {
   user-select: none;
   overflow: hidden;
   font-family: inherit;
+  display: flex;
+  flex-direction: column;
 }
 
 .dialog-md .dialog-header {
@@ -792,6 +794,7 @@ body.is-mobile #change-password-form {
   justify-content: center;
   gap: 8px;
   border-top: 1px solid rgba(212, 184, 150, 0.08);
+  margin-top: auto;
 }
 
 .dialog-md .dialog-contents .player {

@@ -30,6 +30,7 @@
   overflow-y: auto;
   max-height: 240px;
   min-height: 120px;
+  align-content: start;
 }
 
 .locker-grid-empty {

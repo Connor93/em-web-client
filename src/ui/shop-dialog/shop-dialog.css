@@ -37,6 +37,7 @@
   overflow-y: auto;
   max-height: 280px;
   min-height: 180px;
+  align-content: start;
 }
 
 /* Shared grid card styles */
@@ -55,6 +56,7 @@
     background 0.12s,
     border-color 0.12s;
   min-height: 72px;
+  max-height: 90px;
 }
 
 .grid-card:hover {
