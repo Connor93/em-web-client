@@ -339,231 +339,68 @@ div.icon[data-id="23"] {
   --height: 18px;
 }
 
-.img-btn {
-  --bg-url: "";
-  --bg-x: 0;
-  --bg-y: 0;
-  --hover-x: 0;
-  --hover-y: 0;
-  --width: 0;
-  --height: 0;
+/* ── Themed Buttons ──────────────────────────────────────────────── */
 
-  background-color: transparent;
-  border: none;
-  outline: none;
-  /* biome-ignore lint/suspicious/noShorthandPropertyOverrides: CSS variables */
-  background: var(--bg-url) var(--bg-x) var(--bg-y);
-  width: var(--width);
-  height: var(--height);
+.themed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 18px;
+  min-width: 70px;
+  background: rgba(18, 16, 12, 0.88);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 4px;
+  color: #d4b896;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  white-space: nowrap;
 }
 
-.img-btn:hover {
-  background-position: var(--hover-x) var(--hover-y);
+.themed-btn:hover {
+  background: rgba(42, 36, 28, 0.95);
+  border-color: rgba(212, 184, 150, 0.45);
+  color: #e8d5b8;
 }
 
-/* Specific buttons */
-.img-btn[data-id="create-account"] {
-  --bg-url: url("/gfx/gfx001/113.png");
-  --bg-x: 0;
-  --bg-y: 0;
-  --hover-x: -180px;
-  --hover-y: 0;
-  --width: 180px;
-  --height: 40px;
+.themed-btn:active {
+  background: rgba(55, 47, 36, 0.95);
+  transform: translateY(1px);
 }
 
-.img-btn[data-id="play-game"] {
-  --bg-url: url("/gfx/gfx001/113.png");
-  --bg-x: 0;
-  --bg-y: -40px;
-  --hover-x: -180px;
-  --hover-y: -40px;
-  --width: 180px;
-  --height: 40px;
+/* Large variant — main menu / account screens */
+.themed-btn.lg {
+  padding: 10px 28px;
+  min-width: 140px;
+  font-size: 14px;
+  border-radius: 6px;
+  letter-spacing: 0.8px;
 }
 
-.img-btn[data-id="view-credits"] {
-  --bg-url: url("/gfx/gfx001/113.png");
-  --bg-x: 0;
-  --bg-y: -80px;
-  --hover-x: -180px;
-  --hover-y: -80px;
-  --width: 180px;
-  --height: 40px;
+/* Small icon variant — toggle arrows, stat upgrades, quest select */
+.themed-btn.sm {
+  padding: 2px 6px;
+  min-width: 0;
+  font-size: 11px;
+  border-radius: 3px;
+  line-height: 1;
 }
 
-.img-btn[data-id="create"] {
-  --bg-url: url("/gfx/gfx001/114.png");
-  --bg-x: 0;
-  --bg-y: 0;
-  --hover-x: -120px;
-  --hover-y: 0;
-  --width: 120px;
-  --height: 40px;
+/* Danger variant — delete buttons */
+.themed-btn.danger:hover {
+  border-color: rgba(239, 154, 154, 0.4);
+  color: #ef9a9a;
 }
 
-.img-btn[data-id="cancel-big"] {
-  --bg-url: url("/gfx/gfx001/114.png");
-  --bg-x: 0;
-  --bg-y: -40px;
-  --hover-x: -120px;
-  --hover-y: -40px;
-  --width: 120px;
-  --height: 40px;
-}
-
-.img-btn[data-id="connect-big"] {
-  --bg-url: url("/gfx/gfx001/114.png");
-  --bg-x: 0;
-  --bg-y: -80px;
-  --hover-x: -120px;
-  --hover-y: -80px;
-  --width: 120px;
-  --height: 40px;
-}
-
-.img-btn[data-id="password"] {
-  --bg-url: url("/gfx/gfx001/114.png");
-  --bg-x: 0;
-  --bg-y: -120px;
-  --hover-x: -120px;
-  --hover-y: -120px;
-  --width: 120px;
-  --height: 40px;
-}
-
-.img-btn[data-id="play-game"] {
-  --bg-url: url("/gfx/gfx001/113.png");
-  --bg-x: 0;
-  --bg-y: -40px;
-  --hover-x: -180px;
-  --hover-y: -40px;
-  --width: 180px;
-  --height: 40px;
-}
-
-.img-btn[data-id="connect"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: 0;
-  --hover-x: -91px;
-  --hover-y: -0;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="cancel"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -29px;
-  --hover-x: -91px;
-  --hover-y: -29px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="login"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -58px;
-  --hover-x: -91px;
-  --hover-y: -58px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="delete"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -87px;
-  --hover-x: -91px;
-  --hover-y: -87px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="ok"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -116px;
-  --hover-x: -91px;
-  --hover-y: -116px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="back"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -145px;
-  --hover-x: -91px;
-  --hover-y: -145px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="next"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -203px;
-  --hover-x: -91px;
-  --hover-y: -203px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="add"] {
-  --bg-url: url("/gfx/gfx001/115.png");
-  --bg-x: 0;
-  --bg-y: -174px;
-  --hover-x: -91px;
-  --hover-y: -174px;
-  --width: 91px;
-  --height: 29px;
-}
-
-.img-btn[data-id="exit-game"] {
-  --bg-url: url("/gfx/gfx001/124.png");
-  --bg-x: 0;
-  --bg-y: 0;
-  --hover-x: 0;
-  --hover-y: -53px;
-  --width: 51px;
-  --height: 53px;
-}
-
-.img-btn[data-id="toggle-arrow"] {
-  background-color: #000;
-  --bg-url: url("/gfx/gfx001/122.png");
-  --bg-x: -184px;
-  --bg-y: -39px;
-  --hover-x: -205px;
-  --hover-y: -39px;
-  --width: 21px;
-  --height: 18px;
-}
-
-.img-btn[data-id="quest-select"] {
-  background-color: #000;
-  --bg-url: url("/gfx/gfx002/127.png");
-  --bg-x: -303px;
-  --bg-y: -242px;
-  --hover-x: -303px;
-  --hover-y: -242px;
-  --width: 16px;
-  --height: 15px;
-}
-
-.img-btn[data-id="upgrade-stat"] {
-  background-color: #000;
-  --bg-url: url("/gfx/gfx002/127.png");
-  --bg-x: -215px;
-  --bg-y: -386px;
-  --hover-x: -234px;
-  --hover-y: -386px;
-  --width: 19px;
-  --height: 15px;
+/* Primary variant — OK / Confirm */
+.themed-btn.primary:hover {
+  border-color: rgba(150, 212, 170, 0.4);
+  color: #a5d6a7;
 }
 
 #offset-tweaker {
