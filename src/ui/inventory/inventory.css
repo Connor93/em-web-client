@@ -84,13 +84,17 @@
   background: rgba(212, 184, 150, 0.15);
 }
 
+/* Empty placeholder cells that make the grid visible */
+#inventory .cell {
+  background: rgba(10, 9, 7, 0.65);
+}
+
 #inventory .item {
   position: relative;
   display: flex;
   justify-content: center;
-  background: rgba(18, 16, 12, 0.85);
+  background: rgba(10, 9, 7, 0.65);
   align-items: center;
-  border: 1px solid rgba(212, 184, 150, 0.08);
   transition: background 0.1s;
 }
 

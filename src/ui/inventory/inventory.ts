@@ -395,6 +395,13 @@ export class Inventory extends Base {
   private render() {
     this.grid.innerHTML = '';
 
+    // Fill the entire grid with empty cells so CSS grid-gap lines are visible
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      this.grid.appendChild(cell);
+    }
+
     this.currentWeight.innerText = this.client.weight.current.toString();
     this.maxWeight.innerText = this.client.weight.max.toString();
 
