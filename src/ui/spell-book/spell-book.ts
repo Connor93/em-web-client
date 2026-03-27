@@ -136,13 +136,13 @@ export class SpellBook extends BaseDialogMd<Events> {
 
     const { el, ghost, spellId } = this.dragging;
 
-    const target = document.elementFromPoint(e.clientX, e.clientY);
-
     playSfxById(SfxId.InventoryPlace);
     ghost.remove();
     el.style.display = 'flex';
     this.teardownDragListeners();
     this.dragging = null;
+
+    const target = document.elementFromPoint(e.clientX, e.clientY);
 
     if (!target) return;
 
