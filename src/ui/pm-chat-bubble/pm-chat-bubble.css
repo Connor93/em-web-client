@@ -1,0 +1,216 @@
+/* ── PM Chat Bubble ──────────────────────────────────────────────── */
+
+#pm-bubbles {
+  position: fixed;
+  top: 60px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1060;
+  pointer-events: none;
+}
+
+/* ── Collapsed pill ──────────────────────────────────────────────── */
+
+.pm-bubble {
+  pointer-events: auto;
+  width: 140px;
+  background: rgba(18, 16, 12, 0.92);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  position: relative;
+  font-family: inherit;
+  color: #d4b896;
+}
+
+.pm-bubble:hover {
+  border-color: rgba(212, 184, 150, 0.5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.pm-bubble .pm-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.pm-bubble .pm-unread {
+  display: none;
+  width: 8px;
+  height: 8px;
+  background: #e8a54b;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pm-pulse 1.4s ease-in-out infinite;
+}
+
+.pm-bubble .pm-unread.active {
+  display: block;
+}
+
+.pm-bubble .pm-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(212, 184, 150, 0.4);
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.pm-bubble .pm-close-btn:hover {
+  color: #e0daca;
+  background: rgba(212, 184, 150, 0.12);
+}
+
+@keyframes pm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ── Expanded chat window ────────────────────────────────────────── */
+
+.pm-bubble.expanded {
+  width: 260px;
+  border-radius: 8px;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  cursor: default;
+}
+
+.pm-bubble.expanded .pm-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.1);
+  cursor: move;
+}
+
+.pm-bubble.expanded .pm-name {
+  font-size: 12px;
+}
+
+.pm-bubble.expanded .pm-unread {
+  display: none !important;
+}
+
+.pm-bubble .pm-header {
+  display: none;
+}
+
+.pm-bubble .pm-messages {
+  display: none;
+}
+
+.pm-bubble .pm-input-row {
+  display: none;
+}
+
+.pm-bubble.expanded .pm-header {
+  display: flex;
+}
+
+.pm-bubble.expanded .pm-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  max-height: 200px;
+  min-height: 60px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.pm-bubble.expanded .pm-input-row {
+  display: flex;
+  border-top: 1px solid rgba(212, 184, 150, 0.1);
+}
+
+.pm-bubble .pm-input {
+  flex: 1;
+  background: rgba(18, 16, 12, 0.8);
+  border: none;
+  border-radius: 0 0 0 8px;
+  padding: 6px 8px;
+  color: #e0daca;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+}
+
+.pm-bubble .pm-input::placeholder {
+  color: rgba(212, 184, 150, 0.3);
+}
+
+.pm-bubble .pm-send-btn {
+  background: rgba(212, 184, 150, 0.1);
+  border: none;
+  border-radius: 0 0 8px 0;
+  padding: 6px 10px;
+  color: #d4b896;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pm-bubble .pm-send-btn:hover {
+  background: rgba(212, 184, 150, 0.2);
+}
+
+/* ── Message styling ─────────────────────────────────────────────── */
+
+.pm-msg {
+  padding: 3px 6px;
+  border-radius: 4px;
+  max-width: 90%;
+  word-wrap: break-word;
+}
+
+.pm-msg.sent {
+  align-self: flex-end;
+  background: rgba(212, 184, 150, 0.1);
+  color: #d4b896;
+}
+
+.pm-msg.received {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e0daca;
+}
+
+.pm-msg .pm-msg-author {
+  font-size: 9px;
+  opacity: 0.5;
+  margin-bottom: 1px;
+}

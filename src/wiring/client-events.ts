@@ -110,6 +110,10 @@ export interface ClientEventDeps {
     toggle(): void;
   };
   mobileToolbar: { refresh(): void };
+  pmChatManager: {
+    receiveMessage(senderName: string, message: string): void;
+    sentMessage(targetName: string, message: string): void;
+  };
   reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
   resizeCanvases: () => void;
@@ -202,6 +206,21 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('chat', ({ icon, tab, message, name }) => {
     deps.chat.addMessage(tab, message, icon || ChatIcon.None, name);
+
+    // Route PMs to the bubble manager
+    if (icon === ChatIcon.Note && name?.includes('->')) {
+      const parts = name.split('->');
+      const sender = parts[0].toLowerCase().trim();
+      const receiver = parts[1]?.toLowerCase().trim();
+
+      if (sender !== client.name.toLowerCase()) {
+        // Incoming PM
+        deps.pmChatManager.receiveMessage(sender, message);
+      } else if (receiver) {
+        // Outgoing PM echoed back from chat-manager
+        deps.pmChatManager.sentMessage(receiver, message);
+      }
+    }
   });
 
   client.on('enterGame', ({ news }) => {

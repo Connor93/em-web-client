@@ -61,6 +61,7 @@ import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
 import { PlayerContextMenu } from './ui/player-context-menu';
+import { PmChatManager } from './ui/pm-chat-bubble/pm-chat-manager';
 import { QuestDialog } from './ui/quest-dialog';
 import { SettingsDialog } from './ui/settings-dialog';
 import { ShopDialog } from './ui/shop-dialog';
@@ -251,6 +252,7 @@ const spellBook = new SpellBook(client);
 const partyDialog = new PartyDialog(client);
 const infoDialog = new InfoDialog(client);
 const settingsDialog = new SettingsDialog();
+const pmChatManager = new PmChatManager(client);
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -382,6 +384,7 @@ wireClientEvents({
   partyDialog,
   guildPanel,
   mobileToolbar,
+  pmChatManager,
   reconnectOverlay,
   initializeSocket,
   resizeCanvases,
