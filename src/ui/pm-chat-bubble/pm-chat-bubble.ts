@@ -14,7 +14,6 @@ export class PmChatBubble {
   private input: HTMLInputElement;
   private unreadDot: HTMLDivElement;
   private expanded = false;
-  private unread = 0;
   private ownName: string;
 
   constructor(playerName: string, ownName: string) {
@@ -122,7 +121,6 @@ export class PmChatBubble {
   addReceivedMessage(message: string) {
     this.appendMessage(message, 'received', this.name);
     if (!this.expanded) {
-      this.unread++;
       this.unreadDot.classList.add('active');
     }
   }
@@ -134,7 +132,6 @@ export class PmChatBubble {
   expand() {
     this.expanded = true;
     this.el.classList.add('expanded');
-    this.unread = 0;
     this.unreadDot.classList.remove('active');
     this.messages.scrollTo(0, this.messages.scrollHeight);
     setTimeout(() => this.input.focus(), 50);
