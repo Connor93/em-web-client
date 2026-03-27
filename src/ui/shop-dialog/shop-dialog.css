@@ -65,15 +65,15 @@
 }
 
 .grid-card img {
-  max-width: 48px;
-  max-height: 32px;
+  max-width: 56px;
+  max-height: 38px;
   object-fit: contain;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   image-rendering: pixelated;
 }
 
 .grid-card .card-name {
-  font-size: 9px;
+  font-size: 11px;
   color: #a89880;
   text-align: center;
   line-height: 1.2;
@@ -84,13 +84,13 @@
 }
 
 .grid-card .card-badge {
-  font-size: 8px;
+  font-size: 9px;
   color: #d4b896;
   background: rgba(212, 184, 150, 0.12);
   border: 1px solid rgba(212, 184, 150, 0.15);
   border-radius: 3px;
-  padding: 1px 4px;
-  margin-top: 2px;
+  padding: 1px 5px;
+  margin-top: 3px;
   white-space: nowrap;
 }
 
