@@ -469,37 +469,7 @@ div.icon[data-id="23"] {
   }
 }
 
-/* ── Mobile-only overrides ── */
-body.is-mobile #in-game-menu {
-  display: none !important;
-}
-
-body.is-mobile #exit-game {
-  display: none !important;
-}
-
-body.is-mobile #hud {
-  display: none !important;
-}
-
-body.is-mobile #hotbar {
-  bottom: 4px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
-body.is-mobile #hotbar .slot {
-  width: 3.2em;
-  height: 3.2em;
-}
-
-body.is-mobile #login-form,
-body.is-mobile #character-select,
-body.is-mobile #create-account-form,
-body.is-mobile #create-character-form,
-body.is-mobile #change-password-form {
-  overflow: hidden;
-}
+/* Mobile-only overrides moved to mobile-ui.css */
 
 /* ── Mobile HUD panel (top-left) ── */
 #mobile-hud {

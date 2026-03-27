@@ -9,6 +9,7 @@ import { playSfxById, SfxId } from '../../sfx';
 import { getItemMeta } from '../../utils';
 import type { Vector2 } from '../../vector';
 import { Base } from '../base-ui';
+import { addMobileCloseButton } from '../utils';
 
 import './inventory.css';
 
@@ -629,6 +630,7 @@ export class Inventory extends Base {
     this.render();
     this.container.classList.remove('hidden');
     this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   toggle() {

@@ -2,6 +2,7 @@ import mitt from 'mitt';
 import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
+import { addMobileCloseButton } from '../utils';
 
 import './bank-dialog.css';
 
@@ -77,6 +78,7 @@ export class BankDialog extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   hide() {

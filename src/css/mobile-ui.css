@@ -1,0 +1,230 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile UI Overrides  (body.is-mobile)
+   All rules here are scoped so desktop layout is unaffected.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Hide desktop-only chrome ──────────────────────────────────── */
+
+body.is-mobile #in-game-menu {
+  display: none !important;
+}
+
+body.is-mobile #exit-game {
+  display: none !important;
+}
+
+body.is-mobile #hud {
+  display: none !important;
+}
+
+/* ── Hotbar repositioned to center-bottom ──────────────────────── */
+
+body.is-mobile #hotbar {
+  bottom: 4px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+body.is-mobile #hotbar .slot {
+  width: 3.2em;
+  height: 3.2em;
+}
+
+/* ── Login forms overflow fix ──────────────────────────────────── */
+
+body.is-mobile #login-form,
+body.is-mobile #character-select,
+body.is-mobile #create-account-form,
+body.is-mobile #create-character-form,
+body.is-mobile #change-password-form {
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fullscreen Overlays
+   Major dialogs fill the viewport on mobile.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile .dialog-md {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  z-index: 1050 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.is-mobile .dialog-md .dialog-header {
+  padding: 10px 16px;
+  font-size: 14px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+body.is-mobile .dialog-md .dialog-contents {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+body.is-mobile .dialog-md .dialog-footer {
+  flex-shrink: 0;
+}
+
+/* ── Mobile close button (added to headers dynamically) ──────── */
+
+.mobile-close-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(212, 184, 150, 0.08);
+  border-radius: 6px;
+  color: #a89880;
+  font-size: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  flex-shrink: 0;
+}
+
+.mobile-close-btn:active {
+  background: rgba(212, 184, 150, 0.2);
+  color: #d4b896;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fullscreen Inventory
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #inventory {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  z-index: 1050 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.is-mobile #inventory .grid {
+  flex: 1;
+  height: auto !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  grid-auto-rows: 32px !important;
+}
+
+body.is-mobile #inventory .top {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+body.is-mobile #inventory .tabs button {
+  padding: 10px 6px;
+  font-size: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fullscreen Shop / Bank / Locker Grids
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile .shop-grid,
+body.is-mobile .locker-grid {
+  max-height: none !important;
+  flex: 1;
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+body.is-mobile .grid-card {
+  min-height: 80px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fullscreen Paperdoll
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #paperdoll {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  z-index: 1050 !important;
+  margin: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Slide-In Panels (stats, spells, party, online list)
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #stats,
+body.is-mobile #spell-book,
+body.is-mobile #party-dialog,
+body.is-mobile #online-list {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  width: 280px !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  z-index: 1050 !important;
+  margin: 0 !important;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  border-left: 1px solid rgba(212, 184, 150, 0.15) !important;
+}
+
+body.is-mobile #stats:not(.hidden),
+body.is-mobile #spell-book:not(.hidden),
+body.is-mobile #party-dialog:not(.hidden),
+body.is-mobile #online-list:not(.hidden) {
+  transform: translateX(0);
+}
+
+/* Backdrop overlay for slide-in panels */
+.mobile-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1049;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.mobile-panel-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Confirmation Dialogs — always centered, wider on mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile .item-amount-dialog,
+body.is-mobile .small-alert-large-header,
+body.is-mobile .small-alert-small-header,
+body.is-mobile .large-alert-small-header,
+body.is-mobile .large-confirm-small-header {
+  width: 85% !important;
+  max-width: 360px !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}

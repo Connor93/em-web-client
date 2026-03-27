@@ -6,3 +6,8 @@ export {
   createSkillMenuItem,
   createTextMenuItem,
 } from './create-menu-item';
+export {
+  addMobileBackdrop,
+  addMobileCloseButton,
+  removeMobileBackdrop,
+} from './mobile';

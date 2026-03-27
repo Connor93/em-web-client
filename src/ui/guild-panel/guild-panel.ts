@@ -2,6 +2,7 @@ import { TalkReportClientPacket } from 'eolib';
 import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
+import { addMobileCloseButton } from '../utils';
 
 import './guild-panel.css';
 
@@ -231,6 +232,7 @@ export class GuildPanel extends Base {
   show() {
     this.container.classList.remove('hidden');
     this.render();
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   hide() {

@@ -14,6 +14,7 @@ import {
   SitState,
 } from 'eolib';
 import './css/style.css';
+import './css/mobile-ui.css';
 import 'notyf/notyf.min.css';
 import { PacketBus } from './bus';
 import { Client, GameState } from './client';

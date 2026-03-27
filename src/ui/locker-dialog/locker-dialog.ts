@@ -4,7 +4,7 @@ import { EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
 import { capitalize } from '../../utils';
 import { Base } from '../base-ui';
-import { createGridItemCard } from '../utils';
+import { addMobileCloseButton, createGridItemCard } from '../utils';
 
 import './locker-dialog.css';
 
@@ -73,6 +73,7 @@ export class LockerDialog extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   hide() {
