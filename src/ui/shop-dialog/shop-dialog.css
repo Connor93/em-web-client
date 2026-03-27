@@ -31,7 +31,7 @@
 /* Item grid */
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   padding: 4px 12px;
   overflow-y: auto;
@@ -55,8 +55,8 @@
   transition:
     background 0.12s,
     border-color 0.12s;
-  min-height: 72px;
-  max-height: 90px;
+  min-height: 86px;
+  max-height: 108px;
 }
 
 .grid-card:hover {
