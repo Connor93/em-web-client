@@ -247,23 +247,44 @@ export class Inventory extends Base {
       return;
     }
 
-    // Hit-test against the placeholder cells — works at any UI scale
-    // since both cell rects and e.clientX/Y are in screen coordinates
-    const cells = this.grid.querySelectorAll<HTMLDivElement>('.cell');
-    for (let i = 0; i < cells.length; i++) {
-      const cellRect = cells[i].getBoundingClientRect();
-      if (
-        e.clientX >= cellRect.left &&
-        e.clientX <= cellRect.right &&
-        e.clientY >= cellRect.top &&
-        e.clientY <= cellRect.bottom
-      ) {
-        const gridX = i % COLS;
-        const gridY = Math.floor(i / COLS);
-        this.tryMoveItem(item.id, gridX, gridY);
-        return;
-      }
+    // Get UI scale (getBoundingClientRect is in screen-space,
+    // getComputedStyle is in CSS-space; multiply CSS values by scale)
+    const uiEl = document.getElementById('ui');
+    const scaleMatch = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
+    const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
+
+    const rect = this.grid.getBoundingClientRect();
+    const style = getComputedStyle(this.grid);
+    const padL = Number.parseFloat(style.paddingLeft) * scale;
+    const padT = Number.parseFloat(style.paddingTop) * scale;
+    const padR = Number.parseFloat(style.paddingRight) * scale;
+    const padB = Number.parseFloat(style.paddingBottom) * scale;
+    const gap = (Number.parseFloat(style.gap) || 1) * scale;
+
+    // Pointer position relative to the content area (inside padding)
+    const pointerX = e.clientX - rect.left - padL;
+    const pointerY = e.clientY - rect.top - padT;
+
+    const contentW = rect.width - padL - padR;
+    const contentH = rect.height - padT - padB;
+
+    if (
+      pointerX < 0 ||
+      pointerY < 0 ||
+      pointerX > contentW ||
+      pointerY > contentH
+    ) {
+      return;
     }
+
+    // Compute actual cell dimensions (all in screen space)
+    const cellW = (contentW - (COLS - 1) * gap) / COLS;
+    const cellH = (contentH - (ROWS - 1) * gap) / ROWS;
+
+    const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
+
+    this.tryMoveItem(item.id, gridX, gridY);
   }
 
   private onPointerCancel() {
