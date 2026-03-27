@@ -153,7 +153,6 @@ export class PmChatBubble {
     const msg = this.input.value.trim();
     this.input.value = '';
     this.emitter.emit('send', { target: this.name, message: msg });
-    this.addSentMessage(msg);
   }
 
   private appendMessage(
@@ -182,32 +181,27 @@ export class PmChatBubble {
     let offsetX = 0;
     let offsetY = 0;
 
-    const onPointerDown = (e: PointerEvent) => {
+    header.addEventListener('mousedown', (e: MouseEvent) => {
       if (!this.expanded) return;
       const target = e.target as HTMLElement;
       if (target.closest('.pm-close-btn')) return;
 
       dragging = true;
-      offsetX = e.clientX - this.el.getBoundingClientRect().left;
-      offsetY = e.clientY - this.el.getBoundingClientRect().top;
-      header.setPointerCapture(e.pointerId);
+      const rect = this.el.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
       e.preventDefault();
-    };
+    });
 
-    const onPointerMove = (e: PointerEvent) => {
+    document.addEventListener('mousemove', (e: MouseEvent) => {
       if (!dragging) return;
-      // Pull out of flex flow into fixed position
       this.el.style.position = 'fixed';
       this.el.style.left = `${e.clientX - offsetX}px`;
       this.el.style.top = `${e.clientY - offsetY}px`;
-    };
+    });
 
-    const onPointerUp = () => {
+    document.addEventListener('mouseup', () => {
       dragging = false;
-    };
-
-    header.addEventListener('pointerdown', onPointerDown);
-    header.addEventListener('pointermove', onPointerMove);
-    header.addEventListener('pointerup', onPointerUp);
+    });
   }
 }
