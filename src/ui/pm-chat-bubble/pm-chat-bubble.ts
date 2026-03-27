@@ -109,6 +109,9 @@ export class PmChatBubble {
         this.expand();
       }
     });
+
+    // ── Dragging ──
+    this.setupDrag(header);
   }
 
   on<Event extends keyof Events>(
@@ -172,5 +175,39 @@ export class PmChatBubble {
 
     this.messages.appendChild(div);
     this.messages.scrollTo(0, this.messages.scrollHeight);
+  }
+
+  private setupDrag(header: HTMLDivElement) {
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!this.expanded) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('.pm-close-btn')) return;
+
+      dragging = true;
+      offsetX = e.clientX - this.el.getBoundingClientRect().left;
+      offsetY = e.clientY - this.el.getBoundingClientRect().top;
+      header.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      // Pull out of flex flow into fixed position
+      this.el.style.position = 'fixed';
+      this.el.style.left = `${e.clientX - offsetX}px`;
+      this.el.style.top = `${e.clientY - offsetY}px`;
+    };
+
+    const onPointerUp = () => {
+      dragging = false;
+    };
+
+    header.addEventListener('pointerdown', onPointerDown);
+    header.addEventListener('pointermove', onPointerMove);
+    header.addEventListener('pointerup', onPointerUp);
   }
 }

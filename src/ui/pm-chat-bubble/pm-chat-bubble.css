@@ -115,11 +115,10 @@
   cursor: move;
 }
 
-.pm-bubble.expanded .pm-name {
-  font-size: 12px;
-}
-
-.pm-bubble.expanded .pm-unread {
+/* Hide collapsed-only elements when expanded */
+.pm-bubble.expanded > .pm-name,
+.pm-bubble.expanded > .pm-unread,
+.pm-bubble.expanded > .pm-close-btn {
   display: none !important;
 }
 
