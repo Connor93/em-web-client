@@ -103,12 +103,8 @@ export class PmChatBubble {
 
     this.el.appendChild(inputRow);
 
-    // Click collapsed pill to expand
-    this.el.addEventListener('click', () => {
-      if (!this.expanded) {
-        this.expand();
-      }
-    });
+    // Click collapsed pill to expand (only if not dragged)
+    // handled inside setupDrag
 
     // ── Dragging ──
     this.setupDrag(header);
@@ -178,29 +174,51 @@ export class PmChatBubble {
 
   private setupDrag(header: HTMLDivElement) {
     let dragging = false;
+    let didDrag = false;
+    let startX = 0;
+    let startY = 0;
     let offsetX = 0;
     let offsetY = 0;
+    const DRAG_THRESHOLD = 5;
 
-    header.addEventListener('mousedown', (e: MouseEvent) => {
-      if (!this.expanded) return;
+    const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('.pm-close-btn')) return;
 
       dragging = true;
+      didDrag = false;
+      startX = e.clientX;
+      startY = e.clientY;
       const rect = this.el.getBoundingClientRect();
       offsetX = e.clientX - rect.left;
       offsetY = e.clientY - rect.top;
       e.preventDefault();
+    };
+
+    // Listen on both the pill (collapsed) and header (expanded)
+    this.el.addEventListener('mousedown', (e: MouseEvent) => {
+      if (this.expanded) return; // expanded uses header
+      onMouseDown(e);
+    });
+    header.addEventListener('mousedown', (e: MouseEvent) => {
+      onMouseDown(e);
     });
 
     document.addEventListener('mousemove', (e: MouseEvent) => {
       if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!didDrag && Math.abs(dx) + Math.abs(dy) < DRAG_THRESHOLD) return;
+      didDrag = true;
       this.el.style.position = 'fixed';
       this.el.style.left = `${e.clientX - offsetX}px`;
       this.el.style.top = `${e.clientY - offsetY}px`;
     });
 
     document.addEventListener('mouseup', () => {
+      if (dragging && !didDrag && !this.expanded) {
+        this.expand();
+      }
       dragging = false;
     });
   }
