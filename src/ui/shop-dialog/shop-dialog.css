@@ -64,13 +64,19 @@
   border-color: rgba(212, 184, 150, 0.35);
 }
 
+.grid-card .card-img-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  flex-shrink: 0;
+}
+
 .grid-card img {
   max-width: 56px;
   max-height: 40px;
   object-fit: contain;
-  margin-bottom: 3px;
   image-rendering: pixelated;
-  flex-shrink: 0;
 }
 
 .grid-card .card-name {

@@ -132,10 +132,14 @@ export function createGridItemCard(
   const card = document.createElement('div');
   card.classList.add('grid-card');
 
+  const imgWrap = document.createElement('div');
+  imgWrap.classList.add('card-img-wrap');
+
   const img = document.createElement('img');
   img.src = getItemGraphicPath(itemId, record.graphicId, itemAmount);
   img.draggable = false;
-  card.appendChild(img);
+  imgWrap.appendChild(img);
+  card.appendChild(imgWrap);
 
   const name = document.createElement('span');
   name.classList.add('card-name');
