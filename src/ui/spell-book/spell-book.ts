@@ -146,17 +146,21 @@ export class SpellBook extends BaseDialogMd<Events> {
 
     if (!target) return;
 
-    const slot = target.closest('.slot') as HTMLDivElement;
-    if (!slot) return;
-
-    const slots = document.querySelectorAll('#hotbar .slot')!;
-    const slotIndex = Array.from(slots).indexOf(slot);
-    if (slotIndex === -1) return;
-
-    this.emitter.emit('assignToSlot', {
-      spellId,
-      slotIndex,
-    });
+    // Direct hit-test hotbar slots by bounding rect (the spell book dialog
+    // at z-index 1050 covers the hotbar at 1020, so elementFromPoint misses it)
+    const slots = document.querySelectorAll<HTMLDivElement>('#hotbar .slot');
+    for (let i = 0; i < slots.length; i++) {
+      const rect = slots[i].getBoundingClientRect();
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        this.emitter.emit('assignToSlot', { spellId, slotIndex: i });
+        return;
+      }
+    }
   }
 
   private onPointerCancel() {
