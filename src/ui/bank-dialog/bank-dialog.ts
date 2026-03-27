@@ -1,10 +1,7 @@
 import mitt from 'mitt';
 import type { Client } from '../../client';
-import { EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
-import { DialogIcon } from '../dialog-icon';
-import { createIconMenuItem } from '../utils';
 
 import './bank-dialog.css';
 
@@ -19,8 +16,6 @@ export class BankDialog extends Base {
   private dialogs = document.getElementById('dialogs')!;
   private cover = document.querySelector<HTMLDivElement>('#cover')!;
   protected container = document.getElementById('bank')!;
-  private itemList =
-    this.container.querySelector<HTMLDivElement>('.item-list')!;
   private balance = this.container.querySelector<HTMLSpanElement>('.balance')!;
   private emitter = mitt<Events>();
 
@@ -31,9 +26,33 @@ export class BankDialog extends Base {
     const btnOk = this.container.querySelector<HTMLButtonElement>(
       'button[data-id="ok"]',
     );
-    btnOk!.addEventListener!('click', () => {
+    btnOk!.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
+    });
+
+    const btnDeposit = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="deposit"]',
+    );
+    btnDeposit!.addEventListener('click', () => {
+      playSfxById(SfxId.ButtonClick);
+      this.emitter.emit('deposit', undefined);
+    });
+
+    const btnWithdraw = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="withdraw"]',
+    );
+    btnWithdraw!.addEventListener('click', () => {
+      playSfxById(SfxId.ButtonClick);
+      this.emitter.emit('withdraw', undefined);
+    });
+
+    const btnUpgrade = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="upgrade"]',
+    );
+    btnUpgrade!.addEventListener('click', () => {
+      playSfxById(SfxId.ButtonClick);
+      this.emitter.emit('upgrade', undefined);
     });
 
     client.on('bankUpdated', () => {
@@ -50,42 +69,6 @@ export class BankDialog extends Base {
 
   render() {
     this.balance.innerText = `${this.client.goldBank}`;
-    this.itemList.innerHTML = '';
-
-    const gold = this.client.getEifRecordById(1);
-    if (!gold) {
-      throw new Error('Gold item not found');
-    }
-
-    const depositItem = createIconMenuItem(
-      DialogIcon.BankDeposit,
-      this.client.getResourceString(EOResourceID.DIALOG_BANK_DEPOSIT)!,
-      `${this.client.getResourceString(EOResourceID.DIALOG_BANK_TRANSFER)} ${gold.name} ${this.client.getResourceString(EOResourceID.DIALOG_BANK_TO_ACCOUNT)}`,
-    );
-    depositItem.addEventListener('click', () => {
-      this.emitter.emit('deposit', undefined);
-    });
-    this.itemList.appendChild(depositItem);
-
-    const withdrawItem = createIconMenuItem(
-      DialogIcon.BankWithdraw,
-      this.client.getResourceString(EOResourceID.DIALOG_BANK_WITHDRAW)!,
-      `${this.client.getResourceString(EOResourceID.DIALOG_BANK_TRANSFER)} ${gold.name} ${this.client.getResourceString(EOResourceID.DIALOG_BANK_FROM_ACCOUNT)}`,
-    );
-    withdrawItem.addEventListener('click', () => {
-      this.emitter.emit('withdraw', undefined);
-    });
-    this.itemList.appendChild(withdrawItem);
-
-    const upgradeItem = createIconMenuItem(
-      DialogIcon.BankLockerUpgrade,
-      this.client.getResourceString(EOResourceID.DIALOG_BANK_LOCKER_UPGRADE)!,
-      this.client.getResourceString(EOResourceID.DIALOG_BANK_MORE_SPACE)!,
-    );
-    upgradeItem.addEventListener('click', () => {
-      this.emitter.emit('upgrade', undefined);
-    });
-    this.itemList.appendChild(upgradeItem);
   }
 
   show() {

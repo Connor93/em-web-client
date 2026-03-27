@@ -117,3 +117,48 @@ export function createTextMenuItem(
 
   return menuItem;
 }
+
+/**
+ * Creates a grid-layout item card with icon, name, badge, and hover tooltip.
+ * Used by shop/bank/locker grid layouts.
+ */
+export function createGridItemCard(
+  itemId: number,
+  record: EifRecord,
+  badge: string,
+  tooltipExtra = '',
+  itemAmount = 1,
+) {
+  const card = document.createElement('div');
+  card.classList.add('grid-card');
+
+  const img = document.createElement('img');
+  img.src = getItemGraphicPath(itemId, record.graphicId, itemAmount);
+  img.draggable = false;
+  card.appendChild(img);
+
+  const name = document.createElement('span');
+  name.classList.add('card-name');
+  name.innerText =
+    record.name.length > 10 ? `${record.name.substring(0, 9)}…` : record.name;
+  card.appendChild(name);
+
+  if (badge) {
+    const badgeEl = document.createElement('span');
+    badgeEl.classList.add('card-badge');
+    badgeEl.innerText = badge;
+    card.appendChild(badgeEl);
+  }
+
+  const tooltip = document.createElement('div');
+  tooltip.classList.add('tooltip');
+  const meta = getItemMeta(record);
+  const lines = [record.name, ...meta];
+  if (tooltipExtra) {
+    lines.push('', tooltipExtra);
+  }
+  tooltip.innerText = lines.join('\n');
+  card.appendChild(tooltip);
+
+  return card;
+}

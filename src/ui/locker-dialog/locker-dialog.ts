@@ -1,12 +1,14 @@
-import type { ThreeItem } from 'eolib';
+import { ItemType, type ThreeItem } from 'eolib';
 import type { Client } from '../../client';
 import { EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
 import { capitalize } from '../../utils';
 import { Base } from '../base-ui';
-import { createItemMenuItem } from '../utils';
+import { createGridItemCard } from '../utils';
 
 import './locker-dialog.css';
+
+type FilterType = 'all' | 'weapon' | 'armor' | 'consumable' | 'other';
 
 export class LockerDialog extends Base {
   private client: Client;
@@ -15,13 +17,14 @@ export class LockerDialog extends Base {
   private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );
-  private scrollHandle =
-    this.container.querySelector<HTMLDivElement>('.scroll-handle')!;
   private title = this.container.querySelector<HTMLSpanElement>('.title')!;
   private dialogs = document.getElementById('dialogs')!;
-  private itemList =
-    this.container.querySelector<HTMLDivElement>('.locker-items')!;
+  private grid = this.container.querySelector<HTMLDivElement>('.locker-grid')!;
+  private filterButtons = this.container.querySelectorAll<HTMLButtonElement>(
+    '.locker-filters .themed-btn',
+  );
   private items: ThreeItem[] = [];
+  private activeFilter: FilterType = 'all';
 
   constructor(client: Client) {
     super();
@@ -32,33 +35,15 @@ export class LockerDialog extends Base {
       this.hide();
     });
 
-    this.itemList.addEventListener('scroll', () => {
-      this.setScrollThumbPosition();
-    });
-
-    this.scrollHandle.addEventListener('pointerdown', () => {
-      const onPointerMove = (e: PointerEvent) => {
-        const rect = this.itemList.getBoundingClientRect();
-        const min = 30;
-        const max = 212;
-        const clampedY = Math.min(
-          Math.max(e.clientY, rect.top + min),
-          rect.top + max,
-        );
-        const scrollPercent = (clampedY - rect.top - min) / (max - min);
-        const scrollHeight = this.itemList.scrollHeight;
-        const clientHeight = this.itemList.clientHeight;
-        this.itemList.scrollTop = scrollPercent * (scrollHeight - clientHeight);
-      };
-
-      const onPointerUp = () => {
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-      };
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
-    });
+    // Filter switching
+    for (const btn of this.filterButtons) {
+      btn.addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.activeFilter = btn.dataset.filter as FilterType;
+        this.updateFilterHighlight();
+        this.render();
+      });
+    }
   }
 
   setItems(items: ThreeItem[]) {
@@ -75,24 +60,11 @@ export class LockerDialog extends Base {
     return item ? item.amount : 0;
   }
 
-  setScrollThumbPosition() {
-    const min = 60;
-    const max = 212;
-    const scrollTop = this.itemList.scrollTop;
-    const scrollHeight = this.itemList.scrollHeight;
-    const clientHeight = this.itemList.clientHeight;
-    const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-    const clampedPercent = Math.min(Math.max(scrollPercent, 0), 1);
-    const top = min + (max - min) * clampedPercent || min;
-    this.scrollHandle.style.top = `${top}px`;
-  }
-
   show() {
     this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
-    this.setScrollThumbPosition();
   }
 
   hide() {
@@ -105,28 +77,97 @@ export class LockerDialog extends Base {
     }
   }
 
+  private updateFilterHighlight() {
+    for (const btn of this.filterButtons) {
+      btn.classList.toggle('active', btn.dataset.filter === this.activeFilter);
+    }
+  }
+
+  private matchesFilter(type: ItemType): boolean {
+    switch (this.activeFilter) {
+      case 'all':
+        return true;
+      case 'weapon':
+        return type === ItemType.Weapon;
+      case 'armor':
+        return (
+          type === ItemType.Armor ||
+          type === ItemType.Shield ||
+          type === ItemType.Hat ||
+          type === ItemType.Boots ||
+          type === ItemType.Gloves ||
+          type === ItemType.Accessory ||
+          type === ItemType.Belt ||
+          type === ItemType.Necklace ||
+          type === ItemType.Ring ||
+          type === ItemType.Armlet ||
+          type === ItemType.Bracer
+        );
+      case 'consumable':
+        return (
+          type === ItemType.Heal ||
+          type === ItemType.HairDye ||
+          type === ItemType.EffectPotion ||
+          type === ItemType.CureCurse ||
+          type === ItemType.Alcohol ||
+          type === ItemType.ExpReward
+        );
+      case 'other':
+        return (
+          type !== ItemType.Weapon &&
+          type !== ItemType.Armor &&
+          type !== ItemType.Shield &&
+          type !== ItemType.Hat &&
+          type !== ItemType.Boots &&
+          type !== ItemType.Gloves &&
+          type !== ItemType.Accessory &&
+          type !== ItemType.Belt &&
+          type !== ItemType.Necklace &&
+          type !== ItemType.Ring &&
+          type !== ItemType.Armlet &&
+          type !== ItemType.Bracer &&
+          type !== ItemType.Heal &&
+          type !== ItemType.HairDye &&
+          type !== ItemType.EffectPotion &&
+          type !== ItemType.CureCurse &&
+          type !== ItemType.Alcohol &&
+          type !== ItemType.ExpReward
+        );
+    }
+  }
+
   private render() {
-    this.itemList.innerHTML = '';
+    this.grid.innerHTML = '';
     this.title.innerText = `${capitalize(this.client.name)}'s ${this.client.getResourceString(EOResourceID.DIALOG_TITLE_PRIVATE_LOCKER)} [${this.items.length}]`;
 
-    if (this.items.length === 0) {
+    const filtered = this.items.filter((item) => {
+      const record = this.client.getEifRecordById(item.id);
+      return record && this.matchesFilter(record.type);
+    });
+
+    if (filtered.length === 0) {
+      const empty = document.createElement('div');
+      empty.classList.add('locker-grid-empty');
+      empty.innerText =
+        this.items.length === 0 ? 'Locker is empty' : 'No matching items';
+      this.grid.appendChild(empty);
       return;
     }
 
-    for (const item of this.items) {
+    for (const item of filtered) {
       const record = this.client.getEifRecordById(item.id);
-      if (!record) {
-        continue;
-      }
+      if (!record) continue;
 
-      const itemElement = createItemMenuItem(
+      const card = createGridItemCard(
         item.id,
         record,
-        record.name,
-        `x ${item.amount}`,
+        `x${item.amount}`,
+        '',
+        item.amount,
       );
 
-      itemElement.addEventListener('contextmenu', () => {
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
         if (
           this.client.weight.current + record.weight >
           this.client.weight.max
@@ -145,7 +186,7 @@ export class LockerDialog extends Base {
         this.client.takeLockerItem(item.id);
       });
 
-      this.itemList.appendChild(itemElement);
+      this.grid.appendChild(card);
     }
   }
 }

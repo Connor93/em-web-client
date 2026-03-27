@@ -7,20 +7,13 @@ import {
 } from 'eolib';
 import mitt from 'mitt';
 import type { Client } from '../../client';
-import { EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
-import { DialogIcon } from '../dialog-icon';
-import { createIconMenuItem, createItemMenuItem } from '../utils';
+import { createGridItemCard } from '../utils';
 
 import './shop-dialog.css';
 
-enum State {
-  Initial = 0,
-  Buy = 1,
-  Sell = 2,
-  Craft = 3,
-}
+type Tab = 'buy' | 'sell' | 'craft';
 
 type Events = {
   buyItem: { id: number; name: string; price: number; max: number };
@@ -41,37 +34,35 @@ export class ShopDialog extends Base {
   private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );
-  private btnBack = this.container.querySelector<HTMLButtonElement>(
-    'button[data-id="back"]',
-  );
   private txtName =
     this.container.querySelector<HTMLSpanElement>('.shop-name')!;
-  private itemList =
-    this.container.querySelector<HTMLDivElement>('.item-list')!;
-  private scrollHandle =
-    this.container.querySelector<HTMLDivElement>('.scroll-handle')!;
+  private grid = this.container.querySelector<HTMLDivElement>('.shop-grid')!;
+  private tabButtons = this.container.querySelectorAll<HTMLButtonElement>(
+    '.shop-tabs .themed-btn',
+  );
   private name = '';
   private craftItems: ShopCraftItem[] = [];
   private tradeItems: ShopTradeItem[] = [];
-  private state = State.Initial;
+  private activeTab: Tab = 'buy';
 
   constructor(client: Client) {
     super();
     this.client = client;
 
-    this.btnCancel!.addEventListener!('click', () => {
+    this.btnCancel!.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
 
-    this.btnBack!.addEventListener!('click', () => {
-      playSfxById(SfxId.ButtonClick);
-      this.changeState(State.Initial);
-    });
-
-    this.itemList.addEventListener('scroll', () => {
-      this.setScrollThumbPosition();
-    });
+    // Tab switching
+    for (const btn of this.tabButtons) {
+      btn.addEventListener('click', () => {
+        playSfxById(SfxId.ButtonClick);
+        this.activeTab = btn.dataset.tab as Tab;
+        this.updateTabHighlight();
+        this.render();
+      });
+    }
 
     this.client.on('itemBought', () => {
       this.render();
@@ -79,30 +70,6 @@ export class ShopDialog extends Base {
 
     this.client.on('itemSold', () => {
       this.render();
-    });
-
-    this.scrollHandle.addEventListener('pointerdown', () => {
-      const onPointerMove = (e: PointerEvent) => {
-        const rect = this.itemList.getBoundingClientRect();
-        const min = 30;
-        const max = 212;
-        const clampedY = Math.min(
-          Math.max(e.clientY, rect.top + min),
-          rect.top + max,
-        );
-        const scrollPercent = (clampedY - rect.top - min) / (max - min);
-        const scrollHeight = this.itemList.scrollHeight;
-        const clientHeight = this.itemList.clientHeight;
-        this.itemList.scrollTop = scrollPercent * (scrollHeight - clientHeight);
-      };
-
-      const onPointerUp = () => {
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-      };
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
     });
   }
 
@@ -113,18 +80,6 @@ export class ShopDialog extends Base {
     this.emitter.on(event, handler);
   }
 
-  setScrollThumbPosition() {
-    const min = 60;
-    const max = 212;
-    const scrollTop = this.itemList.scrollTop;
-    const scrollHeight = this.itemList.scrollHeight;
-    const clientHeight = this.itemList.clientHeight;
-    const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-    const clampedPercent = Math.min(Math.max(scrollPercent, 0), 1);
-    const top = min + (max - min) * clampedPercent || min;
-    this.scrollHandle.style.top = `${top}px`;
-  }
-
   setData(
     name: string,
     craftItems: ShopCraftItem[],
@@ -133,7 +88,8 @@ export class ShopDialog extends Base {
     this.name = name;
     this.craftItems = craftItems;
     this.tradeItems = tradeItems;
-    this.state = State.Initial;
+    this.activeTab = 'buy';
+    this.updateTabHighlight();
     this.render();
   }
 
@@ -142,7 +98,6 @@ export class ShopDialog extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
-    this.setScrollThumbPosition();
   }
 
   hide() {
@@ -155,98 +110,54 @@ export class ShopDialog extends Base {
     }
   }
 
+  private updateTabHighlight() {
+    for (const btn of this.tabButtons) {
+      btn.classList.toggle('active', btn.dataset.tab === this.activeTab);
+    }
+  }
+
   private render() {
     this.txtName.innerText = this.name;
-    this.btnBack!.classList.add!('hidden');
+    this.grid.innerHTML = '';
 
-    switch (this.state) {
-      case State.Initial:
-        this.renderInitial();
-        return;
-      case State.Buy:
+    switch (this.activeTab) {
+      case 'buy':
         this.renderBuy();
         return;
-      case State.Sell:
+      case 'sell':
         this.renderSell();
         return;
-      case State.Craft:
+      case 'craft':
         this.renderCraft();
         return;
     }
   }
 
-  private changeState(state: State) {
-    this.state = state;
-    this.render();
-  }
-
-  private renderInitial() {
-    this.itemList.innerHTML = '';
-
+  private renderBuy() {
     const buys = this.tradeItems.filter((i) => i.buyPrice > 0);
-    if (buys.length) {
-      const item = createIconMenuItem(
-        DialogIcon.Buy,
-        this.client.getResourceString(EOResourceID.DIALOG_SHOP_BUY_ITEMS)!,
-        `${buys.length} ${this.client.getResourceString(EOResourceID.DIALOG_SHOP_ITEMS_IN_STORE)}`,
-      );
-      const click = () => {
-        this.changeState(State.Buy);
-      };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
+    if (!buys.length) {
+      this.renderEmpty('No items available to buy');
+      return;
     }
 
-    const sells = this.tradeItems.filter(
-      (i) =>
-        i.sellPrice > 0 && this.client.items.some((i2) => i2.id === i.itemId),
-    );
-    if (sells.length) {
-      const item = createIconMenuItem(
-        DialogIcon.Sell,
-        this.client.getResourceString(EOResourceID.DIALOG_SHOP_SELL_ITEMS)!,
-        `${sells.length} ${this.client.getResourceString(EOResourceID.DIALOG_SHOP_ITEMS_ACCEPTED)}`,
-      );
-      const click = () => {
-        this.changeState(State.Sell);
-      };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
-    }
-
-    if (this.craftItems.length) {
-      const item = createIconMenuItem(
-        DialogIcon.Craft,
-        this.client.getResourceString(EOResourceID.DIALOG_SHOP_CRAFT_ITEMS)!,
-        `${this.craftItems.length} ${this.client.getResourceString(EOResourceID.DIALOG_SHOP_ITEMS_ACCEPTED)}`,
-      );
-      const click = () => {
-        this.changeState(State.Craft);
-      };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
-    }
-  }
-
-  renderBuy() {
-    this.itemList.innerHTML = '';
-    this.btnBack!.classList.remove!('hidden');
-    const buys = this.tradeItems.filter((i) => i.buyPrice > 0);
     for (const buy of buys) {
       const record = this.client.getEifRecordById(buy.itemId);
-      if (!record) {
-        continue;
-      }
+      if (!record) continue;
 
-      const item = createItemMenuItem(
+      const genderNote =
+        record.type === ItemType.Armor
+          ? record.spec2 === Gender.Female
+            ? ' (F)'
+            : ' (M)'
+          : '';
+
+      const card = createGridItemCard(
         buy.itemId,
         record,
-        record.name,
-        `${this.client.getResourceString(EOResourceID.DIALOG_SHOP_PRICE)}: ${buy.buyPrice} ${record.type === ItemType.Armor ? `(${record.spec2 === Gender.Female ? this.client.getResourceString(EOResourceID.FEMALE) : this.client.getResourceString(EOResourceID.MALE)})` : ''}`,
+        `${buy.buyPrice}g`,
+        `Price: ${buy.buyPrice}g${genderNote}`,
       );
+
       const click = () => {
         this.emitter.emit('buyItem', {
           id: buy.itemId,
@@ -255,37 +166,44 @@ export class ShopDialog extends Base {
           max: buy.maxBuyAmount,
         });
       };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
+      card.addEventListener('click', click);
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        click();
+      });
+      this.grid.appendChild(card);
     }
   }
 
-  renderSell() {
-    this.itemList.innerHTML = '';
-    this.btnBack!.classList.remove!('hidden');
+  private renderSell() {
     const sells = this.tradeItems.filter(
       (i) =>
         i.sellPrice > 0 && this.client.items.some((i2) => i2.id === i.itemId),
     );
 
     if (!sells.length) {
-      this.changeState(State.Initial);
+      this.renderEmpty('No items to sell');
       return;
     }
 
     for (const sell of sells) {
       const record = this.client.getEifRecordById(sell.itemId);
-      if (!record) {
-        continue;
-      }
+      if (!record) continue;
 
-      const item = createItemMenuItem(
+      const genderNote =
+        record.type === ItemType.Armor
+          ? record.spec2 === Gender.Female
+            ? ' (F)'
+            : ' (M)'
+          : '';
+
+      const card = createGridItemCard(
         sell.itemId,
         record,
-        record.name,
-        `${this.client.getResourceString(EOResourceID.DIALOG_SHOP_PRICE)}: ${sell.sellPrice} ${record.type === ItemType.Armor ? `(${record.spec2 === Gender.Female ? this.client.getResourceString(EOResourceID.FEMALE) : this.client.getResourceString(EOResourceID.MALE)})` : ''}`,
+        `${sell.sellPrice}g`,
+        `Sell: ${sell.sellPrice}g${genderNote}`,
       );
+
       const click = () => {
         this.emitter.emit('sellItem', {
           id: sell.itemId,
@@ -293,27 +211,51 @@ export class ShopDialog extends Base {
           price: sell.sellPrice,
         });
       };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
+      card.addEventListener('click', click);
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        click();
+      });
+      this.grid.appendChild(card);
     }
   }
 
-  renderCraft() {
-    this.itemList.innerHTML = '';
-    this.btnBack!.classList.remove!('hidden');
+  private renderCraft() {
+    if (!this.craftItems.length) {
+      this.renderEmpty('No items to craft');
+      return;
+    }
+
     for (const craft of this.craftItems) {
       const record = this.client.getEifRecordById(craft.itemId);
-      if (!record) {
-        continue;
-      }
+      if (!record) continue;
 
-      const item = createItemMenuItem(
+      // Build ingredient tooltip text
+      const ingredientLines = craft.ingredients
+        .map((ing) => {
+          const ingRecord = this.client.getEifRecordById(ing.id);
+          return ingRecord
+            ? `  ${ing.amount}x ${ingRecord.name}`
+            : `  ${ing.amount}x Item #${ing.id}`;
+        })
+        .join('\n');
+
+      const genderNote =
+        record.type === ItemType.Armor
+          ? record.spec2 === Gender.Female
+            ? ' (F)'
+            : ' (M)'
+          : '';
+
+      const tooltipExtra = `Ingredients: ${craft.ingredients.length}${genderNote}\n${ingredientLines}`;
+
+      const card = createGridItemCard(
         craft.itemId,
         record,
-        record.name,
-        `${this.client.getResourceString(EOResourceID.DIALOG_SHOP_CRAFT_INGREDIENTS)}: ${craft.ingredients.length} ${record.type === ItemType.Armor ? `(${record.spec2 === Gender.Female ? this.client.getResourceString(EOResourceID.FEMALE) : this.client.getResourceString(EOResourceID.MALE)})` : ''}`,
+        `${craft.ingredients.length} ingr.`,
+        tooltipExtra,
       );
+
       const click = () => {
         this.emitter.emit('craftItem', {
           id: craft.itemId,
@@ -321,9 +263,19 @@ export class ShopDialog extends Base {
           ingredients: craft.ingredients,
         });
       };
-      item.addEventListener('click', click);
-      item.addEventListener('contextmenu', click);
-      this.itemList.appendChild(item);
+      card.addEventListener('click', click);
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        click();
+      });
+      this.grid.appendChild(card);
     }
+  }
+
+  private renderEmpty(message: string) {
+    const empty = document.createElement('div');
+    empty.classList.add('shop-grid-empty');
+    empty.innerText = message;
+    this.grid.appendChild(empty);
   }
 }

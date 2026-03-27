@@ -433,27 +433,47 @@
           <button class="themed-btn" type="button" data-id="cancel">Cancel</button>
         </div>
 
-        <div id="shop" class="hidden">
-          <span class="shop-name"></span>
-          <div class="item-list"></div>
-          <div class="scroll-handle"></div>
-          <div class="buttons">
-            <button class="themed-btn hidden" type="button" data-id="back">Back</button>
-            <button class="themed-btn" type="button" data-id="cancel">Cancel</button>
+        <div id="shop" class="dialog-md hidden">
+          <div class="dialog-header"><span class="shop-name"></span></div>
+          <div class="shop-tabs">
+            <button class="themed-btn active" type="button" data-tab="buy">Buy</button>
+            <button class="themed-btn" type="button" data-tab="sell">Sell</button>
+            <button class="themed-btn" type="button" data-tab="craft">Craft</button>
+          </div>
+          <div class="shop-grid"></div>
+          <div class="dialog-footer">
+            <button class="themed-btn" type="button" data-id="cancel">Close</button>
           </div>
         </div>
 
-        <div id="bank" class="hidden">
-          <span class="balance"></span>
-          <div class="item-list"></div>
-          <button class="themed-btn primary" type="button" data-id="ok">OK</button>
+        <div id="bank" class="dialog-md hidden">
+          <div class="dialog-header">
+            <span>Bank</span>
+            <span class="balance"></span>
+          </div>
+          <div class="bank-actions">
+            <button class="themed-btn" type="button" data-id="deposit">Deposit Gold</button>
+            <button class="themed-btn" type="button" data-id="withdraw">Withdraw Gold</button>
+            <button class="themed-btn" type="button" data-id="upgrade">Upgrade Locker</button>
+          </div>
+          <div class="dialog-footer">
+            <button class="themed-btn" type="button" data-id="ok">Close</button>
+          </div>
         </div>
 
-        <div id="locker" class="hidden">
-          <span class="title"></span>
-          <div class="locker-items"></div>
-          <div class="scroll-handle"></div>
-          <button class="themed-btn" type="button" data-id="cancel">Cancel</button>
+        <div id="locker" class="dialog-md hidden">
+          <div class="dialog-header"><span class="title"></span></div>
+          <div class="locker-filters">
+            <button class="themed-btn sm active" type="button" data-filter="all">All</button>
+            <button class="themed-btn sm" type="button" data-filter="weapon">Wpn</button>
+            <button class="themed-btn sm" type="button" data-filter="armor">Arm</button>
+            <button class="themed-btn sm" type="button" data-filter="consumable">Use</button>
+            <button class="themed-btn sm" type="button" data-filter="other">Etc</button>
+          </div>
+          <div class="locker-grid"></div>
+          <div class="dialog-footer">
+            <button class="themed-btn" type="button" data-id="cancel">Close</button>
+          </div>
         </div>
 
         <div id="skill-master" class="hidden">
