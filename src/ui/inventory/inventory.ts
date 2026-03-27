@@ -247,38 +247,23 @@ export class Inventory extends Base {
       return;
     }
 
-    const rect = this.grid.getBoundingClientRect();
-    const style = getComputedStyle(this.grid);
-    const padL = Number.parseFloat(style.paddingLeft);
-    const padT = Number.parseFloat(style.paddingTop);
-    const padR = Number.parseFloat(style.paddingRight);
-    const padB = Number.parseFloat(style.paddingBottom);
-    const gap = Number.parseFloat(style.gap) || 1;
-
-    // Pointer position relative to the content area (inside padding)
-    const pointerX = e.clientX - rect.left - padL;
-    const pointerY = e.clientY - rect.top - padT;
-
-    const contentW = rect.width - padL - padR;
-    const contentH = rect.height - padT - padB;
-
-    if (
-      pointerX < 0 ||
-      pointerY < 0 ||
-      pointerX > contentW ||
-      pointerY > contentH
-    ) {
-      return;
+    // Hit-test against the placeholder cells — works at any UI scale
+    // since both cell rects and e.clientX/Y are in screen coordinates
+    const cells = this.grid.querySelectorAll<HTMLDivElement>('.cell');
+    for (let i = 0; i < cells.length; i++) {
+      const cellRect = cells[i].getBoundingClientRect();
+      if (
+        e.clientX >= cellRect.left &&
+        e.clientX <= cellRect.right &&
+        e.clientY >= cellRect.top &&
+        e.clientY <= cellRect.bottom
+      ) {
+        const gridX = i % COLS;
+        const gridY = Math.floor(i / COLS);
+        this.tryMoveItem(item.id, gridX, gridY);
+        return;
+      }
     }
-
-    // Compute actual cell dimensions from rendered grid
-    const cellW = (contentW - (COLS - 1) * gap) / COLS;
-    const cellH = (contentH - (ROWS - 1) * gap) / ROWS;
-
-    const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
-    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
-
-    this.tryMoveItem(item.id, gridX, gridY);
   }
 
   private onPointerCancel() {
