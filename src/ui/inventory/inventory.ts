@@ -248,20 +248,35 @@ export class Inventory extends Base {
     }
 
     const rect = this.grid.getBoundingClientRect();
-    const pointerX = e.clientX - rect.left;
-    const pointerY = e.clientY - rect.top;
+    const style = getComputedStyle(this.grid);
+    const padL = Number.parseFloat(style.paddingLeft);
+    const padT = Number.parseFloat(style.paddingTop);
+    const padR = Number.parseFloat(style.paddingRight);
+    const padB = Number.parseFloat(style.paddingBottom);
+    const gap = Number.parseFloat(style.gap) || 1;
+
+    // Pointer position relative to the content area (inside padding)
+    const pointerX = e.clientX - rect.left - padL;
+    const pointerY = e.clientY - rect.top - padT;
+
+    const contentW = rect.width - padL - padR;
+    const contentH = rect.height - padT - padB;
 
     if (
       pointerX < 0 ||
       pointerY < 0 ||
-      pointerX > rect.width ||
-      pointerY > rect.height
+      pointerX > contentW ||
+      pointerY > contentH
     ) {
       return;
     }
 
-    const gridX = Math.floor(pointerX / CELL_SIZE);
-    const gridY = Math.floor(pointerY / CELL_SIZE);
+    // Compute actual cell dimensions from rendered grid
+    const cellW = (contentW - (COLS - 1) * gap) / COLS;
+    const cellH = (contentH - (ROWS - 1) * gap) / ROWS;
+
+    const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
 
     this.tryMoveItem(item.id, gridX, gridY);
   }
