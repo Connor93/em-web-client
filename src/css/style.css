@@ -593,61 +593,17 @@ body.is-mobile #change-password-form {
   }
 }
 
-#shop {
-  position: relative;
-  user-select: none;
-  box-sizing: border-box;
-  width: 284px;
-  height: 290px;
-  background-color: #000;
-  background-image: url("/gfx/gfx002/152.png");
-}
-
-#shop .shop-name {
-  position: absolute;
-  color: #fff;
-  font-size: 12px;
-  left: 24px;
-  top: 18px;
-}
-
-#shop .buttons {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 260px;
-  display: flex;
-  gap: 3px;
-  justify-content: center;
-}
+/* Old fixed-layout #shop styles removed — now uses .dialog-md */
 
 .scroll-handle {
   position: absolute;
   right: 16px;
   width: 16px;
   height: 15px;
-  background: url("/gfx/gfx002/129.png") 0 -75px;
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 3px;
   touch-action: none;
   user-select: none;
-}
-
-#shop .item-list {
-  position: absolute;
-  top: 50px;
-  left: 22px;
-  width: 232px;
-  height: 193px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-#shop .item-list::-webkit-scrollbar {
-  display: none;
 }
 
 .menu-item {
@@ -817,6 +773,25 @@ body.is-mobile #change-password-form {
   user-select: none;
   overflow: hidden;
   font-family: inherit;
+}
+
+.dialog-md .dialog-header {
+  padding: 10px 16px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialog-md .dialog-footer {
+  padding: 8px 16px 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  border-top: 1px solid rgba(212, 184, 150, 0.08);
 }
 
 .dialog-md .dialog-contents .player {

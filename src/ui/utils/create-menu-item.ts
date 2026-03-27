@@ -160,5 +160,11 @@ export function createGridItemCard(
   tooltip.innerText = lines.join('\n');
   card.appendChild(tooltip);
 
+  // Position tooltip near the cursor
+  card.addEventListener('mousemove', (e: MouseEvent) => {
+    tooltip.style.left = `${e.clientX + 12}px`;
+    tooltip.style.top = `${e.clientY + 12}px`;
+  });
+
   return card;
 }

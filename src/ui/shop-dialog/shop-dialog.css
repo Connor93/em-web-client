@@ -94,10 +94,7 @@
 
 .grid-card .tooltip {
   display: none;
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
   background: rgba(18, 16, 12, 0.96);
   border: 1px solid rgba(212, 184, 150, 0.3);
   border-radius: 4px;
@@ -109,7 +106,6 @@
   pointer-events: none;
   min-width: 120px;
   max-width: 200px;
-  margin-bottom: 6px;
 }
 
 .grid-card:hover .tooltip {
