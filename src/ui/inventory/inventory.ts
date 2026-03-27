@@ -663,30 +663,65 @@ export class Inventory extends Base {
     name.textContent = record?.name ?? `Item #${item.id}`;
     bar.appendChild(name);
 
-    // Use button
-    const btnUse = document.createElement('button');
-    btnUse.textContent = 'Use';
-    btnUse.addEventListener('click', () => {
-      this.emitter.emit('useItem', item.id);
-      this.hideMobileActionBar();
-    });
-    bar.appendChild(btnUse);
+    // Use button — only for consumable / equippable items
+    const usableTypes = [
+      ItemType.Heal,
+      ItemType.Teleport,
+      ItemType.Alcohol,
+      ItemType.EffectPotion,
+      ItemType.HairDye,
+      ItemType.ExpReward,
+      ItemType.CureCurse,
+    ];
+    const isEquippable =
+      record &&
+      typeof getEquipmentSlotFromString(this.getEquipSlotName(record.type)) !==
+        'undefined';
+    const isUsable = record && usableTypes.includes(record.type);
+
+    if (isUsable || isEquippable) {
+      const btnUse = document.createElement('button');
+      btnUse.textContent = 'Use';
+      btnUse.addEventListener('click', () => {
+        this.emitter.emit('useItem', item.id);
+        this.hideMobileActionBar();
+      });
+      bar.appendChild(btnUse);
+    }
 
     // Equip button — only for equippable items
-    if (record) {
+    if (record && isEquippable) {
       const slot = getEquipmentSlotFromString(
         this.getEquipSlotName(record.type),
-      );
-      if (typeof slot !== 'undefined') {
-        const btnEquip = document.createElement('button');
-        btnEquip.textContent = 'Equip';
-        btnEquip.addEventListener('click', () => {
-          this.emitter.emit('equipItem', { slot, itemId: item.id });
-          this.hideMobileActionBar();
-        });
-        bar.appendChild(btnEquip);
-      }
+      )!;
+      const btnEquip = document.createElement('button');
+      btnEquip.textContent = 'Equip';
+      btnEquip.addEventListener('click', () => {
+        this.emitter.emit('equipItem', { slot, itemId: item.id });
+        this.hideMobileActionBar();
+      });
+      bar.appendChild(btnEquip);
     }
+
+    // Hotbar button — shows slot picker
+    const btnHotbar = document.createElement('button');
+    btnHotbar.textContent = 'Hotbar';
+    btnHotbar.addEventListener('click', () => {
+      this.removeMobilePopup();
+      const picker = this.createSlotPicker(item);
+      this.container.appendChild(picker);
+    });
+    bar.appendChild(btnHotbar);
+
+    // Info button — shows item stats
+    const btnInfo = document.createElement('button');
+    btnInfo.textContent = 'Info';
+    btnInfo.addEventListener('click', () => {
+      this.removeMobilePopup();
+      const popup = this.createInfoPopup(item);
+      this.container.appendChild(popup);
+    });
+    bar.appendChild(btnInfo);
 
     // Drop button
     const btnDrop = document.createElement('button');
@@ -710,12 +745,68 @@ export class Inventory extends Base {
     this.container.appendChild(bar);
   }
 
+  private createSlotPicker(item: Item): HTMLDivElement {
+    const picker = document.createElement('div');
+    picker.className = 'mobile-slot-picker';
+
+    const label = document.createElement('span');
+    label.className = 'picker-label';
+    label.textContent = 'Slot:';
+    picker.appendChild(label);
+
+    const slots = document.querySelectorAll('#hotbar .slot');
+    for (let i = 0; i < slots.length; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = `${i + 1}`;
+      btn.addEventListener('click', () => {
+        this.emitter.emit('assignToSlot', { itemId: item.id, slotIndex: i });
+        this.hideMobileActionBar();
+      });
+      picker.appendChild(btn);
+    }
+
+    return picker;
+  }
+
+  private createInfoPopup(item: Item): HTMLDivElement {
+    const popup = document.createElement('div');
+    popup.className = 'mobile-info-popup';
+
+    const record = this.client.getEifRecordById(item.id);
+    if (!record) {
+      popup.textContent = `Item #${item.id}`;
+      return popup;
+    }
+
+    const meta = getItemMeta(record);
+    let text = record.name;
+    if (item.id === 1) {
+      text = `${item.amount} ${record.name}`;
+    } else if (item.amount > 1) {
+      text = `${record.name} x${item.amount}`;
+    }
+    if (meta.length) {
+      text += `\n${meta.join('\n')}`;
+    }
+
+    popup.textContent = text;
+    return popup;
+  }
+
+  private removeMobilePopup() {
+    this.container
+      .querySelectorAll('.mobile-slot-picker, .mobile-info-popup')
+      .forEach((el) => {
+        el.remove();
+      });
+  }
+
   private hideMobileActionBar() {
+    this.removeMobilePopup();
     if (this.mobileActionBar) {
       this.mobileActionBar.remove();
       this.mobileActionBar = null;
     }
-    this.mobileActionBar = null;
     this.grid.querySelectorAll('.mobile-selected').forEach((e) => {
       e.classList.remove('mobile-selected');
     });
