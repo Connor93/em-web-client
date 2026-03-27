@@ -13,7 +13,6 @@ export abstract class BaseDialogMd<
 
   private btnCancel: HTMLButtonElement;
   private label: HTMLSpanElement;
-  private scrollHandle: HTMLDivElement;
 
   constructor(client: Client, container: HTMLDivElement, labelText: string) {
     super();
@@ -21,7 +20,6 @@ export abstract class BaseDialogMd<
     this.client = client;
     this.dialogContents = container.querySelector('.dialog-contents')!;
     this.btnCancel = container.querySelector('button[data-id="cancel"]')!;
-    this.scrollHandle = container.querySelector('.scroll-handle')!;
     this.label = container.querySelector('.label')!;
 
     this.label.innerText = labelText;
@@ -29,35 +27,6 @@ export abstract class BaseDialogMd<
     this.btnCancel.addEventListener('click', () => {
       playSfxById(SfxId.ButtonClick);
       this.hide();
-    });
-
-    this.dialogContents.addEventListener('scroll', () => {
-      this.setScrollThumbPosition();
-    });
-
-    this.scrollHandle.addEventListener('pointerdown', () => {
-      const onPointerMove = (e: PointerEvent) => {
-        const rect = this.dialogContents.getBoundingClientRect();
-        const min = 30;
-        const max = 212;
-        const clampedY = Math.min(
-          Math.max(e.clientY, rect.top + min),
-          rect.top + max,
-        );
-        const scrollPercent = (clampedY - rect.top - min) / (max - min);
-        const scrollHeight = this.dialogContents.scrollHeight;
-        const clientHeight = this.dialogContents.clientHeight;
-        this.dialogContents.scrollTop =
-          scrollPercent * (scrollHeight - clientHeight);
-      };
-
-      const onPointerUp = () => {
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-      };
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
     });
   }
 
@@ -72,23 +41,10 @@ export abstract class BaseDialogMd<
     this.label.innerText = newText;
   }
 
-  setScrollThumbPosition() {
-    const min = 60;
-    const max = 212;
-    const scrollTop = this.dialogContents.scrollTop;
-    const scrollHeight = this.dialogContents.scrollHeight;
-    const clientHeight = this.dialogContents.clientHeight;
-    const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-    const clampedPercent = Math.min(Math.max(scrollPercent, 0), 1);
-    const top = min + (max - min) * clampedPercent || min;
-    this.scrollHandle.style.top = `${top}px`;
-  }
-
   show() {
     this.render();
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
-    this.setScrollThumbPosition();
   }
 
   hide() {
