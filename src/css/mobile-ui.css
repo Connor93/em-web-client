@@ -201,7 +201,7 @@ body.is-mobile #online-list:not(.hidden) {
 .mobile-panel-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   z-index: 1049;
   opacity: 0;
   pointer-events: none;
