@@ -16,8 +16,6 @@ export class PartyDialog extends Base {
   private memberList: HTMLDivElement =
     this.container.querySelector('.member-list')!;
   private label: HTMLSpanElement = this.container.querySelector('.label')!;
-  private scrollHandle: HTMLDivElement =
-    this.container.querySelector('.scroll-handle')!;
   private open = false;
 
   constructor(client: Client) {
@@ -28,47 +26,6 @@ export class PartyDialog extends Base {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
-
-    this.memberList.addEventListener('scroll', () => {
-      this.setScrollThumbPosition();
-    });
-
-    this.scrollHandle.addEventListener('pointerdown', () => {
-      const onPointerMove = (e: PointerEvent) => {
-        const rect = this.memberList.getBoundingClientRect();
-        const min = 30;
-        const max = 212;
-        const clampedY = Math.min(
-          Math.max(e.clientY, rect.top + min),
-          rect.top + max,
-        );
-        const scrollPercent = (clampedY - rect.top - min) / (max - min);
-        const scrollHeight = this.memberList.scrollHeight;
-        const clientHeight = this.memberList.clientHeight;
-        this.memberList.scrollTop =
-          scrollPercent * (scrollHeight - clientHeight);
-      };
-
-      const onPointerUp = () => {
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-      };
-
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
-    });
-  }
-
-  setScrollThumbPosition() {
-    const min = 60;
-    const max = 212;
-    const scrollTop = this.memberList.scrollTop;
-    const scrollHeight = this.memberList.scrollHeight;
-    const clientHeight = this.memberList.clientHeight;
-    const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-    const clampedPercent = Math.min(Math.max(scrollPercent, 0), 1);
-    const top = min + (max - min) * clampedPercent || min;
-    this.scrollHandle.style.top = `${top}px`;
   }
 
   show() {
@@ -76,7 +33,6 @@ export class PartyDialog extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.open = true;
-    this.setScrollThumbPosition();
   }
 
   hide() {
