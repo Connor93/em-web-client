@@ -1,8 +1,14 @@
 import type { Client } from '../../client';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { capitalize } from '../../utils';
 import { Base } from '../base-ui';
 import { ChatIcon } from '../chat/chat';
+import {
+  addMobileBackdrop,
+  addMobileCloseButton,
+  removeMobileBackdrop,
+} from '../utils';
 
 import './party-dialog.css';
 
@@ -28,16 +34,28 @@ export class PartyDialog extends Base {
     });
   }
 
+  private mobileBackdrop: HTMLDivElement | null = null;
+
   show() {
     this.render();
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.open = true;
+
+    if (isMobile()) {
+      addMobileCloseButton(this.container, () => this.hide());
+      this.mobileBackdrop = addMobileBackdrop(() => this.hide());
+    }
   }
 
   hide() {
     this.container.classList.add('hidden');
     this.open = false;
+
+    if (this.mobileBackdrop) {
+      removeMobileBackdrop(this.mobileBackdrop);
+      this.mobileBackdrop = null;
+    }
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
       this.dialogs.classList.add('hidden');

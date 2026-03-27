@@ -1,7 +1,13 @@
 import mitt, { type EventType } from 'mitt';
 import type { Client } from '../client';
+import { isMobile } from '../main';
 import { playSfxById, SfxId } from '../sfx';
 import { Base } from './base-ui';
+import {
+  addMobileBackdrop,
+  addMobileCloseButton,
+  removeMobileBackdrop,
+} from './utils';
 
 export abstract class BaseDialogMd<
   TEvent extends Record<EventType, unknown>,
@@ -13,6 +19,7 @@ export abstract class BaseDialogMd<
 
   private btnCancel: HTMLButtonElement;
   private label: HTMLSpanElement;
+  private mobileBackdrop: HTMLDivElement | null = null;
 
   constructor(client: Client, container: HTMLDivElement, labelText: string) {
     super();
@@ -45,10 +52,20 @@ export abstract class BaseDialogMd<
     this.render();
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
+
+    if (isMobile()) {
+      addMobileCloseButton(this.container, () => this.hide());
+      this.mobileBackdrop = addMobileBackdrop(() => this.hide());
+    }
   }
 
   hide() {
     this.container.classList.add('hidden');
+
+    if (this.mobileBackdrop) {
+      removeMobileBackdrop(this.mobileBackdrop);
+      this.mobileBackdrop = null;
+    }
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
       this.dialogs.classList.add('hidden');

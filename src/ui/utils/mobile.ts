@@ -5,10 +5,7 @@ import { isMobile } from '../../main';
  * of the given container element. No-ops on desktop.
  * Safe to call multiple times — only injects once.
  */
-export function addMobileCloseButton(
-  container: HTMLElement,
-  onClose: () => void,
-) {
+export function addMobileCloseButton(container: Element, onClose: () => void) {
   if (!isMobile()) return;
 
   const header = container.querySelector('.dialog-header, .top');

@@ -1,9 +1,15 @@
 import { StatId } from 'eolib';
 import mitt from 'mitt';
 import type { Client } from '../../client';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { calculateTnl, capitalize } from '../../utils';
 import { Base } from '../base-ui';
+import {
+  addMobileBackdrop,
+  addMobileCloseButton,
+  removeMobileBackdrop,
+} from '../utils';
 
 import './stats.css';
 
@@ -204,16 +210,28 @@ export class Stats extends Base {
     return '';
   }
 
+  private mobileBackdrop: HTMLDivElement | null = null;
+
   show() {
     this.open = true;
     this.render();
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
+
+    if (isMobile()) {
+      addMobileCloseButton(this.container, () => this.hide());
+      this.mobileBackdrop = addMobileBackdrop(() => this.hide());
+    }
   }
 
   hide() {
     this.open = false;
     this.container.classList.add('hidden');
+
+    if (this.mobileBackdrop) {
+      removeMobileBackdrop(this.mobileBackdrop);
+      this.mobileBackdrop = null;
+    }
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
       this.dialogs.classList.add('hidden');
