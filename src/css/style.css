@@ -799,6 +799,7 @@ body.is-mobile #change-password-form {
 
 .dialog-search {
   display: block;
+  box-sizing: border-box;
   width: calc(100% - 24px);
   margin: 4px 12px;
   padding: 5px 8px;
