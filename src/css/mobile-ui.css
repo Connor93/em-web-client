@@ -45,7 +45,7 @@ body.is-mobile #change-password-form {
    Major dialogs fill the viewport on mobile.
    ═══════════════════════════════════════════════════════════════════ */
 
-body.is-mobile .dialog-md {
+body.is-mobile .dialog-md:not(.hidden) {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
@@ -109,7 +109,7 @@ body.is-mobile .dialog-md .dialog-footer {
    Fullscreen Inventory
    ═══════════════════════════════════════════════════════════════════ */
 
-body.is-mobile #inventory {
+body.is-mobile #inventory:not(.hidden) {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
@@ -157,7 +157,7 @@ body.is-mobile .grid-card {
    Fullscreen Paperdoll
    ═══════════════════════════════════════════════════════════════════ */
 
-body.is-mobile #paperdoll {
+body.is-mobile #paperdoll:not(.hidden) {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
