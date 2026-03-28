@@ -910,6 +910,9 @@ export class Client {
   }
 
   setStatusLabel(type: EOResourceID, text: string) {
+    // Suppress warning-type labels (e.g. "online exp bonus") — they
+    // already appear in the system chat log.
+    if (type === EOResourceID.STATUS_LABEL_TYPE_WARNING) return;
     showGameToast(type, text);
   }
 
