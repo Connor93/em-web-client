@@ -322,7 +322,6 @@ export class SpellBook extends BaseDialogMd<Events> {
   }
 
   override hide() {
-    console.trace('[SpellBook] hide() called');
     this.hideMobileActionBar();
     super.hide();
   }
