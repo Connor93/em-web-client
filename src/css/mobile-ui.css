@@ -193,9 +193,9 @@ body.is-mobile #paperdoll button[data-id="ok"] {
 }
 
 /* Scale up paperdoll equipment in split-view to fill the freed space */
-.mobile-split-view > #paperdoll {
-  transform: scale(1.5) !important;
-  transform-origin: top left !important;
+.mobile-split-view > #paperdoll .equipment-grid {
+  transform: scale(1.5);
+  transform-origin: top left;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
