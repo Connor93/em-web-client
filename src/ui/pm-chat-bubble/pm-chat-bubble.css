@@ -213,3 +213,33 @@
   opacity: 0.5;
   margin-bottom: 1px;
 }
+
+/* ── Mobile overrides ────────────────────────────────────────────── */
+
+body.is-mobile .pm-bubble {
+  width: 70px;
+}
+
+body.is-mobile .pm-bubble.expanded {
+  width: 130px;
+}
+
+body.is-mobile .pm-bubble .pm-name {
+  font-size: 9px;
+}
+
+body.is-mobile .pm-bubble.expanded .pm-messages {
+  max-height: 120px;
+  min-height: 40px;
+  font-size: 9px;
+}
+
+body.is-mobile .pm-bubble .pm-input {
+  font-size: 9px;
+  padding: 4px 6px;
+}
+
+body.is-mobile .pm-bubble .pm-send-btn {
+  padding: 4px 6px;
+  font-size: 9px;
+}

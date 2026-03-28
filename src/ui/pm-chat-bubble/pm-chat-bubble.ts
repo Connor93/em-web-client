@@ -134,6 +134,18 @@ export class PmChatBubble {
     this.unreadDot.classList.remove('active');
     this.messages.scrollTo(0, this.messages.scrollHeight);
     setTimeout(() => this.input.focus(), 50);
+
+    // Reposition if the expanded bubble overflows the viewport
+    requestAnimationFrame(() => {
+      const rect = this.el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      if (rect.bottom > vh) {
+        const overflowPx = rect.bottom - vh;
+        const currentTop = Number.parseFloat(this.el.style.top) || rect.top;
+        this.el.style.position = 'fixed';
+        this.el.style.top = `${Math.max(0, currentTop - overflowPx)}px`;
+      }
+    });
   }
 
   collapse() {
@@ -175,8 +187,8 @@ export class PmChatBubble {
   private setupDrag(header: HTMLDivElement) {
     let dragging = false;
     let didDrag = false;
-    let startMouseX = 0;
-    let startMouseY = 0;
+    let startX = 0;
+    let startY = 0;
     let startLeft = 0;
     let startTop = 0;
     const DRAG_THRESHOLD = 5;
@@ -188,35 +200,22 @@ export class PmChatBubble {
       return m ? Number.parseFloat(m[1]) : 1;
     };
 
-    const onMouseDown = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.pm-close-btn')) return;
-
+    const onStart = (clientX: number, clientY: number) => {
       const scale = getScale();
       dragging = true;
       didDrag = false;
-      startMouseX = e.clientX;
-      startMouseY = e.clientY;
+      startX = clientX;
+      startY = clientY;
 
       const rect = this.el.getBoundingClientRect();
       startLeft = rect.left / scale;
       startTop = rect.top / scale;
-      e.preventDefault();
     };
 
-    // Listen on both the pill (collapsed) and header (expanded)
-    this.el.addEventListener('mousedown', (e: MouseEvent) => {
-      if (this.expanded) return;
-      onMouseDown(e);
-    });
-    header.addEventListener('mousedown', (e: MouseEvent) => {
-      onMouseDown(e);
-    });
-
-    document.addEventListener('mousemove', (e: MouseEvent) => {
+    const onMove = (clientX: number, clientY: number) => {
       if (!dragging) return;
-      const rawDx = e.clientX - startMouseX;
-      const rawDy = e.clientY - startMouseY;
+      const rawDx = clientX - startX;
+      const rawDy = clientY - startY;
       if (!didDrag && Math.abs(rawDx) + Math.abs(rawDy) < DRAG_THRESHOLD)
         return;
       didDrag = true;
@@ -225,7 +224,6 @@ export class PmChatBubble {
       const dx = rawDx / scale;
       const dy = rawDy / scale;
 
-      // Clamp to #ui container bounds
       const uiEl = document.getElementById('ui');
       const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
       const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
@@ -238,13 +236,72 @@ export class PmChatBubble {
       this.el.style.position = 'fixed';
       this.el.style.left = `${newLeft}px`;
       this.el.style.top = `${newTop}px`;
-    });
+    };
 
-    document.addEventListener('mouseup', () => {
+    const onEnd = () => {
       if (dragging && !didDrag && !this.expanded) {
         this.expand();
       }
       dragging = false;
+    };
+
+    // ── Mouse events ──
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.pm-close-btn')) return;
+      onStart(e.clientX, e.clientY);
+      e.preventDefault();
+    };
+
+    this.el.addEventListener('mousedown', (e: MouseEvent) => {
+      if (this.expanded) return;
+      onMouseDown(e);
     });
+    header.addEventListener('mousedown', (e: MouseEvent) => {
+      onMouseDown(e);
+    });
+
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      onMove(e.clientX, e.clientY);
+    });
+    document.addEventListener('mouseup', onEnd);
+
+    // ── Touch events ──
+    const onTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.pm-close-btn')) return;
+      const t = e.touches[0];
+      if (!t) return;
+      onStart(t.clientX, t.clientY);
+    };
+
+    this.el.addEventListener(
+      'touchstart',
+      (e: TouchEvent) => {
+        if (this.expanded) return;
+        onTouchStart(e);
+      },
+      { passive: true },
+    );
+    header.addEventListener(
+      'touchstart',
+      (e: TouchEvent) => {
+        onTouchStart(e);
+      },
+      { passive: true },
+    );
+
+    document.addEventListener(
+      'touchmove',
+      (e: TouchEvent) => {
+        if (!dragging) return;
+        const t = e.touches[0];
+        if (!t) return;
+        onMove(t.clientX, t.clientY);
+        if (didDrag) e.preventDefault();
+      },
+      { passive: false },
+    );
+    document.addEventListener('touchend', onEnd);
   }
 }
