@@ -3,7 +3,11 @@ import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
 import { getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
-import { createItemMenuItem, createTextMenuItem } from '../utils';
+import {
+  addMobileCloseButton,
+  createItemMenuItem,
+  createTextMenuItem,
+} from '../utils';
 
 import './info-dialog.css';
 
@@ -71,6 +75,8 @@ export class InfoDialog extends Base {
       document.addEventListener('pointermove', onPointerMove);
       document.addEventListener('pointerup', onPointerUp);
     });
+
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   private setScrollThumbPosition() {
