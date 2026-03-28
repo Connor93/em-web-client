@@ -1,3 +1,4 @@
+import { isMobile } from '../../main';
 import {
   type GameSettings,
   SETTING_LABELS,
@@ -6,6 +7,7 @@ import {
 } from '../../settings';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
+import { addMobileCloseButton } from '../utils';
 
 import './settings-dialog.css';
 
@@ -57,6 +59,10 @@ export class SettingsDialog extends Base {
     this.render();
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
+
+    if (isMobile()) {
+      addMobileCloseButton(this.container, () => this.hide());
+    }
   }
 
   hide() {
