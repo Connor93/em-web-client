@@ -67,6 +67,17 @@ export class SpellBook extends BaseDialogMd<Events> {
       level.addEventListener('click', click);
       spellElement.appendChild(level);
 
+      if (!isMobile()) {
+        const btnLevelUp = document.createElement('button');
+        btnLevelUp.classList.add('spell-levelup-btn');
+        btnLevelUp.textContent = 'Level Up';
+        btnLevelUp.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.showTrainingPanel(spell.id);
+        });
+        spellElement.appendChild(btnLevelUp);
+      }
+
       this.spellGrid.appendChild(spellElement);
     }
   }
