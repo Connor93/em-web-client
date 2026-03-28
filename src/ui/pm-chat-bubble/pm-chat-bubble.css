@@ -221,7 +221,7 @@ body.is-mobile .pm-bubble {
 }
 
 body.is-mobile .pm-bubble.expanded {
-  width: 130px;
+  width: 200px;
 }
 
 body.is-mobile .pm-bubble .pm-name {
