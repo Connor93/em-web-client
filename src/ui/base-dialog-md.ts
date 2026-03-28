@@ -32,6 +32,7 @@ export abstract class BaseDialogMd<
     this.label.innerText = labelText;
 
     this.btnCancel.addEventListener('click', () => {
+      console.log('[BaseDialogMd] Cancel button clicked');
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
@@ -54,8 +55,14 @@ export abstract class BaseDialogMd<
     this.dialogs.classList.remove('hidden');
 
     if (isMobile()) {
-      addMobileCloseButton(this.container, () => this.hide());
-      this.mobileBackdrop = addMobileBackdrop(() => this.hide());
+      addMobileCloseButton(this.container, () => {
+        console.log('[BaseDialogMd] Mobile close button clicked');
+        this.hide();
+      });
+      this.mobileBackdrop = addMobileBackdrop(() => {
+        console.log('[BaseDialogMd] Mobile backdrop clicked');
+        this.hide();
+      });
     }
   }
 
