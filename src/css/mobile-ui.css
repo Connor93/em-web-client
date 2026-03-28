@@ -45,6 +45,8 @@ body.is-mobile #change-password-form {
    Major dialogs fill the viewport on mobile.
    ═══════════════════════════════════════════════════════════════════ */
 
+/* Fullscreen overlays — major dialogs fill the viewport on mobile.
+   Elements inside .mobile-split-view are excluded via the override below. */
 body.is-mobile .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
   position: fixed !important;
   inset: 0 !important;
@@ -56,6 +58,23 @@ body.is-mobile .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
+}
+
+/* Override: elements inside split-view must NOT be fullscreen */
+body.is-mobile .mobile-split-view
+  .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow-y: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  z-index: auto !important;
 }
 
 body.is-mobile .dialog-md .dialog-header {
@@ -171,6 +190,12 @@ body.is-mobile #paperdoll:not(.hidden) {
 body.is-mobile #paperdoll .info-panel,
 body.is-mobile #paperdoll button[data-id="ok"] {
   display: none !important;
+}
+
+/* Scale up paperdoll equipment in split-view to fill the freed space */
+.mobile-split-view > #paperdoll {
+  transform: scale(1.5) !important;
+  transform-origin: top left !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
