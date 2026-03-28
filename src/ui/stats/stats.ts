@@ -206,8 +206,6 @@ export class Stats extends Base {
     return '';
   }
 
-  private mobileBackdrop: HTMLDivElement | null = null;
-
   show() {
     this.open = true;
     this.render();

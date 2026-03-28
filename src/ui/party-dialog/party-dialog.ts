@@ -30,8 +30,6 @@ export class PartyDialog extends Base {
     });
   }
 
-  private mobileBackdrop: HTMLDivElement | null = null;
-
   show() {
     this.render();
     this.container.classList.remove('hidden');
