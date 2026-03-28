@@ -1,5 +1,6 @@
 import mitt from 'mitt';
 import { ChatTab, type Client } from '../../client';
+import { isMobile } from '../../main';
 import { settings } from '../../settings';
 import { Base } from '../base-ui';
 
@@ -154,6 +155,14 @@ export class Chat extends Base {
     this.globalChat.innerHTML = '';
     this.groupChat.innerHTML = '';
     this.systemChat.innerHTML = '';
+  }
+
+  override show() {
+    super.show();
+    if (isMobile()) {
+      this.activeChat.classList.add('hidden');
+      this.collapsed = true;
+    }
   }
 
   focus() {
