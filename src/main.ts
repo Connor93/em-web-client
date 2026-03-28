@@ -103,6 +103,13 @@ const mobileHud = new MobileHUD();
 let userOverride = false;
 let _isMobile = false;
 
+// Prevent virtual keyboard from resizing the viewport (Chromium API)
+if ('virtualKeyboard' in navigator) {
+  (
+    navigator as unknown as { virtualKeyboard: { overlaysContent: boolean } }
+  ).virtualKeyboard.overlaysContent = true;
+}
+
 export function isMobile(): boolean {
   return _isMobile;
 }
