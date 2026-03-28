@@ -4,6 +4,8 @@
  * Accounts for CSS transform: scale() on the #ui container.
  */
 
+import { isMobile } from '../../main';
+
 const STORAGE_PREFIX = 'ui-pos-';
 
 function getUiScale(): number {
@@ -15,6 +17,7 @@ function getUiScale(): number {
 }
 
 export function makeDraggable(element: HTMLElement, handleSelector?: string) {
+  if (isMobile()) return; // Mobile uses CSS-driven positioning
   const id = element.id;
   if (!id) return;
 
@@ -110,6 +113,7 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
  * Call this in the element's show() method.
  */
 export function restoreOrCenter(element: HTMLElement) {
+  if (isMobile()) return; // Mobile uses CSS-driven positioning
   const id = element.id;
   if (!id) return;
 
