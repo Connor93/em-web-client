@@ -357,3 +357,69 @@ body.is-mobile #spell-book .spell-icon.mobile-selected {
   border-radius: 3px;
   background-color: rgba(212, 184, 150, 0.15);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile Split-View Container (Bank+Inventory, Paperdoll+Inventory)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.mobile-split-view {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 1050;
+  background: rgba(18, 16, 12, 0.98);
+}
+
+.mobile-split-view > * {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  max-height: 100% !important;
+  transform: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.mobile-split-view > :first-child {
+  border-right: 1px solid rgba(212, 184, 150, 0.15);
+}
+
+/* Close button for split-view */
+.mobile-split-close {
+  position: fixed;
+  top: 6px;
+  right: 6px;
+  z-index: 1060;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  color: #a89880;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-split-close:active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #d4b896;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Paperdoll Mobile — tap-to-select equipped item + action bar
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #paperdoll .item.mobile-selected {
+  outline: 2px solid rgba(212, 184, 150, 0.5);
+  outline-offset: -1px;
+  border-radius: 3px;
+  background-color: rgba(212, 184, 150, 0.15);
+}

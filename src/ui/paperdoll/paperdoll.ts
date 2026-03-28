@@ -1,9 +1,10 @@
 import { CharacterDetails, CharacterIcon, EquipmentPaperdoll } from 'eolib';
 import { type Client, EquipmentSlot } from '../../client';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { capitalize, getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
-import { characterIconToChatIcon } from '../utils';
+import { addMobileCloseButton, characterIconToChatIcon } from '../utils';
 
 import './paperdoll.css';
 
@@ -87,6 +88,15 @@ export class Paperdoll extends Base {
   private details = new CharacterDetails();
   private equipment = new EquipmentPaperdoll();
 
+  private mobileActionBar: HTMLDivElement | null = null;
+
+  /** Maps each equipment slot element to its EquipmentSlot + ID getter */
+  private slotMap: {
+    el: HTMLDivElement;
+    slot: EquipmentSlot;
+    getId: () => number;
+  }[];
+
   constructor(client: Client) {
     super();
     this.client = client;
@@ -94,6 +104,84 @@ export class Paperdoll extends Base {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
+
+    this.slotMap = [
+      {
+        el: this.imgBoots,
+        slot: EquipmentSlot.Boots,
+        getId: () => this.equipment.boots,
+      },
+      {
+        el: this.imgAccessory,
+        slot: EquipmentSlot.Accessory,
+        getId: () => this.equipment.accessory,
+      },
+      {
+        el: this.imgGloves,
+        slot: EquipmentSlot.Gloves,
+        getId: () => this.equipment.gloves,
+      },
+      {
+        el: this.imgBelt,
+        slot: EquipmentSlot.Belt,
+        getId: () => this.equipment.belt,
+      },
+      {
+        el: this.imgArmor,
+        slot: EquipmentSlot.Armor,
+        getId: () => this.equipment.armor,
+      },
+      {
+        el: this.imgNecklace,
+        slot: EquipmentSlot.Necklace,
+        getId: () => this.equipment.necklace,
+      },
+      {
+        el: this.imgHat,
+        slot: EquipmentSlot.Hat,
+        getId: () => this.equipment.hat,
+      },
+      {
+        el: this.imgShield,
+        slot: EquipmentSlot.Shield,
+        getId: () => this.equipment.shield,
+      },
+      {
+        el: this.imgWeapon,
+        slot: EquipmentSlot.Weapon,
+        getId: () => this.equipment.weapon,
+      },
+      {
+        el: this.imgRing1,
+        slot: EquipmentSlot.Ring1,
+        getId: () => this.equipment.ring[0],
+      },
+      {
+        el: this.imgRing2,
+        slot: EquipmentSlot.Ring2,
+        getId: () => this.equipment.ring[1],
+      },
+      {
+        el: this.imgArmlet1,
+        slot: EquipmentSlot.Armlet1,
+        getId: () => this.equipment.armlet[0],
+      },
+      {
+        el: this.imgArmlet2,
+        slot: EquipmentSlot.Armlet2,
+        getId: () => this.equipment.armlet[1],
+      },
+      {
+        el: this.imgBracer1,
+        slot: EquipmentSlot.Bracer1,
+        getId: () => this.equipment.bracer[0],
+      },
+      {
+        el: this.imgBracer2,
+        slot: EquipmentSlot.Bracer2,
+        getId: () => this.equipment.bracer[1],
+      },
+    ];
 
     this.client.on('equipmentChanged', () => {
       if (this.details.playerId === client.playerId) {
@@ -113,110 +201,26 @@ export class Paperdoll extends Base {
       }
     });
 
-    this.imgAccessory.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Accessory);
-    });
+    // Desktop: right-click to unequip
+    // Mobile: handled via tap + action bar below
+    for (const entry of this.slotMap) {
+      entry.el.addEventListener('contextmenu', () => {
+        if (this.details.playerId !== this.client.playerId) return;
+        this.client.unequipItem(entry.slot);
+      });
 
-    this.imgArmlet1.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Armlet1);
-    });
+      // Mobile: tap to select + show action bar
+      entry.el.addEventListener('pointerdown', (e) => {
+        if (!isMobile()) return;
+        if (this.details.playerId !== this.client.playerId) return;
+        const itemId = entry.getId();
+        if (!itemId) return;
 
-    this.imgArmlet2.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Armlet2);
-    });
-
-    this.imgArmor.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Armor);
-    });
-
-    this.imgBelt.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Belt);
-    });
-
-    this.imgBoots.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Boots);
-    });
-
-    this.imgBracer1.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Bracer1);
-    });
-
-    this.imgBracer2.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Bracer2);
-    });
-
-    this.imgGloves.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Gloves);
-    });
-
-    this.imgHat.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Hat);
-    });
-
-    this.imgNecklace.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Necklace);
-    });
-
-    this.imgRing1.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Ring1);
-    });
-
-    this.imgRing2.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Ring2);
-    });
-
-    this.imgShield.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Shield);
-    });
-
-    this.imgWeapon.addEventListener('contextmenu', () => {
-      if (this.details.playerId !== this.client.playerId) {
-        return;
-      }
-      this.client.unequipItem(EquipmentSlot.Weapon);
-    });
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectMobileEquipment(entry.el, entry.slot, itemId);
+      });
+    }
   }
 
   setData(
@@ -255,65 +259,9 @@ export class Paperdoll extends Base {
       characterIconToChatIcon(this.icon).toString(),
     );
 
-    this.setEquipment(EquipmentSlot.Boots, this.equipment.boots, this.imgBoots);
-    this.setEquipment(
-      EquipmentSlot.Accessory,
-      this.equipment.accessory,
-      this.imgAccessory,
-    );
-    this.setEquipment(
-      EquipmentSlot.Gloves,
-      this.equipment.gloves,
-      this.imgGloves,
-    );
-    this.setEquipment(EquipmentSlot.Belt, this.equipment.belt, this.imgBelt);
-    this.setEquipment(EquipmentSlot.Armor, this.equipment.armor, this.imgArmor);
-    this.setEquipment(
-      EquipmentSlot.Necklace,
-      this.equipment.necklace,
-      this.imgNecklace,
-    );
-    this.setEquipment(EquipmentSlot.Hat, this.equipment.hat, this.imgHat);
-    this.setEquipment(
-      EquipmentSlot.Shield,
-      this.equipment.shield,
-      this.imgShield,
-    );
-    this.setEquipment(
-      EquipmentSlot.Weapon,
-      this.equipment.weapon,
-      this.imgWeapon,
-    );
-    this.setEquipment(
-      EquipmentSlot.Ring1,
-      this.equipment.ring[0],
-      this.imgRing1,
-    );
-    this.setEquipment(
-      EquipmentSlot.Ring2,
-      this.equipment.ring[1],
-      this.imgRing2,
-    );
-    this.setEquipment(
-      EquipmentSlot.Armlet1,
-      this.equipment.armlet[0],
-      this.imgArmlet1,
-    );
-    this.setEquipment(
-      EquipmentSlot.Armlet2,
-      this.equipment.armlet[1],
-      this.imgArmlet2,
-    );
-    this.setEquipment(
-      EquipmentSlot.Bracer1,
-      this.equipment.bracer[0],
-      this.imgBracer1,
-    );
-    this.setEquipment(
-      EquipmentSlot.Bracer2,
-      this.equipment.bracer[1],
-      this.imgBracer2,
-    );
+    for (const entry of this.slotMap) {
+      this.setEquipment(entry.slot, entry.getId(), entry.el);
+    }
   }
 
   private setEquipment(
@@ -349,9 +297,14 @@ export class Paperdoll extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
+
+    if (isMobile()) {
+      addMobileCloseButton(this.container, () => this.hide());
+    }
   }
 
   hide() {
+    this.hideMobileActionBar();
     this.container.classList.add('hidden');
     this.cover.classList.add('hidden');
 
@@ -359,5 +312,91 @@ export class Paperdoll extends Base {
       this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
+  }
+
+  /* ── Mobile Action Bar ─────────────────────────────────────────── */
+
+  private selectMobileEquipment(
+    el: HTMLDivElement,
+    slot: EquipmentSlot,
+    itemId: number,
+  ) {
+    // Clear previous selection
+    this.container.querySelectorAll('.mobile-selected').forEach((e) => {
+      e.classList.remove('mobile-selected');
+    });
+
+    el.classList.add('mobile-selected');
+    playSfxById(SfxId.InventoryPickup);
+    this.showMobileActionBar(slot, itemId);
+  }
+
+  private showMobileActionBar(slot: EquipmentSlot, itemId: number) {
+    this.hideMobileActionBar();
+
+    const record = this.client.getEifRecordById(itemId);
+    const bar = document.createElement('div');
+    bar.className = 'mobile-action-bar';
+
+    // Item name
+    const nameEl = document.createElement('span');
+    nameEl.className = 'action-item-name';
+    nameEl.textContent = record?.name ?? `Item #${itemId}`;
+    bar.appendChild(nameEl);
+
+    // Unequip button
+    const btnUnequip = document.createElement('button');
+    btnUnequip.textContent = 'Unequip';
+    btnUnequip.addEventListener('click', () => {
+      this.client.unequipItem(slot);
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(btnUnequip);
+
+    // Info button
+    const btnInfo = document.createElement('button');
+    btnInfo.textContent = 'Info';
+    btnInfo.addEventListener('click', () => {
+      this.removeMobilePopup();
+      const popup = this.createInfoPopup(itemId);
+      this.container.appendChild(popup);
+    });
+    bar.appendChild(btnInfo);
+
+    this.mobileActionBar = bar;
+    this.container.appendChild(bar);
+  }
+
+  private createInfoPopup(itemId: number): HTMLDivElement {
+    const popup = document.createElement('div');
+    popup.className = 'mobile-info-popup';
+
+    const record = this.client.getEifRecordById(itemId);
+    if (!record) {
+      popup.textContent = `Item #${itemId}`;
+      return popup;
+    }
+
+    const meta = getItemMeta(record);
+    const lines = [record.name, ...meta];
+    popup.textContent = lines.join('\n');
+    return popup;
+  }
+
+  private removeMobilePopup() {
+    this.container.querySelectorAll('.mobile-info-popup').forEach((el) => {
+      el.remove();
+    });
+  }
+
+  private hideMobileActionBar() {
+    this.removeMobilePopup();
+    if (this.mobileActionBar) {
+      this.mobileActionBar.remove();
+      this.mobileActionBar = null;
+    }
+    this.container.querySelectorAll('.mobile-selected').forEach((e) => {
+      e.classList.remove('mobile-selected');
+    });
   }
 }
