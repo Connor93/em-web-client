@@ -1,8 +1,10 @@
 import type { Client } from '../client';
 import { ChatTab } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
+import { isMobile } from '../main';
 import { playSfxById, SfxId } from '../sfx';
 import { ChatIcon } from '../ui/chat/chat';
+import { createMobileSplitView } from '../ui/utils';
 
 export interface ClientEventDeps {
   client: Client;
@@ -41,7 +43,7 @@ export interface ClientEventDeps {
     show(playerId: number, screenX: number, screenY: number): void;
     hide(): void;
   };
-  inventory: { loadPositions(): void; show(): void };
+  inventory: { loadPositions(): void; show(): void; hide(): void };
   stats: { render(): void };
   questDialog: {
     setData(
@@ -56,6 +58,8 @@ export interface ClientEventDeps {
   paperdoll: {
     setData(icon: unknown, details: unknown, equipment: unknown): void;
     show(): void;
+    hide(): void;
+    isOwnCharacter(): boolean;
   };
   book: {
     setData(icon: unknown, details: unknown, questNames: unknown): void;
@@ -77,7 +81,7 @@ export interface ClientEventDeps {
     show(): void;
   };
   boardDialog: { setData(posts: unknown): void; show(): void };
-  lockerDialog: { setItems(items: unknown): void; show(): void };
+  lockerDialog: { setItems(items: unknown): void; show(): void; hide(): void };
   skillMasterDialog: {
     setData(name: string, skills: unknown): void;
     show(): void;
@@ -289,6 +293,19 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('openPaperdoll', ({ icon, equipment, details }) => {
     deps.paperdoll.setData(icon, details, equipment);
     deps.paperdoll.show();
+
+    // Mobile split-view: paperdoll left, inventory right (own character only)
+    if (isMobile() && deps.paperdoll.isOwnCharacter()) {
+      const paperdollEl = document.getElementById('paperdoll')!;
+      const inventoryEl = document.getElementById('inventory')!;
+      deps.inventory.show();
+
+      const cleanup = createMobileSplitView(paperdollEl, inventoryEl, () => {
+        cleanup();
+        deps.paperdoll.hide();
+        deps.inventory.hide();
+      });
+    }
   });
 
   client.on('openBook', ({ icon, details, questNames }) => {
@@ -347,6 +364,19 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('lockerOpened', ({ items }) => {
     deps.lockerDialog.setItems(items);
     deps.lockerDialog.show();
+
+    // Mobile split-view: inventory left, locker right
+    if (isMobile()) {
+      const inventoryEl = document.getElementById('inventory')!;
+      const lockerEl = document.getElementById('locker')!;
+      deps.inventory.show();
+
+      const cleanup = createMobileSplitView(inventoryEl, lockerEl, () => {
+        cleanup();
+        deps.lockerDialog.hide();
+        deps.inventory.hide();
+      });
+    }
   });
 
   client.on('lockerChanged', ({ items }) => {

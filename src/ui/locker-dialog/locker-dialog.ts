@@ -29,10 +29,6 @@ export class LockerDialog extends Base {
   private searchInput =
     this.container.querySelector<HTMLInputElement>('.dialog-search')!;
 
-  private splitView: HTMLDivElement | null = null;
-  private splitClose: HTMLButtonElement | null = null;
-  private inventoryParent: ParentNode | null = null;
-
   constructor(client: Client) {
     super();
     this.client = client;
@@ -114,17 +110,9 @@ export class LockerDialog extends Base {
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
     addMobileCloseButton(this.container, () => this.hide());
-
-    if (isMobile()) {
-      this.showSplitView();
-    }
   }
 
   hide() {
-    if (isMobile()) {
-      this.hideSplitView();
-    }
-
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
@@ -132,53 +120,6 @@ export class LockerDialog extends Base {
       this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
-  }
-
-  /* ── Mobile Split-View (Inventory + Locker) ────────────────────── */
-
-  private showSplitView() {
-    const inventory = document.getElementById('inventory');
-    if (!inventory) return;
-
-    this.inventoryParent = inventory.parentNode;
-
-    this.splitView = document.createElement('div');
-    this.splitView.className = 'mobile-split-view';
-
-    // Left: inventory, Right: locker
-    inventory.classList.remove('hidden');
-    this.splitView.appendChild(inventory);
-    this.splitView.appendChild(this.container);
-
-    // Close button
-    this.splitClose = document.createElement('button');
-    this.splitClose.className = 'mobile-split-close';
-    this.splitClose.textContent = '×';
-    this.splitClose.addEventListener('click', () => this.hide());
-    this.splitView.appendChild(this.splitClose);
-
-    document.body.appendChild(this.splitView);
-  }
-
-  private hideSplitView() {
-    if (!this.splitView) return;
-
-    const inventory = document.getElementById('inventory');
-
-    if (inventory && this.inventoryParent) {
-      this.inventoryParent.appendChild(inventory);
-      inventory.classList.add('hidden');
-    }
-
-    this.dialogs.appendChild(this.container);
-
-    if (this.splitClose) {
-      this.splitClose.remove();
-      this.splitClose = null;
-    }
-    this.splitView.remove();
-    this.splitView = null;
-    this.inventoryParent = null;
   }
 
   private updateFilterHighlight() {

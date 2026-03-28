@@ -11,3 +11,4 @@ export {
   addMobileCloseButton,
   removeMobileBackdrop,
 } from './mobile';
+export { createMobileSplitView } from './mobile-split-view';
