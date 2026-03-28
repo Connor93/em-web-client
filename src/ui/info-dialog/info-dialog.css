@@ -10,7 +10,8 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   color: #e0daca;
-  font-family: inherit;
+  /* biome-ignore lint/a11y/useGenericFontNames: fallback for bitmap font */
+  font-family: w95fa, 'Segoe UI', Tahoma, Arial !important;
 }
 
 /* ── Header ─────────────────────────────────────────────────────── */
@@ -76,11 +77,10 @@
 
 #info-dialog .info-row {
   color: #d4c4a8;
-  font-size: 11px;
+  font-size: 12px;
   padding: 2px 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
   border-radius: 3px;
 }
 
