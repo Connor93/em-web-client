@@ -380,6 +380,7 @@ wireClientEvents({
   boardDialog,
   lockerDialog,
   skillMasterDialog,
+  spellBook,
   tradeDialog,
   infoDialog,
   partyDialog,

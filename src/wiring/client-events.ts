@@ -93,6 +93,7 @@ export interface ClientEventDeps {
     show(): void;
     refresh(): void;
   };
+  spellBook: { render(): void };
   tradeDialog: {
     showRequest(playerId: number, playerName: string): void;
     open(
@@ -430,6 +431,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('skillsChanged', () => {
     deps.skillMasterDialog.refresh();
+    deps.spellBook.render();
   });
 
   client.on('spellQueued', () => {

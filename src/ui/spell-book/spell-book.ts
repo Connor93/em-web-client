@@ -52,11 +52,7 @@ export class SpellBook extends BaseDialogMd<Events> {
       spellElement.appendChild(icon);
 
       const click = () => {
-        this.client.showConfirmation(
-          `Do you want to level up '${record.name}' to level ${spell.level + 1} for 1 skill point?`,
-          'Spell training',
-          () => {},
-        );
+        this.showTrainingPanel(spell.id);
       };
 
       const name = document.createElement('span');
@@ -238,17 +234,12 @@ export class SpellBook extends BaseDialogMd<Events> {
     bar.appendChild(btnInfo);
 
     // Level up button
-    const spell = this.client.spells.find((s) => s.id === spellId);
-    if (spell && this.client.skillPoints > 0) {
+    if (this.client.skillPoints > 0) {
       const btnLevel = document.createElement('button');
       btnLevel.textContent = 'Level Up';
       btnLevel.addEventListener('click', () => {
-        this.client.showConfirmation(
-          `Do you want to level up '${record?.name}' to level ${spell.level + 1} for 1 skill point?`,
-          'Spell training',
-          () => {},
-        );
         this.hideMobileActionBar();
+        this.showTrainingPanel(spellId);
       });
       bar.appendChild(btnLevel);
     }
@@ -308,6 +299,114 @@ export class SpellBook extends BaseDialogMd<Events> {
       .forEach((el) => {
         el.remove();
       });
+  }
+
+  private showTrainingPanel(spellId: number) {
+    // Remove existing panel
+    this.container.querySelector('.spell-training-panel')?.remove();
+
+    const spell = this.client.spells.find((s) => s.id === spellId);
+    const record = this.client.getEsfRecordById(spellId);
+    if (!spell || !record) return;
+
+    const maxTrainable = Math.min(this.client.skillPoints, 100 - spell.level);
+    if (maxTrainable <= 0) {
+      this.client.showError('No skill points available');
+      return;
+    }
+
+    let amount = 1;
+
+    const panel = document.createElement('div');
+    panel.className = 'spell-training-panel';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'training-header';
+    header.innerHTML = `<span class="training-spell-name">${record.name}</span><span class="training-level">Lv. ${spell.level}</span>`;
+    panel.appendChild(header);
+
+    // Amount selector
+    const selector = document.createElement('div');
+    selector.className = 'training-selector';
+
+    const btnMinus = document.createElement('button');
+    btnMinus.className = 'training-btn';
+    btnMinus.textContent = '−';
+
+    const amountDisplay = document.createElement('span');
+    amountDisplay.className = 'training-amount';
+    amountDisplay.textContent = '1';
+
+    const btnPlus = document.createElement('button');
+    btnPlus.className = 'training-btn';
+    btnPlus.textContent = '+';
+
+    const btnMax = document.createElement('button');
+    btnMax.className = 'training-btn training-max';
+    btnMax.textContent = 'Max';
+
+    const updateAmount = (newAmt: number) => {
+      amount = Math.max(1, Math.min(newAmt, maxTrainable));
+      amountDisplay.textContent = `${amount}`;
+      costDisplay.textContent = `Cost: ${amount} SP`;
+      resultDisplay.textContent = `Lv. ${spell.level} → ${spell.level + amount}`;
+      btnMinus.disabled = amount <= 1;
+      btnPlus.disabled = amount >= maxTrainable;
+    };
+
+    btnMinus.addEventListener('click', () => updateAmount(amount - 1));
+    btnPlus.addEventListener('click', () => updateAmount(amount + 1));
+    btnMax.addEventListener('click', () => updateAmount(maxTrainable));
+
+    selector.append(btnMinus, amountDisplay, btnPlus, btnMax);
+    panel.appendChild(selector);
+
+    // Info line
+    const info = document.createElement('div');
+    info.className = 'training-info';
+
+    const costDisplay = document.createElement('span');
+    costDisplay.className = 'training-cost';
+    costDisplay.textContent = 'Cost: 1 SP';
+
+    const resultDisplay = document.createElement('span');
+    resultDisplay.className = 'training-result';
+    resultDisplay.textContent = `Lv. ${spell.level} → ${spell.level + 1}`;
+
+    info.append(costDisplay, resultDisplay);
+    panel.appendChild(info);
+
+    // Buttons
+    const actions = document.createElement('div');
+    actions.className = 'training-actions';
+
+    const btnTrain = document.createElement('button');
+    btnTrain.className = 'training-confirm';
+    btnTrain.textContent = 'Train';
+    btnTrain.addEventListener('click', () => {
+      for (let i = 0; i < amount; i++) {
+        this.client.trainSpell(spellId);
+      }
+      panel.remove();
+    });
+
+    const btnCancel = document.createElement('button');
+    btnCancel.className = 'training-cancel';
+    btnCancel.textContent = 'Cancel';
+    btnCancel.addEventListener('click', () => panel.remove());
+
+    actions.append(btnTrain, btnCancel);
+    panel.appendChild(actions);
+
+    // Available SP footer
+    const footer = document.createElement('div');
+    footer.className = 'training-footer';
+    footer.textContent = `Available: ${this.client.skillPoints} SP`;
+    panel.appendChild(footer);
+
+    this.container.appendChild(panel);
+    updateAmount(1);
   }
 
   private hideMobileActionBar() {

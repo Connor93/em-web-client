@@ -6,3 +6,174 @@
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
+
+/* ── Training Panel ────────────────────────────────────────────── */
+
+.spell-training-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(12, 10, 8, 0.97);
+  border-top: 1px solid rgba(212, 184, 150, 0.3);
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  z-index: 10;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  animation: trainingSlideUp 0.2s ease-out;
+}
+
+@keyframes trainingSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.training-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.12);
+}
+
+.training-spell-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+}
+
+.training-level {
+  font-size: 11px;
+  color: rgba(212, 184, 150, 0.6);
+}
+
+/* ── Amount Selector ─────────────────────────────────────────── */
+
+.training-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.training-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 6px;
+  background: rgba(45, 38, 28, 0.7);
+  color: #d4b896;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.training-btn:hover:not(:disabled) {
+  background: rgba(212, 184, 150, 0.15);
+  border-color: rgba(212, 184, 150, 0.45);
+}
+
+.training-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.training-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.training-max {
+  width: auto;
+  padding: 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.training-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e8c478;
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Info Line ───────────────────────────────────────────────── */
+
+.training-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+
+.training-cost {
+  color: #c4956a;
+}
+
+.training-result {
+  color: rgba(212, 184, 150, 0.7);
+}
+
+/* ── Action Buttons ──────────────────────────────────────────── */
+
+.training-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.training-confirm {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid rgba(120, 180, 90, 0.4);
+  border-radius: 6px;
+  background: rgba(80, 140, 60, 0.25);
+  color: #a4d48a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.training-confirm:hover {
+  background: rgba(80, 140, 60, 0.4);
+  border-color: rgba(120, 180, 90, 0.6);
+}
+
+.training-cancel {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 6px;
+  background: rgba(45, 38, 28, 0.5);
+  color: rgba(212, 184, 150, 0.6);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.training-cancel:hover {
+  background: rgba(45, 38, 28, 0.8);
+  border-color: rgba(212, 184, 150, 0.35);
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
+
+.training-footer {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 10px;
+  color: rgba(212, 184, 150, 0.4);
+}

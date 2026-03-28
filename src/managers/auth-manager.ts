@@ -240,6 +240,14 @@ export function learnSkill(client: Client, skillId: number): void {
   client.bus.send(packet);
 }
 
+export function trainSpell(client: Client, spellId: number): void {
+  const packet = new StatSkillAddClientPacket();
+  packet.actionType = TrainType.Skill;
+  packet.actionTypeData = new StatSkillAddClientPacket.ActionTypeDataSkill();
+  packet.actionTypeData.spellId = spellId;
+  client.bus.send(packet);
+}
+
 export function forgetSkill(client: Client, skillId: number): void {
   const packet = new StatSkillRemoveClientPacket();
   packet.sessionId = client.sessionId;

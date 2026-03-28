@@ -975,6 +975,10 @@ export class Client {
     AuthManager.learnSkill(this, skillId);
   }
 
+  trainSpell(spellId: number) {
+    AuthManager.trainSpell(this, spellId);
+  }
+
   forgetSkill(skillId: number) {
     AuthManager.forgetSkill(this, skillId);
   }
