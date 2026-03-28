@@ -346,3 +346,14 @@ body.is-mobile #inventory .item.mobile-selected {
   max-height: 200px;
   overflow-y: auto;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Mobile Spell Book — tap-to-select + action bar
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #spell-book .spell-icon.mobile-selected {
+  outline: 2px solid rgba(212, 184, 150, 0.5);
+  outline-offset: -1px;
+  border-radius: 3px;
+  background-color: rgba(212, 184, 150, 0.15);
+}
