@@ -45,7 +45,7 @@ body.is-mobile #change-password-form {
    Major dialogs fill the viewport on mobile.
    ═══════════════════════════════════════════════════════════════════ */
 
-body.is-mobile .dialog-md:not(.hidden) {
+body.is-mobile .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
