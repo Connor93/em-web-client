@@ -101,6 +101,14 @@ export class InfoDialog extends Base {
     );
     this.itemList.appendChild(headerItem);
 
+    // Detailed item metadata (damage, defense, stat bonuses, requirements)
+    if (meta.length > 1) {
+      this.addSection('Details');
+      for (let i = 1; i < meta.length; i++) {
+        this.addRow(meta[i]);
+      }
+    }
+
     // Stats
     const stats: string[] = [];
     if (item.hp > 0) stats.push(`HP: +${item.hp}`);
