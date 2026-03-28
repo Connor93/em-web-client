@@ -7,6 +7,26 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
+/* ── Consistent spell cell layout ────────────────────────────── */
+/* Each cell is a grid: icon | name (fixed 2-line height) | level | button */
+
+#spell-book .spell-grid > div {
+  display: grid;
+  grid-template-rows: 32px 28px auto auto;
+  justify-items: center;
+}
+
+#spell-book .spell-name {
+  height: 28px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  align-self: start;
+}
+
+
 /* ── Desktop Level Up Button ─────────────────────────────────── */
 
 .spell-levelup-btn {
