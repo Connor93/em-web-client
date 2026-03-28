@@ -68,7 +68,9 @@
   transition: transform 0.25s ease;
   display: flex;
   flex-direction: column;
-  padding: 60px 0 20px 0;
+  padding: 60px 0 12px 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #mobile-menu-panel.open {
@@ -78,18 +80,19 @@
 #mobile-menu-panel .menu-item-btn {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 14px 24px;
+  padding: 10px 20px;
   background: none;
   border: none;
   outline: none;
   color: #c4b48e;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.12s;
   text-align: left;
+  flex-shrink: 0;
 }
 
 #mobile-menu-panel .menu-item-btn:active {
