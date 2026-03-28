@@ -43,7 +43,12 @@ export interface ClientEventDeps {
     show(playerId: number, screenX: number, screenY: number): void;
     hide(): void;
   };
-  inventory: { loadPositions(): void; show(): void; hide(): void };
+  inventory: {
+    loadPositions(): void;
+    show(): void;
+    hide(): void;
+    renderOnly(): void;
+  };
   stats: { render(): void };
   questDialog: {
     setData(
@@ -60,6 +65,7 @@ export interface ClientEventDeps {
     show(): void;
     hide(): void;
     isOwnCharacter(): boolean;
+    renderOnly(): void;
   };
   book: {
     setData(icon: unknown, details: unknown, questNames: unknown): void;
@@ -292,19 +298,21 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('openPaperdoll', ({ icon, equipment, details }) => {
     deps.paperdoll.setData(icon, details, equipment);
-    deps.paperdoll.show();
 
     // Mobile split-view: paperdoll left, inventory right (own character only)
     if (isMobile() && deps.paperdoll.isOwnCharacter()) {
+      // Don't call show() — it triggers fullscreen CSS. Just render + split.
+      deps.paperdoll.renderOnly();
+      deps.inventory.renderOnly();
+
       const paperdollEl = document.getElementById('paperdoll')!;
       const inventoryEl = document.getElementById('inventory')!;
-      deps.inventory.show();
 
       const cleanup = createMobileSplitView(paperdollEl, inventoryEl, () => {
         cleanup();
-        deps.paperdoll.hide();
-        deps.inventory.hide();
       });
+    } else {
+      deps.paperdoll.show();
     }
   });
 
@@ -363,19 +371,19 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('lockerOpened', ({ items }) => {
     deps.lockerDialog.setItems(items);
-    deps.lockerDialog.show();
 
-    // Mobile split-view: inventory left, locker right
     if (isMobile()) {
+      // Don't call show() — it triggers fullscreen CSS. Just render + split.
+      deps.inventory.renderOnly();
+
       const inventoryEl = document.getElementById('inventory')!;
       const lockerEl = document.getElementById('locker')!;
-      deps.inventory.show();
 
       const cleanup = createMobileSplitView(inventoryEl, lockerEl, () => {
         cleanup();
-        deps.lockerDialog.hide();
-        deps.inventory.hide();
       });
+    } else {
+      deps.lockerDialog.show();
     }
   });
 

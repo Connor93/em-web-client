@@ -291,6 +291,11 @@ export class Paperdoll extends Base {
     tooltip.classList.remove('hidden');
   }
 
+  /** Render equipment without triggering fullscreen show (for split-view). */
+  renderOnly() {
+    this.render();
+  }
+
   show() {
     this.render();
     this.cover.classList.remove('hidden');

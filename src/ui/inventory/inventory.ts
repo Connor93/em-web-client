@@ -857,6 +857,11 @@ export class Inventory extends Base {
     }
   }
 
+  /** Render items without triggering fullscreen show/cover/dialogs (for split-view). */
+  renderOnly() {
+    this.render();
+  }
+
   show() {
     this.render();
     this.container.classList.remove('hidden');
