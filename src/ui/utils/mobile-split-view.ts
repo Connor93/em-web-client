@@ -2,6 +2,7 @@ import { isMobile } from '../../main';
 
 /**
  * Creates a mobile split-view container with two panels side by side.
+ * Hides the #cover and #dialogs overlays so the split-view is the top layer.
  * Returns a cleanup function that restores DOM positions.
  */
 export function createMobileSplitView(
@@ -33,6 +34,12 @@ export function createMobileSplitView(
   wrapper.appendChild(closeBtn);
 
   document.body.appendChild(wrapper);
+
+  // Hide cover/dialogs overlays so they don't obscure split-view
+  const cover = document.getElementById('cover');
+  const dialogs = document.getElementById('dialogs');
+  cover?.classList.add('hidden');
+  dialogs?.classList.add('hidden');
 
   // Return cleanup function
   return () => {

@@ -167,6 +167,41 @@ body.is-mobile #paperdoll:not(.hidden) {
   margin: 0 !important;
 }
 
+/* Hide character info and OK button on mobile — just show equipment */
+body.is-mobile #paperdoll .info-panel,
+body.is-mobile #paperdoll button[data-id="ok"] {
+  display: none !important;
+}
+
+/* Convert absolute-positioned equipment to a CSS grid on mobile */
+body.is-mobile #paperdoll {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-content: start !important;
+  gap: 4px !important;
+  padding: 8px !important;
+  overflow-y: auto !important;
+}
+
+body.is-mobile #paperdoll .item {
+  position: static !important;
+  width: 60px !important;
+  height: 60px !important;
+  left: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  border: 1px solid rgba(212, 184, 150, 0.15) !important;
+  border-radius: 6px !important;
+  background: rgba(212, 184, 150, 0.04);
+}
+
+body.is-mobile #paperdoll .item img {
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    Slide-In Panels (stats, spells, party, online list)
    ═══════════════════════════════════════════════════════════════════ */
@@ -439,6 +474,13 @@ body.is-mobile .mobile-split-view > .dialog-md {
    ═══════════════════════════════════════════════════════════════════ */
 
 body.is-mobile #paperdoll .item.mobile-selected {
+  outline: 2px solid rgba(212, 184, 150, 0.5);
+  outline-offset: -1px;
+  border-radius: 3px;
+  background-color: rgba(212, 184, 150, 0.15);
+}
+
+body.is-mobile #locker .grid-card.mobile-selected {
   outline: 2px solid rgba(212, 184, 150, 0.5);
   outline-offset: -1px;
   border-radius: 3px;

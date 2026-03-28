@@ -3,7 +3,7 @@ import type { Client } from '../../client';
 import { EOResourceID } from '../../edf';
 import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
-import { capitalize } from '../../utils';
+import { capitalize, getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
 import { addMobileCloseButton, createGridItemCard } from '../utils';
 
@@ -29,6 +29,8 @@ export class LockerDialog extends Base {
   private searchInput =
     this.container.querySelector<HTMLInputElement>('.dialog-search')!;
 
+  private mobileActionBar: HTMLDivElement | null = null;
+
   constructor(client: Client) {
     super();
     this.client = client;
@@ -53,7 +55,7 @@ export class LockerDialog extends Base {
       this.render();
     });
 
-    // Mobile: tap locker item to take it (replaces right-click)
+    // Mobile: tap locker item to select → action bar
     if (isMobile()) {
       this.grid.addEventListener('pointerdown', (e) => {
         const card = (e.target as HTMLElement).closest<HTMLDivElement>(
@@ -66,25 +68,13 @@ export class LockerDialog extends Base {
         e.preventDefault();
         e.stopPropagation();
 
-        const record = this.client.getEifRecordById(itemId);
-        if (!record) return;
-
-        if (
-          this.client.weight.current + record.weight >
-          this.client.weight.max
-        ) {
-          this.client.emit('smallAlert', {
-            title: this.client.getResourceString(
-              EOResourceID.STATUS_LABEL_TYPE_WARNING,
-            )!,
-            message: this.client.getResourceString(
-              EOResourceID.DIALOG_ITS_TOO_HEAVY_WEIGHT,
-            )!,
-          });
-          return;
-        }
-
-        this.client.takeLockerItem(itemId);
+        // Highlight selected card
+        this.grid.querySelectorAll('.mobile-selected').forEach((el) => {
+          el.classList.remove('mobile-selected');
+        });
+        card.classList.add('mobile-selected');
+        playSfxById(SfxId.InventoryPickup);
+        this.showMobileActionBar(itemId);
       });
     }
   }
@@ -113,6 +103,7 @@ export class LockerDialog extends Base {
   }
 
   hide() {
+    this.hideMobileActionBar();
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
@@ -120,6 +111,82 @@ export class LockerDialog extends Base {
       this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
+  }
+
+  /* ── Mobile Action Bar ─────────────────────────────────────────── */
+
+  private showMobileActionBar(itemId: number) {
+    this.hideMobileActionBar();
+
+    const record = this.client.getEifRecordById(itemId);
+    const bar = document.createElement('div');
+    bar.className = 'mobile-action-bar';
+
+    // Item name
+    const nameEl = document.createElement('span');
+    nameEl.className = 'action-item-name';
+    nameEl.textContent = record?.name ?? `Item #${itemId}`;
+    bar.appendChild(nameEl);
+
+    // Take button
+    const btnTake = document.createElement('button');
+    btnTake.textContent = 'Take';
+    btnTake.addEventListener('click', () => {
+      if (record) {
+        if (
+          this.client.weight.current + record.weight >
+          this.client.weight.max
+        ) {
+          this.client.emit('smallAlert', {
+            title: this.client.getResourceString(
+              EOResourceID.STATUS_LABEL_TYPE_WARNING,
+            )!,
+            message: this.client.getResourceString(
+              EOResourceID.DIALOG_ITS_TOO_HEAVY_WEIGHT,
+            )!,
+          });
+          return;
+        }
+      }
+      this.client.takeLockerItem(itemId);
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(btnTake);
+
+    // Info button
+    const btnInfo = document.createElement('button');
+    btnInfo.textContent = 'Info';
+    btnInfo.addEventListener('click', () => {
+      this.removeMobilePopup();
+      if (record) {
+        const meta = getItemMeta(record);
+        const popup = document.createElement('div');
+        popup.className = 'mobile-info-popup';
+        popup.textContent = [record.name, ...meta].join('\n');
+        this.container.appendChild(popup);
+      }
+    });
+    bar.appendChild(btnInfo);
+
+    this.mobileActionBar = bar;
+    this.container.appendChild(bar);
+  }
+
+  private hideMobileActionBar() {
+    this.removeMobilePopup();
+    if (this.mobileActionBar) {
+      this.mobileActionBar.remove();
+      this.mobileActionBar = null;
+    }
+    this.grid.querySelectorAll('.mobile-selected').forEach((el) => {
+      el.classList.remove('mobile-selected');
+    });
+  }
+
+  private removeMobilePopup() {
+    this.container.querySelectorAll('.mobile-info-popup').forEach((el) => {
+      el.remove();
+    });
   }
 
   private updateFilterHighlight() {
