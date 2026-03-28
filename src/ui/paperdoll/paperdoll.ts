@@ -89,6 +89,9 @@ export class Paperdoll extends Base {
   private equipment = new EquipmentPaperdoll();
 
   private mobileActionBar: HTMLDivElement | null = null;
+  private splitView: HTMLDivElement | null = null;
+  private splitClose: HTMLButtonElement | null = null;
+  private inventoryParent: ParentNode | null = null;
 
   /** Maps each equipment slot element to its EquipmentSlot + ID getter */
   private slotMap: {
@@ -300,11 +303,18 @@ export class Paperdoll extends Base {
 
     if (isMobile()) {
       addMobileCloseButton(this.container, () => this.hide());
+      // Show split-view only for own character
+      if (this.details.playerId === this.client.playerId) {
+        this.showSplitView();
+      }
     }
   }
 
   hide() {
     this.hideMobileActionBar();
+    if (isMobile()) {
+      this.hideSplitView();
+    }
     this.container.classList.add('hidden');
     this.cover.classList.add('hidden');
 
@@ -312,6 +322,53 @@ export class Paperdoll extends Base {
       this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
+  }
+
+  /* ── Mobile Split-View (Paperdoll + Inventory) ─────────────────── */
+
+  private showSplitView() {
+    const inventory = document.getElementById('inventory');
+    if (!inventory) return;
+
+    this.inventoryParent = inventory.parentNode;
+
+    this.splitView = document.createElement('div');
+    this.splitView.className = 'mobile-split-view';
+
+    // Left: paperdoll, Right: inventory
+    this.splitView.appendChild(this.container);
+    inventory.classList.remove('hidden');
+    this.splitView.appendChild(inventory);
+
+    // Close button
+    this.splitClose = document.createElement('button');
+    this.splitClose.className = 'mobile-split-close';
+    this.splitClose.textContent = '×';
+    this.splitClose.addEventListener('click', () => this.hide());
+    this.splitView.appendChild(this.splitClose);
+
+    document.body.appendChild(this.splitView);
+  }
+
+  private hideSplitView() {
+    if (!this.splitView) return;
+
+    const inventory = document.getElementById('inventory');
+
+    if (inventory && this.inventoryParent) {
+      this.inventoryParent.appendChild(inventory);
+      inventory.classList.add('hidden');
+    }
+
+    this.dialogs.appendChild(this.container);
+
+    if (this.splitClose) {
+      this.splitClose.remove();
+      this.splitClose = null;
+    }
+    this.splitView.remove();
+    this.splitView = null;
+    this.inventoryParent = null;
   }
 
   /* ── Mobile Action Bar ─────────────────────────────────────────── */

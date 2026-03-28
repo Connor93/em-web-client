@@ -1,6 +1,7 @@
 import { ItemType, type ThreeItem } from 'eolib';
 import type { Client } from '../../client';
 import { EOResourceID } from '../../edf';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { capitalize } from '../../utils';
 import { Base } from '../base-ui';
@@ -28,6 +29,10 @@ export class LockerDialog extends Base {
   private searchInput =
     this.container.querySelector<HTMLInputElement>('.dialog-search')!;
 
+  private splitView: HTMLDivElement | null = null;
+  private splitClose: HTMLButtonElement | null = null;
+  private inventoryParent: ParentNode | null = null;
+
   constructor(client: Client) {
     super();
     this.client = client;
@@ -51,6 +56,41 @@ export class LockerDialog extends Base {
     this.searchInput.addEventListener('input', () => {
       this.render();
     });
+
+    // Mobile: tap locker item to take it (replaces right-click)
+    if (isMobile()) {
+      this.grid.addEventListener('pointerdown', (e) => {
+        const card = (e.target as HTMLElement).closest<HTMLDivElement>(
+          '.grid-card',
+        );
+        if (!card) return;
+        const itemId = Number(card.dataset.itemId);
+        if (!itemId) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const record = this.client.getEifRecordById(itemId);
+        if (!record) return;
+
+        if (
+          this.client.weight.current + record.weight >
+          this.client.weight.max
+        ) {
+          this.client.emit('smallAlert', {
+            title: this.client.getResourceString(
+              EOResourceID.STATUS_LABEL_TYPE_WARNING,
+            )!,
+            message: this.client.getResourceString(
+              EOResourceID.DIALOG_ITS_TOO_HEAVY_WEIGHT,
+            )!,
+          });
+          return;
+        }
+
+        this.client.takeLockerItem(itemId);
+      });
+    }
   }
 
   setItems(items: ThreeItem[]) {
@@ -74,9 +114,17 @@ export class LockerDialog extends Base {
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
     addMobileCloseButton(this.container, () => this.hide());
+
+    if (isMobile()) {
+      this.showSplitView();
+    }
   }
 
   hide() {
+    if (isMobile()) {
+      this.hideSplitView();
+    }
+
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
@@ -84,6 +132,53 @@ export class LockerDialog extends Base {
       this.dialogs.classList.add('hidden');
       this.client.typing = false;
     }
+  }
+
+  /* ── Mobile Split-View (Inventory + Locker) ────────────────────── */
+
+  private showSplitView() {
+    const inventory = document.getElementById('inventory');
+    if (!inventory) return;
+
+    this.inventoryParent = inventory.parentNode;
+
+    this.splitView = document.createElement('div');
+    this.splitView.className = 'mobile-split-view';
+
+    // Left: inventory, Right: locker
+    inventory.classList.remove('hidden');
+    this.splitView.appendChild(inventory);
+    this.splitView.appendChild(this.container);
+
+    // Close button
+    this.splitClose = document.createElement('button');
+    this.splitClose.className = 'mobile-split-close';
+    this.splitClose.textContent = '×';
+    this.splitClose.addEventListener('click', () => this.hide());
+    this.splitView.appendChild(this.splitClose);
+
+    document.body.appendChild(this.splitView);
+  }
+
+  private hideSplitView() {
+    if (!this.splitView) return;
+
+    const inventory = document.getElementById('inventory');
+
+    if (inventory && this.inventoryParent) {
+      this.inventoryParent.appendChild(inventory);
+      inventory.classList.add('hidden');
+    }
+
+    this.dialogs.appendChild(this.container);
+
+    if (this.splitClose) {
+      this.splitClose.remove();
+      this.splitClose = null;
+    }
+    this.splitView.remove();
+    this.splitView = null;
+    this.inventoryParent = null;
   }
 
   private updateFilterHighlight() {

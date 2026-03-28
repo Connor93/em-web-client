@@ -703,6 +703,20 @@ export class Inventory extends Base {
       bar.appendChild(btnEquip);
     }
 
+    // Store button — only when locker dialog is open
+    const lockerOpen = !document
+      .getElementById('locker')
+      ?.classList.contains('hidden');
+    if (lockerOpen) {
+      const btnStore = document.createElement('button');
+      btnStore.textContent = 'Store';
+      btnStore.addEventListener('click', () => {
+        this.emitter.emit('addLockerItem', item.id);
+        this.hideMobileActionBar();
+      });
+      bar.appendChild(btnStore);
+    }
+
     // Hotbar button — shows slot picker
     const btnHotbar = document.createElement('button');
     btnHotbar.textContent = 'Hotbar';
