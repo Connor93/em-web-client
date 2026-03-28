@@ -172,6 +172,7 @@ body.is-mobile #paperdoll:not(.hidden) {
    ═══════════════════════════════════════════════════════════════════ */
 
 body.is-mobile #stats,
+body.is-mobile #spell-book,
 body.is-mobile #party-dialog,
 body.is-mobile #online-list {
   position: fixed !important;
@@ -190,6 +191,7 @@ body.is-mobile #online-list {
 }
 
 body.is-mobile #stats:not(.hidden),
+body.is-mobile #spell-book:not(.hidden),
 body.is-mobile #party-dialog:not(.hidden),
 body.is-mobile #online-list:not(.hidden) {
   transform: translateX(0);

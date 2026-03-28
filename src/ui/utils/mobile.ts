@@ -35,13 +35,13 @@ export function addMobileBackdrop(onDismiss: () => void): HTMLDivElement {
   backdrop.className = 'mobile-panel-backdrop';
   document.body.appendChild(backdrop);
 
-  // Small delay for CSS transition
+  // Delay both the CSS transition and the click handler so the opening
+  // click/tap doesn't immediately bubble up and dismiss the panel.
   requestAnimationFrame(() => {
     backdrop.classList.add('active');
-  });
-
-  backdrop.addEventListener('click', () => {
-    onDismiss();
+    backdrop.addEventListener('click', () => {
+      onDismiss();
+    });
   });
 
   return backdrop;
