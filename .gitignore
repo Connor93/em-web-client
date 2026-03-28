@@ -7,3 +7,4 @@ public/data
 dist
 .DS_Store*.egf
 *.DS_Store
+.env.deploy

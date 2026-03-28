@@ -28,6 +28,3 @@ docker-compose.yml
 
 # Screenshots
 screenshots
-
-# EGF asset files (symlinks, not needed at runtime)
-**/*.egf

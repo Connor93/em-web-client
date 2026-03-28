@@ -38,18 +38,42 @@ echo " Domain: $CLIENT_DOMAIN"
 echo "═══════════════════════════════════════════"
 echo ""
 
-# ── Step 1: Build ──────────────────────────────────────────
+# ── Step 1: Prepare EGF files ─────────────────────────────
+# The .egf files in public/gfx/ are symlinks to ~/Projects/assets/gfx/
+# Docker can't follow symlinks outside the build context, so we replace
+# them with real copies before building and restore symlinks after.
+echo "🔗 Dereferencing EGF symlinks for Docker build..."
+EGF_RESTORE=()
+for egf in "$SCRIPT_DIR"/public/gfx/*.egf; do
+  [ -L "$egf" ] || continue
+  target=$(readlink "$egf")
+  rm "$egf"
+  cp "$target" "$egf"
+  EGF_RESTORE+=("$egf|$target")
+done
+
+restore_symlinks() {
+  for entry in "${EGF_RESTORE[@]}"; do
+    local file="${entry%%|*}"
+    local target="${entry##*|}"
+    rm -f "$file"
+    ln -s "$target" "$file"
+  done
+}
+trap restore_symlinks EXIT
+
+# ── Step 2: Build ──────────────────────────────────────────
 echo "📦 Building Docker image (linux/amd64)..."
 docker build --platform linux/amd64 -t "$IMAGE" "$SCRIPT_DIR"
 echo ""
 
-# ── Step 2: Push to GHCR ──────────────────────────────────
+# ── Step 3: Push to GHCR ──────────────────────────────────
 echo "🚀 Pushing to GHCR..."
 echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 docker push "$IMAGE"
 echo ""
 
-# ── Step 3: Deploy to VPS ─────────────────────────────────
+# ── Step 4: Deploy to VPS ─────────────────────────────────
 echo "🔧 Deploying to $VPS_HOST..."
 
 ssh -p "${SSH_PORT}" "${VPS_USER}@${VPS_HOST}" bash -s -- \
