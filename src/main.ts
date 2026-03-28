@@ -465,6 +465,10 @@ initDraggableDialogs([
 window.addEventListener(
   'touchmove',
   (e) => {
+    // Only track touch position and prevent scrolling when touching the canvas
+    const target = e.target as HTMLElement;
+    if (!target || !canvas.contains(target)) return;
+
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;

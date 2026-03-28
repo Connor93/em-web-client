@@ -91,6 +91,8 @@ body.is-mobile .dialog-md .dialog-contents {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.is-mobile .dialog-md .dialog-footer {
