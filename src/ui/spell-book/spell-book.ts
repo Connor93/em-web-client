@@ -58,13 +58,11 @@ export class SpellBook extends BaseDialogMd<Events> {
       const name = document.createElement('span');
       name.classList.add('spell-name');
       name.innerText = record.name;
-      name.addEventListener('click', click);
       spellElement.appendChild(name);
 
       const level = document.createElement('span');
       level.classList.add('spell-level');
       level.innerText = `Lvl: ${spell.level}`;
-      level.addEventListener('click', click);
       spellElement.appendChild(level);
 
       if (!isMobile()) {
