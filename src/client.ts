@@ -36,7 +36,6 @@ import {
   Weight,
 } from 'eolib';
 import mitt, { type Emitter } from 'mitt';
-import { Notyf } from 'notyf';
 import { Atlas } from './atlas';
 import type { PacketBus } from './bus';
 import type { ChatBubble } from './chat-bubble';
@@ -90,6 +89,7 @@ import {
   SfxId,
   type SpellTarget,
 } from './types';
+import { showGameToast } from './ui/game-toast/game-toast';
 import {
   exportWeaponMetadata,
   getEffectMetaData,
@@ -214,12 +214,7 @@ export class Client {
     jukebox: null,
   };
   chestCoords = new Coords();
-  notyf = new Notyf({
-    position: {
-      x: 'right',
-      y: 'top',
-    },
-  });
+
   goldBank = 0;
   lockerUpgrades = 0;
   boardId = 0;
@@ -915,9 +910,7 @@ export class Client {
   }
 
   setStatusLabel(type: EOResourceID, text: string) {
-    this.notyf.open({
-      message: `[ ${this.getResourceString(type)} ] ${text}`,
-    });
+    showGameToast(type, text);
   }
 
   refresh() {

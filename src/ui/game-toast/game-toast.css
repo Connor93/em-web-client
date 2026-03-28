@@ -1,0 +1,131 @@
+/* ── Game Toast Container ────────────────────────────────────────── */
+
+#game-toasts {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1100;
+  pointer-events: none;
+  max-width: 340px;
+  width: 100%;
+}
+
+/* ── Individual Toast ────────────────────────────────────────────── */
+
+.game-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1.4;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 184, 150, 0.15);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-toast.show {
+  animation: toast-in 0.25s ease-out forwards;
+}
+
+.game-toast.hide {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+/* ── Icon ────────────────────────────────────────────────────────── */
+
+.game-toast__icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.game-toast__msg {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Category Colors ─────────────────────────────────────────────── */
+
+.game-toast--info {
+  background: rgba(25, 35, 50, 0.88);
+  color: #b8d4e8;
+  border-color: rgba(140, 180, 220, 0.25);
+}
+
+.game-toast--warning {
+  background: rgba(50, 30, 12, 0.88);
+  color: #e8a54b;
+  border-color: rgba(232, 165, 75, 0.3);
+}
+
+.game-toast--loot {
+  background: rgba(35, 40, 20, 0.88);
+  color: #c8d48a;
+  border-color: rgba(180, 200, 100, 0.25);
+}
+
+.game-toast--exp {
+  background: rgba(40, 30, 55, 0.88);
+  color: #d4a8e8;
+  border-color: rgba(180, 140, 220, 0.3);
+}
+
+.game-toast--action {
+  background: rgba(18, 16, 12, 0.88);
+  color: #d4b896;
+  border-color: rgba(212, 184, 150, 0.2);
+}
+
+/* ── Animations ──────────────────────────────────────────────────── */
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ── Mobile adjustment ───────────────────────────────────────────── */
+
+body.is-mobile #game-toasts {
+  bottom: 60px;
+  max-width: 280px;
+}
+
+body.is-mobile .game-toast {
+  font-size: 11px;
+  padding: 5px 10px;
+  gap: 6px;
+}
