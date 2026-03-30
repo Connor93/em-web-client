@@ -53,10 +53,11 @@ function applyPosition(element: HTMLElement, x: number, y: number): void {
   const clampedX = Math.max(0, Math.min(x, containerWidth - 50));
   const clampedY = Math.max(0, Math.min(y, containerHeight - 50));
 
-  // Use class to override !important CSS rules (e.g. #chat bottom/top)
+  // Use class + setProperty('important') to override !important CSS rules
+  // (e.g. #chat has left/top with !important in media queries)
   element.classList.add('ui-repositioned');
-  element.style.left = `${clampedX}px`;
-  element.style.top = `${clampedY}px`;
+  element.style.setProperty('left', `${clampedX}px`, 'important');
+  element.style.setProperty('top', `${clampedY}px`, 'important');
 }
 
 function restorePosition(element: HTMLElement): void {
@@ -80,8 +81,8 @@ function clearPosition(element: HTMLElement): void {
   localStorage.removeItem(STORAGE_PREFIX + otherPrefix + element.id);
   // Remove repositioning class and inline styles to restore CSS defaults
   element.classList.remove('ui-repositioned');
-  element.style.left = '';
-  element.style.top = '';
+  element.style.removeProperty('left');
+  element.style.removeProperty('top');
 }
 
 function setupDesktopDrag(element: HTMLElement): void {
