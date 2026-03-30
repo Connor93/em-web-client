@@ -168,6 +168,7 @@ export class MapRenderer {
   _tileRenderWarned = false;
   playerTooltip: PlayerTooltip | null = null;
   private cachedUiElement: HTMLElement | null = null;
+  private cachedCanvas: HTMLCanvasElement | null = null;
 
   private topLayer: (() => void)[] = [];
   private staticTileGrid: StaticTile[][][] = [];
@@ -646,13 +647,27 @@ export class MapRenderer {
         // HTML tooltip for desktop, canvas text for mobile
         if (this.playerTooltip && !isMobile()) {
           const position = isoToScreen(coords);
-          const screenX = Math.floor(
+          const canvasX = Math.floor(
             position.x - playerScreen.x + HALF_GAME_WIDTH + offset.x,
           );
-          const screenY = Math.floor(
+          const canvasY = Math.floor(
             position.y - playerScreen.y + HALF_GAME_HEIGHT + offset.y,
           );
 
+          // Convert canvas-space coordinates to page coordinates
+          if (!this.cachedCanvas) {
+            this.cachedCanvas = document.getElementById(
+              'game',
+            ) as HTMLCanvasElement;
+          }
+          const canvas = this.cachedCanvas;
+          if (!canvas) return;
+
+          const rect = canvas.getBoundingClientRect();
+          const pageX = rect.left + (canvasX / canvas.width) * rect.width;
+          const pageY = rect.top + (canvasY / canvas.height) * rect.height;
+
+          // Account for UI scale (tooltip is inside #ui which has transform: scale)
           if (!this.cachedUiElement) {
             this.cachedUiElement = document.getElementById('ui');
           }
@@ -674,8 +689,8 @@ export class MapRenderer {
               tp: character.tp,
               maxTp: character.maxTp,
             },
-            screenX,
-            screenY,
+            pageX,
+            pageY,
             scale,
           );
           return;
