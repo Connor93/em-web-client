@@ -126,6 +126,15 @@ When the user requests a new feature or significant change:
 
 This workflow is mandatory for all feature work — do not skip straight to coding.
 
+## Follow-Up Tracking
+
+Deferred work, improvements, and ideas are tracked in `docs/followups.md`. This is a living document:
+
+- **When deferring work**: Add an entry under "Open" with date, context, and related files
+- **When completing a follow-up**: Move the entry from "Open" to "Completed" with the completion date
+- **Proactively check**: At the start of feature work, check `docs/followups.md` for related open items that could be bundled in
+- **User can ask anytime**: If the user asks about outstanding work, deferred items, or follow-ups, read and summarize `docs/followups.md`
+
 ## Project Memory Bank
 
 Proactively save memories during every working session. Don't wait to be asked — capture knowledge as it emerges. The memory index lives at `.claude/projects/.../memory/MEMORY.md`.
