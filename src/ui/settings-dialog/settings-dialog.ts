@@ -8,6 +8,7 @@ import {
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 import { addMobileCloseButton } from '../utils';
+import { resetMovablePositions, setMovableLocked } from '../utils/movable';
 
 import './settings-dialog.css';
 
@@ -42,6 +43,34 @@ export class SettingsDialog extends Base {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
+
+    // Lock UI toggle (desktop only)
+    const lockButton = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="toggle-lock"]',
+    );
+    if (lockButton) {
+      if (isMobile()) {
+        lockButton.style.display = 'none';
+      } else {
+        lockButton.addEventListener('click', () => {
+          const isUnlocked = lockButton.classList.toggle('active');
+          lockButton.textContent = isUnlocked ? '🔓 Unlock UI' : '🔒 Lock UI';
+          setMovableLocked(!isUnlocked);
+          playSfxById(SfxId.ButtonClick);
+        });
+      }
+    }
+
+    // Reset UI positions (both platforms)
+    const resetButton = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="reset-positions"]',
+    );
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        resetMovablePositions();
+        playSfxById(SfxId.ButtonClick);
+      });
+    }
 
     // Apply saved UI scale on startup
     this.applyUiScale(settings.getUiScale());

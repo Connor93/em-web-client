@@ -82,6 +82,7 @@ import { SmallConfirm } from './ui/small-confirm';
 import { SpellBook } from './ui/spell-book';
 import { Stats } from './ui/stats/stats';
 import { TradeDialog } from './ui/trade-dialog/trade-dialog';
+import { makeMovable } from './ui/utils/movable';
 import { randomRange } from './utils';
 import {
   getReconnectAttempts,
@@ -492,6 +493,13 @@ initDraggableDialogs([
   'info-dialog',
   'guild-panel',
 ]);
+
+// ── Movable UI elements (HUD, Chat) ─────────────────────────────────
+makeMovable(document.getElementById('hud')!);
+makeMovable(document.getElementById('chat')!);
+if (_isMobile) {
+  makeMovable(document.getElementById('mobile-hud')!);
+}
 
 // ── Input Listeners ──────────────────────────────────────────────────────
 

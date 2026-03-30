@@ -165,3 +165,51 @@ body.is-mobile #settings-dialog .setting-value::after {
   font-size: 9px;
   right: 4px;
 }
+
+/* ── Footer actions ────────────────────────────────────────────── */
+
+#settings-dialog .settings-footer {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid rgba(212, 184, 150, 0.1);
+}
+
+#settings-dialog .settings-action-button {
+  flex: 1;
+  padding: 6px 10px;
+  background: rgba(30, 26, 20, 0.7);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 4px;
+  color: #d4b896;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+#settings-dialog .settings-action-button:hover {
+  background: rgba(42, 36, 28, 0.85);
+  border-color: rgba(212, 184, 150, 0.35);
+}
+
+#settings-dialog .settings-action-button.active {
+  background: rgba(80, 120, 60, 0.3);
+  border-color: rgba(100, 180, 80, 0.4);
+  color: #b0d890;
+}
+
+#settings-dialog .settings-reset {
+  color: #a89880;
+}
+
+body.is-mobile #settings-dialog .settings-footer {
+  padding: 12px 16px 16px;
+}
+
+body.is-mobile #settings-dialog .settings-action-button {
+  font-size: 13px;
+  padding: 10px 12px;
+}
