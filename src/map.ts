@@ -43,6 +43,7 @@ import {
 import { TextAlign } from './fonts/base';
 import { GAME_WIDTH, HALF_GAME_HEIGHT, HALF_GAME_WIDTH } from './game-state';
 import { GfxType } from './gfx';
+import { isMobile } from './main';
 import {
   CharacterAttackAnimation,
   CharacterDeathAnimation,
@@ -578,6 +579,8 @@ export class MapRenderer {
       return;
     }
 
+    this.playerTooltip?.hide();
+
     const coords = { x: 0, y: 0 };
     const offset = { x: 0, y: 0 };
     let name = '';
@@ -607,13 +610,12 @@ export class MapRenderer {
         character &&
         (!character.invisible || this.client.admin !== AdminLevel.Player)
       ) {
-        name = capitalize(character.name);
+        const charName = capitalize(character.name);
+        const guildSuffix =
+          character.guildTag !== '   ' ? ` ${character.guildTag}` : '';
+
         coords.x = character.coords.x;
         coords.y = character.coords.y;
-
-        // TODO: Friend color
-        // if (this.client.isFriend(character.name)) {
-        // color = COLORS.NameplateFriend;
 
         switch (character.sitState) {
           case SitState.Floor:
@@ -625,10 +627,6 @@ export class MapRenderer {
           case SitState.Stand:
             offset.y -= 72;
             break;
-        }
-
-        if (character.guildTag !== '   ') {
-          name += ` ${character.guildTag}`;
         }
 
         if (animation instanceof CharacterWalkAnimation) {
@@ -643,6 +641,44 @@ export class MapRenderer {
           coords.x = animation.from.x;
           coords.y = animation.from.y;
         }
+
+        // HTML tooltip for desktop, canvas text for mobile
+        if (this.playerTooltip && !isMobile()) {
+          const position = isoToScreen(coords);
+          const screenX = Math.floor(
+            position.x - playerScreen.x + HALF_GAME_WIDTH + offset.x,
+          );
+          const screenY = Math.floor(
+            position.y - playerScreen.y + HALF_GAME_HEIGHT + offset.y,
+          );
+
+          const uiElement = document.getElementById('ui');
+          const scaleMatch =
+            uiElement?.style.transform.match(/scale\(([^)]+)\)/);
+          const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
+
+          const ecfClass = this.client.ecf.classes[character.classId - 1];
+          const className = ecfClass?.name || '';
+
+          this.playerTooltip.update(
+            {
+              name: `${charName}${guildSuffix}`,
+              level: character.level,
+              className,
+              hp: character.hp,
+              maxHp: character.maxHp,
+              tp: character.tp,
+              maxTp: character.maxTp,
+            },
+            screenX,
+            screenY,
+            scale,
+          );
+          return;
+        }
+
+        // Mobile fallback: set name for canvas drawing below
+        name = `${charName}${guildSuffix}`;
       }
     }
 
