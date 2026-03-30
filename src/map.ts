@@ -158,6 +158,44 @@ const WALK_OFFSETS = [
   },
 ];
 
+function getNpcTypeInfo(record: { type: NpcType; boss: boolean }): {
+  name: string;
+  color: string;
+} {
+  if (record.boss) {
+    return { name: 'Boss', color: '#ff8800' };
+  }
+
+  switch (record.type) {
+    case NpcType.Aggressive:
+      return { name: 'Aggressive', color: '#ff4444' };
+    case NpcType.Passive:
+      return { name: 'Passive', color: '#dddd44' };
+    case NpcType.Friendly:
+      return { name: 'Friendly', color: '#44dd44' };
+    case NpcType.Shop:
+      return { name: 'Shop', color: '#66bbff' };
+    case NpcType.Bank:
+      return { name: 'Bank', color: '#66bbff' };
+    case NpcType.Barber:
+      return { name: 'Barber', color: '#66bbff' };
+    case NpcType.Inn:
+      return { name: 'Inn', color: '#66bbff' };
+    case NpcType.Guild:
+      return { name: 'Guild', color: '#66bbff' };
+    case NpcType.Priest:
+      return { name: 'Priest', color: '#66bbff' };
+    case NpcType.Lawyer:
+      return { name: 'Lawyer', color: '#66bbff' };
+    case NpcType.Trainer:
+      return { name: 'Trainer', color: '#66bbff' };
+    case NpcType.Quest:
+      return { name: 'Quest', color: '#cc66ff' };
+    default:
+      return { name: '', color: '#ffffff' };
+  }
+}
+
 export class MapRenderer {
   client: Client;
   animationFrame = 0;
@@ -570,6 +608,7 @@ export class MapRenderer {
 
   renderNameplate(playerScreen: Vector2, ctx: CanvasRenderingContext2D) {
     this.playerTooltip?.hide();
+    this.npcTooltip?.hide();
 
     if (!this.client.mousePosition) {
       return;
@@ -727,7 +766,6 @@ export class MapRenderer {
         ) {
           const record = this.client.getEnfRecordById(npc.id);
           if (record) {
-            name = record.name;
             coords.x = npc.coords.x;
             coords.y = npc.coords.y;
             offset.y -= TILE_HEIGHT;
@@ -749,6 +787,55 @@ export class MapRenderer {
               coords.x = animation.from.x;
               coords.y = animation.from.y;
             }
+
+            // HTML tooltip for desktop, canvas text for mobile
+            if (this.npcTooltip && !isMobile()) {
+              const position = isoToScreen(coords);
+              const canvasX = Math.floor(
+                position.x - playerScreen.x + HALF_GAME_WIDTH + offset.x,
+              );
+              const canvasY = Math.floor(
+                position.y - playerScreen.y + HALF_GAME_HEIGHT + offset.y,
+              );
+
+              if (!this.cachedCanvas) {
+                this.cachedCanvas = document.getElementById(
+                  'game',
+                ) as HTMLCanvasElement;
+              }
+              const canvas = this.cachedCanvas;
+              if (!canvas) return;
+
+              const rect = canvas.getBoundingClientRect();
+              const pageX = rect.left + (canvasX / canvas.width) * rect.width;
+              const pageY = rect.top + (canvasY / canvas.height) * rect.height;
+
+              if (!this.cachedUiElement) {
+                this.cachedUiElement = document.getElementById('ui');
+              }
+              const uiElement = this.cachedUiElement;
+              const scaleMatch =
+                uiElement?.style.transform.match(/scale\(([^)]+)\)/);
+              const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
+
+              const typeInfo = getNpcTypeInfo(record);
+
+              this.npcTooltip.update(
+                {
+                  name: record.name,
+                  level: record.level,
+                  typeName: typeInfo.name,
+                  typeColor: typeInfo.color,
+                },
+                pageX,
+                pageY,
+                scale,
+              );
+              return;
+            }
+
+            // Mobile fallback
+            name = record.name;
           }
         }
       }
