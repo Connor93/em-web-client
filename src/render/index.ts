@@ -8,6 +8,7 @@ export { CharacterSpellChantAnimation } from './character-spell-chant';
 export { CharacterWalkAnimation } from './character-walk';
 // Effects & UI
 export { CursorClickAnimation } from './cursor-click';
+export { DamageTracker } from './damage-tracker';
 export {
   EffectAnimation,
   EffectTarget,

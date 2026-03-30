@@ -11,7 +11,7 @@
   overflow: hidden;
   color: #e0daca;
   /* biome-ignore lint/a11y/useGenericFontNames: fallback for bitmap font */
-  font-family: w95fa, 'Segoe UI', Tahoma, Arial !important;
+  font-family: w95fa, "Segoe UI", Tahoma, Arial !important;
 }
 
 /* ── Header ─────────────────────────────────────────────────────── */

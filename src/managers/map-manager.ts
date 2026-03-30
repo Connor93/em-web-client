@@ -208,7 +208,11 @@ export function occupied(client: Client, coords: Vector2): boolean {
   return false;
 }
 
-export function findPathTo(client: Client, target: Vector2): Vector2[] {
+export function findPathTo(
+  client: Client,
+  target: Vector2,
+  avoidWarps = false,
+): Vector2[] {
   const start = client.getPlayerCoords();
 
   if (!canWalk(client, target, true)) {
@@ -302,6 +306,11 @@ export function findPathTo(client: Client, target: Vector2): Vector2[] {
         continue;
       }
 
+      // Skip warp tiles when avoidWarps is enabled (auto-battle)
+      if (avoidWarps && isWarpTile(client, { x: neighborX, y: neighborY })) {
+        continue;
+      }
+
       const gCost = current.g + 1;
       const hCost = heuristic({ x: neighborX, y: neighborY }, target);
       const fCost = gCost + hCost;
@@ -336,6 +345,13 @@ export function findPathTo(client: Client, target: Vector2): Vector2[] {
   // No path found
 
   return [];
+}
+
+export function isWarpTile(client: Client, coords: Vector2): boolean {
+  const warp = client.map.warpRows
+    .find((r) => r.y === coords.y)
+    ?.tiles.find((t) => t.x === coords.x);
+  return warp !== undefined;
 }
 
 export function canWalk(

@@ -18,7 +18,12 @@ export {
 export type { ClientEvents } from './events';
 
 // Game State
-export { GameState, PlayerMenuItem, SpellTarget } from './game';
+export {
+  AutoBattleState,
+  GameState,
+  PlayerMenuItem,
+  SpellTarget,
+} from './game';
 
 // Graphics
 export { GfxType } from './gfx';

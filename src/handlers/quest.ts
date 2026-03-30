@@ -4,6 +4,8 @@ import {
   PacketAction,
   PacketFamily,
   QuestDialogServerPacket,
+  QuestListServerPacket,
+  QuestPage,
   QuestReportServerPacket,
 } from 'eolib';
 import type { Client } from '../client';
@@ -34,6 +36,22 @@ function handleQuestReport(client: Client, reader: EoReader) {
   client.queuedNpcChats.set(packet.npcIndex, packet.messages);
 }
 
+function handleQuestList(client: Client, reader: EoReader) {
+  const packet = QuestListServerPacket.deserialize(reader);
+
+  if (packet.page === QuestPage.Progress && packet.pageData) {
+    const data = packet.pageData as QuestListServerPacket.PageDataProgress;
+    client.emit('questProgressUpdated', {
+      quests: data.questProgressEntries,
+    });
+  } else if (packet.page === QuestPage.History && packet.pageData) {
+    const data = packet.pageData as QuestListServerPacket.PageDataHistory;
+    client.emit('questHistoryUpdated', {
+      completedQuests: data.completedQuests,
+    });
+  }
+}
+
 export function registerQuestHandlers(client: Client) {
   client.bus.registerPacketHandler(
     PacketFamily.Quest,
@@ -45,5 +63,11 @@ export function registerQuestHandlers(client: Client) {
     PacketFamily.Quest,
     PacketAction.Report,
     (reader) => handleQuestReport(client, reader),
+  );
+
+  client.bus.registerPacketHandler(
+    PacketFamily.Quest,
+    PacketAction.List,
+    (reader) => handleQuestList(client, reader),
   );
 }

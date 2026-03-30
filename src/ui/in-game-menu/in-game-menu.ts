@@ -12,6 +12,7 @@ type Events = {
     | 'stats'
     | 'online'
     | 'party'
+    | 'quests'
     | 'settings';
 };
 

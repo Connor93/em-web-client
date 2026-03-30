@@ -72,6 +72,19 @@ export class LockerDialog extends Base {
         this.grid.querySelectorAll('.mobile-selected').forEach((el) => {
           el.classList.remove('mobile-selected');
         });
+
+        // Dismiss action bars from sibling panels (e.g. inventory) in split-view
+        const splitView = this.container.closest('.mobile-split-view');
+        if (splitView) {
+          for (const sibling of splitView.children) {
+            if (sibling === this.container) continue;
+            sibling.querySelector('.mobile-action-bar')?.remove();
+            sibling.querySelectorAll('.mobile-selected').forEach((s) => {
+              s.classList.remove('mobile-selected');
+            });
+          }
+        }
+
         card.classList.add('mobile-selected');
         playSfxById(SfxId.InventoryPickup);
         this.showMobileActionBar(itemId);

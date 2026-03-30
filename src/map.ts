@@ -35,10 +35,6 @@ import {
   HALF_TILE_HEIGHT,
   HALF_TILE_WIDTH,
   NPC_IDLE_ANIMATION_TICKS,
-  PLAYER_MENU_HEIGHT,
-  PLAYER_MENU_ITEM_HEIGHT,
-  PLAYER_MENU_OFFSET_Y,
-  PLAYER_MENU_WIDTH,
   TILE_HEIGHT,
   TILE_WIDTH,
   WALK_HEIGHT_FACTOR,
@@ -173,8 +169,6 @@ export class MapRenderer {
   private staticTileGrid: StaticTile[][][] = [];
   private tileSpecCache: (MapTileSpec | null)[][] = [];
   private signCache: ({ title: string; message: string } | null)[][] = [];
-  private damageNumberCanvas: HTMLCanvasElement;
-  private damageNumberCtx: CanvasRenderingContext2D;
   private interpolation = 0;
 
   // Viewport-cached sorted static entities — only rebuilt when player moves
@@ -183,8 +177,6 @@ export class MapRenderer {
 
   constructor(client: Client) {
     this.client = client;
-    this.damageNumberCanvas = document.createElement('canvas');
-    this.damageNumberCtx = this.damageNumberCanvas.getContext('2d')!;
   }
 
   buildCaches() {
@@ -1431,7 +1423,14 @@ export class MapRenderer {
       }
 
       if (healthBar) {
-        this.renderHealthBar(healthBar, npcTopCenter, ctx);
+        this.renderHealthBar(
+          healthBar,
+          {
+            x: npcTopCenter.x,
+            y: rect.position.y,
+          },
+          ctx,
+        );
       }
 
       if (this.client.debug) {
@@ -1677,127 +1676,107 @@ export class MapRenderer {
 
     healthBar.renderedFirstFrame = true;
 
-    const frame = this.client.atlas.getStaticEntry(
-      StaticAtlasEntryType.HealthBars,
-    );
-    if (!frame) {
-      return;
+    // ── Custom Health Bar ──────────────────────────────────────────
+    const barWidth = 44;
+    const barHeight = 6;
+    const barX = position.x - barWidth / 2;
+    const barY = position.y - 22;
+    const radius = 3;
+
+    // Background
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2, radius + 1);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fill();
+
+    // Border
+    ctx.beginPath();
+    ctx.roundRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2, radius + 1);
+    ctx.strokeStyle = 'rgba(200, 180, 140, 0.35)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Fill
+    const fillWidth = Math.floor(barWidth * (healthBar.percentage / 100));
+    if (fillWidth > 0) {
+      ctx.beginPath();
+      ctx.roundRect(barX, barY, fillWidth, barHeight, radius);
+      ctx.clip();
+
+      let gradient: CanvasGradient;
+      if (healthBar.percentage < 25) {
+        gradient = ctx.createLinearGradient(barX, barY, barX, barY + barHeight);
+        gradient.addColorStop(0, '#e04040');
+        gradient.addColorStop(0.5, '#c03030');
+        gradient.addColorStop(1, '#a02020');
+      } else if (healthBar.percentage < 50) {
+        gradient = ctx.createLinearGradient(barX, barY, barX, barY + barHeight);
+        gradient.addColorStop(0, '#e0c040');
+        gradient.addColorStop(0.5, '#c0a030');
+        gradient.addColorStop(1, '#a08820');
+      } else {
+        gradient = ctx.createLinearGradient(barX, barY, barX, barY + barHeight);
+        gradient.addColorStop(0, '#50c050');
+        gradient.addColorStop(0.5, '#38a838');
+        gradient.addColorStop(1, '#288828');
+      }
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(barX, barY, fillWidth, barHeight);
+
+      // Shine highlight
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.fillRect(barX, barY, fillWidth, barHeight / 2);
     }
 
-    const atlas = this.client.atlas.getAtlas(frame.atlasIndex);
-    if (!atlas) {
-      return;
-    }
+    ctx.restore();
 
-    const offsetY = -10;
-
-    ctx.drawImage(
-      atlas,
-      frame.x,
-      frame.y + 28,
-      40,
-      7,
-      position.x - 20,
-      position.y - 7 + offsetY,
-      40,
-      7,
-    );
-
-    let barOffsetY: number;
-    if (healthBar.percentage < 25) {
-      barOffsetY = 23;
-    } else if (healthBar.percentage < 50) {
-      barOffsetY = 16;
-    } else {
-      barOffsetY = 9;
-    }
-
-    ctx.drawImage(
-      atlas,
-      frame.x + 2,
-      frame.y + barOffsetY,
-      Math.floor(40 * (healthBar.percentage / 100)),
-      3,
-      position.x - 18,
-      position.y - 5 + offsetY,
-      40 * (healthBar.percentage / 100),
-      3,
-    );
-
+    // ── Damage / Heal Numbers ──────────────────────────────────────
     const amount = healthBar.damage || healthBar.heal;
+    const floatY = position.y - 40 + healthBar.ticks;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
     if (!amount) {
-      const frame = this.client.atlas.getStaticEntry(StaticAtlasEntryType.Miss);
-      if (!frame) {
-        return;
-      }
-
-      const atlas = this.client.atlas.getAtlas(frame.atlasIndex);
-      if (!atlas) {
-        return;
-      }
-
-      ctx.drawImage(
-        atlas,
-        frame.x,
-        frame.y,
-        frame.w,
-        frame.h,
-        position.x - (frame.w >> 1),
-        position.y - 35 + healthBar.ticks,
-        frame.w,
-        frame.h,
-      );
-      return;
+      // Miss
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillText('MISS', position.x + 1, floatY + 1);
+      ctx.fillStyle = '#d0d0d0';
+      ctx.fillText('MISS', position.x, floatY);
+    } else if (healthBar.heal) {
+      // Heal (green)
+      const text = `+${amount}`;
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillText(text, position.x + 1, floatY + 1);
+      ctx.fillStyle = '#40e840';
+      ctx.fillText(text, position.x, floatY);
+    } else if (healthBar.critical) {
+      // Critical hit (orange/gold, larger, with glow)
+      const text = `${amount}!`;
+      ctx.font = 'bold 14px sans-serif';
+      ctx.shadowColor = '#ff8800';
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillText(text, position.x + 1, floatY + 1);
+      ctx.fillStyle = '#ffaa22';
+      ctx.fillText(text, position.x, floatY);
+      ctx.shadowBlur = 0;
+    } else {
+      // Normal damage (red)
+      const text = amount.toString();
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillText(text, position.x + 1, floatY + 1);
+      ctx.fillStyle = '#ff4444';
+      ctx.fillText(text, position.x, floatY);
     }
 
-    const amountAsText = amount.toString();
-    const chars = amountAsText.split('');
-    this.damageNumberCanvas.width = chars.length * 9;
-    this.damageNumberCanvas.height = 12;
-    this.damageNumberCtx.clearRect(
-      0,
-      0,
-      this.damageNumberCanvas.width,
-      this.damageNumberCanvas.height,
-    );
-
-    const numbersFrame = this.client.atlas.getStaticEntry(
-      healthBar.heal
-        ? StaticAtlasEntryType.HealNumbers
-        : StaticAtlasEntryType.DamageNumbers,
-    );
-
-    if (!numbersFrame) {
-      return;
-    }
-
-    const numbersAtlas = this.client.atlas.getAtlas(numbersFrame.atlasIndex);
-    if (!numbersAtlas) {
-      return;
-    }
-
-    let index = 0;
-    for (const char of chars) {
-      const number = Number.parseInt(char, 10);
-      this.damageNumberCtx.drawImage(
-        numbersAtlas,
-        numbersFrame.x + number * 9,
-        numbersFrame.y,
-        9,
-        12,
-        index * 9,
-        0,
-        9,
-        12,
-      );
-      index++;
-    }
-
-    ctx.drawImage(
-      this.damageNumberCanvas,
-      position.x - this.damageNumberCanvas.width / 2,
-      position.y - 35 + healthBar.ticks,
-    );
+    ctx.restore();
   }
 
   renderEmote(

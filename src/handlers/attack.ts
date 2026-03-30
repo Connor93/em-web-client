@@ -30,12 +30,23 @@ function handleAttackPlayer(client: Client, reader: EoReader) {
   character.direction = packet.direction;
 
   const metadata = client.getWeaponMetadata(character.equipment.weapon);
-  client.characterAnimations.set(
-    packet.playerId,
-    metadata.ranged
-      ? new CharacterRangedAttackAnimation()
-      : new CharacterAttackAnimation(),
-  );
+
+  // Don't overwrite our own attack animation — it was already set locally
+  // when we initiated the attack. Replacing it resets renderedFirstFrame,
+  // causing the character to flicker/disappear for a frame.
+  const existingAnim = client.characterAnimations.get(packet.playerId);
+  const alreadyAttacking =
+    existingAnim instanceof CharacterAttackAnimation ||
+    existingAnim instanceof CharacterRangedAttackAnimation;
+
+  if (packet.playerId !== client.playerId || !alreadyAttacking) {
+    client.characterAnimations.set(
+      packet.playerId,
+      metadata.ranged
+        ? new CharacterRangedAttackAnimation()
+        : new CharacterAttackAnimation(),
+    );
+  }
 
   const index = randomRange(0, metadata.sfx.length - 1);
   playSfxById(metadata.sfx[index]);

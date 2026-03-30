@@ -7,6 +7,7 @@ import type {
   DialogQuestEntry,
   EquipmentPaperdoll,
   OnlinePlayer,
+  QuestProgressEntry,
   ShopCraftItem,
   ShopTradeItem,
   SkillLearn,
@@ -170,4 +171,23 @@ export type ClientEvents = {
   };
   reconnected: undefined;
   resize: undefined;
+  autoBattleStarted: undefined;
+  autoBattleStopped: {
+    reason: string;
+    kills: number;
+    expGained: number;
+    elapsed: number;
+  };
+  autoBattleStatsUpdate: {
+    kills: number;
+    expGained: number;
+    elapsed: number;
+    status: string;
+  };
+  questProgressUpdated: {
+    quests: QuestProgressEntry[];
+  };
+  questHistoryUpdated: {
+    completedQuests: string[];
+  };
 };

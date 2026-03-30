@@ -17,50 +17,50 @@ export interface UiEventDeps {
   mainMenu: {
     show(): void;
     hide(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   loginForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   createAccountForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   characterSelect: {
     show(): void;
     hide(): void;
     confirmed: boolean;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
     selectCharacter(index: number): void;
     isOpen?(): boolean;
   };
   createCharacterForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
     isOpen(): boolean;
   };
   changePasswordForm: {
     show(): void;
     hide(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
     isOpen(): boolean;
   };
   exitGame: {
     show(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   playerContextMenu: {
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
     hide(): void;
   };
   chat: {
     focus(): void;
     addMessage(tab: ChatTab, msg: string, icon: ChatIcon, name?: string): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
     show(): void;
   };
   smallConfirm: {
@@ -86,22 +86,22 @@ export interface UiEventDeps {
   inventory: {
     toggle(): void;
     show(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   stats: {
     toggle(): void;
     setTrainingConfirmed(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   spellBook: {
     toggle(): void;
-    on(event: string, cb: (...args: any[]) => void): void;
+    on(event: string, cb: (...args: unknown[]) => void): void;
   };
   onlineList: { toggle(): void };
-  inGameMenu: { on(event: string, cb: (...args: any[]) => void): void };
-  questDialog: { on(event: string, cb: (...args: any[]) => void): void };
-  shopDialog: { on(event: string, cb: (...args: any[]) => void): void };
-  bankDialog: { on(event: string, cb: (...args: any[]) => void): void };
+  inGameMenu: { on(event: string, cb: (...args: unknown[]) => void): void };
+  questDialog: { on(event: string, cb: (...args: unknown[]) => void): void };
+  shopDialog: { on(event: string, cb: (...args: unknown[]) => void): void };
+  bankDialog: { on(event: string, cb: (...args: unknown[]) => void): void };
   lockerDialog: {
     getItemAmount(id: number): number;
   };
@@ -116,9 +116,11 @@ export interface UiEventDeps {
   };
   partyDialog: { toggle(): void };
   settingsDialog: { toggle(): void };
+  autoBattleDialog: { toggle(): void };
   tradeDialog: { offerItem(itemId: number): void };
   guildPanel: { toggle(): void };
-  mobileToolbar: { on(event: string, cb: (...args: any[]) => void): void };
+  questProgress: { requestAndShow(): void; toggle(): void };
+  mobileToolbar: { on(event: string, cb: (...args: unknown[]) => void): void };
   hideAllUi: () => void;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
 }
@@ -372,6 +374,12 @@ export function wireUiEvents(deps: UiEventDeps): void {
         break;
       case 'settings':
         deps.settingsDialog.toggle();
+        break;
+      case 'auto-battle':
+        deps.autoBattleDialog.toggle();
+        break;
+      case 'quests':
+        deps.questProgress.requestAndShow();
         break;
     }
   };

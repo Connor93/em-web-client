@@ -8,6 +8,8 @@ import {
   PartyRequestClientPacket,
   PartyRequestType,
   PartyTakeClientPacket,
+  QuestListClientPacket,
+  type QuestPage,
   TradeRequestClientPacket,
 } from 'eolib';
 
@@ -77,5 +79,11 @@ export function requestPartyList(client: Client): void {
 
   const packet = new PartyTakeClientPacket();
   packet.membersCount = client.partyMembers.length;
+  client.bus.send(packet);
+}
+
+export function requestQuestList(client: Client, page: QuestPage): void {
+  const packet = new QuestListClientPacket();
+  packet.page = page;
   client.bus.send(packet);
 }

@@ -24,7 +24,6 @@ type ItemPosition = {
 const TABS = 2;
 const COLS = 8;
 const ROWS = 10;
-const CELL_SIZE = 23;
 
 const ITEM_SIZE = {
   [ItemSize.Size1x1]: { x: 1, y: 1 },
@@ -222,8 +221,8 @@ export class Inventory extends Base {
       return;
     }
 
-    const lockerItems = target.closest('.locker-items');
-    if (lockerItems) {
+    const lockerGrid = target.closest('.locker-grid');
+    if (lockerGrid) {
       this.emitter.emit('addLockerItem', item.id);
       return;
     }
@@ -643,6 +642,18 @@ export class Inventory extends Base {
     this.grid.querySelectorAll('.mobile-selected').forEach((e) => {
       e.classList.remove('mobile-selected');
     });
+
+    // Dismiss action bars from sibling panels (e.g. locker) in split-view
+    const splitView = this.container.closest('.mobile-split-view');
+    if (splitView) {
+      for (const sibling of splitView.children) {
+        if (sibling === this.container) continue;
+        sibling.querySelector('.mobile-action-bar')?.remove();
+        sibling.querySelectorAll('.mobile-selected').forEach((s) => {
+          s.classList.remove('mobile-selected');
+        });
+      }
+    }
 
     // Highlight new selection
     el.classList.add('mobile-selected');

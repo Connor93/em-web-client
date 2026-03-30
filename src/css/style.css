@@ -415,12 +415,11 @@ div.icon[data-id="23"] {
 }
 
 .slider-container {
-  position: absolute;
-  width: 123px;
+  position: relative;
+  width: calc(100% - 28px);
   height: 16px;
   background: transparent;
-  left: 24px;
-  top: 96px;
+  margin: 0 14px 8px;
 }
 
 .slider-thumb {

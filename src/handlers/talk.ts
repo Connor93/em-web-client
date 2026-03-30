@@ -10,6 +10,7 @@ import {
   TalkPlayerServerPacket,
   TalkReply,
   TalkReplyServerPacket,
+  TalkRequestServerPacket,
   TalkServerServerPacket,
   TalkTellServerPacket,
 } from 'eolib';
@@ -159,6 +160,17 @@ function handleTalkReply(client: Client, reader: EoReader) {
   }
 }
 
+function handleTalkRequest(client: Client, reader: EoReader) {
+  const packet = TalkRequestServerPacket.deserialize(reader);
+  client.emit('chat', {
+    tab: ChatTab.Group,
+    name: capitalize(packet.playerName),
+    message: packet.message,
+    icon: ChatIcon.PlayerParty,
+  });
+  playSfxById(SfxId.GroupChatReceived);
+}
+
 export function registerTalkHandlers(client: Client) {
   client.bus.registerPacketHandler(
     PacketFamily.Talk,
@@ -199,5 +211,10 @@ export function registerTalkHandlers(client: Client) {
     PacketFamily.Talk,
     PacketAction.Reply,
     (reader) => handleTalkReply(client, reader),
+  );
+  client.bus.registerPacketHandler(
+    PacketFamily.Talk,
+    PacketAction.Request,
+    (reader) => handleTalkRequest(client, reader),
   );
 }
