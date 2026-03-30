@@ -57,6 +57,10 @@ export class SettingsDialog extends Base {
           lockButton.textContent = isUnlocked ? '🔓 Unlock UI' : '🔒 Lock UI';
           setMovableLocked(!isUnlocked);
           playSfxById(SfxId.ButtonClick);
+          // Close settings so user can interact with the unlocked elements
+          if (isUnlocked) {
+            this.hide();
+          }
         });
       }
     }
