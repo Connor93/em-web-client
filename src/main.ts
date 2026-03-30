@@ -68,6 +68,7 @@ import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
 import { PlayerContextMenu } from './ui/player-context-menu';
+import { PlayerTooltip } from './ui/player-tooltip';
 import { PmChatManager } from './ui/pm-chat-bubble/pm-chat-manager';
 import { QuestDialog } from './ui/quest-dialog';
 import { QuestProgress } from './ui/quest-progress';
@@ -103,6 +104,8 @@ ctx.imageSmoothingEnabled = false;
 // ── Client & Mobile ──────────────────────────────────────────────────────
 
 const client = new Client();
+const playerTooltip = new PlayerTooltip(document.getElementById('ui')!);
+client.mapRenderer.playerTooltip = playerTooltip;
 const mobileControls = new MobileControls();
 const mobileToolbar = new MobileToolbar(client);
 const mobileHud = new MobileHUD();

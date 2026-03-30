@@ -59,6 +59,7 @@ import {
   NpcDeathAnimation,
   NpcWalkAnimation,
 } from './render';
+import type { PlayerTooltip } from './ui/player-tooltip';
 import { capitalize, getItemGraphicId, isoToScreen } from './utils';
 import type { Vector2 } from './vector';
 
@@ -164,6 +165,7 @@ export class MapRenderer {
   npcIdleAnimationFrame = 0;
   buildingCache = false;
   _tileRenderWarned = false;
+  playerTooltip: PlayerTooltip | null = null;
 
   private topLayer: (() => void)[] = [];
   private staticTileGrid: StaticTile[][][] = [];
