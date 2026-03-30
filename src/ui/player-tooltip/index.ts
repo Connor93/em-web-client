@@ -1,1 +1,1 @@
-export { PlayerTooltip, type PlayerTooltipData } from './player-tooltip';
+export * from './player-tooltip';
