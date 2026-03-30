@@ -60,6 +60,7 @@ import {
   NpcDeathAnimation,
   NpcWalkAnimation,
 } from './render';
+import type { NpcTooltip } from './ui/npc-tooltip';
 import type { PlayerTooltip } from './ui/player-tooltip';
 import { capitalize, getItemGraphicId, isoToScreen } from './utils';
 import type { Vector2 } from './vector';
@@ -167,6 +168,7 @@ export class MapRenderer {
   buildingCache = false;
   _tileRenderWarned = false;
   playerTooltip: PlayerTooltip | null = null;
+  npcTooltip: NpcTooltip | null = null;
   private cachedUiElement: HTMLElement | null = null;
   private cachedCanvas: HTMLCanvasElement | null = null;
 
