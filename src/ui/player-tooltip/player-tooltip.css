@@ -7,9 +7,9 @@
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
-  z-index: 50;
+  z-index: 1080;
   display: none;
-  font-family: Arial, Helvetica, sans-serif;
+  transform: translate(-50%, -100%);
 }
 
 .player-tooltip.visible {
@@ -54,7 +54,6 @@
 
 .player-tooltip-fill {
   height: 100%;
-  border-radius: 3px;
   transition: width 0.15s ease;
 }
 

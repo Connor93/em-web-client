@@ -88,7 +88,6 @@ export class PlayerTooltip {
 
     this.element.style.left = `${screenX / scale}px`;
     this.element.style.top = `${screenY / scale}px`;
-    this.element.style.transform = 'translate(-50%, -100%)';
     this.element.classList.add('visible');
   }
 
