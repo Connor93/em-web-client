@@ -53,12 +53,10 @@ function applyPosition(element: HTMLElement, x: number, y: number): void {
   const clampedX = Math.max(0, Math.min(x, containerWidth - 50));
   const clampedY = Math.max(0, Math.min(y, containerHeight - 50));
 
-  element.style.position = 'fixed';
+  // Use class to override !important CSS rules (e.g. #chat bottom/top)
+  element.classList.add('ui-repositioned');
   element.style.left = `${clampedX}px`;
   element.style.top = `${clampedY}px`;
-  element.style.right = 'auto';
-  element.style.bottom = 'auto';
-  element.style.margin = '0';
 }
 
 function restorePosition(element: HTMLElement): void {
@@ -80,13 +78,10 @@ function clearPosition(element: HTMLElement): void {
   // Also clear the other platform's key
   const otherPrefix = isMobile() ? '' : 'mobile-';
   localStorage.removeItem(STORAGE_PREFIX + otherPrefix + element.id);
-  // Remove inline positioning to restore CSS defaults
-  element.style.position = '';
+  // Remove repositioning class and inline styles to restore CSS defaults
+  element.classList.remove('ui-repositioned');
   element.style.left = '';
   element.style.top = '';
-  element.style.right = '';
-  element.style.bottom = '';
-  element.style.margin = '';
 }
 
 function setupDesktopDrag(element: HTMLElement): void {
