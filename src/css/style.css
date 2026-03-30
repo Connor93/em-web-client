@@ -897,3 +897,10 @@ div.icon[data-id="23"] {
   display: block;
   margin: 6px auto 10px;
 }
+
+/* ── Movable UI unlock indicators ──────────────────────────────── */
+
+.ui-unlocked {
+  border: 1px dashed rgba(212, 184, 150, 0.4) !important;
+  cursor: move !important;
+}
