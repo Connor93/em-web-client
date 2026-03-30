@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -qE '(pnpm-lock\\.yaml|\\.env)' && echo 'BLOCK: Do not edit lock files or .env files' >&2 && exit 2 || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

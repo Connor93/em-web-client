@@ -61,6 +61,7 @@ import {
   type CharacterAnimation,
   CharacterDeathAnimation,
   type CursorClickAnimation,
+  DamageTracker,
   type EffectAnimation,
   type EffectTarget,
   type Emote,
@@ -81,11 +82,11 @@ import type {
   IWeaponMetadata,
 } from './types';
 import {
+  AutoBattleState,
   EffectAnimationType,
   type EquipmentSlot,
   GameState,
   HatMaskType,
-  type PlayerMenuItem,
   SfxId,
   type SpellTarget,
 } from './types';
@@ -178,6 +179,7 @@ export class Client {
   npcHealthBars: Map<number, HealthBar> = new Map();
   characterHealthBars: Map<number, HealthBar> = new Map();
   characterEmotes: Map<number, Emote> = new Map();
+  damageTracker = new DamageTracker();
   effects: EffectAnimation[] = [];
   mousePosition: Vector2 | undefined;
   mouseCoords: Vector2 | undefined;
@@ -248,6 +250,15 @@ export class Client {
       ownerId: number;
     }
   > = new Map();
+
+  // Auto-battle state
+  autoBattleState: AutoBattleState = AutoBattleState.IDLE;
+  autoBattleTargetIndex = 0;
+  autoBattleTimerTicks = 0;
+  autoBattleAttackCooldown = 0;
+  autoBattleLootCoords: Vector2 | null = null;
+  autoBattleKillCount = 0;
+  autoBattleStartTime = 0;
 
   constructor() {
     this.emitter = mitt<ClientEvents>();
@@ -537,6 +548,7 @@ export class Client {
       }
 
       Managers.tickAutoWalk(this);
+      Managers.tickAutoBattle(this);
       Managers.tickQuake(this);
     }
   }
@@ -781,6 +793,7 @@ export class Client {
     this.queuedNpcChats.clear();
     this.npcHealthBars.clear();
     this.characterHealthBars.clear();
+    this.damageTracker.clear();
     this.characterEmotes.clear();
     this.effects = [];
     this.autoWalkPath = [];
@@ -796,6 +809,13 @@ export class Client {
     this.onlinePlayers = [];
     this.equipmentSwap = null;
     this.itemProtectionTimers.clear();
+    this.autoBattleState = AutoBattleState.IDLE;
+    this.autoBattleTargetIndex = 0;
+    this.autoBattleTimerTicks = 0;
+    this.autoBattleAttackCooldown = 0;
+    this.autoBattleLootCoords = null;
+    this.autoBattleKillCount = 0;
+    this.autoBattleStartTime = 0;
   }
 
   disconnect() {
@@ -835,6 +855,16 @@ export class Client {
 
   questReply(questId: number, dialogId: number, action: number | null) {
     AuthManager.questReply(this, questId, dialogId, action);
+  }
+
+  requestQuestList(page: import('eolib').QuestPage) {
+    Managers.requestQuestList(this, page);
+  }
+
+  /** Record outgoing damage and return true if it qualifies as a critical hit. */
+  recordOutgoingDamage(damage: number): boolean {
+    this.damageTracker.setMaxDamage(this.secondaryStats.maxDamage);
+    return this.damageTracker.isCritical(damage);
   }
 
   emote(type: EmoteType) {

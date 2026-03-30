@@ -1,0 +1,211 @@
+/* ── Quest Progress ─────────────────────────────────────────────── */
+
+#quest-progress {
+  width: 340px;
+  min-height: 200px;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 16, 12, 0.96);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  z-index: 1050;
+  overflow: hidden;
+  color: #e0daca;
+  font-family: inherit;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.quest-progress-header {
+  padding: 8px 12px 6px;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+}
+
+.quest-progress-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d4b896;
+  margin-bottom: 6px;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+
+.quest-progress-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.quest-tab {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #a09880;
+  background: rgba(30, 26, 20, 0.6);
+  border: 1px solid rgba(212, 184, 150, 0.1);
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.quest-tab:hover {
+  color: #d4c4a8;
+  background: rgba(42, 36, 28, 0.8);
+}
+
+.quest-tab.active {
+  color: #d4b896;
+  background: rgba(50, 42, 32, 0.9);
+  border-bottom-color: transparent;
+}
+
+/* ── Body ────────────────────────────────────────────────── */
+
+.quest-progress-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  min-height: 100px;
+}
+
+.quest-progress-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.quest-progress-body::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.quest-empty {
+  text-align: center;
+  color: #706858;
+  font-size: 11px;
+  padding: 24px 0;
+}
+
+/* ── Quest entry ─────────────────────────────────────────── */
+
+.quest-entry {
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: rgba(40, 34, 26, 0.5);
+  border: 1px solid rgba(212, 184, 150, 0.08);
+  border-radius: 5px;
+  transition: background 0.15s;
+}
+
+.quest-entry:last-child {
+  margin-bottom: 0;
+}
+
+.quest-entry:hover {
+  background: rgba(50, 42, 32, 0.6);
+}
+
+.quest-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.quest-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  fill: #d4b896;
+  opacity: 0.8;
+}
+
+.quest-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4c4a8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quest-description {
+  font-size: 10px;
+  color: #a09880;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+/* ── Progress bar ────────────────────────────────────────── */
+
+.quest-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quest-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(20, 16, 12, 0.6);
+  border: 1px solid rgba(212, 184, 150, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quest-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7a6840, #b89850);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.quest-bar-fill.complete {
+  background: linear-gradient(90deg, #4a8050, #60b068);
+}
+
+.quest-bar-text {
+  font-size: 10px;
+  color: #a09880;
+  white-space: nowrap;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ── History list ────────────────────────────────────────── */
+
+.quest-history-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: #a09880;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.quest-history-item:hover {
+  background: rgba(212, 184, 150, 0.06);
+}
+
+.quest-history-check {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  fill: #60b068;
+  opacity: 0.7;
+}
+
+/* ── Close button ────────────────────────────────────────── */
+
+#quest-progress > button[data-id="close"] {
+  display: block;
+  margin: 6px 10px 8px auto;
+}

@@ -2,9 +2,11 @@ import type { EifRecord, ThreeItem } from 'eolib';
 import { Gender, ItemType } from 'eolib';
 import type { Client } from '../../client';
 import { EOResourceID } from '../../edf';
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
-import { getItemGraphicId } from '../../utils';
+import { getItemGraphicId, getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
+import { addMobileCloseButton } from '../utils';
 
 import './chest-dialog.css';
 
@@ -19,6 +21,7 @@ export class ChestDialog extends Base {
   private itemsList =
     this.container.querySelector<HTMLDivElement>('.chest-items')!;
   private items: ThreeItem[] = [];
+  private mobileActionBar: HTMLDivElement | null = null;
 
   constructor(client: Client) {
     super();
@@ -28,6 +31,29 @@ export class ChestDialog extends Base {
       playSfxById(SfxId.ButtonClick);
       this.hide();
     });
+
+    // Mobile: tap chest item to select → action bar
+    if (isMobile()) {
+      this.itemsList.addEventListener('pointerdown', (e) => {
+        const card = (e.target as HTMLElement).closest<HTMLDivElement>(
+          '.chest-item',
+        );
+        if (!card) return;
+        const itemId = Number(card.dataset.itemId);
+        if (!itemId) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Highlight selected card
+        this.itemsList.querySelectorAll('.mobile-selected').forEach((el) => {
+          el.classList.remove('mobile-selected');
+        });
+        card.classList.add('mobile-selected');
+        playSfxById(SfxId.InventoryPickup);
+        this.showMobileActionBar(itemId);
+      });
+    }
   }
 
   setItems(items: ThreeItem[]) {
@@ -40,9 +66,11 @@ export class ChestDialog extends Base {
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
+    addMobileCloseButton(this.container, () => this.hide());
   }
 
   hide() {
+    this.hideMobileActionBar();
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
@@ -51,6 +79,68 @@ export class ChestDialog extends Base {
       this.client.typing = false;
     }
   }
+
+  /* ── Mobile Action Bar ─────────────────────────────────────────── */
+
+  private showMobileActionBar(itemId: number) {
+    this.hideMobileActionBar();
+
+    const record = this.client.getEifRecordById(itemId);
+    const bar = document.createElement('div');
+    bar.className = 'mobile-action-bar';
+
+    // Item name
+    const itemName = document.createElement('span');
+    itemName.className = 'action-item-name';
+    itemName.textContent = record?.name ?? `Item #${itemId}`;
+    bar.appendChild(itemName);
+
+    // Take button
+    const takeButton = document.createElement('button');
+    takeButton.textContent = 'Take';
+    takeButton.addEventListener('click', () => {
+      this.client.takeChestItem(itemId);
+      this.hideMobileActionBar();
+    });
+    bar.appendChild(takeButton);
+
+    // Info button
+    const infoButton = document.createElement('button');
+    infoButton.textContent = 'Info';
+    infoButton.addEventListener('click', () => {
+      this.removeMobilePopup();
+      if (record) {
+        const meta = getItemMeta(record);
+        const popup = document.createElement('div');
+        popup.className = 'mobile-info-popup';
+        popup.textContent = [record.name, ...meta].join('\n');
+        this.container.appendChild(popup);
+      }
+    });
+    bar.appendChild(infoButton);
+
+    this.mobileActionBar = bar;
+    this.container.appendChild(bar);
+  }
+
+  private hideMobileActionBar() {
+    this.removeMobilePopup();
+    if (this.mobileActionBar) {
+      this.mobileActionBar.remove();
+      this.mobileActionBar = null;
+    }
+    this.itemsList.querySelectorAll('.mobile-selected').forEach((el) => {
+      el.classList.remove('mobile-selected');
+    });
+  }
+
+  private removeMobilePopup() {
+    this.container.querySelectorAll('.mobile-info-popup').forEach((el) => {
+      el.remove();
+    });
+  }
+
+  /* ── Rendering ─────────────────────────────────────────────────── */
 
   private getChestItemGraphicPath(
     id: number,
@@ -77,6 +167,7 @@ export class ChestDialog extends Base {
 
       const itemElement = document.createElement('div');
       itemElement.className = 'chest-item';
+      itemElement.dataset.itemId = item.id.toString();
 
       const itemImage = document.createElement('img');
       itemImage.src = this.getChestItemGraphicPath(

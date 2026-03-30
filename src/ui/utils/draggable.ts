@@ -48,7 +48,6 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
       target.closest('.item') ||
       target.closest('.item-list') ||
       target.closest('.chest-items') ||
-      target.closest('.locker-items') ||
       target.closest('.dialog-contents') ||
       target.closest('.spell-grid') ||
       target.closest('.shop-grid') ||

@@ -28,9 +28,11 @@ function handleCastReply(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
+  const damage = packet.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     packet.npcIndex,
-    new HealthBar(packet.hpPercentage, packet.damage),
+    new HealthBar(packet.hpPercentage, damage, 0, isCritical),
   );
 
   client.playSpellEffect(packet.spellId, new EffectTargetNpc(packet.npcIndex));
@@ -49,9 +51,11 @@ function handleCastSpec(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
+  const damage = packet.npcKilledData.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
-    new HealthBar(0, packet.npcKilledData.damage),
+    new HealthBar(0, damage, 0, isCritical),
   );
 
   client.playSpellEffect(
@@ -111,9 +115,11 @@ function handleCastAccept(client: Client, reader: EoReader) {
     client.emit('statsUpdate', undefined);
   }
 
+  const damage = packet.npcKilledData.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
-    new HealthBar(0, packet.npcKilledData.damage),
+    new HealthBar(0, damage, 0, isCritical),
   );
 
   client.playSpellEffect(

@@ -1,3 +1,4 @@
+import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 
@@ -50,6 +51,13 @@ export class ItemAmountDialog extends Base {
     this.thumb.style.left = '0';
     this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
+
+    // On mobile, #ui has transform:scale() which creates a containing block
+    // that traps fixed-position children. Move to body to escape it.
+    if (isMobile() && this.container.parentElement !== document.body) {
+      document.body.appendChild(this.container);
+    }
+
     this.container.style.left = `${Math.floor(window.innerWidth / 2 - this.container.clientWidth / 2)}px`;
     this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     this.txtAmount.focus();
@@ -84,7 +92,7 @@ export class ItemAmountDialog extends Base {
       }
     });
 
-    this.txtAmount.addEventListener('change', () => {
+    this.txtAmount.addEventListener('input', () => {
       this.amount = Number.parseInt(this.txtAmount.value, 10);
       if (Number.isNaN(this.amount)) {
         this.amount = 1;

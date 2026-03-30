@@ -28,6 +28,12 @@ import {
   ZOOM,
 } from './game-state';
 import { handleItemCommand, handleNpcCommand } from './handlers';
+import {
+  isAutoBattleUnlocked,
+  toggleAutoBattle,
+} from './managers/auto-battle-manager';
+import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
+import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
 import { BarberDialog } from './ui/barber-dialog/barber-dialog';
 import { initDraggableDialogs } from './ui/base-ui';
@@ -64,6 +70,7 @@ import { PartyDialog } from './ui/party-dialog';
 import { PlayerContextMenu } from './ui/player-context-menu';
 import { PmChatManager } from './ui/pm-chat-bubble/pm-chat-manager';
 import { QuestDialog } from './ui/quest-dialog';
+import { QuestProgress } from './ui/quest-progress';
 import { SettingsDialog } from './ui/settings-dialog';
 import { ShopDialog } from './ui/shop-dialog';
 import { SkillMasterDialog } from './ui/skill-master-dialog';
@@ -241,6 +248,7 @@ const book = new Book(client);
 const hud = new HUD();
 const itemAmountDialog = new ItemAmountDialog();
 const questDialog = new QuestDialog(client);
+const questProgress = new QuestProgress(client);
 const chestDialog = new ChestDialog(client);
 const shopDialog = new ShopDialog(client);
 const boardDialog = new BoardDialog(client);
@@ -260,6 +268,21 @@ const spellBook = new SpellBook(client);
 const partyDialog = new PartyDialog(client);
 const infoDialog = new InfoDialog(client);
 const settingsDialog = new SettingsDialog();
+const autoBattleDialog = new AutoBattleDialog();
+const autoBattleHud = new AutoBattleHud();
+autoBattleDialog.setClient(client);
+autoBattleHud.setClient(client);
+
+// Hide auto-battle UI when not unlocked via ?autobattle=true
+if (!isAutoBattleUnlocked()) {
+  document
+    .querySelector<HTMLButtonElement>(
+      '#in-game-menu button[data-id="auto-battle"]',
+    )
+    ?.remove();
+  document.getElementById('auto-battle-dialog')?.remove();
+  document.getElementById('auto-battle-hud')?.remove();
+}
 const pmChatManager = new PmChatManager(client);
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -431,8 +454,10 @@ wireUiEvents({
   itemAmountDialog,
   partyDialog,
   settingsDialog,
+  autoBattleDialog,
   tradeDialog,
   guildPanel,
+  questProgress,
   mobileToolbar,
   hideAllUi,
   initializeSocket,
@@ -455,12 +480,26 @@ initDraggableDialogs([
   'shop',
   'skill-master',
   'settings-dialog',
+  'auto-battle-dialog',
   'quest-dialog',
+  'quest-progress',
   'info-dialog',
   'guild-panel',
 ]);
 
 // ── Input Listeners ──────────────────────────────────────────────────────
+
+// F9 — Toggle auto-battle (only when unlocked via URL param)
+window.addEventListener('keydown', (e) => {
+  if (
+    e.code === 'F9' &&
+    client.state === GameState.InGame &&
+    isAutoBattleUnlocked()
+  ) {
+    e.preventDefault();
+    toggleAutoBattle(client);
+  }
+});
 
 window.addEventListener(
   'touchmove',

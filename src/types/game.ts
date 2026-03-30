@@ -13,6 +13,16 @@ export enum SpellTarget {
   Player = 3,
 }
 
+export enum AutoBattleState {
+  IDLE = 0,
+  FIND_TARGET = 1,
+  MOVE_TO_TARGET = 2,
+  ATTACK = 3,
+  HEAL = 4,
+  ROAM_TO_BREADCRUMB = 5,
+  RANDOM_EXPLORE = 6,
+}
+
 export enum PlayerMenuItem {
   Paperdoll = 0,
   Book = 1,

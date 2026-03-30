@@ -39,7 +39,10 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
     }
 
     npc.direction = position.direction;
-    if (npc.coords !== position.coords) {
+    if (
+      npc.coords.x !== position.coords.x ||
+      npc.coords.y !== position.coords.y
+    ) {
       client.npcAnimations.set(
         npc.index,
         new NpcWalkAnimation(npc.coords, position.coords, position.direction),
@@ -116,9 +119,11 @@ function handleNpcAgree(client: Client, reader: EoReader) {
 
 function handleNpcSpec(client: Client, reader: EoReader) {
   const packet = NpcSpecServerPacket.deserialize(reader);
+  const damage = packet.npcKilledData.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
-    new HealthBar(0, packet.npcKilledData.damage),
+    new HealthBar(0, damage, 0, isCritical),
   );
 
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
@@ -162,9 +167,11 @@ function handleNpcSpec(client: Client, reader: EoReader) {
 
 function handleNpcAccept(client: Client, reader: EoReader) {
   const packet = NpcAcceptServerPacket.deserialize(reader);
+  const damage = packet.npcKilledData.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
-    new HealthBar(0, packet.npcKilledData.damage),
+    new HealthBar(0, damage, 0, isCritical),
   );
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
 
@@ -262,9 +269,11 @@ function handleNpcReply(client: Client, reader: EoReader) {
     return;
   }
 
+  const damage = packet.damage;
+  const isCritical = client.recordOutgoingDamage(damage);
   client.npcHealthBars.set(
     npc.index,
-    new HealthBar(packet.hpPercentage, packet.damage),
+    new HealthBar(packet.hpPercentage, damage, 0, isCritical),
   );
 
   if (

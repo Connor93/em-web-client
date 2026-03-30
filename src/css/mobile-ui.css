@@ -63,7 +63,7 @@ body.is-mobile .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
 /* Override: elements inside split-view must NOT be fullscreen */
 body.is-mobile .mobile-split-view
   .dialog-md:not(.hidden):not(#spell-book):not(#online-list) {
-  position: static !important;
+  position: relative !important;
   inset: auto !important;
   width: auto !important;
   height: 100% !important;
@@ -71,10 +71,11 @@ body.is-mobile .mobile-split-view
   flex: 1 !important;
   min-width: 0 !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   transform: none !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  z-index: auto !important;
+  z-index: 0 !important;
 }
 
 body.is-mobile .dialog-md .dialog-header {
@@ -250,16 +251,20 @@ body.is-mobile #online-list:not(.hidden) {
    Confirmation Dialogs — always centered, wider on mobile
    ═══════════════════════════════════════════════════════════════════ */
 
-body.is-mobile .item-amount-dialog,
-body.is-mobile .small-alert-large-header,
-body.is-mobile .small-alert-small-header,
-body.is-mobile .large-alert-small-header,
-body.is-mobile .large-confirm-small-header {
+body.is-mobile #item-amount-dialog,
+body.is-mobile #small-alert,
+body.is-mobile #small-alert-small-header,
+body.is-mobile #small-alert-large-header,
+body.is-mobile #large-alert-small-header,
+body.is-mobile #small-confirm,
+body.is-mobile #large-confirm-small-header {
+  position: fixed !important;
   width: 85% !important;
   max-width: 360px !important;
   left: 50% !important;
   top: 50% !important;
   transform: translate(-50%, -50%) !important;
+  z-index: 10000 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -408,7 +413,7 @@ body.is-mobile .mobile-split-view > #inventory,
 body.is-mobile .mobile-split-view > #paperdoll,
 body.is-mobile .mobile-split-view > #locker,
 body.is-mobile .mobile-split-view > .dialog-md {
-  position: static !important;
+  position: relative !important;
   inset: auto !important;
   width: auto !important;
   height: 100% !important;
@@ -416,10 +421,11 @@ body.is-mobile .mobile-split-view > .dialog-md {
   flex: 1 !important;
   min-width: 0 !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   transform: none !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  z-index: auto !important;
+  z-index: 0 !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -436,6 +442,18 @@ body.is-mobile .mobile-split-view > .dialog-md {
 
 .mobile-split-view .locker-grid {
   grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.mobile-split-view #locker .dialog-footer {
+  display: none !important;
+}
+
+/* Action bars inside split-view panels must be sticky (not absolute)
+   because the panels have overflow-y: auto which clips absolute children. */
+.mobile-split-view .mobile-action-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
 }
 
 .mobile-split-view .grid-card {
@@ -479,6 +497,36 @@ body.is-mobile #paperdoll .item.mobile-selected {
 }
 
 body.is-mobile #locker .grid-card.mobile-selected {
+  outline: 2px solid rgba(212, 184, 150, 0.5);
+  outline-offset: -1px;
+  border-radius: 3px;
+  background-color: rgba(212, 184, 150, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Fullscreen Chest Dialog
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.is-mobile #chest:not(.hidden) {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  z-index: 1050 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.is-mobile #chest .chest-items {
+  flex: 1;
+  max-height: none !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+body.is-mobile #chest .chest-item.mobile-selected {
   outline: 2px solid rgba(212, 184, 150, 0.5);
   outline-offset: -1px;
   border-radius: 3px;

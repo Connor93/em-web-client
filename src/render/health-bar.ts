@@ -2,13 +2,15 @@ export class HealthBar {
   percentage: number;
   damage: number;
   heal: number;
+  critical: boolean;
   ticks = 4;
   renderedFirstFrame = false;
 
-  constructor(percentage: number, damage: number, heal = 0) {
+  constructor(percentage: number, damage: number, heal = 0, critical = false) {
     this.percentage = percentage;
     this.damage = damage;
     this.heal = heal;
+    this.critical = critical;
   }
 
   tick() {

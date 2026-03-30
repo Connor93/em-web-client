@@ -131,6 +131,7 @@ export function createGridItemCard(
 ) {
   const card = document.createElement('div');
   card.classList.add('grid-card');
+  card.dataset.itemId = itemId.toString();
 
   const imgWrap = document.createElement('div');
   imgWrap.classList.add('card-img-wrap');

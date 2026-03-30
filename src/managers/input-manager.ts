@@ -3,7 +3,6 @@ import type { Client } from '../client';
 import {
   getBoardIntersecting,
   getCharacterIntersecting,
-  getCharacterRectangle,
   getDoorIntersecting,
   getLockerIntersecting,
   getNpcIntersecting,
@@ -11,7 +10,6 @@ import {
 } from '../collision';
 import { EOResourceID } from '../edf';
 import { CursorClickAnimation } from '../render';
-import { playSfxById, SfxId } from '../sfx';
 import { GameState } from '../types';
 import { capitalize } from '../utils';
 

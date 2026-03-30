@@ -1,5 +1,6 @@
 import mitt from 'mitt';
 import type { Client } from '../../client';
+import { isAutoBattleUnlocked } from '../../managers/auto-battle-manager';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 
@@ -13,7 +14,9 @@ type ToggleTarget =
   | 'online'
   | 'party'
   | 'guild'
-  | 'settings';
+  | 'quests'
+  | 'settings'
+  | 'auto-battle';
 
 type Events = {
   toggle: ToggleTarget;
@@ -57,9 +60,19 @@ const MENU_ITEMS: { id: ToggleTarget; label: string; svg: string }[] = [
     svg: `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 9.04-7 10.2-3.87-1.16-7-5.53-7-10.2V6.3l7-3.12z"/></svg>`,
   },
   {
+    id: 'quests',
+    label: 'Quests',
+    svg: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM7 17l2-2h6l2 2H7zm0-4l2-2h6l2 2H7z"/></svg>`,
+  },
+  {
     id: 'settings',
     label: 'Settings',
     svg: `<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>`,
+  },
+  {
+    id: 'auto-battle',
+    label: 'Auto-Battle',
+    svg: `<svg viewBox="0 0 24 24"><path d="M7.5 3.5L5.5 5.5 7.5 7.5 5.5 9.5 7.5 11.5M12 3v18M16.5 3.5l2 2-2 2 2 2-2 2M5 21h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2z"/></svg>`,
   },
 ];
 
@@ -114,7 +127,10 @@ export class MobileToolbar extends Base {
     this.panel = document.createElement('div');
     this.panel.id = 'mobile-menu-panel';
 
-    for (const item of MENU_ITEMS) {
+    const items = MENU_ITEMS.filter(
+      (item) => item.id !== 'auto-battle' || isAutoBattleUnlocked(),
+    );
+    for (const item of items) {
       const button = document.createElement('button');
       button.className = 'menu-item-btn';
       button.innerHTML = `${item.svg}<span>${item.label}</span>`;

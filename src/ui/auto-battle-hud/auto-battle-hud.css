@@ -1,0 +1,148 @@
+/* ── Auto-Battle HUD Overlay ─────────────────────────────────── */
+
+#auto-battle-hud {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1040;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 16, 12, 0.92);
+  border: 1px solid rgba(140, 200, 90, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px 4px 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  font-family: inherit;
+  color: #e0daca;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+/* ── Pulse dot ───────────────────────────────────────────────── */
+
+#auto-battle-hud .ab-pulse {
+  width: 8px;
+  height: 8px;
+  background: #8cc85a;
+  border-radius: 50%;
+  animation: ab-pulse-anim 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ab-pulse-anim {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ── Status text ─────────────────────────────────────────────── */
+
+#auto-battle-hud .ab-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8cc85a;
+  white-space: nowrap;
+}
+
+/* ── Stats ───────────────────────────────────────────────────── */
+
+#auto-battle-hud .ab-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 9px;
+  color: #a89880;
+}
+
+#auto-battle-hud .ab-stats span {
+  white-space: nowrap;
+}
+
+#auto-battle-hud .ab-stats .ab-stat-val {
+  color: #d4b896;
+  font-weight: 600;
+}
+
+/* ── Stop button ─────────────────────────────────────────────── */
+
+#auto-battle-hud .ab-stop-btn {
+  background: rgba(220, 80, 60, 0.15);
+  border: 1px solid rgba(220, 80, 60, 0.3);
+  border-radius: 12px;
+  color: #dc503c;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+}
+
+#auto-battle-hud .ab-stop-btn:hover {
+  background: rgba(220, 80, 60, 0.25);
+  border-color: rgba(220, 80, 60, 0.5);
+}
+
+/* ── Mobile adjustments ──────────────────────────────────────── */
+
+body.is-mobile #auto-battle-hud {
+  top: auto;
+  bottom: 140px;
+  padding: 6px 14px 6px 12px;
+}
+
+body.is-mobile #auto-battle-hud .ab-status {
+  font-size: 12px;
+}
+
+body.is-mobile #auto-battle-hud .ab-stats {
+  font-size: 11px;
+}
+
+body.is-mobile #auto-battle-hud .ab-stop-btn {
+  font-size: 11px;
+  padding: 4px 14px;
+}
+
+/* ── Sleep overlay ───────────────────────────────────────────── */
+
+#auto-battle-sleep {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: #e0daca;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+#auto-battle-sleep .sleep-text {
+  font-size: 14px;
+  color: #a89880;
+  animation: ab-pulse-anim 2s ease-in-out infinite;
+}
+
+#auto-battle-sleep .sleep-stats {
+  font-size: 11px;
+  color: #706050;
+}
+
+#auto-battle-sleep .sleep-hint {
+  font-size: 10px;
+  color: #504030;
+  margin-top: 8px;
+}

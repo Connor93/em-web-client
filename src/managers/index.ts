@@ -1,3 +1,10 @@
+export {
+  isAutoBattleActive,
+  startAutoBattle,
+  stopAutoBattle,
+  tickAutoBattle,
+  toggleAutoBattle,
+} from './auto-battle-manager';
 export { chat } from './chat-manager';
 export {
   beginSpellChant,
@@ -49,6 +56,7 @@ export {
   requestBook,
   requestPaperdoll,
   requestPartyList,
+  requestQuestList,
   requestToJoinParty,
   requestTrade,
 } from './social-manager';
