@@ -167,6 +167,7 @@ export class MapRenderer {
   buildingCache = false;
   _tileRenderWarned = false;
   playerTooltip: PlayerTooltip | null = null;
+  private cachedUiElement: HTMLElement | null = null;
 
   private topLayer: (() => void)[] = [];
   private staticTileGrid: StaticTile[][][] = [];
@@ -565,6 +566,8 @@ export class MapRenderer {
   }
 
   renderNameplate(playerScreen: Vector2, ctx: CanvasRenderingContext2D) {
+    this.playerTooltip?.hide();
+
     if (!this.client.mousePosition) {
       return;
     }
@@ -578,8 +581,6 @@ export class MapRenderer {
     if (!atlas) {
       return;
     }
-
-    this.playerTooltip?.hide();
 
     const coords = { x: 0, y: 0 };
     const offset = { x: 0, y: 0 };
@@ -652,13 +653,16 @@ export class MapRenderer {
             position.y - playerScreen.y + HALF_GAME_HEIGHT + offset.y,
           );
 
-          const uiElement = document.getElementById('ui');
+          if (!this.cachedUiElement) {
+            this.cachedUiElement = document.getElementById('ui');
+          }
+          const uiElement = this.cachedUiElement;
           const scaleMatch =
             uiElement?.style.transform.match(/scale\(([^)]+)\)/);
           const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
 
-          const ecfClass = this.client.ecf.classes[character.classId - 1];
-          const className = ecfClass?.name || '';
+          const className =
+            this.client.getEcfRecordById(character.classId)?.name ?? '';
 
           this.playerTooltip.update(
             {
