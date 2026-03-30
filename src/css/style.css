@@ -904,3 +904,13 @@ div.icon[data-id="23"] {
   border: 1px dashed rgba(212, 184, 150, 0.4) !important;
   cursor: move !important;
 }
+
+/* Override all CSS-driven positioning when an element has been repositioned.
+   Needed because some elements (e.g. #chat) use !important on position props. */
+.ui-repositioned {
+  position: fixed !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+}
