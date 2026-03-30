@@ -1,0 +1,40 @@
+.npc-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1080;
+  display: none;
+  transform: translate(-50%, -100%);
+}
+
+.npc-tooltip.visible {
+  display: block;
+}
+
+.npc-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.npc-tooltip-name {
+  font-weight: bold;
+}
+
+.npc-tooltip-level {
+  opacity: 0.8;
+}
+
+.npc-tooltip-type {
+  font-size: 11px;
+  margin-top: 1px;
+}
+
+body.is-mobile .npc-tooltip {
+  display: none !important;
+}
