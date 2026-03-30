@@ -41,7 +41,7 @@ interface PlayerTooltipData {
 
 class PlayerTooltip {
   constructor(container: HTMLElement);
-  update(data: PlayerTooltipData, screenPosition: Vector2, scale: number): void;
+  update(data: PlayerTooltipData, screenX: number, screenY: number, scale: number): void;
   hide(): void;
 }
 ```
