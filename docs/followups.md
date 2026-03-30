@@ -4,11 +4,6 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 
 ## Open
 
-### Player Tooltip — NPC Info Tooltips
-**Added:** 2026-03-30
-**Context:** Same pattern as player tooltip, different data source (ENF records instead of CharacterMapInfo). NPC name, type, and possibly HP if available.
-**Related:** `src/ui/player-tooltip/`, `src/map.ts:renderNameplate`
-
 ### Player Tooltip — Mobile Touch Tooltips
 **Added:** 2026-03-30
 **Context:** Currently mobile falls back to canvas nameplate (name only). Could add tap-to-show or long-press tooltip interaction for mobile. Needs its own interaction design to avoid conflicts with tap-to-move.
@@ -21,4 +16,6 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 
 ## Completed
 
-_(Move items here when done, with completion date)_
+### NPC Info Tooltips
+**Completed:** 2026-03-30
+**Context:** HTML tooltip for NPCs showing name, level, and color-coded type. Separate `NpcTooltip` component at `src/ui/npc-tooltip/`.
