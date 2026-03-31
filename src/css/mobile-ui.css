@@ -146,8 +146,8 @@ body.is-mobile #inventory:not(.hidden) {
 body.is-mobile #inventory .grid {
   flex: 1;
   height: auto !important;
-  grid-template-columns: repeat(6, 1fr) !important;
-  grid-auto-rows: 32px !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+  grid-auto-rows: minmax(20px, 1fr) !important;
 }
 
 body.is-mobile #inventory .top {
@@ -436,8 +436,8 @@ body.is-mobile .mobile-split-view > .dialog-md {
 
 /* Adjust grids for 50% width inside split-view */
 .mobile-split-view > #inventory .grid {
-  grid-template-columns: repeat(3, 1fr) !important;
-  grid-auto-rows: 32px !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+  grid-auto-rows: minmax(16px, 1fr) !important;
 }
 
 .mobile-split-view .locker-grid {
@@ -448,12 +448,15 @@ body.is-mobile .mobile-split-view > .dialog-md {
   display: none !important;
 }
 
-/* Action bars inside split-view panels must be sticky (not absolute)
-   because the panels have overflow-y: auto which clips absolute children. */
+/* Action bars inside split-view panels — keep absolute within the panel.
+   Each panel is position: relative (from the split-view override) so the
+   bar sticks to the bottom of its own panel, not the full viewport. */
 .mobile-split-view .mobile-action-bar {
-  position: sticky;
+  position: absolute;
   bottom: 0;
-  margin-top: auto;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .mobile-split-view .grid-card {
