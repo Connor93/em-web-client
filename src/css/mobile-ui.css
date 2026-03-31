@@ -187,6 +187,18 @@ body.is-mobile #paperdoll:not(.hidden) {
   border-radius: 0 !important;
   z-index: 1050 !important;
   margin: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Show dialog header on mobile for close button */
+body.is-mobile #paperdoll .dialog-header {
+  display: flex !important;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
 }
 
 /* Hide character info and OK button on mobile — just show equipment */

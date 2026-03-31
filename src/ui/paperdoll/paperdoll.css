@@ -22,6 +22,10 @@
   flex-shrink: 0;
 }
 
+#paperdoll .dialog-header {
+  display: none;
+}
+
 /* ── Equipment Slots (left half) ────────────────────────────────── */
 
 #paperdoll .item {
