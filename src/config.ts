@@ -6,6 +6,11 @@ type Config = {
   title: string;
   slogan: string;
   creditsUrl: string;
+  autoLogin?: {
+    username: string;
+    password: string;
+    characterName: string;
+  };
 };
 
 export function getDefaultConfig(): Config {
@@ -19,15 +24,27 @@ export function getDefaultConfig(): Config {
 }
 
 export async function loadConfig(): Promise<Config> {
+  let config = getDefaultConfig();
+
   try {
     const response = await fetch('/config.json');
-    if (!response.ok) {
-      return getDefaultConfig();
+    if (response.ok) {
+      config = await response.json();
     }
-
-    const config = await response.json();
-    return config;
-  } catch (_err) {
-    return getDefaultConfig();
+  } catch {
+    // Use defaults
   }
+
+  // Merge local overrides (gitignored, never deployed)
+  try {
+    const local = await fetch('/config.local.json');
+    if (local.ok) {
+      const overrides = await local.json();
+      config = { ...config, ...overrides };
+    }
+  } catch {
+    // No local config
+  }
+
+  return config;
 }

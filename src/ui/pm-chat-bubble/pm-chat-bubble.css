@@ -2,7 +2,7 @@
 
 #pm-bubbles {
   position: fixed;
-  top: 60px;
+  top: 120px;
   left: 8px;
   display: flex;
   flex-direction: column;

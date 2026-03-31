@@ -36,6 +36,7 @@
   overflow-x: hidden;
   color: #d4c4a8;
   font-size: 12px;
+  cursor: default;
 }
 
 #board .post-list::-webkit-scrollbar {

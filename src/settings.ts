@@ -9,6 +9,7 @@ export interface GameSettings {
   ghostNpcs: 'enabled' | 'disabled';
   movementSmoothing: 'enabled' | 'disabled';
   uiScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x' | '2.5x' | '3x';
+  fpsLimit: 'Unlimited' | '60' | '30' | '20';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -22,6 +23,7 @@ const DEFAULTS: GameSettings = {
   ghostNpcs: 'disabled',
   movementSmoothing: 'enabled',
   uiScale: '1x',
+  fpsLimit: '30',
 };
 
 export const SETTING_OPTIONS: {
@@ -35,6 +37,7 @@ export const SETTING_OPTIONS: {
   ghostNpcs: ['enabled', 'disabled'],
   movementSmoothing: ['enabled', 'disabled'],
   uiScale: ['1x', '1.25x', '1.5x', '1.75x', '2x', '2.5x', '3x'],
+  fpsLimit: ['Unlimited', '60', '30', '20'],
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -46,6 +49,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   ghostNpcs: 'Ghost NPCs',
   movementSmoothing: 'Movement',
   uiScale: 'UI Scale',
+  fpsLimit: 'FPS Limit',
 };
 
 type SettingsEvents = {
@@ -84,6 +88,13 @@ class SettingsStore {
   /** Returns the UI scale as a numeric multiplier (e.g. 1, 1.25, 2). */
   getUiScale(): number {
     return Number.parseFloat(this.data.uiScale) || 1;
+  }
+
+  /** Returns the minimum frame interval in ms, or 0 for unlimited. */
+  getFpsInterval(): number {
+    const val = this.data.fpsLimit;
+    if (val === 'Unlimited') return 0;
+    return 1000 / Number.parseInt(val, 10);
   }
 
   private load(): void {

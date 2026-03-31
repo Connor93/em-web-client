@@ -11,7 +11,12 @@ import { Base } from '../base-ui';
 import './quest-dialog.css';
 
 type Events = {
-  reply: { questId: number; dialogId: number; action: number | null };
+  reply: {
+    questId: number;
+    dialogId: number;
+    action: number | null;
+    questName: string;
+  };
   cancel: undefined;
 };
 
@@ -77,6 +82,11 @@ export class QuestDialog extends Base {
     this.render();
   }
 
+  private get questName(): string {
+    const quest = this.quests.find((q) => q.questId === this.questId);
+    return quest?.questName ?? 'Unknown';
+  }
+
   private updateQuestTitle() {
     const quest = this.quests.find((q) => q.questId === this.questId);
     if (!quest) {
@@ -138,6 +148,7 @@ export class QuestDialog extends Base {
           questId: this.questId,
           dialogId: this.dialogId,
           action: data.linkId,
+          questName: this.questName,
         });
       });
       this.entries.appendChild(link);
@@ -216,6 +227,7 @@ export class QuestDialog extends Base {
         questId: this.questId,
         dialogId: this.dialogIndex,
         action: null,
+        questName: this.questName,
       });
     });
   }

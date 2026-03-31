@@ -379,6 +379,7 @@ export class Atlas {
   private pendingBmpPromises: Promise<void>[] = [];
   private pendingCharacterFramePromises: Promise<void>[] = [];
   private loading = false;
+  private loadEpoch = 0;
   private appended = true;
   private staticAtlas: AtlasCanvas;
   private mapAtlas: AtlasCanvas;
@@ -873,9 +874,11 @@ export class Atlas {
     }
 
     if (this.bmpsToLoad.length) {
-      return Promise.all(this.pendingBmpPromises).then(() =>
-        this.updateAtlas(),
-      );
+      const epoch = this.loadEpoch;
+      return Promise.all(this.pendingBmpPromises).then(() => {
+        if (this.loadEpoch !== epoch) return; // Stale load, discard
+        this.updateAtlas();
+      });
     }
 
     this.loading = false;
@@ -925,6 +928,10 @@ export class Atlas {
   }
 
   reset() {
+    this.loading = false;
+    this.loadEpoch++;
+    this.bmpsToLoad = [];
+    this.pendingBmpPromises = [];
     this.characters = [];
     this.npcs = [];
     this.items = [];

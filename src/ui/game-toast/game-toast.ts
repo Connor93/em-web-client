@@ -2,7 +2,13 @@ import { EOResourceID } from '../../edf';
 
 import './game-toast.css';
 
-export type ToastCategory = 'info' | 'warning' | 'loot' | 'exp' | 'action';
+export type ToastCategory =
+  | 'info'
+  | 'warning'
+  | 'loot'
+  | 'exp'
+  | 'action'
+  | 'quest';
 
 const TOAST_DURATION = 4000;
 const MAX_TOASTS = 5;
@@ -38,6 +44,7 @@ const ICONS: Record<ToastCategory, string> = {
   loot: '💰',
   exp: '✨',
   action: '⚡',
+  quest: '📜',
 };
 
 export function showGameToast(

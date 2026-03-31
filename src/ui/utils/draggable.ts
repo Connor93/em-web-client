@@ -53,6 +53,8 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
       target.closest('.shop-grid') ||
       target.closest('.locker-grid') ||
       target.closest('.grid-card') ||
+      target.closest('.quest-progress-body') ||
+      target.closest('.post-list') ||
       target.closest('.link') ||
       target.tagName === 'IMG' ||
       target.tagName === 'CANVAS'

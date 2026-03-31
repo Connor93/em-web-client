@@ -9,6 +9,7 @@ import {
 } from '../consts';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { ChatIcon } from '../ui/chat/chat';
+import { showGameToast } from '../ui/game-toast/game-toast';
 import { SlotType } from '../ui/hotbar/hotbar';
 import { capitalize } from '../utils';
 
@@ -410,12 +411,22 @@ export function wireUiEvents(deps: UiEventDeps): void {
       questId,
       dialogId,
       action,
+      questName,
     }: {
       questId: number;
       dialogId: number;
       action: number;
+      questName: string;
     }) => {
       client.questReply(questId, dialogId, action);
+      if (action === null) {
+        showGameToast(
+          EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+          `Quest accepted: ${questName}`,
+          'quest',
+        );
+      }
+      client.requestQuestProgressUpdate();
       client.typing = false;
     },
   );

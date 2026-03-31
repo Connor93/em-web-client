@@ -4,6 +4,7 @@ import { DialogResourceID, EOResourceID } from '../edf';
 import { isMobile } from '../main';
 import { playSfxById, SfxId } from '../sfx';
 import { ChatIcon } from '../ui/chat/chat';
+import { showGameToast } from '../ui/game-toast/game-toast';
 import { createMobileSplitView } from '../ui/utils';
 
 export interface ClientEventDeps {
@@ -258,6 +259,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.guildPanel.showToggleButton();
     deps.resizeCanvases();
     deps.inventory.loadPositions();
+
+    // Seed quest progress cache for change detection
+    cachedQuestProgress.clear();
+    client.requestQuestProgressUpdate();
   });
 
   client.on('passwordChanged', () => {
@@ -295,6 +300,37 @@ export function wireClientEvents(deps: ClientEventDeps): void {
       data.dialog,
     );
     deps.questDialog.show();
+  });
+
+  // Track quest progress changes and show toasts
+  const cachedQuestProgress = new Map<
+    string,
+    { progress: number; target: number }
+  >();
+
+  client.on('questProgressUpdated', ({ quests }) => {
+    for (const quest of quests) {
+      const cached = cachedQuestProgress.get(quest.name);
+      if (cached && quest.target > 0 && quest.progress > cached.progress) {
+        if (quest.progress >= quest.target) {
+          showGameToast(
+            EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+            `${quest.name}: objective complete!`,
+            'quest',
+          );
+        } else {
+          showGameToast(
+            EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+            `${quest.name}: ${quest.progress}/${quest.target}`,
+            'quest',
+          );
+        }
+      }
+      cachedQuestProgress.set(quest.name, {
+        progress: quest.progress,
+        target: quest.target,
+      });
+    }
   });
 
   client.on('openPaperdoll', ({ icon, equipment, details }) => {

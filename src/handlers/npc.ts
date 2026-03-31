@@ -163,6 +163,8 @@ function handleNpcSpec(client: Client, reader: EoReader) {
     });
     client.emit('statsUpdate', undefined);
   }
+
+  client.requestQuestProgressUpdate();
 }
 
 function handleNpcAccept(client: Client, reader: EoReader) {
@@ -230,6 +232,8 @@ function handleNpcAccept(client: Client, reader: EoReader) {
     });
     client.emit('statsUpdate', undefined);
   }
+
+  client.requestQuestProgressUpdate();
 }
 
 function handleNpcJunk(client: Client, reader: EoReader) {

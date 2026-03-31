@@ -84,6 +84,7 @@ function handleItemGet(client: Client, reader: EoReader) {
   });
 
   client.emit('inventoryChanged', undefined);
+  client.requestQuestProgressUpdate();
 }
 
 function handleItemDrop(client: Client, reader: EoReader) {

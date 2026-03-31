@@ -1,4 +1,4 @@
-export const GAME_FPS = 1000 / 20;
+export const GAME_FPS = 1000 / 30;
 //export const HOST = 'ws://localhost:8077';
 export const HOST = 'wss://ws.reoserv.net';
 export const TILE_WIDTH = 64;

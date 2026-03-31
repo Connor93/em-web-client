@@ -190,4 +190,5 @@ export type ClientEvents = {
   questHistoryUpdated: {
     completedQuests: string[];
   };
+  fpsToggled: undefined;
 };

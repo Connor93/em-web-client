@@ -26,6 +26,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'ghostNpcs',
   'movementSmoothing',
   'uiScale',
+  'fpsLimit',
 ];
 
 export class SettingsDialog extends Base {

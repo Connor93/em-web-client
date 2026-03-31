@@ -18,7 +18,7 @@ import './css/mobile-ui.css';
 
 import { PacketBus } from './bus';
 import { Client, GameState } from './client';
-import { GAME_FPS, MAX_CHALLENGE } from './consts';
+import { MAX_CHALLENGE } from './consts';
 import { DialogResourceID } from './edf';
 import {
   GAME_HEIGHT,
@@ -32,6 +32,7 @@ import {
   isAutoBattleUnlocked,
   toggleAutoBattle,
 } from './managers/auto-battle-manager';
+import { settings } from './settings';
 import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
@@ -203,15 +204,33 @@ window.addEventListener('resize', () => {
 let lastTime: DOMHighResTimeStamp | undefined;
 let accumulator = 0;
 const TICK = 120;
+
+// FPS counter
+let fpsFrameCount = 0;
+let fpsLastSample = 0;
+let fpsDisplay: HTMLDivElement | null = null;
+let lastRenderTime = 0;
+
+function getFpsDisplay(): HTMLDivElement {
+  if (fpsDisplay) return fpsDisplay;
+  fpsDisplay = document.createElement('div');
+  fpsDisplay.id = 'fps-counter';
+  fpsDisplay.style.cssText =
+    'position:fixed;top:4px;left:4px;z-index:9999;font:bold 12px monospace;' +
+    'color:#40e840;background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:4px;' +
+    'pointer-events:none;display:none;';
+  document.body.appendChild(fpsDisplay);
+  return fpsDisplay;
+}
+
+client.on('fpsToggled', () => {
+  const el = getFpsDisplay();
+  el.style.display = client.showFps ? 'block' : 'none';
+});
+
 const render = (now: DOMHighResTimeStamp) => {
   if (!lastTime) {
     lastTime = now;
-  }
-
-  const ellapsed = now - lastTime;
-  if (ellapsed < GAME_FPS) {
-    requestAnimationFrame(render);
-    return;
   }
 
   const dt = now - lastTime;
@@ -224,11 +243,30 @@ const render = (now: DOMHighResTimeStamp) => {
 
   lastTime = now;
 
+  // Frame limiter — skip render if under the configured interval
+  const fpsInterval = settings.getFpsInterval();
+  if (fpsInterval > 0 && now - lastRenderTime < fpsInterval) {
+    requestAnimationFrame(render);
+    return;
+  }
+  lastRenderTime = now;
+
   const interpolation = accumulator / TICK;
 
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   client.render(ctx, interpolation);
+
+  // FPS tracking
+  if (client.showFps) {
+    fpsFrameCount++;
+    if (now - fpsLastSample >= 1000) {
+      getFpsDisplay().textContent = `${fpsFrameCount} FPS`;
+      fpsFrameCount = 0;
+      fpsLastSample = now;
+    }
+  }
+
   requestAnimationFrame(render);
 };
 
@@ -602,6 +640,38 @@ window.addEventListener('DOMContentLoaded', async () => {
   //setTimeout(setDebugData, 300);
 
   requestAnimationFrame(render);
+
+  // Auto-login for local development
+  const isLocalhost =
+    location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (isLocalhost) {
+    client.configReady.then(() => {
+      const auto = client.config.autoLogin;
+      if (!auto?.username || !auto?.password || !auto?.characterName) return;
+
+      let autoLoginDone = false;
+      client.on('login', (characters) => {
+        if (autoLoginDone) return;
+        autoLoginDone = true;
+        const match = characters.find(
+          (c) => c.name.toLowerCase() === auto.characterName.toLowerCase(),
+        );
+        if (match) {
+          characterSelect.hide();
+          client.selectCharacter(match.id);
+        }
+      });
+      initializeSocket('login');
+
+      // Wait for init handshake to complete before sending login
+      const waitForReady = setInterval(() => {
+        if (client.state === GameState.Connected) {
+          clearInterval(waitForReady);
+          client.login(auto.username, auto.password, false);
+        }
+      }, 100);
+    });
+  }
 });
 
 function _setDebugData() {

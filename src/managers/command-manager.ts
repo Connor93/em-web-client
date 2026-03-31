@@ -87,6 +87,13 @@ export function handleCommand(client: Client, input: string): boolean {
       return true;
     }
 
+    case '#fps': {
+      client.showFps = !client.showFps;
+      client.emit('fpsToggled', undefined);
+      playSfxById(SfxId.TextBoxFocus);
+      return true;
+    }
+
     case '#item': {
       const param = input.substring('#item'.length);
       return handleItemCommand(client, param);

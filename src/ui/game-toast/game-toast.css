@@ -93,6 +93,12 @@
   border-color: rgba(212, 184, 150, 0.2);
 }
 
+.game-toast--quest {
+  background: rgba(30, 40, 25, 0.88);
+  color: #a8d4a0;
+  border-color: rgba(140, 200, 130, 0.25);
+}
+
 /* ── Animations ──────────────────────────────────────────────────── */
 
 @keyframes toast-in {

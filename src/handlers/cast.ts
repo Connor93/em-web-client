@@ -100,6 +100,8 @@ function handleCastSpec(client: Client, reader: EoReader) {
     });
     client.emit('statsUpdate', undefined);
   }
+
+  client.requestQuestProgressUpdate();
 }
 
 function handleCastAccept(client: Client, reader: EoReader) {
@@ -184,6 +186,8 @@ function handleCastAccept(client: Client, reader: EoReader) {
     });
     client.emit('statsUpdate', undefined);
   }
+
+  client.requestQuestProgressUpdate();
 }
 
 export function registerCastHandlers(client: Client) {

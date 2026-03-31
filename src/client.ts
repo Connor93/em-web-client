@@ -28,6 +28,7 @@ import {
   type OnlinePlayer,
   type PartyMember,
   type PartyRequestType,
+  QuestPage,
   RefreshRequestClientPacket,
   type ServerSettings,
   type Spell,
@@ -121,6 +122,7 @@ export class Client {
   tickCount = 0;
   bus!: PacketBus;
   config = getDefaultConfig();
+  configReady: Promise<void>;
   version: Version;
   challenge: number;
   accountCreateData: AccountCreateData | null = null;
@@ -243,6 +245,7 @@ export class Client {
   } | null = null;
   sans11: Sans11Font;
   debug = false;
+  showFps = false;
   itemProtectionTimers: Map<
     number,
     {
@@ -303,7 +306,7 @@ export class Client {
     this.mapRenderer = new MapRenderer(this);
     this.minimapRenderer = new MinimapRenderer(this);
     this.movementController = new MovementController(this);
-    loadConfig().then((config) => {
+    this.configReady = loadConfig().then((config) => {
       this.config = config;
       const txtHost =
         document.querySelector<HTMLInputElement>('input[name="host"]')!;
@@ -859,6 +862,18 @@ export class Client {
 
   requestQuestList(page: import('eolib').QuestPage) {
     Managers.requestQuestList(this, page);
+  }
+
+  private questProgressPending = false;
+
+  /** Request quest progress update, throttled to avoid spamming. */
+  requestQuestProgressUpdate() {
+    if (this.questProgressPending) return;
+    this.questProgressPending = true;
+    setTimeout(() => {
+      this.questProgressPending = false;
+      Managers.requestQuestList(this, QuestPage.Progress);
+    }, 500);
   }
 
   /** Record outgoing damage and return true if it qualifies as a critical hit. */
