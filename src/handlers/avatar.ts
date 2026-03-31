@@ -12,13 +12,16 @@ import {
 } from 'eolib';
 import type { Client } from '../client';
 import {
+  CharacterAttackAnimation,
   CharacterDeathAnimation,
+  CharacterRangedAttackAnimation,
   EffectAnimation,
   EffectTargetCharacter,
   EffectTargetTile,
   HealthBar,
 } from '../render';
 import { playSfxById, SfxId } from '../sfx';
+import { randomRange } from '../utils';
 
 function handleAvatarRemove(client: Client, reader: EoReader) {
   const packet = AvatarRemoveServerPacket.deserialize(reader);
@@ -100,6 +103,32 @@ function handleAvatarAgree(client: Client, reader: EoReader) {
 
 function handleAvatarReply(client: Client, reader: EoReader) {
   const packet = AvatarReplyServerPacket.deserialize(reader);
+
+  const attackerId = packet.playerId || client.playerId;
+  const attacker = client.getCharacterById(attackerId);
+
+  if (attacker) {
+    attacker.direction = packet.direction;
+
+    const metadata = client.getWeaponMetadata(attacker.equipment.weapon);
+
+    const existingAnimation = client.characterAnimations.get(attackerId);
+    const alreadyAttacking =
+      existingAnimation instanceof CharacterAttackAnimation ||
+      existingAnimation instanceof CharacterRangedAttackAnimation;
+
+    if (attackerId !== client.playerId || !alreadyAttacking) {
+      client.characterAnimations.set(
+        attackerId,
+        metadata.ranged
+          ? new CharacterRangedAttackAnimation()
+          : new CharacterAttackAnimation(),
+      );
+    }
+
+    const index = randomRange(0, metadata.sfx.length - 1);
+    playSfxById(metadata.sfx[index]);
+  }
 
   if (packet.victimId === client.playerId) {
     client.hp = Math.max(client.hp - packet.damage, 0);
