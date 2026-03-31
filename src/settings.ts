@@ -10,6 +10,7 @@ export interface GameSettings {
   movementSmoothing: 'enabled' | 'disabled';
   uiScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x' | '2.5x' | '3x';
   fpsLimit: 'Unlimited' | '60' | '30' | '20';
+  wasdMovement: 'enabled' | 'disabled';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -24,6 +25,7 @@ const DEFAULTS: GameSettings = {
   movementSmoothing: 'enabled',
   uiScale: '1x',
   fpsLimit: '30',
+  wasdMovement: 'enabled',
 };
 
 export const SETTING_OPTIONS: {
@@ -38,6 +40,7 @@ export const SETTING_OPTIONS: {
   movementSmoothing: ['enabled', 'disabled'],
   uiScale: ['1x', '1.25x', '1.5x', '1.75x', '2x', '2.5x', '3x'],
   fpsLimit: ['Unlimited', '60', '30', '20'],
+  wasdMovement: ['enabled', 'disabled'],
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -48,6 +51,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   interactions: 'Interactions',
   ghostNpcs: 'Ghost NPCs',
   movementSmoothing: 'Movement',
+  wasdMovement: 'WASD Keys',
   uiScale: 'UI Scale',
   fpsLimit: 'FPS Limit',
 };

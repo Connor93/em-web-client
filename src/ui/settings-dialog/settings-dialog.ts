@@ -25,6 +25,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'interactions',
   'ghostNpcs',
   'movementSmoothing',
+  'wasdMovement',
   'uiScale',
   'fpsLimit',
 ];
@@ -74,6 +75,21 @@ export class SettingsDialog extends Base {
       resetButton.addEventListener('click', () => {
         resetMovablePositions();
         playSfxById(SfxId.ButtonClick);
+      });
+    }
+
+    // Clear game cache (IndexedDB) — forces re-download of pub files
+    const clearCacheButton = this.container.querySelector<HTMLButtonElement>(
+      'button[data-id="clear-cache"]',
+    );
+    if (clearCacheButton) {
+      clearCacheButton.addEventListener('click', async () => {
+        playSfxById(SfxId.ButtonClick);
+        const databases = await indexedDB.databases();
+        for (const db of databases) {
+          if (db.name) indexedDB.deleteDatabase(db.name);
+        }
+        window.location.reload();
       });
     }
 

@@ -7,6 +7,7 @@ import {
   EoReader,
   EoWriter,
   Esf,
+  FileType,
   InitBanType,
   InitInitServerPacket,
   InitReply,
@@ -25,6 +26,46 @@ import {
   syncWeaponMetadataWithEif,
   waitForWeaponMetadata,
 } from '../utils';
+
+/** Process the next item in the download queue, or enter the game. */
+function processNextDownload(client: Client) {
+  if (client.downloadQueue.length > 0) {
+    const download = client.downloadQueue.pop();
+    client.requestFile(download!.type!, download!.id!);
+  } else {
+    client.enterGame();
+  }
+}
+
+/**
+ * Merge a pub file chunk into an existing pub. Each chunk is a standalone
+ * pub file; we append its records to the existing pub's array.
+ * Returns the merged pub, or the chunk if no existing pub.
+ */
+function mergePub<
+  T extends {
+    items?: unknown[];
+    npcs?: unknown[];
+    skills?: unknown[];
+    classes?: unknown[];
+  },
+>(existing: T | null, chunk: T, fileId: number): T {
+  if (fileId <= 1 || !existing) return chunk;
+  // Append records from the chunk to the existing pub
+  if (existing.items && chunk.items) {
+    existing.items.push(...chunk.items);
+  }
+  if (existing.npcs && chunk.npcs) {
+    existing.npcs.push(...chunk.npcs);
+  }
+  if (existing.skills && chunk.skills) {
+    existing.skills.push(...chunk.skills);
+  }
+  if (existing.classes && chunk.classes) {
+    existing.classes.push(...chunk.classes);
+  }
+  return existing;
+}
 
 function handleInitInit(client: Client, reader: EoReader) {
   const packet = InitInitServerPacket.deserialize(reader);
@@ -186,70 +227,73 @@ function handleInitFileEcf(
   client: Client,
   data: InitInitServerPacket.ReplyCodeDataFileEcf,
 ) {
+  const fileId = data.pubFile.fileId;
   const reader = new EoReader(data.pubFile.content);
-  client.ecf = Ecf.deserialize(reader);
-  saveEcf(client.ecf);
+  const chunk = Ecf.deserialize(reader);
+  client.ecf = mergePub(fileId > 1 ? client.ecf : null, chunk, fileId) as Ecf;
 
-  if (client.downloadQueue.length > 0) {
-    const download = client.downloadQueue.pop();
-    client.requestFile(download!.type!, download!.id!);
+  if (client.ecf.classes.length < client.ecf.totalClassesCount) {
+    client.downloadQueue.push({ type: FileType.Ecf, id: fileId + 1 });
   } else {
-    client.enterGame();
+    saveEcf(client.ecf);
   }
+  processNextDownload(client);
 }
 
 function handleInitFileEif(
   client: Client,
   data: InitInitServerPacket.ReplyCodeDataFileEif,
 ) {
+  const fileId = data.pubFile.fileId;
   const reader = new EoReader(data.pubFile.content);
-  client.eif = Eif.deserialize(reader);
-  saveEif(client.eif);
+  const chunk = Eif.deserialize(reader);
+  client.eif = mergePub(fileId > 1 ? client.eif : null, chunk, fileId) as Eif;
 
-  // Sync weapon metadata with freshly downloaded EIF
-  waitForWeaponMetadata().then(() => {
-    syncWeaponMetadataWithEif(client.eif);
-    client.weaponMetadata = getWeaponMetaData();
-  });
-
-  if (client.downloadQueue.length > 0) {
-    const download = client.downloadQueue.pop();
-    client.requestFile(download!.type!, download!.id!);
+  if (client.eif.items.length < client.eif.totalItemsCount) {
+    client.downloadQueue.push({ type: FileType.Eif, id: fileId + 1 });
   } else {
-    client.enterGame();
+    saveEif(client.eif);
+    // Sync weapon metadata with freshly downloaded EIF
+    waitForWeaponMetadata().then(() => {
+      syncWeaponMetadataWithEif(client.eif);
+      client.weaponMetadata = getWeaponMetaData();
+    });
   }
+  processNextDownload(client);
 }
 
 function handleInitFileEnf(
   client: Client,
   data: InitInitServerPacket.ReplyCodeDataFileEnf,
 ) {
+  const fileId = data.pubFile.fileId;
   const reader = new EoReader(data.pubFile.content);
-  client.enf = Enf.deserialize(reader);
-  saveEnf(client.enf);
+  const chunk = Enf.deserialize(reader);
+  client.enf = mergePub(fileId > 1 ? client.enf : null, chunk, fileId) as Enf;
 
-  if (client.downloadQueue.length > 0) {
-    const download = client.downloadQueue.pop();
-    client.requestFile(download!.type!, download!.id!);
+  if (client.enf.npcs.length < client.enf.totalNpcsCount) {
+    client.downloadQueue.push({ type: FileType.Enf, id: fileId + 1 });
   } else {
-    client.enterGame();
+    saveEnf(client.enf);
   }
+  processNextDownload(client);
 }
 
 function handleInitFileEsf(
   client: Client,
   data: InitInitServerPacket.ReplyCodeDataFileEsf,
 ) {
+  const fileId = data.pubFile.fileId;
   const reader = new EoReader(data.pubFile.content);
-  client.esf = Esf.deserialize(reader);
-  saveEsf(client.esf);
+  const chunk = Esf.deserialize(reader);
+  client.esf = mergePub(fileId > 1 ? client.esf : null, chunk, fileId) as Esf;
 
-  if (client.downloadQueue.length > 0) {
-    const download = client.downloadQueue.pop();
-    client.requestFile(download!.type!, download!.id!);
+  if (client.esf.skills.length < client.esf.totalSkillsCount) {
+    client.downloadQueue.push({ type: FileType.Esf, id: fileId + 1 });
   } else {
-    client.enterGame();
+    saveEsf(client.esf);
   }
+  processNextDownload(client);
 }
 
 function handleInitFileEmf(

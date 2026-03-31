@@ -83,7 +83,7 @@ function handleCastSpec(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record?.name ?? `Item #${item.id}`}`,
     });
 
     tryAutoloot(client, item, packet.npcKilledData.killerId);
@@ -151,7 +151,7 @@ function handleCastAccept(client: Client, reader: EoReader) {
     client.emit('chat', {
       tab: ChatTab.System,
       icon: ChatIcon.DownArrow,
-      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
+      message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record?.name ?? `Item #${item.id}`}`,
     });
 
     tryAutoloot(client, item, packet.npcKilledData.killerId);

@@ -1,4 +1,5 @@
 import { zoomIn, zoomOut } from './main';
+import { settings } from './settings';
 
 export enum Input {
   Up = 0,
@@ -86,21 +87,26 @@ window.addEventListener('keydown', (e) => {
     if (e.key === '=' || e.key === '+') zoomIn();
     else zoomOut();
   }
+  const wasd = settings.get('wasdMovement') === 'enabled';
   switch (e.code) {
     case 'KeyW':
     case 'ArrowUp':
+      if (e.code === 'KeyW' && !wasd) break;
       updateInputHeld(Input.Up, true);
       break;
     case 'KeyA':
     case 'ArrowLeft':
+      if (e.code === 'KeyA' && !wasd) break;
       updateInputHeld(Input.Left, true);
       break;
     case 'KeyS':
     case 'ArrowDown':
+      if (e.code === 'KeyS' && !wasd) break;
       updateInputHeld(Input.Down, true);
       break;
     case 'KeyD':
     case 'ArrowRight':
+      if (e.code === 'KeyD' && !wasd) break;
       updateInputHeld(Input.Right, true);
       break;
     case 'KeyX':
@@ -170,21 +176,26 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('keyup', (e) => {
+  const wasd = settings.get('wasdMovement') === 'enabled';
   switch (e.code) {
     case 'KeyW':
     case 'ArrowUp':
+      if (e.code === 'KeyW' && !wasd) break;
       updateInputHeld(Input.Up, false);
       break;
     case 'KeyA':
     case 'ArrowLeft':
+      if (e.code === 'KeyA' && !wasd) break;
       updateInputHeld(Input.Left, false);
       break;
     case 'KeyS':
     case 'ArrowDown':
+      if (e.code === 'KeyS' && !wasd) break;
       updateInputHeld(Input.Down, false);
       break;
     case 'KeyD':
     case 'ArrowRight':
+      if (e.code === 'KeyD' && !wasd) break;
       updateInputHeld(Input.Right, false);
       break;
     case 'KeyX':
