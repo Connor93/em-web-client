@@ -353,7 +353,9 @@ let _reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 const initializeSocket = (next: 'login' | 'create' | '' = '') => {
   const socket = new WebSocket(client.config.host);
   socket.addEventListener('open', () => {
-    if (next === 'create') {
+    if (client.reconnecting) {
+      // Reconnect handles login silently — don't show any UI
+    } else if (next === 'create') {
       mainMenu.hide();
       createAccountForm.show();
     } else if (next === 'login') {
@@ -374,10 +376,10 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
   });
 
   socket.addEventListener('close', () => {
-    const wasInGame = client.state === GameState.InGame;
+    const wasInGame = client.state === GameState.InGame || client.reconnecting;
     const canReconnect =
       wasInGame &&
-      client.loginToken &&
+      (client.loginToken || client.sessionCredentials) &&
       client.lastCharacterId &&
       getReconnectAttempts() < MAX_RECONNECT_ATTEMPTS;
 

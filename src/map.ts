@@ -1415,12 +1415,42 @@ export class MapRenderer {
     }
 
     const frame = this.client.atlas.getNpcFrame(record.graphicId, npcFrame);
-    if (!frame) {
-      return;
-    }
 
-    const atlas = this.client.atlas.getAtlas(frame.atlasIndex);
-    if (!atlas) {
+    const atlas = frame ? this.client.atlas.getAtlas(frame.atlasIndex) : null;
+
+    // Fallback: render placeholder for NPCs with missing graphics
+    if (!frame || !atlas) {
+      const screenCoords = isoToScreen(coords);
+      const placeholderW = 32;
+      const placeholderH = 48;
+      const sx = Math.floor(
+        screenCoords.x -
+          playerScreen.x +
+          HALF_GAME_WIDTH -
+          placeholderW / 2 +
+          walkOffset.x,
+      );
+      const sy = Math.floor(
+        screenCoords.y -
+          playerScreen.y +
+          HALF_GAME_HEIGHT -
+          placeholderH +
+          walkOffset.y,
+      );
+
+      const rect = new Rectangle({ x: sx, y: sy }, placeholderW, placeholderH);
+      setNpcRectangle(npc.index, rect);
+
+      this.topLayer.push(() => {
+        const healthBar = this.client.npcHealthBars.get(npc.index);
+        const bubble = this.client.npcChats.get(npc.index);
+        const npcTopCenter = {
+          x: sx + placeholderW / 2,
+          y: sy,
+        };
+        if (bubble) bubble.render(npcTopCenter, ctx);
+        if (healthBar) this.renderHealthBar(healthBar, npcTopCenter, ctx);
+      });
       return;
     }
 

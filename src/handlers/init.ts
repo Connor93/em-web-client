@@ -136,6 +136,12 @@ function handleInitOk(
     const writer = new EoWriter();
     writer.addString(client.loginToken);
     bus.sendBuf(PacketFamily.Login, PacketAction.Use, writer.toByteArray());
+  } else if (client.reconnecting && client.sessionCredentials) {
+    client.login(
+      client.sessionCredentials.username,
+      client.sessionCredentials.password,
+      false,
+    );
   }
 }
 

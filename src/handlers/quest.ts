@@ -12,10 +12,9 @@ import type { Client } from '../client';
 
 function handleQuestDialog(client: Client, reader: EoReader) {
   const packet = QuestDialogServerPacket.deserialize(reader);
-  const record = client.getEnfRecordByBehaviorId(
-    NpcType.Quest,
-    packet.behaviorId,
-  );
+  const record =
+    client.getEnfRecordByBehaviorId(NpcType.Quest, packet.behaviorId) ??
+    client.getEnfRecordByBehaviorId(NpcType.Friendly, packet.behaviorId);
   if (!record) {
     return;
   }

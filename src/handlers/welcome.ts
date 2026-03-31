@@ -43,6 +43,7 @@ function handleSelectCharacter(
   client.mapId = data.mapId;
   client.characterId = data.characterId;
   client.name = data.name;
+  client.lastCharacterName = data.name;
   client.title = data.title;
   client.guildName = data.guildName;
   client.guildTag = data.guildTag;

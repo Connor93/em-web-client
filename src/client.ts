@@ -208,6 +208,10 @@ export class Client {
   loginToken = localStorage.getItem('login-token');
   lastCharacterId =
     Number.parseInt(localStorage.getItem('last-character-id') ?? '', 10) || 0;
+  /** Credentials held in memory for session reconnect (never persisted). */
+  sessionCredentials: { username: string; password: string } | null = null;
+  /** Last played character name for reconnect matching. */
+  lastCharacterName = '';
   edfs: {
     game1: Edf | null;
     game2: Edf | null;
@@ -718,6 +722,7 @@ export class Client {
   }
 
   login(username: string, password: string, rememberMe: boolean) {
+    this.sessionCredentials = { username, password };
     AuthManager.login(this, username, password, rememberMe);
   }
 

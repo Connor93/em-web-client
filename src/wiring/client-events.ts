@@ -183,6 +183,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   });
 
   client.on('login', (characters) => {
+    if (client.reconnecting) return; // Reconnect handles character select silently
     playSfxById(SfxId.Login);
     deps.loginForm.hide();
     deps.characterSelect.setCharacters(characters);
@@ -244,6 +245,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
       }
     }
 
+    deps.loginForm.hide();
     deps.characterSelect.hide();
     deps.exitGame.show();
 

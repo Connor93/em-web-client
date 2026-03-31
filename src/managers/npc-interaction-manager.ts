@@ -22,6 +22,14 @@ export function clickNpc(client: Client, npc: NpcMapInfo): void {
   }
 
   switch (record.type) {
+    case NpcType.Friendly: {
+      if (!record.behaviorId) return;
+      const packet = new QuestUseClientPacket();
+      packet.npcIndex = npc.index;
+      packet.questId = 0;
+      client.bus.send(packet);
+      break;
+    }
     case NpcType.Quest: {
       const packet = new QuestUseClientPacket();
       packet.npcIndex = npc.index;

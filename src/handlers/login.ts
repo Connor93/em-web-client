@@ -59,17 +59,24 @@ function handleLoginReply(client: Client, reader: EoReader) {
   const data = packet.replyCodeData as LoginReplyServerPacket.ReplyCodeDataOk;
   client.setState(GameState.LoggedIn);
 
+  const reconnectMatch = data.characters.find(
+    (c) =>
+      c.id === client.lastCharacterId ||
+      (client.lastCharacterName &&
+        c.name.toLowerCase() === client.lastCharacterName.toLowerCase()),
+  );
+
   if (
     (client.reconnecting || client.rememberMe) &&
-    client.loginToken &&
-    data.characters.some((c) => c.id === client.lastCharacterId)
+    (client.loginToken || client.sessionCredentials) &&
+    reconnectMatch
   ) {
+    client.lastCharacterId = reconnectMatch.id;
     const packet = new WelcomeRequestClientPacket();
-    packet.characterId = client.lastCharacterId;
+    packet.characterId = reconnectMatch.id;
     client.bus.send(packet);
     return;
   }
-
   client.emit('login', data.characters);
 }
 
