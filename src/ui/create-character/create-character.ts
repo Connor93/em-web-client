@@ -1,4 +1,9 @@
-import { type CharacterMapInfo, Direction, Gender } from 'eolib';
+import {
+  type CharacterMapInfo,
+  Direction,
+  EquipmentMapInfo,
+  Gender,
+} from 'eolib';
 import mitt from 'mitt';
 import { CharacterFrame } from '../../atlas';
 import type { Client } from '../../client';
@@ -9,9 +14,21 @@ import { Base } from '../base-ui';
 import './create-character.css';
 
 const MAX_GENDER = 2;
-const MAX_HAIR_STYLE = 20;
-const MAX_HAIR_COLOR = 10;
-const MAX_SKIN = 4;
+
+const GENDER_NAMES = ['Female', 'Male'];
+const HAIR_COLOR_NAMES = [
+  'Brown',
+  'Green',
+  'Pink',
+  'Blonde',
+  'Blue',
+  'Ginger',
+  'Silver',
+  'Purple',
+  'Red',
+  'White',
+];
+const SKIN_NAMES = ['Light', 'Tan', 'Dark', 'Pale'];
 let lastTime: DOMHighResTimeStamp | undefined;
 
 type Events = {
@@ -170,17 +187,23 @@ export class CreateCharacterForm extends Base {
     this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     this.name.value = '';
     this.character = this.client.getCharacterById(this.client.playerId);
-    this.character!.gender! = Gender.Female;
-    this.character!.skin! = 0;
-    this.character!.direction! = Direction.Down;
-    this.character!.hairStyle! = 1;
-    this.character!.hairColor! = 0;
+    this.character!.gender = Gender.Female;
+    this.character!.skin = 0;
+    this.character!.direction = Direction.Down;
+    this.character!.hairStyle = 1;
+    this.character!.hairColor = 0;
+    this.character!.equipment = new EquipmentMapInfo();
+    this.character!.equipment.armor = 0;
+    this.character!.equipment.weapon = 0;
+    this.character!.equipment.boots = 0;
+    this.character!.equipment.shield = 0;
+    this.character!.equipment.hat = 0;
     this.gender = 0;
     this.hairStyle = 0;
     this.hairColor = 0;
     this.skin = 0;
     this.open = true;
-    this.updateIcons();
+    this.updateLabels();
     this.client.atlas.refresh();
     window.requestAnimationFrame((now) => {
       this.render(now);
@@ -193,11 +216,12 @@ export class CreateCharacterForm extends Base {
     this.open = false;
   }
 
-  private updateIcons() {
-    this.lblGender.style.backgroundPositionX = `-${this.gender * 23}px`;
-    this.lblHairStyle.style.backgroundPositionX = `-${this.hairStyle * 23}px`;
-    this.lblHairColor.style.backgroundPositionX = `-${this.hairColor * 23}px`;
-    this.lblSkin.style.backgroundPositionX = `-${this.skin * 23 + 46}px`;
+  private updateLabels() {
+    this.lblGender.textContent = GENDER_NAMES[this.gender] ?? `${this.gender}`;
+    this.lblHairStyle.textContent = `Hair ${this.hairStyle + 1}`;
+    this.lblHairColor.textContent =
+      HAIR_COLOR_NAMES[this.hairColor] ?? `Color ${this.hairColor + 1}`;
+    this.lblSkin.textContent = SKIN_NAMES[this.skin] ?? `Skin ${this.skin + 1}`;
   }
 
   constructor(client: Client) {
@@ -257,31 +281,37 @@ export class CreateCharacterForm extends Base {
       playSfxById(SfxId.TextBoxFocus);
       this.gender = incrementOrWrap(this.gender, MAX_GENDER);
       this.character!.gender! = this.gender as Gender;
-      this.updateIcons();
+      this.updateLabels();
       this.client.atlas.refresh();
     });
 
     this.btnToggleHairStyle.addEventListener('click', () => {
       playSfxById(SfxId.TextBoxFocus);
-      this.hairStyle = incrementOrWrap(this.hairStyle, MAX_HAIR_STYLE);
-      this.character!.hairStyle! = this.hairStyle + 1;
-      this.updateIcons();
+      this.hairStyle = incrementOrWrap(
+        this.hairStyle,
+        this.client.createMaxHairStyle,
+      );
+      this.character!.hairStyle = this.hairStyle + 1;
+      this.updateLabels();
       this.client.atlas.refresh();
     });
 
     this.btnToggleHairColor.addEventListener('click', () => {
       playSfxById(SfxId.TextBoxFocus);
-      this.hairColor = incrementOrWrap(this.hairColor, MAX_HAIR_COLOR);
-      this.character!.hairColor! = this.hairColor;
-      this.updateIcons();
+      this.hairColor = incrementOrWrap(
+        this.hairColor,
+        this.client.createMaxHairColor + 1,
+      );
+      this.character!.hairColor = this.hairColor;
+      this.updateLabels();
       this.client.atlas.refresh();
     });
 
     this.btnToggleSkin.addEventListener('click', () => {
       playSfxById(SfxId.TextBoxFocus);
-      this.skin = incrementOrWrap(this.skin, MAX_SKIN);
-      this.character!.skin! = this.skin;
-      this.updateIcons();
+      this.skin = incrementOrWrap(this.skin, this.client.createMaxSkin + 1);
+      this.character!.skin = this.skin;
+      this.updateLabels();
       this.client.atlas.refresh();
     });
   }

@@ -212,6 +212,10 @@ export class Client {
   sessionCredentials: { username: string; password: string } | null = null;
   /** Last played character name for reconnect matching. */
   lastCharacterName = '';
+  /** Server-configured max values for character creation. */
+  createMaxSkin = 3;
+  createMaxHairStyle = 20;
+  createMaxHairColor = 9;
   /** Whether the player has an active pet (enables autoloot). */
   hasPet = false;
   /** Whether autoloot is enabled by the player (can be toggled independently of pet). */

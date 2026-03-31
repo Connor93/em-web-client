@@ -307,36 +307,18 @@ div.icon[data-id="23"] {
   --height: 16px;
 }
 
-.img-label[data-id="gender"] {
-  --bg-url: url("/gfx/gfx001/122.png");
-  --bg-x: 0;
-  --bg-y: -38px;
-  --width: 23px;
-  --height: 18px;
-}
-
-.img-label[data-id="hair-color"] {
-  --bg-url: url("/gfx/gfx001/122.png");
-  --bg-x: 0;
-  --bg-y: 0;
-  --width: 23px;
-  --height: 18px;
-}
-
-.img-label[data-id="hair-style"] {
-  --bg-url: url("/gfx/gfx001/122.png");
-  --bg-x: 0;
-  --bg-y: -20px;
-  --width: 23px;
-  --height: 18px;
-}
-
+.img-label[data-id="gender"],
+.img-label[data-id="hair-color"],
+.img-label[data-id="hair-style"],
 .img-label[data-id="skin"] {
-  --bg-url: url("/gfx/gfx001/122.png");
-  --bg-x: -46px;
-  --bg-y: -38px;
-  --width: 23px;
-  --height: 18px;
+  --width: auto;
+  --height: auto;
+  background: none;
+  font-size: 11px;
+  color: #d4b896;
+  min-width: 60px;
+  text-align: right;
+  line-height: 24px;
 }
 
 /* ── Themed Buttons ──────────────────────────────────────────────── */

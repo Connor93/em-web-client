@@ -9,6 +9,14 @@ import {
 import { type Client, GameState } from '../client';
 import { DialogResourceID } from '../edf';
 
+/** Custom action 220 — server sends create-character limits before login reply. */
+const ACTION_CONFIG = 220;
+
+function handleLoginConfig(client: Client, reader: EoReader) {
+  client.createMaxSkin = reader.getShort();
+  client.createMaxHairStyle = reader.getShort();
+}
+
 function handleLoginReply(client: Client, reader: EoReader) {
   const packet = LoginReplyServerPacket.deserialize(reader);
   if (packet.replyCode === LoginReply.Banned) {
@@ -81,6 +89,11 @@ function handleLoginReply(client: Client, reader: EoReader) {
 }
 
 export function registerLoginHandlers(client: Client) {
+  client.bus.registerPacketHandler(
+    PacketFamily.Login,
+    ACTION_CONFIG as PacketAction,
+    (reader) => handleLoginConfig(client, reader),
+  );
   client.bus.registerPacketHandler(
     PacketFamily.Login,
     PacketAction.Reply,
