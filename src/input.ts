@@ -151,19 +151,74 @@ window.addEventListener('keydown', (e) => {
       updateInputHeld(Input.EmoteSuicidal, true);
       break;
     case 'Digit1':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteHappy, true);
+        break;
+      }
       updateInputHeld(Input.Hotbar1, true);
       break;
     case 'Digit2':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteDepressed, true);
+        break;
+      }
       updateInputHeld(Input.Hotbar2, true);
       break;
     case 'Digit3':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteSad, true);
+        break;
+      }
       updateInputHeld(Input.Hotbar3, true);
       break;
     case 'Digit4':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteAngry, true);
+        break;
+      }
       updateInputHeld(Input.Hotbar4, true);
       break;
     case 'Digit5':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteConfused, true);
+        break;
+      }
       updateInputHeld(Input.Hotbar5, true);
+      break;
+    case 'Digit6':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteSurprised, true);
+      }
+      break;
+    case 'Digit7':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteHearts, true);
+      }
+      break;
+    case 'Digit8':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteMoon, true);
+      }
+      break;
+    case 'Digit9':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmoteSuicidal, true);
+      }
+      break;
+    case 'Digit0':
+      if (e.altKey) {
+        e.preventDefault();
+        updateInputHeld(Input.EmotePlayful, true);
+      }
       break;
     case 'Tab':
       updateInputHeld(Input.Tab, true);
@@ -241,18 +296,38 @@ window.addEventListener('keyup', (e) => {
       break;
     case 'Digit1':
       updateInputHeld(Input.Hotbar1, false);
+      updateInputHeld(Input.EmoteHappy, false);
       break;
     case 'Digit2':
       updateInputHeld(Input.Hotbar2, false);
+      updateInputHeld(Input.EmoteDepressed, false);
       break;
     case 'Digit3':
       updateInputHeld(Input.Hotbar3, false);
+      updateInputHeld(Input.EmoteSad, false);
       break;
     case 'Digit4':
       updateInputHeld(Input.Hotbar4, false);
+      updateInputHeld(Input.EmoteAngry, false);
       break;
     case 'Digit5':
       updateInputHeld(Input.Hotbar5, false);
+      updateInputHeld(Input.EmoteConfused, false);
+      break;
+    case 'Digit6':
+      updateInputHeld(Input.EmoteSurprised, false);
+      break;
+    case 'Digit7':
+      updateInputHeld(Input.EmoteHearts, false);
+      break;
+    case 'Digit8':
+      updateInputHeld(Input.EmoteMoon, false);
+      break;
+    case 'Digit9':
+      updateInputHeld(Input.EmoteSuicidal, false);
+      break;
+    case 'Digit0':
+      updateInputHeld(Input.EmotePlayful, false);
       break;
     case 'Tab':
       updateInputHeld(Input.Tab, false);
