@@ -12,6 +12,7 @@ import {
   PacketFamily,
 } from 'eolib';
 import type { Client } from '../client';
+import { EOResourceID } from '../edf';
 import {
   EffectAnimation,
   EffectTargetCharacter,
@@ -19,6 +20,7 @@ import {
   HealthBar,
 } from '../render';
 import { playSfxById, SfxId } from '../sfx';
+import { showGameToast } from '../ui/game-toast/game-toast';
 import { getDistance, getVolumeFromDistance } from '../utils';
 import type { Vector2 } from '../vector';
 
@@ -129,6 +131,18 @@ function handleEffectPlayer(client: Client, reader: EoReader) {
   }
 }
 
+function handleEffectTell(client: Client, reader: EoReader) {
+  // Pet state packet: action 20 (Tell), char 1 = active, char 0 = inactive
+  const active = reader.getChar() === 1;
+  client.hasPet = active;
+  showGameToast(
+    EOResourceID.STATUS_LABEL_TYPE_ACTION,
+    active ? 'Autoloot enabled' : 'Autoloot disabled',
+    'action',
+  );
+  client.emit('petStateChanged', { active });
+}
+
 function handleEffectAdmin(client: Client, reader: EoReader) {
   const packet = EffectAdminServerPacket.deserialize(reader);
   const character = client.getCharacterById(packet.playerId);
@@ -181,6 +195,11 @@ export function registerEffectHandlers(client: Client) {
     PacketFamily.Effect,
     PacketAction.Player,
     (reader) => handleEffectPlayer(client, reader),
+  );
+  client.bus.registerPacketHandler(
+    PacketFamily.Effect,
+    PacketAction.Tell,
+    (reader) => handleEffectTell(client, reader),
   );
   client.bus.registerPacketHandler(
     PacketFamily.Effect,

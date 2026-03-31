@@ -13,7 +13,6 @@ import {
   WalkAdminClientPacket,
   WalkPlayerClientPacket,
 } from 'eolib';
-
 import type { Client } from '../client';
 import { INITIAL_IDLE_TICKS } from '../consts';
 import { EffectAnimation, EffectTargetCharacter, Emote } from '../render';
@@ -21,6 +20,7 @@ import { playSfxById } from '../sfx';
 import { SfxId } from '../types';
 import { randomRange } from '../utils';
 import type { Vector2 } from '../vector';
+import { autolootNearby } from './autoloot-manager';
 
 export function face(client: Client, direction: Direction): void {
   const packet = new FacePlayerClientPacket();
@@ -68,6 +68,7 @@ export function walk(
   client.bus.send(packet);
   client.idleTicks = INITIAL_IDLE_TICKS;
   client.setAmbientVolume();
+  autolootNearby(client);
 }
 
 export function attack(

@@ -1,0 +1,241 @@
+/* ── Autoloot Panel ──────────────────────────────────────────────── */
+
+#autoloot-panel {
+  position: fixed;
+  top: 120px;
+  right: 8px;
+  z-index: 1060;
+  font-family: inherit;
+  color: #e0daca;
+}
+
+/* ── Collapsed Pill ─────────────────────────────────────────────── */
+
+.autoloot-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(18, 16, 12, 0.92);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+  font-size: 11px;
+  color: #d4b896;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.autoloot-pill:hover {
+  border-color: rgba(212, 184, 150, 0.5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+
+.autoloot-pill .paw {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.autoloot-pill.off {
+  color: #706858;
+}
+
+/* ── Expanded Panel ─────────────────────────────────────────────── */
+
+.autoloot-expanded {
+  display: none;
+  width: 240px;
+  background: rgba(18, 16, 12, 0.96);
+  border: 1px solid rgba(212, 184, 150, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.autoloot-expanded.open {
+  display: block;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.autoloot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(45, 38, 28, 0.9);
+  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4b896;
+}
+
+.autoloot-toggle {
+  position: relative;
+  width: 32px;
+  height: 16px;
+  background: rgba(60, 50, 40, 0.8);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.autoloot-toggle.on {
+  background: rgba(80, 160, 80, 0.6);
+  border-color: rgba(100, 180, 100, 0.4);
+}
+
+.autoloot-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  background: #a09880;
+  border-radius: 50%;
+  transition:
+    left 0.2s,
+    background 0.2s;
+}
+
+.autoloot-toggle.on::after {
+  left: 18px;
+  background: #60b068;
+}
+
+/* ── Section ────────────────────────────────────────────────────── */
+
+.autoloot-section {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(212, 184, 150, 0.08);
+}
+
+.autoloot-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #a09880;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+/* ── Type Filters ───────────────────────────────────────────────── */
+
+.autoloot-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.autoloot-type-chip {
+  padding: 2px 8px;
+  font-size: 10px;
+  background: rgba(50, 42, 32, 0.6);
+  border: 1px solid rgba(212, 184, 150, 0.12);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #a09880;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  user-select: none;
+}
+
+.autoloot-type-chip.active {
+  background: rgba(60, 80, 50, 0.5);
+  border-color: rgba(100, 160, 90, 0.3);
+  color: #a8d4a0;
+}
+
+.autoloot-type-chip:hover {
+  background: rgba(60, 50, 40, 0.8);
+}
+
+/* ── Item Search ────────────────────────────────────────────────── */
+
+.autoloot-search {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  background: rgba(10, 9, 7, 0.6);
+  border: 1px solid rgba(212, 184, 150, 0.15);
+  border-radius: 4px;
+  color: #e0daca;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.autoloot-search::placeholder {
+  color: #706858;
+}
+
+.autoloot-search:focus {
+  border-color: rgba(212, 184, 150, 0.35);
+}
+
+.autoloot-results {
+  max-height: 100px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.autoloot-results::-webkit-scrollbar {
+  width: 3px;
+}
+
+.autoloot-results::-webkit-scrollbar-thumb {
+  background: rgba(212, 184, 150, 0.3);
+  border-radius: 2px;
+}
+
+.autoloot-result-item {
+  padding: 3px 6px;
+  font-size: 10px;
+  color: #d4c4a8;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.autoloot-result-item:hover {
+  background: rgba(212, 184, 150, 0.1);
+}
+
+/* ── Ignore List ────────────────────────────────────────────────── */
+
+.autoloot-ignored {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.autoloot-ignored-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+  font-size: 10px;
+  background: rgba(80, 40, 30, 0.4);
+  border: 1px solid rgba(200, 100, 80, 0.2);
+  border-radius: 10px;
+  color: #d4a090;
+}
+
+.autoloot-ignored-remove {
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.6;
+  color: #d4a090;
+}
+
+.autoloot-ignored-remove:hover {
+  opacity: 1;
+}

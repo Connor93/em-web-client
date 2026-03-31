@@ -18,6 +18,7 @@ import { ChatBubble } from '../chat-bubble';
 import { ChatTab, type Client } from '../client';
 import { ITEM_PROTECT_TICKS_NPC } from '../consts';
 import { EOResourceID } from '../edf';
+import { tryAutoloot } from '../managers';
 import {
   Emote,
   HealthBar,
@@ -147,6 +148,8 @@ function handleNpcSpec(client: Client, reader: EoReader) {
       icon: ChatIcon.DownArrow,
       message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
+
+    tryAutoloot(client, item, packet.npcKilledData.killerId);
   }
 
   if (packet.experience) {
@@ -196,6 +199,8 @@ function handleNpcAccept(client: Client, reader: EoReader) {
       icon: ChatIcon.DownArrow,
       message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
+
+    tryAutoloot(client, item, packet.npcKilledData.killerId);
   }
 
   client.characterEmotes.set(

@@ -35,6 +35,7 @@ import {
 import { settings } from './settings';
 import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
+import { AutolootPanel } from './ui/autoloot-panel';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
 import { BarberDialog } from './ui/barber-dialog/barber-dialog';
 import { initDraggableDialogs } from './ui/base-ui';
@@ -315,6 +316,7 @@ const infoDialog = new InfoDialog(client);
 const settingsDialog = new SettingsDialog();
 const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
+const autolootPanel = new AutolootPanel(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
 
@@ -464,6 +466,7 @@ wireClientEvents({
   guildPanel,
   mobileToolbar,
   pmChatManager,
+  autolootPanel,
   reconnectOverlay,
   initializeSocket,
   resizeCanvases,

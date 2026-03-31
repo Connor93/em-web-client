@@ -5,6 +5,12 @@ export {
   tickAutoBattle,
   toggleAutoBattle,
 } from './auto-battle-manager';
+export {
+  autolootNearby,
+  loadAutolootSettings,
+  saveAutolootSettings,
+  tryAutoloot,
+} from './autoloot-manager';
 export { chat } from './chat-manager';
 export {
   beginSpellChant,

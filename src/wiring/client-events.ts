@@ -2,6 +2,7 @@ import type { Client } from '../client';
 import { ChatTab } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { isMobile } from '../main';
+import { loadAutolootSettings } from '../managers/autoloot-manager';
 import { playSfxById, SfxId } from '../sfx';
 import { ChatIcon } from '../ui/chat/chat';
 import { showGameToast } from '../ui/game-toast/game-toast';
@@ -126,6 +127,7 @@ export interface ClientEventDeps {
     receiveMessage(senderName: string, message: string): void;
     sentMessage(targetName: string, message: string): void;
   };
+  autolootPanel: { show(): void; hide(): void };
   reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
   resizeCanvases: () => void;
@@ -290,6 +292,15 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     resetReconnectAttempts();
     deps.reconnectOverlay.classList.add('hidden');
     console.log('Successfully reconnected to server');
+  });
+
+  client.on('petStateChanged', ({ active }) => {
+    if (active) {
+      loadAutolootSettings(client);
+      deps.autolootPanel.show();
+    } else {
+      deps.autolootPanel.hide();
+    }
   });
 
   client.on('openQuestDialog', (data) => {

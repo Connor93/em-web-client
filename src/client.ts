@@ -212,6 +212,14 @@ export class Client {
   sessionCredentials: { username: string; password: string } | null = null;
   /** Last played character name for reconnect matching. */
   lastCharacterName = '';
+  /** Whether the player has an active pet (enables autoloot). */
+  hasPet = false;
+  /** Whether autoloot is enabled by the player (can be toggled independently of pet). */
+  autolootEnabled = true;
+  /** Item type IDs that are excluded from autoloot. */
+  autolootDisabledTypes: Set<number> = new Set();
+  /** Item IDs that are excluded from autoloot. */
+  autolootIgnoredItems: Set<number> = new Set();
   edfs: {
     game1: Edf | null;
     game2: Edf | null;

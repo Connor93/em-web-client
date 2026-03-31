@@ -191,4 +191,5 @@ export type ClientEvents = {
     completedQuests: string[];
   };
   fpsToggled: undefined;
+  petStateChanged: { active: boolean };
 };

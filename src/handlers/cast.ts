@@ -11,6 +11,7 @@ import {
 import { ChatTab, type Client } from '../client';
 import { ITEM_PROTECT_TICKS_NPC } from '../consts';
 import { EOResourceID } from '../edf';
+import { tryAutoloot } from '../managers';
 import { EffectTargetNpc, Emote, HealthBar } from '../render';
 import { playSfxById, SfxId } from '../sfx';
 import { ChatIcon } from '../ui/chat/chat';
@@ -84,6 +85,8 @@ function handleCastSpec(client: Client, reader: EoReader) {
       icon: ChatIcon.DownArrow,
       message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
+
+    tryAutoloot(client, item, packet.npcKilledData.killerId);
   }
 
   if (packet.experience) {
@@ -150,6 +153,8 @@ function handleCastAccept(client: Client, reader: EoReader) {
       icon: ChatIcon.DownArrow,
       message: `${client.getResourceString(EOResourceID.STATUS_LABEL_THE_NPC_DROPPED)} ${item.amount} ${record!.name!}`,
     });
+
+    tryAutoloot(client, item, packet.npcKilledData.killerId);
   }
 
   client.characterEmotes.set(
