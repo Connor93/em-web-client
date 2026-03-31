@@ -218,6 +218,7 @@ function handlePartyTargetGroup(client: Client, reader: EoReader) {
       if (memberCharacter) {
         playSfxById(SfxId.LevelUp);
         client.characterEmotes.set(gain.playerId, new Emote(EmoteType.LevelUp));
+        memberCharacter.level = gain.levelUp;
       }
 
       const member = client.partyMembers.find(

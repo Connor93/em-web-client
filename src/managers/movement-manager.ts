@@ -1,5 +1,6 @@
 import {
   AttackUseClientPacket,
+  ChairRequestClientPacket,
   Coords,
   type Direction,
   Emote as EmoteType,
@@ -7,6 +8,7 @@ import {
   MapTileSpec,
   SitAction,
   SitRequestClientPacket,
+  SitState,
   WalkAction,
   WalkAdminClientPacket,
   WalkPlayerClientPacket,
@@ -120,8 +122,15 @@ export function sit(client: Client): void {
 }
 
 export function stand(client: Client): void {
-  const packet = new SitRequestClientPacket();
-  packet.sitAction = SitAction.Stand;
-  client.bus.send(packet);
+  const character = client.getPlayerCharacter();
+  if (character?.sitState === SitState.Chair) {
+    const packet = new ChairRequestClientPacket();
+    packet.sitAction = SitAction.Stand;
+    client.bus.send(packet);
+  } else {
+    const packet = new SitRequestClientPacket();
+    packet.sitAction = SitAction.Stand;
+    client.bus.send(packet);
+  }
   client.idleTicks = INITIAL_IDLE_TICKS;
 }

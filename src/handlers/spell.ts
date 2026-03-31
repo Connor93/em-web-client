@@ -58,6 +58,8 @@ function handleSpellTargetSelf(client: Client, reader: EoReader) {
     return;
   }
 
+  character.hp = Math.round((character.maxHp * packet.hpPercentage) / 100);
+
   client.characterHealthBars.set(
     packet.playerId,
     new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),
@@ -88,6 +90,8 @@ function handleSpellTargetOther(client: Client, reader: EoReader) {
     client.requestCharacterRange([packet.victimId]);
     return;
   }
+
+  character.hp = Math.round((character.maxHp * packet.hpPercentage) / 100);
 
   client.characterHealthBars.set(
     packet.victimId,
@@ -120,6 +124,8 @@ function handleSpellTargetGroup(client: Client, reader: EoReader) {
       unknownPlayerIds.push(player.playerId);
       continue;
     }
+
+    character.hp = Math.round((character.maxHp * player.hpPercentage) / 100);
 
     client.characterHealthBars.set(
       player.playerId,

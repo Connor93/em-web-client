@@ -231,8 +231,10 @@ export class ShopDialog extends Base {
       const record = this.client.getEifRecordById(craft.itemId);
       if (!record) continue;
 
-      // Build ingredient tooltip text
-      const ingredientLines = craft.ingredients
+      // Filter out empty ingredient slots (server always sends 4)
+      const activeIngredients = craft.ingredients.filter((ing) => ing.id > 0);
+
+      const ingredientLines = activeIngredients
         .map((ing) => {
           const ingRecord = this.client.getEifRecordById(ing.id);
           return ingRecord
@@ -248,12 +250,12 @@ export class ShopDialog extends Base {
             : ' (M)'
           : '';
 
-      const tooltipExtra = `Ingredients: ${craft.ingredients.length}${genderNote}\n${ingredientLines}`;
+      const tooltipExtra = `Ingredients: ${activeIngredients.length}${genderNote}\n${ingredientLines}`;
 
       const card = createGridItemCard(
         craft.itemId,
         record,
-        `${craft.ingredients.length} ingr.`,
+        `${activeIngredients.length} ingr.`,
         tooltipExtra,
       );
 

@@ -124,34 +124,33 @@ export class QuestProgress extends Base {
         entry.appendChild(description);
       }
 
-      // Progress bar
-      const barContainer = document.createElement('div');
-      barContainer.className = 'quest-bar-container';
+      // Progress bar (only for quests with trackable progress)
+      if (quest.target > 0) {
+        const barContainer = document.createElement('div');
+        barContainer.className = 'quest-bar-container';
 
-      const bar = document.createElement('div');
-      bar.className = 'quest-bar';
+        const bar = document.createElement('div');
+        bar.className = 'quest-bar';
 
-      const fill = document.createElement('div');
-      fill.className = 'quest-bar-fill';
-      const percent =
-        quest.target > 0
-          ? Math.min((quest.progress / quest.target) * 100, 100)
-          : 0;
-      fill.style.width = `${percent}%`;
+        const fill = document.createElement('div');
+        fill.className = 'quest-bar-fill';
+        const percent = Math.min((quest.progress / quest.target) * 100, 100);
+        fill.style.width = `${percent}%`;
 
-      if (quest.progress >= quest.target && quest.target > 0) {
-        fill.classList.add('complete');
+        if (quest.progress >= quest.target) {
+          fill.classList.add('complete');
+        }
+
+        bar.appendChild(fill);
+        barContainer.appendChild(bar);
+
+        const text = document.createElement('span');
+        text.className = 'quest-bar-text';
+        text.textContent = `${quest.progress}/${quest.target}`;
+        barContainer.appendChild(text);
+
+        entry.appendChild(barContainer);
       }
-
-      bar.appendChild(fill);
-      barContainer.appendChild(bar);
-
-      const text = document.createElement('span');
-      text.className = 'quest-bar-text';
-      text.textContent = `${quest.progress}/${quest.target}`;
-      barContainer.appendChild(text);
-
-      entry.appendChild(barContainer);
       this.body.appendChild(entry);
     }
   }

@@ -210,6 +210,12 @@ function handleItemReply(client: Client, reader: EoReader) {
         client.maxSp = data.maxSp;
         client.statPoints = data.statPoints;
         client.skillPoints = data.skillPoints;
+        const localCharacter = client.getCharacterById(client.playerId);
+        if (localCharacter) {
+          localCharacter.level = data.levelUp;
+          localCharacter.maxHp = data.maxHp;
+          localCharacter.maxTp = data.maxTp;
+        }
       }
 
       client.emit('statsUpdate', undefined);

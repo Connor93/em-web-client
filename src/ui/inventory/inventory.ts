@@ -430,6 +430,8 @@ export class Inventory extends Base {
     for (let i = 0; i < COLS * ROWS; i++) {
       const cell = document.createElement('div');
       cell.classList.add('cell');
+      cell.style.gridColumn = `${(i % COLS) + 1}`;
+      cell.style.gridRow = `${Math.floor(i / COLS) + 1}`;
       this.grid.appendChild(cell);
     }
 

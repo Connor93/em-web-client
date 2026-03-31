@@ -162,6 +162,12 @@ function handleCastAccept(client: Client, reader: EoReader) {
     client.maxSp = packet.levelUp.maxSp;
     client.statPoints = packet.levelUp.statPoints;
     client.skillPoints = packet.levelUp.skillPoints;
+    const localCharacter = client.getCharacterById(client.playerId);
+    if (localCharacter) {
+      localCharacter.level = packet.levelUp.level;
+      localCharacter.maxHp = packet.levelUp.maxHp;
+      localCharacter.maxTp = packet.levelUp.maxTp;
+    }
   }
 
   if (packet.experience) {

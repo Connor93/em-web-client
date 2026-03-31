@@ -79,6 +79,10 @@ function handleRecoverReply(client: Client, reader: EoReader) {
     client.level = packet.levelUp;
     client.statPoints = packet.statPoints ?? client.statPoints;
     client.skillPoints = packet.skillPoints ?? client.skillPoints;
+    const localCharacter = client.getCharacterById(client.playerId);
+    if (localCharacter) {
+      localCharacter.level = packet.levelUp;
+    }
   }
 }
 
