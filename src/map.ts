@@ -1086,6 +1086,7 @@ export class MapRenderer {
     if (animation instanceof CharacterDeathAnimation) {
       dying = true;
       dyingTicks = animation.ticks;
+      animation.renderedFirstFrame = true;
       if (animation.base) {
         animation = animation.base;
       }
@@ -1310,11 +1311,15 @@ export class MapRenderer {
       const emote = justCharacter
         ? null
         : this.client.characterEmotes.get(character.playerId);
+      const partyMember = this.client.partyMembers.find(
+        (m) => m.playerId === character.playerId,
+      );
 
       if (
         !bubble &&
         !healthBar &&
         !emote &&
+        !partyMember &&
         !this.client.debug &&
         (!(animation instanceof CharacterSpellChantAnimation) ||
           animation.animationFrame)
@@ -1328,6 +1333,16 @@ export class MapRenderer {
           x: screenCoords.x - playerScreen.x + HALF_GAME_WIDTH + walkOffset.x,
           y: rect!.position.y!,
         };
+
+        // Persistent party nameplate
+        if (partyMember && character.playerId !== this.client.playerId) {
+          this.renderPartyNameplate(
+            partyMember.name,
+            partyMember.hpPercentage,
+            characterTopCenter,
+            ctx,
+          );
+        }
 
         if (bubble) {
           bubble.render(characterTopCenter, ctx);
@@ -1950,6 +1965,52 @@ export class MapRenderer {
       ctx.fillText(text, position.x + 1, floatY + 1);
       ctx.fillStyle = '#ff4444';
       ctx.fillText(text, position.x, floatY);
+    }
+
+    ctx.restore();
+  }
+
+  private renderPartyNameplate(
+    name: string,
+    hpPercentage: number,
+    position: { x: number; y: number },
+    ctx: CanvasRenderingContext2D,
+  ) {
+    const barWidth = 44;
+    const barHeight = 4;
+    const barX = position.x - barWidth / 2;
+    const barY = position.y - 14;
+
+    // Name
+    ctx.save();
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillText(capitalize(name), position.x + 1, barY - 3);
+    ctx.fillStyle = '#88ccff';
+    ctx.fillText(capitalize(name), position.x, barY - 4);
+
+    // Bar background
+    ctx.beginPath();
+    ctx.roundRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2, 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fill();
+
+    // Bar fill
+    const fillWidth = Math.floor(barWidth * (hpPercentage / 100));
+    if (fillWidth > 0) {
+      ctx.beginPath();
+      ctx.roundRect(barX, barY, fillWidth, barHeight, 2);
+      ctx.clip();
+
+      if (hpPercentage < 25) {
+        ctx.fillStyle = '#c03030';
+      } else if (hpPercentage < 50) {
+        ctx.fillStyle = '#c0a030';
+      } else {
+        ctx.fillStyle = '#38a838';
+      }
+      ctx.fillRect(barX, barY, fillWidth, barHeight);
     }
 
     ctx.restore();

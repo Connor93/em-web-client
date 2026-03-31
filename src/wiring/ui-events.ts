@@ -484,7 +484,13 @@ export function wireUiEvents(deps: UiEventDeps): void {
   // Keyboard
   window.addEventListener('keyup', (e) => {
     if (client.state === GameState.InGame && e.key === 'Enter') {
-      deps.chat.focus();
+      const active = document.activeElement;
+      const isInOtherInput =
+        active instanceof HTMLInputElement &&
+        !active.id.includes('chat-message');
+      if (!isInOtherInput) {
+        deps.chat.focus();
+      }
     }
 
     if (

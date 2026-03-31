@@ -216,6 +216,9 @@ export class Client {
   createMaxSkin = 3;
   createMaxHairStyle = 20;
   createMaxHairColor = 9;
+  /** Ghost-through-player state: tracks blocked walk attempts into a player. */
+  ghostBlockedTicks = 0;
+  ghostBlockedCoords: { x: number; y: number } | null = null;
   /** Whether the player has an active pet (enables autoloot). */
   hasPet = false;
   /** Whether autoloot is enabled by the player (can be toggled independently of pet). */

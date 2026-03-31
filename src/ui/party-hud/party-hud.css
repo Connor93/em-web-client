@@ -1,0 +1,80 @@
+/* ── Party HUD ───────────────────────────────────────────────────── */
+
+#party-hud {
+  position: fixed;
+  top: 180px;
+  left: 8px;
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+  width: 140px;
+}
+
+body.is-mobile #party-hud {
+  display: none;
+}
+
+.party-hud-member {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  background: rgba(18, 16, 12, 0.8);
+  border: 1px solid rgba(212, 184, 150, 0.15);
+  border-radius: 4px;
+  pointer-events: auto;
+}
+
+.party-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.party-hud-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #88ccff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.party-hud-name.leader::before {
+  content: "\2605 ";
+  color: #d4b896;
+}
+
+.party-hud-level {
+  font-size: 9px;
+  color: #a09880;
+  flex-shrink: 0;
+}
+
+.party-hud-bar {
+  height: 4px;
+  background: rgba(20, 16, 12, 0.6);
+  border: 1px solid rgba(212, 184, 150, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.party-hud-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.party-hud-fill.hp {
+  background: #38a838;
+}
+
+.party-hud-fill.hp.low {
+  background: #c0a030;
+}
+
+.party-hud-fill.hp.critical {
+  background: #c03030;
+}

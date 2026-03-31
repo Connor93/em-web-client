@@ -70,6 +70,7 @@ import { NpcTooltip } from './ui/npc-tooltip';
 import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
+import { PartyHud } from './ui/party-hud';
 import { PlayerContextMenu } from './ui/player-context-menu';
 import { PlayerTooltip } from './ui/player-tooltip';
 import { PmChatManager } from './ui/pm-chat-bubble/pm-chat-manager';
@@ -317,6 +318,7 @@ const settingsDialog = new SettingsDialog();
 const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
+const partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
 
@@ -606,6 +608,14 @@ window.addEventListener('click', (e) => {
 window.addEventListener('contextmenu', (e) => {
   client.handleRightClick(e);
   e.preventDefault();
+});
+
+// Blur buttons after click so Enter doesn't re-trigger them
+document.addEventListener('mouseup', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.tagName === 'BUTTON') {
+    requestAnimationFrame(() => target.blur());
+  }
 });
 
 // ── DOM Init ─────────────────────────────────────────────────────────────

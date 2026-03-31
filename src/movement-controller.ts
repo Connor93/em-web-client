@@ -260,6 +260,9 @@ export class MovementController {
         character.direction = lastDirectionHeld;
         character.coords.x = to.x;
         character.coords.y = to.y;
+        // Reset ghost-through state on successful walk
+        this.client.ghostBlockedTicks = 0;
+        this.client.ghostBlockedCoords = null;
         this.client.walk(lastDirectionHeld, to, getTimestamp());
         this.walkTicks = WALK_TICKS;
         this.faceTicks = FACE_TICKS;

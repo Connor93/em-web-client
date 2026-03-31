@@ -84,8 +84,11 @@ export class PmChatBubble {
     this.input.placeholder = 'Type a message…';
     this.input.addEventListener('keydown', (e) => {
       e.stopPropagation();
-      if (e.key === 'Enter' && this.input.value.trim()) {
-        this.sendCurrentMessage();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (this.input.value.trim()) {
+          this.sendCurrentMessage();
+        }
       }
     });
     inputRow.appendChild(this.input);
@@ -161,6 +164,7 @@ export class PmChatBubble {
     const msg = this.input.value.trim();
     this.input.value = '';
     this.emitter.emit('send', { target: this.name, message: msg });
+    this.input.focus();
   }
 
   private appendMessage(

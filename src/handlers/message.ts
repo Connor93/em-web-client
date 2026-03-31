@@ -18,16 +18,34 @@ function handleMessagePing(client: Client) {
   });
 }
 
+/** Messages that are guild/achievement panel data — not meant for chat display. */
+function isInternalMessage(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.startsWith('[guild') ||
+    lower.startsWith('[achievement') ||
+    lower.startsWith('[bounty') ||
+    lower.startsWith('[achbadge') ||
+    lower.startsWith('=== guild') ||
+    lower.startsWith('=== achievement') ||
+    lower.startsWith('=== bounty')
+  );
+}
+
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
+  // Also emit for guild panel buff aggregation
+  client.emit('statusMessage', { message: packet.message });
+
+  // Don't show internal guild/achievement data in chat
+  if (isInternalMessage(packet.message)) return;
+
   client.setStatusLabel(EOResourceID.STATUS_LABEL_TYPE_WARNING, packet.message);
   client.emit('chat', {
     tab: ChatTab.System,
     icon: ChatIcon.QuestMessage,
     message: packet.message,
   });
-  // Also emit for guild panel buff aggregation
-  client.emit('statusMessage', { message: packet.message });
 }
 
 function handleMessageAccept(client: Client, reader: EoReader) {
