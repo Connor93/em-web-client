@@ -1161,11 +1161,18 @@ export class MapRenderer {
       const bubble = this.client.characterChats.get(character.playerId);
       const healthBar = this.client.characterHealthBars.get(character.playerId);
       const emote = this.client.characterEmotes.get(character.playerId);
+      const partyMember =
+        character.playerId !== this.client.playerId
+          ? this.client.partyMembers.find(
+              (m) => m.playerId === character.playerId,
+            )
+          : undefined;
 
       if (
         !bubble &&
         !healthBar &&
         !emote &&
+        !partyMember &&
         (!(animation instanceof CharacterSpellChantAnimation) ||
           animation.animationFrame)
       ) {
@@ -1176,6 +1183,15 @@ export class MapRenderer {
         x: screenCoordsX - playerScreen.x + this._halfGameWidth + walkOffset.x,
         y: rect.position.y,
       };
+
+      if (partyMember) {
+        this.addPartyNameplateSprites(
+          `ui:char-party:${character.playerId}`,
+          partyMember.name,
+          partyMember.hpPercentage,
+          topCenter,
+        );
+      }
 
       if (bubble) {
         this.addChatBubbleSprites(
@@ -1611,6 +1627,53 @@ export class MapRenderer {
       { x: position.x, y: numberY },
       textColor,
     );
+  }
+
+  private addPartyNameplateSprites(
+    nodeKey: string,
+    name: string,
+    hpPercentage: number,
+    position: Vector2,
+  ) {
+    const barWidth = 44;
+    const barHeight = 4;
+    const radius = 2;
+    const barX = Math.floor(position.x - barWidth / 2);
+    const barY = Math.floor(position.y - 14);
+
+    // Name text above the bar
+    this.addAtlasTextSprites(
+      `${nodeKey}:name`,
+      capitalize(name),
+      { x: position.x, y: barY - 4 },
+      '#88ccff',
+    );
+
+    // Bar background
+    const graphics = this.ensureUiGraphics(`${nodeKey}:bar`, 'ui:party-bar');
+    graphics.roundRect(
+      barX - 1,
+      barY - 1,
+      barWidth + 2,
+      barHeight + 2,
+      radius + 1,
+    );
+    graphics.fill({ color: 0x000000, alpha: 0.6 });
+
+    // Bar fill
+    const fillWidth = Math.floor(barWidth * (hpPercentage / 100));
+    if (fillWidth > 0) {
+      let fillColor: number;
+      if (hpPercentage < 25) {
+        fillColor = 0xc03030;
+      } else if (hpPercentage < 50) {
+        fillColor = 0xc0a030;
+      } else {
+        fillColor = 0x38a838;
+      }
+      graphics.roundRect(barX, barY, fillWidth, barHeight, radius);
+      graphics.fill({ color: fillColor });
+    }
   }
 
   private addEmoteSprite(
