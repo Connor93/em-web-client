@@ -101,6 +101,7 @@ const mobileHud = new MobileHUD();
 
 let userOverride = false;
 let _isMobile = false;
+const _hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
 // Prevent virtual keyboard from resizing the viewport (Chromium API)
 if ('virtualKeyboard' in navigator) {
@@ -146,7 +147,8 @@ function resizeCanvases() {
     canvas.style.height = `${h * ZOOM}px`;
   }
 
-  _isMobile = viewportWidth < 940;
+  _isMobile =
+    viewportWidth < 940 || (_hasCoarsePointer && viewportWidth < 1200);
   if (_isMobile) {
     document.body.classList.add('is-mobile');
     if (client.state === GameState.InGame) {
