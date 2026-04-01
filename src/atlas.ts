@@ -401,6 +401,7 @@ export class Atlas {
   private pendingBmpPromises: Promise<void>[] = [];
   private pendingCharacterFramePromises: Promise<void>[] = [];
   private loading = false;
+  private pendingRefresh = false;
   private appended = true;
   private staticAtlas: AtlasCanvas;
   private mapAtlas: AtlasCanvas;
@@ -889,8 +890,12 @@ export class Atlas {
   }
 
   refresh(): Promise<void> | void {
-    if (this.loading) return;
+    if (this.loading) {
+      this.pendingRefresh = true;
+      return;
+    }
     this.loading = true;
+    this.pendingRefresh = false;
 
     this.bmpsToLoad = [];
     this.pendingBmpPromises = [];
@@ -926,6 +931,9 @@ export class Atlas {
     }
 
     this.loading = false;
+    if (this.pendingRefresh) {
+      this.refresh();
+    }
   }
 
   private addBmpToLoad(gfxType: GfxType, id: number) {
@@ -1622,6 +1630,9 @@ export class Atlas {
 
     this.loading = false;
     this.bmpsToLoad = [];
+    if (this.pendingRefresh) {
+      this.refresh();
+    }
   }
 
   private placeFrames() {
