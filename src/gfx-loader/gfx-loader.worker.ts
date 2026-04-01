@@ -5,30 +5,13 @@ import { PEReader } from './pe-reader';
 const egfs = new Map<number, PEReader>();
 
 function loadDIB(data: { fileID: number; resourceID: number }) {
-  let transparentColors: number[][] = [[0, 0, 0]];
   try {
     const egf = egfs.get(data.fileID);
     if (egf) {
       const info = egf.getResourceInfo(data.resourceID);
       if (info) {
         const dib = egf.readResource(info);
-
-        if ([15, 16].includes(data.fileID)) {
-          const probe = new DIBReader(dib, []);
-          const probePixels = probe.read();
-          for (let i = 0; i < probePixels.length; i += 4) {
-            if (
-              probePixels[i] === 8 &&
-              probePixels[i + 1] === 0 &&
-              probePixels[i + 2] === 0
-            ) {
-              transparentColors = [[8, 0, 0]];
-              break;
-            }
-          }
-        }
-
-        const reader = new DIBReader(dib, transparentColors);
+        const reader = new DIBReader(dib, data.fileID);
         const pixels = reader.read();
         postMessage(
           {

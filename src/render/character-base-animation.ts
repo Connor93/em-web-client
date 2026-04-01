@@ -1,6 +1,2 @@
-export abstract class CharacterAnimation {
-  ticks!: number;
-  animationFrame = 0;
-  abstract tick(): void;
-  renderedFirstFrame = false;
-}
+// Legacy alias — upstream consolidated into Animation
+export { Animation as CharacterAnimation } from './animation';

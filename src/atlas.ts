@@ -6,6 +6,7 @@ import {
   Gender,
   MapTileSpec,
 } from 'eolib';
+import { CanvasSource, Rectangle, Texture } from 'pixi.js';
 import type { Client } from './client';
 import {
   ATLAS_EXPIRY_TICKS,
@@ -29,9 +30,7 @@ import {
 import { GfxType } from './gfx';
 import { GfxLoader } from './gfx-loader/gfx-loader';
 import { LAYER_GFX_MAP } from './map';
-import { clipHair } from './utils/clip-hair';
-import { HatMaskType } from './utils/get-hat-metadata';
-import { getItemGraphicId } from './utils/get-item-graphic-id';
+import { clipHair, getItemGraphicId, HatMaskType } from './utils';
 
 const ATLAS_SIZE = 2048;
 const CHARACTER_FRAME_SIZE = 100;
@@ -134,7 +133,7 @@ const FRAME_TO_FRAME_NUMBER_MAP = {
   [CharacterFrame.RangeAttackUpLeft]: 0,
 };
 
-const WEAPON_VISIBLE_MAP: Record<number, boolean> = {
+const WEAPON_VISIBLE_MAP = {
   [CharacterFrame.StandingDownRight]: true,
   [CharacterFrame.StandingUpLeft]: true,
   [CharacterFrame.WalkingDownRight1]: true,
@@ -159,7 +158,7 @@ const WEAPON_VISIBLE_MAP: Record<number, boolean> = {
   [CharacterFrame.RangeAttackUpLeft]: true,
 };
 
-const WEAPON_FRAME_MAP: Record<number, number> = {
+const WEAPON_FRAME_MAP = {
   [CharacterFrame.StandingDownRight]: 0,
   [CharacterFrame.StandingUpLeft]: 1,
   [CharacterFrame.WalkingDownRight1]: 2,
@@ -180,7 +179,7 @@ const WEAPON_FRAME_MAP: Record<number, number> = {
   [CharacterFrame.RangeAttackUpLeft]: 18,
 };
 
-const BACK_FRAME_MAP: Record<number, number> = {
+const BACK_FRAME_MAP = {
   [CharacterFrame.StandingDownRight]: 0,
   [CharacterFrame.StandingUpLeft]: 1,
   [CharacterFrame.WalkingDownRight1]: 0,
@@ -255,9 +254,9 @@ type EmoteAtlasEntry = {
 
 type EffectAtlasEntry = {
   effectId: number;
-  behindFrames: (Frame | undefined)[];
-  transparentFrames: (Frame | undefined)[];
-  frontFrames: (Frame | undefined)[];
+  behindFrames: Frame[];
+  transparentFrames: Frame[];
+  frontFrames: Frame[];
 };
 
 type NpcAtlasEntry = {
@@ -316,31 +315,54 @@ type PlaceableFrame = {
 class AtlasCanvas {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private img: HTMLImageElement;
-  private loaded = false;
+  private source: CanvasSource;
+  private texture: Texture;
+  private labelPrefix: string;
+  private committed = false;
+  private subTextureCache = new Map<string, Texture>();
   skyline = [{ x: 0, y: 0, w: ATLAS_SIZE }];
 
-  constructor() {
+  constructor(labelPrefix: string) {
+    this.labelPrefix = labelPrefix;
     this.canvas = document.createElement('canvas');
     this.canvas.width = ATLAS_SIZE;
     this.canvas.height = ATLAS_SIZE;
+    this.canvas.id = `${labelPrefix}-canvas`;
     this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })!;
-    this.img = new Image();
-    this.img.onload = () => {
-      this.loaded = true;
-    };
+    this.source = new CanvasSource({
+      resource: this.canvas,
+      scaleMode: 'nearest',
+      label: `${labelPrefix}-source`,
+    });
+    this.texture = new Texture({
+      source: this.source,
+      label: `${labelPrefix}-texture`,
+    });
   }
 
   commit() {
-    this.img.src = this.canvas.toDataURL();
+    this.source.update();
+    this.subTextureCache.clear();
+    this.committed = true;
   }
 
-  getImg(): HTMLImageElement | undefined {
-    if (!this.loaded) {
-      return;
-    }
+  getTexture(): Texture | undefined {
+    if (!this.committed) return undefined;
+    return this.texture;
+  }
 
-    return this.img;
+  getSubTexture(x: number, y: number, w: number, h: number): Texture {
+    const key = `${x},${y},${w},${h}`;
+    let t = this.subTextureCache.get(key);
+    if (!t) {
+      t = new Texture({
+        source: this.source,
+        frame: new Rectangle(x, y, w, h),
+        label: `${this.labelPrefix}-subtex(${x},${y},${w},${h})`,
+      });
+      this.subTextureCache.set(key, t);
+    }
+    return t;
   }
 
   getCanvas(): HTMLCanvasElement {
@@ -379,7 +401,6 @@ export class Atlas {
   private pendingBmpPromises: Promise<void>[] = [];
   private pendingCharacterFramePromises: Promise<void>[] = [];
   private loading = false;
-  private loadEpoch = 0;
   private appended = true;
   private staticAtlas: AtlasCanvas;
   private mapAtlas: AtlasCanvas;
@@ -401,9 +422,9 @@ export class Atlas {
 
   constructor(client: Client) {
     this.client = client;
-    this.staticAtlas = new AtlasCanvas();
-    this.mapAtlas = new AtlasCanvas();
-    this.atlases = [new AtlasCanvas()];
+    this.staticAtlas = new AtlasCanvas('atlas-static');
+    this.mapAtlas = new AtlasCanvas('atlas-map');
+    this.atlases = [new AtlasCanvas('atlas-dynamic-0')];
     this.ctx = this.atlases[0].getContext();
     this.tmpCanvas = document.createElement('canvas');
     this.tmpCtx = this.tmpCanvas.getContext('2d', {
@@ -418,16 +439,35 @@ export class Atlas {
     })!;
   }
 
-  getAtlas(index: number): HTMLImageElement | undefined {
-    if (index === STATIC_ATLAS_INDEX) {
-      return this.staticAtlas.getImg();
-    }
+  getAtlas(index: number): HTMLCanvasElement | undefined {
+    // Kept for ground pre-rendering (renderTile with canvas 2D ctx).
+    // Returns a hidden img backed by the atlas canvas for drawImage compatibility.
+    const atlasCanvas = this.getAtlasCanvas(index);
+    if (!atlasCanvas?.getTexture()) return undefined;
+    // Expose the underlying HTML canvas as an image-like source for ctx.drawImage.
+    return atlasCanvas.getCanvas();
+  }
 
-    if (index === MAP_ATLAS_INDEX) {
-      return this.mapAtlas.getImg();
-    }
+  getAtlasTexture(index: number): Texture | undefined {
+    return this.getAtlasCanvas(index)?.getTexture();
+  }
 
-    return this.atlases[index]?.getImg();
+  getFrameTexture(
+    frame:
+      | Frame
+      | TileAtlasEntry
+      | ItemAtlasEntry
+      | { atlasIndex: number; x: number; y: number; w: number; h: number },
+  ): Texture | undefined {
+    const atlasCanvas = this.getAtlasCanvas(frame.atlasIndex);
+    if (!atlasCanvas?.getTexture()) return undefined;
+    return atlasCanvas.getSubTexture(frame.x, frame.y, frame.w, frame.h);
+  }
+
+  private getAtlasCanvas(index: number): AtlasCanvas | undefined {
+    if (index === STATIC_ATLAS_INDEX) return this.staticAtlas;
+    if (index === MAP_ATLAS_INDEX) return this.mapAtlas;
+    return this.atlases[index];
   }
 
   getItem(graphicId: number): ItemAtlasEntry | undefined {
@@ -612,7 +652,7 @@ export class Atlas {
 
     // No fit found → create new atlas
     if (bestAtlasIndex === -1) {
-      const newAtlas = new AtlasCanvas();
+      const newAtlas = new AtlasCanvas(`atlas-dynamic-${this.atlases.length}`);
       newAtlas.skyline = [{ x: 0, y: 0, w: ATLAS_SIZE }];
       this.atlases.push(newAtlas);
       this.currentAtlasIndex = this.atlases.length - 1;
@@ -755,6 +795,16 @@ export class Atlas {
       return;
     }
 
+    // Snapshot every atlas canvas BEFORE clearing so we can copy from the
+    // original positions even after the destination canvases are wiped.
+    const snapshots: HTMLCanvasElement[] = this.atlases.map((atlas) => {
+      const snap = document.createElement('canvas');
+      snap.width = ATLAS_SIZE;
+      snap.height = ATLAS_SIZE;
+      snap.getContext('2d')!.drawImage(atlas.getCanvas(), 0, 0);
+      return snap;
+    });
+
     for (const atlas of this.atlases) {
       const ctx = atlas.getContext();
       ctx.clearRect(0, 0, ATLAS_SIZE, ATLAS_SIZE);
@@ -772,10 +822,10 @@ export class Atlas {
         continue;
       }
 
-      const img = atlas.getImg();
+      const img = snapshots[placeable.atlasIndex];
       if (!img) {
         console.error(
-          'Atlas image not found for defragmentation',
+          'Atlas snapshot not found for defragmentation',
           placeable.atlasIndex,
         );
         continue;
@@ -800,11 +850,9 @@ export class Atlas {
           );
           if (character) {
             const frame = character.frames[placeable.frameIndex];
-            if (frame) {
-              frame.atlasIndex = this.currentAtlasIndex;
-              frame.x = rect.x;
-              frame.y = rect.y;
-            }
+            frame!.atlasIndex = this.currentAtlasIndex;
+            frame!.x = rect.x;
+            frame!.y = rect.y;
           }
           break;
         }
@@ -812,11 +860,9 @@ export class Atlas {
           const npc = this.npcs.find((n) => n.graphicId === placeable.typeId);
           if (npc) {
             const frame = npc.frames[placeable.frameIndex];
-            if (frame) {
-              frame.atlasIndex = this.currentAtlasIndex;
-              frame.x = rect.x;
-              frame.y = rect.y;
-            }
+            frame!.atlasIndex = this.currentAtlasIndex;
+            frame!.x = rect.x;
+            frame!.y = rect.y;
           }
           break;
         }
@@ -874,11 +920,9 @@ export class Atlas {
     }
 
     if (this.bmpsToLoad.length) {
-      const epoch = this.loadEpoch;
-      return Promise.all(this.pendingBmpPromises).then(() => {
-        if (this.loadEpoch !== epoch) return; // Stale load, discard
-        this.updateAtlas();
-      });
+      return Promise.all(this.pendingBmpPromises).then(() =>
+        this.updateAtlas(),
+      );
     }
 
     this.loading = false;
@@ -928,10 +972,6 @@ export class Atlas {
   }
 
   reset() {
-    this.loading = false;
-    this.loadEpoch++;
-    this.bmpsToLoad = [];
-    this.pendingBmpPromises = [];
     this.characters = [];
     this.npcs = [];
     this.items = [];
@@ -955,7 +995,7 @@ export class Atlas {
       MapTileSpec.ChairDownRight,
       MapTileSpec.ChairUpLeft,
     ];
-    this.mapHasChairs = this.client.map.tileSpecRows.some((r) =>
+    this.mapHasChairs = this.client.map!.tileSpecRows.some((r) =>
       r.tiles.some((t) => chairSpecs.includes(t.tileSpec)),
     );
 
@@ -966,15 +1006,15 @@ export class Atlas {
   }
 
   private loadMapGraphicLayers() {
-    if (this.tiles.length && this.tiles.every((t) => t.atlasIndex !== -1)) {
+    if (this.tiles.length) {
       return;
     }
 
-    if (this.client.map.fillTile > 0) {
-      this.addBmpToLoad(GfxType.MapTiles, this.client.map.fillTile);
+    if (this.client.map!.fillTile > 0) {
+      this.addBmpToLoad(GfxType.MapTiles, this.client.map!.fillTile);
       this.tiles.push({
         gfxType: GfxType.MapTiles,
-        graphicId: this.client.map.fillTile,
+        graphicId: this.client.map!.fillTile,
         atlasIndex: -1,
         x: -1,
         y: -1,
@@ -985,7 +1025,7 @@ export class Atlas {
       });
     }
 
-    for (const [index, layer] of this.client.map.graphicLayers.entries()) {
+    for (const [index, layer] of this.client.map!.graphicLayers.entries()) {
       for (const row of layer.graphicRows) {
         for (const tile of row.tiles) {
           if (!tile.graphic) {
@@ -1032,30 +1072,7 @@ export class Atlas {
       }
     }
 
-    // Also register tiles from the staticTileGrid to handle cases where
-    // client.map was replaced between buildCaches() and this function.
-    for (const tile of this.client.mapRenderer.getRequiredTileIds()) {
-      if (!tile.graphicId) continue;
-      const existing = this.bmpsToLoad.find(
-        (t) => t.gfxType === tile.gfxType && t.id === tile.graphicId,
-      );
-      if (!existing) {
-        this.addBmpToLoad(tile.gfxType, tile.graphicId);
-        this.tiles.push({
-          gfxType: tile.gfxType,
-          graphicId: tile.graphicId,
-          atlasIndex: -1,
-          x: -1,
-          y: -1,
-          w: -1,
-          h: -1,
-          xOffset: 0,
-          yOffset: 0,
-        });
-      }
-    }
-
-    for (const spawn of this.client.map.npcs) {
+    for (const spawn of this.client.map!.npcs) {
       const record = this.client.getEnfRecordById(spawn.id);
       if (!record) {
         continue;
@@ -1068,7 +1085,16 @@ export class Atlas {
 
       const npc = {
         graphicId: record.graphicId,
-        frames: [] as (Frame | undefined)[],
+        frames: [] as {
+          atlasIndex: number;
+          x: number;
+          y: number;
+          w: number;
+          h: number;
+          xOffset: number;
+          yOffset: number;
+          mirroredXOffset: number;
+        }[],
         keep: true,
         tickCount: 0,
         size: { w: 0, h: 0 },
@@ -1086,7 +1112,7 @@ export class Atlas {
           xOffset: 0,
           yOffset: 0,
           mirroredXOffset: 0,
-        } as Frame);
+        });
       }
 
       this.npcs.push(npc);
@@ -1476,8 +1502,18 @@ export class Atlas {
       }
 
       const ticksSinceSeen = this.client.tickCount - npc.tickCount;
-      if (ticksSinceSeen > ATLAS_EXPIRY_TICKS && !npc.keep) {
-        this.npcs.splice(i, 1);
+      if (ticksSinceSeen > ATLAS_EXPIRY_TICKS) {
+        // Don't expire if a nearby NPC still uses this graphicId
+        const stillNeeded = this.client.nearby.npcs.some((nearbyNpc) => {
+          const nearbyRecord = this.client.getEnfRecordById(nearbyNpc.id);
+          return nearbyRecord?.graphicId === npc.graphicId;
+        });
+
+        if (stillNeeded) {
+          npc.tickCount = this.client.tickCount;
+        } else {
+          this.npcs.splice(i, 1);
+        }
       }
     }
   }
@@ -1733,7 +1769,7 @@ export class Atlas {
             continue;
           }
 
-          let frame: Frame | undefined;
+          let frame: Frame;
           let offset = 0;
           switch (placeable.type) {
             case FrameType.EffectBehind:
@@ -1758,13 +1794,11 @@ export class Atlas {
             continue;
           }
 
-          if (frame) {
-            frame.atlasIndex = this.currentAtlasIndex;
-            sourceX = frame.x;
-            sourceY = frame.y;
-            frame.x = rect.x;
-            frame.y = rect.y;
-          }
+          frame.atlasIndex = this.currentAtlasIndex;
+          sourceX = frame.x;
+          sourceY = frame.y;
+          frame.x = rect.x;
+          frame.y = rect.y;
           frameImg = bmp;
           break;
         }
@@ -2023,7 +2057,9 @@ export class Atlas {
           CHARACTER_FRAME_SIZE,
         );
 
-        const weaponVisible = WEAPON_VISIBLE_MAP[index];
+        const weaponVisible = (WEAPON_VISIBLE_MAP as Record<number, boolean>)[
+          index
+        ];
 
         const upLeft = [
           CharacterFrame.StandingUpLeft,
@@ -2292,11 +2328,7 @@ export class Atlas {
         maxY: 0,
       };
       const colors: Set<number> = new Set();
-      // Scan all rows except the last, which contains only registration
-      // marker pixels (pure R/G/B at x=0,2,4) used for alignment.
-      // The markers must be excluded from the bounding box so they are
-      // not drawn to the atlas.
-      for (let y = 0; y < bmp.height - 1; ++y) {
+      for (let y = 0; y < bmp.height; ++y) {
         for (let x = 0; x < bmp.width; ++x) {
           const base = (y * bmp.width + x) * 4;
           colors.add(
@@ -2630,7 +2662,7 @@ export class Atlas {
 
       // Mark blank frames as undefined
       for (const i of blankIndexes) {
-        frameArray![i] = undefined;
+        frameArray[i] = undefined!;
       }
     }
   }
@@ -2758,7 +2790,10 @@ export class Atlas {
     weapon: number,
     frame: CharacterFrame,
   ) {
-    const graphicId = (weapon - 1) * 100 + WEAPON_FRAME_MAP[frame] + 1;
+    const graphicId =
+      (weapon - 1) * 100 +
+      (WEAPON_FRAME_MAP as Record<number, number>)[frame] +
+      1;
 
     const bmp = this.getBmp(
       gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
@@ -2769,7 +2804,9 @@ export class Atlas {
       return;
     }
 
-    const offset = WEAPON_OFFSETS[gender][frame];
+    const offset = (
+      WEAPON_OFFSETS[gender] as Record<number, { x: number; y: number }>
+    )[frame];
 
     const destX = Math.floor(
       HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x,
@@ -2810,7 +2847,8 @@ export class Atlas {
     frame: number,
     behind = true,
   ) {
-    const graphicId = (back - 1) * 50 + BACK_FRAME_MAP[frame] + 1;
+    const graphicId =
+      (back - 1) * 50 + (BACK_FRAME_MAP as Record<number, number>)[frame] + 1;
 
     const bmp = this.getBmp(
       gender === Gender.Female ? GfxType.FemaleBack : GfxType.MaleBack,
@@ -2824,7 +2862,9 @@ export class Atlas {
       return;
     }
 
-    const offset = BACK_OFFSETS[gender][frame];
+    const offset = (
+      BACK_OFFSETS[gender] as Record<number, { x: number; y: number }>
+    )[frame];
     const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
 
@@ -2847,7 +2887,9 @@ export class Atlas {
       return;
     }
 
-    const offset = SHIELD_OFFSETS[gender][frame];
+    const offset = (
+      SHIELD_OFFSETS[gender] as Record<number, { x: number; y: number }>
+    )[frame];
 
     const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
@@ -3304,10 +3346,7 @@ const HAT_OFFSETS = {
   },
 };
 
-const WEAPON_OFFSETS: Record<
-  number,
-  Record<number, { x: number; y: number }>
-> = {
+const WEAPON_OFFSETS = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: -9, y: -6 },
     [CharacterFrame.StandingUpLeft]: { x: -9, y: -6 },
@@ -3350,10 +3389,7 @@ const WEAPON_OFFSETS: Record<
   },
 };
 
-const SHIELD_OFFSETS: Record<
-  number,
-  Record<number, { x: number; y: number }>
-> = {
+const SHIELD_OFFSETS = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: -5, y: 5 },
     [CharacterFrame.StandingUpLeft]: { x: -5, y: 5 },
@@ -3392,7 +3428,7 @@ const SHIELD_OFFSETS: Record<
   },
 };
 
-const BACK_OFFSETS: Record<number, Record<number, { x: number; y: number }>> = {
+const BACK_OFFSETS = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: { x: 0, y: -17 },
     [CharacterFrame.StandingUpLeft]: { x: 0, y: -17 },
@@ -3443,10 +3479,7 @@ const BACK_OFFSETS: Record<number, Record<number, { x: number; y: number }>> = {
   },
 };
 
-export const CHARACTER_FRAME_OFFSETS: Record<
-  number,
-  Record<number, Record<number, { x: number; y: number }>>
-> = {
+export const CHARACTER_FRAME_OFFSETS = {
   [Gender.Female]: {
     [CharacterFrame.StandingDownRight]: {
       [Direction.Down]: { x: 0, y: 0 },

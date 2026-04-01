@@ -1,4 +1,5 @@
 import { Direction, MapTileSpec, NpcType } from 'eolib';
+import { Sprite } from 'pixi.js';
 import { StaticAtlasEntryType } from './atlas';
 import type { Client } from './client';
 import { DEATH_TICKS } from './consts';
@@ -91,7 +92,23 @@ function getIconForTile(
 
 export class MinimapRenderer {
   private interpolation = 0;
+  private spritePool: Sprite[] = [];
+  private spriteHead = 0;
   constructor(private client: Client) {}
+
+  private acquireSprite(): Sprite {
+    if (this.spriteHead < this.spritePool.length) {
+      const s = this.spritePool[this.spriteHead++];
+      s.alpha = 1;
+      s.visible = true;
+      return s;
+    }
+    const s = new Sprite();
+    s.eventMode = 'none';
+    this.spritePool.push(s);
+    this.spriteHead++;
+    return s;
+  }
 
   private interpolateWalkOffset(frame: number, direction: Direction): Vector2 {
     const prevOffset =
@@ -108,7 +125,10 @@ export class MinimapRenderer {
     };
   }
 
-  render(ctx: CanvasRenderingContext2D, interpolation: number) {
+  update(interpolation: number) {
+    this.client.minimapContainer.removeChildren();
+    this.spriteHead = 0;
+
     if (!this.client.minimapEnabled) {
       return;
     }
@@ -118,15 +138,7 @@ export class MinimapRenderer {
     const bmp = this.client.atlas.getStaticEntry(
       StaticAtlasEntryType.MinimapIcons,
     );
-
-    if (!bmp) {
-      return;
-    }
-
-    const atlas = this.client.atlas.getAtlas(bmp.atlasIndex);
-    if (!atlas) {
-      return;
-    }
+    if (!bmp) return;
 
     const player = this.client.getPlayerCoords();
     let playerScreen = isoToScreen(player);
@@ -153,23 +165,47 @@ export class MinimapRenderer {
 
     playerScreen.x += this.client.quakeOffset;
 
-    ctx.globalAlpha = 0.5;
+    const halfGameWidth = HALF_GAME_WIDTH;
+    const halfGameHeight = HALF_GAME_HEIGHT;
+
+    const addIcon = (
+      icon: MiniMapIcon,
+      screenX: number,
+      screenY: number,
+      alpha = 0.5,
+    ) => {
+      const sourceX = START_X + icon * TILE_WIDTH + icon;
+      const texture = this.client.atlas.getFrameTexture({
+        atlasIndex: bmp.atlasIndex,
+        x: bmp.x + sourceX,
+        y: bmp.y + 1,
+        w: TILE_WIDTH,
+        h: TILE_HEIGHT,
+      });
+      if (!texture) return;
+      const sprite = this.acquireSprite();
+      sprite.texture = texture;
+      sprite.position.set(screenX, screenY);
+      sprite.alpha = alpha;
+      this.client.minimapContainer.addChild(sprite);
+    };
+
     for (let y = player.y - RANGE; y <= player.y + RANGE; y++) {
       for (let x = player.x - RANGE; x <= player.x + RANGE; x++) {
         if (
           x < 0 ||
           y < 0 ||
-          x >= this.client.map.width ||
-          y >= this.client.map.height
+          x >= this.client.map!.width ||
+          y >= this.client.map!.height
         ) {
           continue;
         }
 
-        const spec = this.client.map.tileSpecRows
-          .find((r) => r.y === y)
+        const spec = this.client
+          .map!.tileSpecRows.find((r) => r.y === y)
           ?.tiles.find((t) => t.x === x);
 
-        const hasWarp = this.client.map.warpRows.some(
+        const hasWarp = this.client.map!.warpRows.some(
           (r) => r.y === y && r.tiles.find((t) => t.x === x),
         );
 
@@ -177,36 +213,21 @@ export class MinimapRenderer {
           ? MiniMapIcon.Interactable
           : getIconForTile(spec?.tileSpec);
 
-        if (icon === undefined) {
-          continue;
-        }
+        if (icon === undefined) continue;
 
         const tileScreen = isoToScreen({ x, y });
         const screenX = Math.floor(
-          tileScreen.x - HALF_TILE_WIDTH - playerScreen.x + HALF_GAME_WIDTH,
+          tileScreen.x - HALF_TILE_WIDTH - playerScreen.x + halfGameWidth,
         );
         const screenY = Math.floor(
-          tileScreen.y - HALF_TILE_HEIGHT - playerScreen.y + HALF_GAME_HEIGHT,
+          tileScreen.y - HALF_TILE_HEIGHT - playerScreen.y + halfGameHeight,
         );
-
-        const sourceX = START_X + icon * TILE_WIDTH + icon;
-        ctx.drawImage(
-          atlas,
-          bmp.x + sourceX,
-          bmp.y + 1,
-          TILE_WIDTH,
-          TILE_HEIGHT,
-          screenX,
-          screenY,
-          TILE_WIDTH,
-          TILE_HEIGHT,
-        );
+        addIcon(icon, screenX, screenY);
       }
     }
 
     for (const npc of this.client.nearby.npcs) {
       let tileScreen = isoToScreen(npc.coords);
-
       let dyingTicks = 0;
       let dying = false;
       let animation = this.client.npcAnimations.get(npc.index);
@@ -214,9 +235,7 @@ export class MinimapRenderer {
       if (animation instanceof NpcDeathAnimation) {
         dying = true;
         dyingTicks = animation.ticks;
-        if (animation.base) {
-          animation = animation.base;
-        }
+        if (animation.base) animation = animation.base;
       }
 
       if (animation instanceof NpcWalkAnimation) {
@@ -232,45 +251,25 @@ export class MinimapRenderer {
       }
 
       const screenX = Math.floor(
-        tileScreen.x - HALF_TILE_WIDTH - playerScreen.x + HALF_GAME_WIDTH,
+        tileScreen.x - HALF_TILE_WIDTH - playerScreen.x + halfGameWidth,
       );
       const screenY = Math.floor(
-        tileScreen.y - HALF_TILE_HEIGHT - playerScreen.y + HALF_GAME_HEIGHT,
+        tileScreen.y - HALF_TILE_HEIGHT - playerScreen.y + halfGameHeight,
       );
 
       const record = this.client.getEnfRecordById(npc.id);
-      if (!record) {
-        continue;
-      }
+      if (!record) continue;
 
-      let icon: MiniMapIcon;
-      if ([NpcType.Passive, NpcType.Aggressive].includes(record.type)) {
-        icon = MiniMapIcon.Monster;
-      } else {
-        icon = MiniMapIcon.Vendor;
-      }
+      const icon = [NpcType.Passive, NpcType.Aggressive].includes(record.type)
+        ? MiniMapIcon.Monster
+        : MiniMapIcon.Vendor;
 
-      const sourceX = START_X + icon * TILE_WIDTH + icon;
-
-      if (dying) {
-        ctx.globalAlpha = 0.5 * (dyingTicks / DEATH_TICKS);
-      }
-
-      ctx.drawImage(
-        atlas,
-        bmp.x + sourceX,
-        bmp.y + 1,
-        TILE_WIDTH,
-        TILE_HEIGHT,
+      addIcon(
+        icon,
         screenX,
         screenY,
-        TILE_WIDTH,
-        TILE_HEIGHT,
+        dying ? 0.5 * (dyingTicks / DEATH_TICKS) : 0.5,
       );
-
-      if (dying) {
-        ctx.globalAlpha = 0.5;
-      }
     }
 
     for (const character of this.client.nearby.characters) {
@@ -280,10 +279,7 @@ export class MinimapRenderer {
       if (animation instanceof CharacterDeathAnimation) {
         dying = true;
         dyingTicks = animation.ticks;
-
-        if (animation.base) {
-          animation = animation.base;
-        }
+        if (animation.base) animation = animation.base;
       }
 
       let coords: Vector2 = character.coords;
@@ -303,47 +299,29 @@ export class MinimapRenderer {
         tileScreen.x -
           HALF_TILE_WIDTH -
           playerScreen.x +
-          HALF_GAME_WIDTH +
+          halfGameWidth +
           offset.x,
       );
       const screenY = Math.floor(
         tileScreen.y -
           HALF_TILE_HEIGHT -
           playerScreen.y +
-          HALF_GAME_HEIGHT +
+          halfGameHeight +
           offset.y,
       );
 
-      let icon: MiniMapIcon;
-      if (character.playerId === this.client.playerId) {
-        icon = MiniMapIcon.PlayerCharacter;
-      } else {
-        icon = MiniMapIcon.Character;
-      }
-      const sourceX = START_X + icon * TILE_WIDTH + icon;
+      const icon =
+        character.playerId === this.client.playerId
+          ? MiniMapIcon.PlayerCharacter
+          : MiniMapIcon.Character;
 
-      if (dying) {
-        ctx.globalAlpha = 0.5 * (dyingTicks / DEATH_TICKS);
-      }
-
-      ctx.drawImage(
-        atlas,
-        bmp.x + sourceX,
-        bmp.y + 1,
-        TILE_WIDTH,
-        TILE_HEIGHT,
+      addIcon(
+        icon,
         screenX,
         screenY,
-        TILE_WIDTH,
-        TILE_HEIGHT,
+        dying ? 0.5 * (dyingTicks / DEATH_TICKS) : 0.5,
       );
-
-      if (dying) {
-        ctx.globalAlpha = 0.5;
-      }
     }
-
-    ctx.globalAlpha = 1;
   }
 }
 

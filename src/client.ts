@@ -37,6 +37,8 @@ import {
   Weight,
 } from 'eolib';
 import mitt, { type Emitter } from 'mitt';
+// biome-ignore lint/style/useImportType: used as values in initPixi
+import { Application, Container } from 'pixi.js';
 import { Atlas } from './atlas';
 import type { PacketBus } from './bus';
 import type { ChatBubble } from './chat-bubble';
@@ -119,6 +121,10 @@ export {
 
 export class Client {
   private emitter: Emitter<ClientEvents>;
+  app!: Application;
+  worldContainer!: Container;
+  uiContainer!: Container;
+  minimapContainer!: Container;
   tickCount = 0;
   bus!: PacketBus;
   config = getDefaultConfig();
@@ -575,10 +581,40 @@ export class Client {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D, interpolation: number) {
+  async initPixi() {
+    this.app = new Application();
+    await this.app.init({
+      width: HALF_GAME_WIDTH * 2,
+      height: HALF_GAME_HEIGHT * 2,
+      background: '#000000',
+      antialias: false,
+    });
+
+    this.app.renderer.canvas.id = 'game';
+    this.app.renderer.canvas.style.imageRendering = 'pixelated';
+
+    const gameEl = document.querySelector('#game');
+    if (gameEl) {
+      gameEl.replaceWith(this.app.renderer.canvas);
+    } else {
+      document
+        .querySelector('#container')!
+        .appendChild(this.app.renderer.canvas);
+    }
+
+    this.worldContainer = new Container();
+    this.uiContainer = new Container();
+    this.minimapContainer = new Container();
+
+    this.app.stage.addChild(this.worldContainer);
+    this.app.stage.addChild(this.uiContainer);
+    this.app.stage.addChild(this.minimapContainer);
+  }
+
+  render(interpolation: number) {
     const smooth = settings.get('movementSmoothing') === 'enabled';
-    this.mapRenderer.render(ctx, smooth ? interpolation : 1);
-    this.minimapRenderer.render(ctx, smooth ? interpolation : 1);
+    this.mapRenderer.update(smooth ? interpolation : 1);
+    this.minimapRenderer.update(smooth ? interpolation : 1);
   }
 
   setMap(map: Emf) {
