@@ -151,7 +151,6 @@ export class TradeDialog extends Base {
 
     this.renderColumns();
     this.updateAgreeButton();
-    this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
@@ -159,7 +158,6 @@ export class TradeDialog extends Base {
 
   close() {
     this._open = false;
-    this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
       this.dialogs.classList.add('hidden');

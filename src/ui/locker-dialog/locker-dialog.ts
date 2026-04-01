@@ -108,7 +108,6 @@ export class LockerDialog extends Base {
 
   show() {
     this.searchInput.value = '';
-    this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
@@ -117,7 +116,6 @@ export class LockerDialog extends Base {
 
   hide() {
     this.hideMobileActionBar();
-    this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {

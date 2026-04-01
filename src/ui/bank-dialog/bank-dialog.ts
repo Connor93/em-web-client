@@ -74,7 +74,6 @@ export class BankDialog extends Base {
 
   show() {
     this.render();
-    this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
@@ -82,7 +81,6 @@ export class BankDialog extends Base {
   }
 
   hide() {
-    this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {

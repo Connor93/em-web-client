@@ -62,7 +62,6 @@ export class ChestDialog extends Base {
   }
 
   show() {
-    this.cover.classList.remove('hidden');
     this.container.classList.remove('hidden');
     this.dialogs.classList.remove('hidden');
     this.client.typing = true;
@@ -71,7 +70,6 @@ export class ChestDialog extends Base {
 
   hide() {
     this.hideMobileActionBar();
-    this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
     if (!document.querySelector('#dialogs > div:not(.hidden)')) {
