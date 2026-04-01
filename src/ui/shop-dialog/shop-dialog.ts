@@ -30,7 +30,7 @@ export class ShopDialog extends Base {
   private emitter = mitt<Events>();
   protected container = document.getElementById('shop')!;
   private dialogs = document.getElementById('dialogs')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+
   private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );

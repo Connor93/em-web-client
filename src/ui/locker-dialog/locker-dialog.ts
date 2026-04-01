@@ -14,7 +14,7 @@ type FilterType = 'all' | 'weapon' | 'armor' | 'consumable' | 'other';
 export class LockerDialog extends Base {
   private client: Client;
   protected container = document.getElementById('locker')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+
   private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );

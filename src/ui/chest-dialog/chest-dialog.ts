@@ -13,7 +13,7 @@ import './chest-dialog.css';
 export class ChestDialog extends Base {
   private client: Client;
   protected container = document.getElementById('chest')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+
   private btnCancel = this.container.querySelector<HTMLButtonElement>(
     'button[data-id="cancel"]',
   );

@@ -15,7 +15,7 @@ type Events = {
 export class BankDialog extends Base {
   private client: Client;
   private dialogs = document.getElementById('dialogs')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+
   protected container = document.getElementById('bank')!;
   private balance = this.container.querySelector<HTMLSpanElement>('.balance')!;
   private emitter = mitt<Events>();

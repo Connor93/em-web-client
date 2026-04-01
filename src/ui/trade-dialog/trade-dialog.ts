@@ -17,7 +17,7 @@ export class TradeDialog extends Base {
   private client: Client;
   protected container = document.getElementById('trade-dialog')!;
   private dialogs = document.getElementById('dialogs')!;
-  private cover = document.querySelector<HTMLDivElement>('#cover')!;
+
   private notification = document.getElementById('trade-request-notification')!;
   private columns = this.container.querySelector('.trade-columns')!;
   private btnAgree = this.container.querySelector<HTMLButtonElement>(
