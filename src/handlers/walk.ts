@@ -26,22 +26,24 @@ function handleWalkPlayer(client: Client, reader: EoReader) {
     return;
   }
 
-  character.direction = packet.direction;
-  character.coords.x = packet.coords.x;
-  character.coords.y = packet.coords.y;
-  client.characterAnimations.set(
-    packet.playerId,
-    new CharacterWalkAnimation(
-      getPrevCoords(
-        packet.coords,
-        packet.direction,
-        client.map.width,
-        client.map.height,
-      ),
-      packet.coords,
-      packet.direction,
-    ),
+  // Queue the entire walk (coord update + animation) to be processed inside
+  // the tick loop. This prevents renders between packet arrival and the next
+  // tick from showing the character at the destination without a walk animation.
+  const from = getPrevCoords(
+    packet.coords,
+    packet.direction,
+    client.map.width,
+    client.map.height,
   );
+  client.pendingAnimations.push(() => {
+    character.direction = packet.direction;
+    character.coords.x = packet.coords.x;
+    character.coords.y = packet.coords.y;
+    client.characterAnimations.set(
+      packet.playerId,
+      new CharacterWalkAnimation(from, packet.coords, packet.direction),
+    );
+  });
 
   if (character.invisible && client.admin === AdminLevel.Player) {
     return;

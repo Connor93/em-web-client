@@ -180,6 +180,7 @@ export class Client {
   ambientVolume: GainNode | null = null;
   downloadQueue: { type: FileType; id: number }[] = [];
   characterAnimations: Map<number, CharacterAnimation> = new Map();
+  pendingAnimations: (() => void)[] = [];
   npcAnimations: Map<number, NpcAnimation> = new Map();
   characterChats: Map<number, ChatBubble> = new Map();
   npcChats: Map<number, ChatBubble> = new Map();
@@ -541,6 +542,13 @@ export class Client {
     this.tickCount += 1;
     this.movementController.tick();
     this.mapRenderer.tick();
+
+    // Drain pending animations so they're created inside the tick loop,
+    // allowing the renderedFirstFrame no-op to happen in this same tick.
+    for (const create of this.pendingAnimations) {
+      create();
+    }
+    this.pendingAnimations.length = 0;
 
     if (this.state === GameState.InGame) {
       // Build lookup Sets once per tick — O(n) total instead of O(n) per .some() call
