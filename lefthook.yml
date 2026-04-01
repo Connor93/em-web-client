@@ -3,3 +3,9 @@ pre-commit:
     check:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: npx @biomejs/biome check --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+
+commit-msg:
+  commands:
+    no-co-author:
+      run: "! grep -qi 'Co-Authored-By' {1}"
+      fail_text: "Co-Authored-By lines are not allowed in commit messages. See CLAUDE.md."
