@@ -1,6 +1,6 @@
 # eoweb — Endless Online Web Client
 
-Browser-based client for Endless Online (protocol 0.0.28). TypeScript + Vite + Canvas 2D rendering.
+Browser-based client for Endless Online (protocol 0.0.28). TypeScript + Vite + PixiJS 8 (WebGL) rendering.
 
 Do not add Co-Authored-By lines to commit messages.
 
@@ -38,14 +38,24 @@ pnpm find-dead-code   # ts-prune (unused exports)
 ```
 
 Pre-commit hook (lefthook) runs Biome check on staged files.
+Commit-msg hook (lefthook) rejects any message containing "Co-Authored-By".
+
+## Deployment
+
+- `./deploy.sh` — Manual deploy: Docker build → GHCR push → SSH to VPS → Traefik recreate
+- Pushing to `master` auto-deploys via GitHub Actions (`docker-publish.yml`)
+- Production: `https://client.calamity-online.cloud` (alias: `client.endless-memories.net`)
+- Requires `.env.deploy` with VPS/GHCR credentials (gitignored)
 
 ## Architecture
 
 ```
-main.ts          Entry point — UI init, event wiring, game loop (120 tick/s fixed timestep)
-client.ts        Central state container + thin method delegates to managers
+main.ts          Entry point — UI init, event wiring, game loop (PixiJS ticker, 120 tick/s fixed timestep)
+client.ts        Central state container + thin method delegates to managers; holds PixiJS Application + Containers
 bus.ts           PacketBus — WebSocket packet send/receive via eolib
-map.ts           Isometric MapRenderer (layered depth-sorted canvas)
+map.ts           Isometric MapRenderer (PixiJS Sprite/Graphics pools, depth-sorted via zIndex)
+atlas.ts         Sprite atlas packing — CanvasSource → PixiJS Texture, with NPC expiry/refresh
+minimap.ts       Minimap renderer (PixiJS Sprite-based)
 ```
 
 ### Layers
@@ -56,7 +66,7 @@ map.ts           Isometric MapRenderer (layered depth-sorted canvas)
 | **Managers** | `src/managers/` | Business logic functions; `Client` delegates to these |
 | **Wiring** | `src/wiring/` | Binds Client events → UI (`client-events.ts`) and UI events → Client (`ui-events.ts`) |
 | **UI** | `src/ui/` | DOM components extending `Base` or `BaseDialogMd`, each with own CSS |
-| **Render** | `src/render/` | Canvas animation classes (walk, attack, spell, effects, health bars) |
+| **Render** | `src/render/` | Animation data classes (walk, attack, spell, effects, health bars) — MapRenderer renders these as PixiJS Sprites/Graphics |
 | **Types** | `src/types/` | Pure types, enums, event definitions |
 
 ### Data flow
@@ -99,6 +109,10 @@ Each in `src/ui/<name>/` with its own `.ts` and `.css`. Extend `Base` (panels) o
 ### Handlers
 
 One file per packet family in `src/handlers/`. Registered in `handlers/index.ts` via `registerAllHandlers(client)`. Pattern: `handleXyzReply(client, reader)`.
+
+### PixiJS rendering
+
+`Client` holds `app` (PixiJS Application), `worldContainer`, `uiContainer`, and `minimapContainer`. MapRenderer uses sprite pools (`_worldSprites`, `_uiSprites`, `_uiGraphics`) with a `beginFrame()`/`endFrame()` sweep pattern — sprites not marked as seen each frame are recycled. Atlas produces `Texture` objects via `CanvasSource` wrapping offscreen canvases.
 
 ## Conventions
 
