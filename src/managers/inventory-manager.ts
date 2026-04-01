@@ -81,6 +81,7 @@ export function useItem(client: Client, id: number): void {
     ![
       ItemType.Heal,
       ItemType.Teleport,
+      ItemType.Reserved5, // Transform (etheos skin change items)
       ItemType.Alcohol,
       ItemType.EffectPotion,
       ItemType.HairDye,

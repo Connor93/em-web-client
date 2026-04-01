@@ -62,6 +62,8 @@ function handleAvatarRemove(client: Client, reader: EoReader) {
   );
 }
 
+const AVATAR_CHANGE_TYPE_SKIN = 4;
+
 function handleAvatarAgree(client: Client, reader: EoReader) {
   const packet = AvatarAgreeServerPacket.deserialize(reader);
   const player = client.nearby.characters.find(
@@ -94,6 +96,18 @@ function handleAvatarAgree(client: Client, reader: EoReader) {
       const update = packet.change
         .changeTypeData as AvatarChange.ChangeTypeDataHairColor;
       player.hairColor = update.hairColor;
+      break;
+    }
+    default: {
+      // Skin change (type 4) is an etheos extension not in eolib.
+      // eolib consumed playerId + changeType + sound (4 bytes) but left
+      // the skin ID byte unread on the reader.
+      if (
+        packet.change.changeType === AVATAR_CHANGE_TYPE_SKIN &&
+        reader.remaining > 0
+      ) {
+        player.skin = reader.getChar();
+      }
       break;
     }
   }

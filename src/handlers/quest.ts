@@ -15,14 +15,18 @@ function handleQuestDialog(client: Client, reader: EoReader) {
   const record =
     client.getEnfRecordByBehaviorId(NpcType.Quest, packet.behaviorId) ??
     client.getEnfRecordByBehaviorId(NpcType.Friendly, packet.behaviorId);
-  if (!record) {
+
+  // Fall back to the quest entry name for server-driven dialogs (e.g. skin
+  // wardrobe) that aren't tied to an NPC.
+  const name = record?.name ?? packet.questEntries[0]?.questName ?? 'Unknown';
+  if (!record && !packet.questEntries.length && !packet.dialogEntries.length) {
     return;
   }
 
   client.sessionId = packet.sessionId;
 
   client.emit('openQuestDialog', {
-    name: record.name,
+    name,
     dialogId: packet.dialogId,
     questId: packet.questId,
     quests: packet.questEntries,
