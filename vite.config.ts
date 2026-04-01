@@ -10,6 +10,11 @@ export default defineConfig({
       checks: {
         pluginTimings: false,
       },
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules/eolib')) return 'eolib';
+        },
+      },
     },
   },
   server: {
