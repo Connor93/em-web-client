@@ -101,6 +101,13 @@ http:
         - websecure
       tls:
         certResolver: letsencrypt
+    em-web-client-alias:
+      rule: "Host(\`client.endless-memories.net\`)"
+      service: em-web-client
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
   services:
     em-web-client:
       loadBalancer:
