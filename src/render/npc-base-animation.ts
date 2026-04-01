@@ -1,6 +1,2 @@
-export abstract class NpcAnimation {
-  ticks!: number;
-  animationFrame = 0;
-  abstract tick(): void;
-  renderedFirstFrame = false;
-}
+// Legacy alias — upstream consolidated into Animation
+export { Animation as NpcAnimation } from './animation';

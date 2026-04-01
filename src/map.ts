@@ -1581,7 +1581,7 @@ export class MapRenderer {
       textColor = '#ffaa22';
     } else {
       displayText = amount.toString();
-      textColor = '#ffffff';
+      textColor = '#ff6666';
     }
 
     // Critical hit glow — slightly larger semi-transparent orange background

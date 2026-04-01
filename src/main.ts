@@ -20,19 +20,12 @@ import { PacketBus } from './bus';
 import { Client, GameState } from './client';
 import { MAX_CHALLENGE } from './consts';
 import { DialogResourceID } from './edf';
-import {
-  GAME_HEIGHT,
-  GAME_WIDTH,
-  setGameSize,
-  setZoom,
-  ZOOM,
-} from './game-state';
+import { setGameSize, setZoom, ZOOM } from './game-state';
 import { handleItemCommand, handleNpcCommand } from './handlers';
 import {
   isAutoBattleUnlocked,
   toggleAutoBattle,
 } from './managers/auto-battle-manager';
-import { settings } from './settings';
 import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { AutolootPanel } from './ui/autoloot-panel';
@@ -95,17 +88,6 @@ import {
 } from './wiring/client-events';
 import { wireUiEvents } from './wiring/ui-events';
 
-// ── Canvas Setup ──────────────────────────────────────────────────────────
-
-const canvas = document.getElementById('game') as HTMLCanvasElement;
-if (!canvas) throw new Error('Canvas not found!');
-
-const ctx = canvas.getContext('2d', { alpha: false });
-if (!ctx) {
-  throw new Error('Failed to get canvas context!');
-}
-ctx.imageSmoothingEnabled = false;
-
 // ── Client & Mobile ──────────────────────────────────────────────────────
 
 const client = new Client();
@@ -153,31 +135,17 @@ function resizeCanvases() {
   if (!userOverride) setZoom(viewportWidth >= 1280 ? 2 : 1);
   const w = Math.floor(viewportWidth / ZOOM);
   const h = Math.floor(viewportHeight / ZOOM);
-  const snapshot =
-    canvas.width > 0
-      ? ctx!.getImageData!(0, 0, canvas.width, canvas.height)
-      : null;
-  const prevW = canvas.width;
-  const prevH = canvas.height;
-  canvas.width = w;
-  canvas.height = h;
-  canvas.style.width = `${w * ZOOM}px`;
-  canvas.style.height = `${h * ZOOM}px`;
-  ctx!.imageSmoothingEnabled! = false;
-  if (snapshot && prevW > 0) {
-    const temp = document.createElement('canvas');
-    temp.width = prevW;
-    temp.height = prevH;
-    const tempCtx = temp.getContext('2d');
-    if (tempCtx) {
-      tempCtx.putImageData(snapshot, 0, 0);
-      ctx!.drawImage!(temp, 0, 0, w, h);
-    }
-  } else {
-    ctx!.fillStyle! = '#000';
-    ctx!.fillRect!(0, 0, w, h);
-  }
+
   setGameSize(w, h);
+
+  // Resize PixiJS renderer if available
+  if (client.app?.renderer) {
+    client.app.renderer.resize(w, h);
+    const canvas = client.app.renderer.canvas as HTMLCanvasElement;
+    canvas.style.width = `${w * ZOOM}px`;
+    canvas.style.height = `${h * ZOOM}px`;
+  }
+
   _isMobile = viewportWidth < 940;
   if (_isMobile) {
     document.body.classList.add('is-mobile');
@@ -203,22 +171,21 @@ window.addEventListener('resize', () => {
 
 // ── Render Loop ──────────────────────────────────────────────────────────
 
-let lastTime: DOMHighResTimeStamp | undefined;
 let accumulator = 0;
 const TICK = 120;
+const MAX_ACCUMULATOR = TICK * 10;
 
 // FPS counter
 let fpsFrameCount = 0;
 let fpsLastSample = 0;
 let fpsDisplay: HTMLDivElement | null = null;
-let lastRenderTime = 0;
 
 function getFpsDisplay(): HTMLDivElement {
   if (fpsDisplay) return fpsDisplay;
   fpsDisplay = document.createElement('div');
   fpsDisplay.id = 'fps-counter';
   fpsDisplay.style.cssText =
-    'position:fixed;top:4px;left:4px;z-index:9999;font:bold 12px monospace;' +
+    'position:fixed;top:4px;left:4px;z:9999;font:bold 12px monospace;' +
     'color:#40e840;background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:4px;' +
     'pointer-events:none;display:none;';
   document.body.appendChild(fpsDisplay);
@@ -229,48 +196,6 @@ client.on('fpsToggled', () => {
   const el = getFpsDisplay();
   el.style.display = client.showFps ? 'block' : 'none';
 });
-
-const render = (now: DOMHighResTimeStamp) => {
-  if (!lastTime) {
-    lastTime = now;
-  }
-
-  const dt = now - lastTime;
-  accumulator += dt;
-
-  while (accumulator >= TICK) {
-    client.tick();
-    accumulator -= TICK;
-  }
-
-  lastTime = now;
-
-  // Frame limiter — skip render if under the configured interval
-  const fpsInterval = settings.getFpsInterval();
-  if (fpsInterval > 0 && now - lastRenderTime < fpsInterval) {
-    requestAnimationFrame(render);
-    return;
-  }
-  lastRenderTime = now;
-
-  const interpolation = accumulator / TICK;
-
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-  client.render(ctx, interpolation);
-
-  // FPS tracking
-  if (client.showFps) {
-    fpsFrameCount++;
-    if (now - fpsLastSample >= 1000) {
-      getFpsDisplay().textContent = `${fpsFrameCount} FPS`;
-      fpsFrameCount = 0;
-      fpsLastSample = now;
-    }
-  }
-
-  requestAnimationFrame(render);
-};
 
 // ── UI Component Instantiation ───────────────────────────────────────────
 
@@ -546,6 +471,11 @@ if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }
 
+// Helper to get the PixiJS canvas element
+function getCanvas(): HTMLCanvasElement {
+  return client.app?.renderer?.canvas as HTMLCanvasElement;
+}
+
 // ── Input Listeners ──────────────────────────────────────────────────────
 
 // F9 — Toggle auto-battle (only when unlocked via URL param)
@@ -565,7 +495,8 @@ window.addEventListener(
   (e) => {
     // Only track touch position and prevent scrolling when touching the canvas
     const target = e.target as HTMLElement;
-    if (!target || !canvas.contains(target)) return;
+    const canvas = getCanvas();
+    if (!target || !canvas?.contains(target)) return;
 
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -586,6 +517,8 @@ window.addEventListener(
 );
 
 window.addEventListener('mousemove', (e) => {
+  const canvas = getCanvas();
+  if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
@@ -623,6 +556,30 @@ document.addEventListener('mouseup', (e) => {
 // Inventory grid background now handled by CSS (gap + cell backgrounds)
 
 window.addEventListener('DOMContentLoaded', async () => {
+  await client.initPixi();
+  resizeCanvases();
+
+  client.app.ticker.add((ticker) => {
+    accumulator = Math.min(accumulator + ticker.deltaMS, MAX_ACCUMULATOR);
+    while (accumulator >= TICK) {
+      client.tick();
+      accumulator -= TICK;
+    }
+    const interpolation = accumulator / TICK;
+    client.render(interpolation);
+
+    // FPS tracking
+    if (client.showFps) {
+      fpsFrameCount++;
+      const now = performance.now();
+      if (now - fpsLastSample >= 1000) {
+        getFpsDisplay().textContent = `${fpsFrameCount} FPS`;
+        fpsFrameCount = 0;
+        fpsLastSample = now;
+      }
+    }
+  });
+
   const response = await fetch('/maps/00005.emf');
   const map = await response.arrayBuffer();
   const reader = new EoReader(new Uint8Array(map));
@@ -653,8 +610,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   client.atlas.refresh();
 
   //setTimeout(setDebugData, 300);
-
-  requestAnimationFrame(render);
 
   // Auto-login for local development
   const isLocalhost =

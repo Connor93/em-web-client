@@ -213,10 +213,9 @@ export class GfxLoader {
     );
     const bm = await createImageBitmap(imageData);
 
-    // LRU eviction — do NOT call .close() because atlas.ts holds direct
-    // references to these ImageBitmaps in its bmpsToLoad array. Closing
-    // them would cause "image source is detached" errors when atlas tries
-    // to drawImage() with the evicted bitmap. GC will handle cleanup.
+    // LRU eviction — don't close() the bitmap because the atlas may still
+    // hold a reference to it for character frame composition.  Let the GC
+    // reclaim it once all references are dropped.
     if (this.bitmapCache.size >= LRU_MAX_SIZE) {
       const firstKey = this.bitmapCache.keys().next().value as string;
       this.bitmapCache.delete(firstKey);

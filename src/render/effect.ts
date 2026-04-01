@@ -1,6 +1,6 @@
 import type { Rectangle } from '../collision';
-import type { EffectMetadata } from '../utils';
-import { randomRange } from '../utils';
+import type { EffectMetadata } from '../utils/get-effect-metadata';
+import { randomRange } from '../utils/random-range';
 import type { Vector2 } from '../vector';
 
 export abstract class EffectTarget {
@@ -26,6 +26,8 @@ export class EffectTargetCharacter extends EffectTarget {
 }
 
 export class EffectAnimation {
+  private static nextInstanceId = 1;
+  readonly instanceId: number;
   id: number;
   target: EffectTarget;
   ticks: number;
@@ -35,6 +37,7 @@ export class EffectAnimation {
   renderedFirstFrame = false;
 
   constructor(id: number, target: EffectTarget, metadata: EffectMetadata) {
+    this.instanceId = EffectAnimation.nextInstanceId++;
     this.id = id;
     this.target = target;
     this.metadata = metadata;

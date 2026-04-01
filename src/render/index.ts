@@ -1,5 +1,6 @@
 // Character animations
 
+export { Animation } from './animation';
 export { CharacterAttackAnimation } from './character-attack';
 export { CharacterRangedAttackAnimation } from './character-attack-ranged';
 export { CharacterAnimation } from './character-base-animation';
