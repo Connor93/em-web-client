@@ -839,6 +839,7 @@ export class Client {
     this.autoBattleLootCoords = null;
     this.autoBattleKillCount = 0;
     this.autoBattleStartTime = 0;
+    this.hasPet = false;
   }
 
   disconnect() {
@@ -1026,6 +1027,11 @@ export class Client {
       playerId,
       new CharacterDeathAnimation(current),
     );
+
+    if (playerId === this.playerId && this.hasPet) {
+      this.hasPet = false;
+      this.emit('petStateChanged', { active: false });
+    }
   }
 
   trainStat(statId: StatId) {
