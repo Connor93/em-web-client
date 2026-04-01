@@ -16,7 +16,6 @@ import { playSfxById, SfxId } from '../sfx';
 function handleAdminInteractRemove(client: Client, reader: EoReader) {
   const packet = AdminInteractRemoveServerPacket.deserialize(reader);
 
-  // TODO: Hide animation
   const character = client.getCharacterById(packet.playerId);
   if (character) {
     const metadata = client.getEffectMetadata(25);
