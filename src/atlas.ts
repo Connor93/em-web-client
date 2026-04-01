@@ -1327,7 +1327,9 @@ export class Atlas {
             char.gender === Gender.Female ? GfxType.FemaleHat : GfxType.MaleHat;
 
           this.addBmpToLoad(gfxType, baseId + 1);
+          this.addBmpToLoad(gfxType, baseId + 2); // face mask (front)
           this.addBmpToLoad(gfxType, baseId + 3);
+          this.addBmpToLoad(gfxType, baseId + 4); // face mask (side)
         }
 
         if (char.equipment.shield > 0) {
@@ -2134,6 +2136,12 @@ export class Atlas {
         }
 
         if (maskType === HatMaskType.FaceMask && character.equipment.hat) {
+          this.applyFaceMask(
+            character.gender,
+            character.equipment.hat,
+            index,
+            upLeft,
+          );
           this.renderCharacterHat(
             character.gender,
             character.equipment.hat,
@@ -3026,6 +3034,34 @@ export class Atlas {
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
 
     this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+  }
+
+  private applyFaceMask(
+    gender: Gender,
+    hat: number,
+    frame: CharacterFrame,
+    upLeft: boolean,
+  ) {
+    // Face mask hats have a mask graphic at ID +2/+4 that determines which
+    // pixels of the underlying face to erase. Opaque mask pixels erase the
+    // face; transparent mask pixels let the face show through.
+    const maskGraphicId = (hat - 1) * 10 + (upLeft ? 4 : 2);
+    const maskBmp = this.getBmp(
+      gender === Gender.Female ? GfxType.FemaleHat : GfxType.MaleHat,
+      maskGraphicId,
+    );
+
+    if (!maskBmp) {
+      return;
+    }
+
+    const offset = HAT_OFFSETS[gender][frame];
+    const destX = HALF_CHARACTER_FRAME_SIZE - (maskBmp.width >> 1) + offset.x;
+    const destY = -(maskBmp.height >> 1) + offset.y;
+
+    this.tmpCtx.globalCompositeOperation = 'destination-out';
+    this.tmpCtx.drawImage(maskBmp, destX, destY, maskBmp.width, maskBmp.height);
+    this.tmpCtx.globalCompositeOperation = 'source-over';
   }
 
   private renderCharacterHat(
