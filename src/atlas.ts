@@ -1502,8 +1502,18 @@ export class Atlas {
       }
 
       const ticksSinceSeen = this.client.tickCount - npc.tickCount;
-      if (ticksSinceSeen > ATLAS_EXPIRY_TICKS && !npc.keep) {
-        this.npcs.splice(i, 1);
+      if (ticksSinceSeen > ATLAS_EXPIRY_TICKS) {
+        // Don't expire if a nearby NPC still uses this graphicId
+        const stillNeeded = this.client.nearby.npcs.some((nearbyNpc) => {
+          const nearbyRecord = this.client.getEnfRecordById(nearbyNpc.id);
+          return nearbyRecord?.graphicId === npc.graphicId;
+        });
+
+        if (stillNeeded) {
+          npc.tickCount = this.client.tickCount;
+        } else {
+          this.npcs.splice(i, 1);
+        }
       }
     }
   }
