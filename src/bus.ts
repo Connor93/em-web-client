@@ -79,7 +79,7 @@ export class PacketBus {
   }
 
   private handlePacket(data: Uint8Array) {
-    if (data[0] !== 0xff && data[1] !== 0xff) {
+    if (!(data[0] === 0xff && data[1] === 0xff)) {
       deinterleave(data);
       flipMsb(data);
       swapMultiples(data, this.decodeMultiple);
@@ -131,7 +131,7 @@ export class PacketBus {
 
     const temp = new Uint8Array(data);
 
-    if (data[0] !== 0xff && data[1] !== 0xff) {
+    if (!(data[0] === 0xff && data[1] === 0xff)) {
       swapMultiples(temp, this.encodeMultiple);
       flipMsb(temp);
       interleave(temp);
