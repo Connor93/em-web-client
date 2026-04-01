@@ -2,6 +2,8 @@
 
 Browser-based client for Endless Online (protocol 0.0.28). TypeScript + Vite + Canvas 2D rendering.
 
+Do not add Co-Authored-By lines to commit messages.
+
 ## Companion Server: etheos
 
 The game server lives at `../etheos/` (C++17, forked from EOSERV). These repos are tightly coupled — they share the EO 0.0.28 packet protocol.
