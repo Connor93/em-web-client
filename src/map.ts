@@ -1084,6 +1084,17 @@ export class MapRenderer {
         frameOffset.y,
     );
 
+    const isPlayer = entity.typeId === this.client.playerId;
+    const visible =
+      isPlayer ||
+      !character.invisible ||
+      this.client.admin !== AdminLevel.Player;
+
+    // Skip collision, effects, and rendering entirely for hidden characters
+    if (!visible) {
+      return;
+    }
+
     const rect = new Rectangle(
       {
         x: screenX + (mirrored ? frame.mirroredXOffset : frame.xOffset),
@@ -1124,13 +1135,7 @@ export class MapRenderer {
       alpha = Math.min(alpha, 0.4);
     }
 
-    const isPlayer = entity.typeId === this.client.playerId;
-    const visible =
-      isPlayer ||
-      !character.invisible ||
-      this.client.admin !== AdminLevel.Player;
-
-    if (visible) {
+    {
       const sprite = this.ensureWorldSprite(
         `character:${character.playerId}:${justCharacter ? 'ghost' : 'main'}`,
         `map:character${justCharacter ? '-ghost' : ''} id=${character.playerId}`,
