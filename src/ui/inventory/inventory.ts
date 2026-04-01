@@ -680,6 +680,7 @@ export class Inventory extends Base {
     const usableTypes = [
       ItemType.Heal,
       ItemType.Teleport,
+      ItemType.Reserved5, // Transform (skin change items)
       ItemType.Alcohol,
       ItemType.EffectPotion,
       ItemType.HairDye,

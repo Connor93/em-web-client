@@ -446,6 +446,34 @@ body.is-mobile .mobile-split-view > .dialog-md {
   border-right: 1px solid rgba(212, 184, 150, 0.15);
 }
 
+/* Portrait: stack panels vertically instead of side-by-side */
+@media (orientation: portrait) {
+  .mobile-split-view {
+    flex-direction: column;
+  }
+
+  body.is-mobile .mobile-split-view > #inventory,
+  body.is-mobile .mobile-split-view > #paperdoll,
+  body.is-mobile .mobile-split-view > #locker,
+  body.is-mobile .mobile-split-view > .dialog-md {
+    height: auto !important;
+    max-height: 50% !important;
+  }
+
+  .mobile-split-view > :first-child {
+    border-right: none;
+    border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  }
+
+  .mobile-split-view > #inventory .grid {
+    grid-template-columns: repeat(auto-fill, minmax(28px, 1fr)) !important;
+  }
+
+  .mobile-split-view .locker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
 /* Adjust grids for 50% width inside split-view */
 .mobile-split-view > #inventory .grid {
   grid-template-columns: repeat(8, 1fr) !important;

@@ -15,7 +15,12 @@ import { capitalize } from '../utils';
 
 export function handleClick(client: Client, e: MouseEvent): void {
   const ui = document.getElementById('ui')!;
-  if (client.state !== GameState.InGame || client.typing || e.target !== ui) {
+  const canvas = document.getElementById('game');
+  if (
+    client.state !== GameState.InGame ||
+    client.typing ||
+    (e.target !== ui && e.target !== canvas)
+  ) {
     return;
   }
 
@@ -171,7 +176,12 @@ export function handleClick(client: Client, e: MouseEvent): void {
 
 export function handleRightClick(client: Client, e: MouseEvent): void {
   const ui = document.getElementById('ui')!;
-  if (client.state !== GameState.InGame || client.typing || e.target !== ui) {
+  const canvas = document.getElementById('game');
+  if (
+    client.state !== GameState.InGame ||
+    client.typing ||
+    (e.target !== ui && e.target !== canvas)
+  ) {
     return;
   }
 
