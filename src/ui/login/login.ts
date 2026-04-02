@@ -27,11 +27,19 @@ export class LoginForm extends Base {
   private formElements: HTMLInputElement[];
 
   show() {
-    this.username.value = '';
     this.password.value = '';
     this.chkRememberMe.checked = this.rememberMe;
+    if (this.rememberMe) {
+      this.username.value = localStorage.getItem('remembered-username') ?? '';
+    } else {
+      this.username.value = '';
+    }
     this.container.classList.remove('hidden');
-    this.username.focus();
+    if (this.username.value) {
+      this.password.focus();
+    } else {
+      this.username.focus();
+    }
   }
 
   constructor() {
@@ -50,6 +58,11 @@ export class LoginForm extends Base {
       this.password.value = '';
       this.password.focus();
       localStorage.setItem('remember-me', `${this.chkRememberMe.checked}`);
+      if (this.chkRememberMe.checked) {
+        localStorage.setItem('remembered-username', this.username.value.trim());
+      } else {
+        localStorage.removeItem('remembered-username');
+      }
       return false;
     });
 
