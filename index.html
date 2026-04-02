@@ -788,6 +788,34 @@
         </div>
       </div>
 
+      <div id="mobile-chat-drawer" class="hidden">
+        <div class="drawer-messages"></div>
+        <div class="drawer-bottom">
+          <form class="drawer-input-form">
+            <input type="text" class="drawer-input" placeholder="Type a message..." autocomplete="off" />
+            <button type="submit" class="drawer-send">Send</button>
+          </form>
+          <button class="drawer-expand">Expand ▼</button>
+        </div>
+      </div>
+
+      <div id="mobile-chat-fullscreen" class="hidden">
+        <div class="fullscreen-header">
+          <div class="fullscreen-tabs">
+            <button class="tab active" data-tab="local">All</button>
+            <button class="tab" data-tab="global">Global</button>
+            <button class="tab" data-tab="group">Party</button>
+            <button class="tab" data-tab="system">System</button>
+          </div>
+          <button class="fullscreen-close">✕</button>
+        </div>
+        <div class="fullscreen-messages"></div>
+        <form class="fullscreen-input-form">
+          <input type="text" class="fullscreen-input" placeholder="Type a message..." autocomplete="off" />
+          <button type="submit" class="fullscreen-send">Send</button>
+        </form>
+      </div>
+
       <div id="hud" class="hidden">
         <div class="hud-header">
           <span class="hud-name"></span>
