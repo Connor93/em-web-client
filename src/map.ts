@@ -1281,10 +1281,56 @@ export class MapRenderer {
     }
 
     const frame = this.client.atlas.getNpcFrame(record.graphicId, npcFrame);
-    if (!frame) return;
+    const texture = frame ? this.client.atlas.getFrameTexture(frame) : null;
 
-    const texture = this.client.atlas.getFrameTexture(frame);
-    if (!texture) return;
+    const screenCoordsX = (coords.x - coords.y) * HALF_TILE_WIDTH;
+    const screenCoordsY = (coords.x + coords.y) * HALF_TILE_HEIGHT;
+
+    // Fallback: render placeholder click rectangle for NPCs with missing graphics
+    if (!frame || !texture) {
+      const placeholderW = 32;
+      const placeholderH = 48;
+      const sx = Math.floor(
+        screenCoordsX -
+          playerScreen.x +
+          this._halfGameWidth -
+          placeholderW / 2 +
+          walkOffset.x,
+      );
+      const sy = Math.floor(
+        screenCoordsY -
+          playerScreen.y +
+          this._halfGameHeight -
+          placeholderH +
+          walkOffset.y,
+      );
+
+      setNpcRectangle(
+        npc.index,
+        new Rectangle({ x: sx, y: sy }, placeholderW, placeholderH),
+      );
+
+      const bubble = this.client.npcChats.get(npc.index);
+      const healthBar = this.client.npcHealthBars.get(npc.index);
+      if (bubble || healthBar) {
+        const npcTopCenter = { x: sx + placeholderW / 2, y: sy };
+        if (bubble) {
+          this.addChatBubbleSprites(
+            `ui:npc-bubble:${npc.index}`,
+            bubble,
+            npcTopCenter,
+          );
+        }
+        if (healthBar) {
+          this.addHealthBarSprites(
+            `ui:npc-health:${npc.index}`,
+            healthBar,
+            npcTopCenter,
+          );
+        }
+      }
+      return;
+    }
 
     const metaOffset = {
       x:
@@ -1302,8 +1348,6 @@ export class MapRenderer {
       y: walkOffset.y + metaOffset.y,
     };
 
-    const screenCoordsX = (coords.x - coords.y) * HALF_TILE_WIDTH;
-    const screenCoordsY = (coords.x + coords.y) * HALF_TILE_HEIGHT;
     const screenX = Math.floor(
       screenCoordsX - playerScreen.x + this._halfGameWidth + additionalOffset.x,
     );
