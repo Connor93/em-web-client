@@ -37,7 +37,16 @@ export interface ClientEventDeps {
     setMessage(msg: string): void;
   };
   hud: { setStats(client: Client): void; show(): void };
-  mobileHud: { setStats(client: Client): void };
+  mobileHud: {
+    setStats(client: Client): void;
+    incrementUnread(): void;
+    clearUnread(): void;
+  };
+  mobileChat: {
+    addMessage(tab: ChatTab, msg: string, icon: ChatIcon, name?: string): void;
+    isOpen(): boolean;
+    clear(): void;
+  };
   hotbar: { show(): void; refresh(): void };
   inGameMenu: { show(): void };
   exitGame: { show(): void };
@@ -122,7 +131,10 @@ export interface ClientEventDeps {
     hide(): void;
     toggle(): void;
   };
-  mobileToolbar: { refresh(): void };
+  mobileToolbar: {
+    refresh(): void;
+    setPlayerInfo(name: string, level: number, className: string): void;
+  };
   pmChatManager: {
     receiveMessage(senderName: string, message: string): void;
     sentMessage(targetName: string, message: string): void;
@@ -221,6 +233,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('chat', ({ icon, tab, message, name }) => {
     deps.chat.addMessage(tab, message, icon || ChatIcon.None, name);
+    deps.mobileChat.addMessage(tab, message, icon || ChatIcon.None, name);
+    if (!deps.mobileChat.isOpen()) {
+      deps.mobileHud.incrementUnread();
+    }
 
     // Route PMs to the bubble manager
     if (icon === ChatIcon.Note && name?.includes('->')) {
@@ -246,6 +262,13 @@ export function wireClientEvents(deps: ClientEventDeps): void {
         deps.chat.addMessage(ChatTab.Local, line, ChatIcon.None);
       }
     }
+
+    deps.mobileChat.clear();
+    deps.mobileToolbar.setPlayerInfo(
+      client.name,
+      client.level,
+      client.getEcfRecordById(client.classId)?.name ?? '',
+    );
 
     deps.loginForm.hide();
     deps.characterSelect.hide();
@@ -282,6 +305,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.hud.setStats(client);
     deps.mobileHud.setStats(client);
     deps.stats.render();
+    deps.mobileToolbar.setPlayerInfo(
+      client.name,
+      client.level,
+      client.getEcfRecordById(client.classId)?.name ?? '',
+    );
   });
 
   client.on('reconnect', () => {

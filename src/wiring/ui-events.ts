@@ -122,6 +122,14 @@ export interface UiEventDeps {
   guildPanel: { toggle(): void };
   questProgress: { requestAndShow(): void; toggle(): void };
   mobileToolbar: { on(event: string, cb: (...args: any[]) => void): void };
+  mobileChat: {
+    toggleDrawer(): void;
+    on(event: string, cb: (...args: any[]) => void): void;
+  };
+  mobileHud: {
+    on(event: string, cb: (...args: any[]) => void): void;
+    clearUnread(): void;
+  };
   hideAllUi: () => void;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
 }
@@ -382,6 +390,9 @@ export function wireUiEvents(deps: UiEventDeps): void {
       case 'quests':
         deps.questProgress.requestAndShow();
         break;
+      case 'customize-controls':
+        // Wired in Task 6 — no-op for now
+        break;
     }
   };
 
@@ -399,6 +410,25 @@ export function wireUiEvents(deps: UiEventDeps): void {
       deps.mainMenu.show();
     });
     deps.smallConfirm.show();
+  });
+
+  // Mobile chat badge
+  deps.mobileHud.on('chatBadgeClick', () => {
+    deps.mobileChat.toggleDrawer();
+    deps.mobileHud.clearUnread();
+  });
+
+  // Mobile chat input
+  deps.mobileChat.on('chat', (message: unknown) => {
+    client.chat(message as string);
+  });
+
+  deps.mobileChat.on('focus', () => {
+    client.typing = true;
+  });
+
+  deps.mobileChat.on('blur', () => {
+    client.typing = false;
   });
 
   // Inventory events

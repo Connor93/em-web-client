@@ -55,6 +55,7 @@ import { LargeConfirmSmallHeader } from './ui/large-confirm-small-header';
 import { LockerDialog } from './ui/locker-dialog';
 import { LoginForm } from './ui/login';
 import { MainMenu } from './ui/main-menu/main-menu';
+import { MobileChat } from './ui/mobile-chat/mobile-chat';
 import { MobileControls } from './ui/mobile-controls/mobile-controls';
 import { MobileHUD } from './ui/mobile-hud/mobile-hud';
 import { MobileToolbar } from './ui/mobile-toolbar/mobile-toolbar';
@@ -98,6 +99,7 @@ client.mapRenderer.npcTooltip = npcTooltip;
 const mobileControls = new MobileControls();
 const mobileToolbar = new MobileToolbar(client);
 const mobileHud = new MobileHUD();
+const mobileChat = new MobileChat();
 
 let userOverride = false;
 let _isMobile = false;
@@ -371,6 +373,7 @@ wireClientEvents({
   chat,
   hud,
   mobileHud,
+  mobileChat,
   hotbar,
   inGameMenu,
   exitGame,
@@ -438,6 +441,8 @@ wireUiEvents({
   guildPanel,
   questProgress,
   mobileToolbar,
+  mobileChat,
+  mobileHud,
   hideAllUi,
   initializeSocket,
 });

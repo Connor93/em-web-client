@@ -17,6 +17,10 @@ body.is-mobile #hud {
   display: none !important;
 }
 
+body.is-mobile #chat {
+  display: none !important;
+}
+
 /* ── Hotbar repositioned to center-bottom ──────────────────────── */
 
 body.is-mobile #hotbar {
