@@ -39,6 +39,7 @@ import { CharacterSelect } from './ui/character-select';
 import { Chat } from './ui/chat/chat';
 import { ChestDialog } from './ui/chest-dialog';
 import { CitizenDialog } from './ui/citizen-dialog/citizen-dialog';
+import { ControlEditor } from './ui/control-editor';
 import { CreateAccountForm } from './ui/create-account';
 import { CreateCharacterForm } from './ui/create-character';
 import { ExitGame } from './ui/exit-game';
@@ -100,6 +101,7 @@ const mobileControls = new MobileControls();
 const mobileToolbar = new MobileToolbar(client);
 const mobileHud = new MobileHUD();
 const mobileChat = new MobileChat();
+const controlEditor = new ControlEditor();
 
 let userOverride = false;
 let _isMobile = false;
@@ -443,6 +445,7 @@ wireUiEvents({
   mobileToolbar,
   mobileChat,
   mobileHud,
+  controlEditor,
   hideAllUi,
   initializeSocket,
 });

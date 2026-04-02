@@ -130,6 +130,9 @@ export interface UiEventDeps {
     on(event: string, cb: (...args: any[]) => void): void;
     clearUnread(): void;
   };
+  controlEditor: {
+    enter(): void;
+  };
   hideAllUi: () => void;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
 }
@@ -391,7 +394,7 @@ export function wireUiEvents(deps: UiEventDeps): void {
         deps.questProgress.requestAndShow();
         break;
       case 'customize-controls':
-        // Wired in Task 6 — no-op for now
+        deps.controlEditor.enter();
         break;
     }
   };

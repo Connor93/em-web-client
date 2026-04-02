@@ -1,0 +1,71 @@
+/* ── Control Editor overlay ── */
+#control-editor-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1070;
+  background: rgba(74, 106, 175, 0.9);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#control-editor-banner .editor-title {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+#control-editor-banner .editor-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#control-editor-banner .editor-reset {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: monospace;
+}
+
+#control-editor-banner .editor-done {
+  background: white;
+  color: #4a6aaf;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: monospace;
+}
+
+/* Edit mode control appearance */
+body.control-edit-mode #joystick-container,
+body.control-edit-mode #btn-attack,
+body.control-edit-mode #btn-toggle-sit {
+  border: 2px dashed rgba(74, 106, 175, 0.6) !important;
+  background-color: rgba(74, 106, 175, 0.15) !important;
+}
+
+body.control-edit-mode #joystick-base {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.control-edit-mode .control-label {
+  text-align: center;
+  font-size: 10px;
+  color: #6a8aaf;
+  font-family: monospace;
+  margin-top: 4px;
+  pointer-events: none;
+}
