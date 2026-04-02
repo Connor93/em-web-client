@@ -69,21 +69,14 @@
   transition: transform 0.05s ease-out;
 }
 
-/* ── Action buttons (bottom-right) ── */
-#mobile-actions-container {
+/* ── Attack button (bottom-right) ── */
+#attack-container {
   position: fixed;
-  bottom: 12%;
-  right: 3%;
-  width: auto;
-  height: auto;
+  bottom: calc(12% + 62px);
+  right: calc(3% - 19px);
   touch-action: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
 }
 
-/* Large attack button */
 #btn-attack {
   width: 90px !important;
   height: 90px !important;
@@ -115,7 +108,14 @@
   transform: scale(0.93);
 }
 
-/* Smaller sit button */
+/* ── Sit button (bottom-right, below attack) ── */
+#sit-container {
+  position: fixed;
+  bottom: 12%;
+  right: 3%;
+  touch-action: none;
+}
+
 #btn-toggle-sit {
   width: 52px !important;
   height: 52px !important;
