@@ -1,5 +1,6 @@
 import mitt from 'mitt';
 import type { Client } from '../../client';
+import { getExpForLevel } from '../../utils';
 import { Base } from '../base-ui';
 
 type Events = {
@@ -10,8 +11,10 @@ export class MobileHUD extends Base {
   protected container = document.getElementById('mobile-hud')!;
   private hpBar: HTMLDivElement;
   private tpBar: HTMLDivElement;
+  private expBar: HTMLDivElement;
   private hpValue: HTMLSpanElement;
   private tpValue: HTMLSpanElement;
+  private expValue: HTMLSpanElement;
   private badgeCount: HTMLSpanElement;
   private emitter = mitt<Events>();
   private unreadCount = 0;
@@ -20,8 +23,10 @@ export class MobileHUD extends Base {
     super();
     this.hpBar = this.container.querySelector('.hud-bar-fill.hp')!;
     this.tpBar = this.container.querySelector('.hud-bar-fill.tp')!;
+    this.expBar = this.container.querySelector('.hud-bar-fill.exp')!;
     this.hpValue = this.container.querySelector('.hp-value')!;
     this.tpValue = this.container.querySelector('.tp-value')!;
+    this.expValue = this.container.querySelector('.exp-value')!;
     this.badgeCount = this.container.querySelector('.badge-count')!;
 
     const badge = this.container.querySelector('#btn-chat-badge')!;
@@ -39,6 +44,14 @@ export class MobileHUD extends Base {
     const tpPercent = client.maxTp > 0 ? (client.tp / client.maxTp) * 100 : 0;
     this.tpBar.style.width = `${tpPercent}%`;
     this.tpValue.textContent = `${client.tp}/${client.maxTp}`;
+
+    const currentLevelExp = getExpForLevel(client.level);
+    const nextLevelExp = getExpForLevel(client.level + 1);
+    const progress = client.experience - currentLevelExp;
+    const range = nextLevelExp - currentLevelExp;
+    const expPercent = range > 0 ? (progress / range) * 100 : 0;
+    this.expBar.style.width = `${expPercent}%`;
+    this.expValue.textContent = `${Math.floor(expPercent)}%`;
   }
 
   incrementUnread() {

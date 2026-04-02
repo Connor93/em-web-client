@@ -495,9 +495,12 @@ div.icon[data-id="23"] {
   color: #40c0d0;
 }
 
+#mobile-hud .exp-label {
+  color: #d8c040;
+}
+
 #mobile-hud .hud-bar-track {
   flex: 1;
-  max-width: 100px;
   height: 10px;
   background: #333;
   border-radius: 5px;
@@ -517,6 +520,10 @@ div.icon[data-id="23"] {
 
 #mobile-hud .hud-bar-fill.tp {
   background: linear-gradient(90deg, #2090a0, #40c0d0);
+}
+
+#mobile-hud .hud-bar-fill.exp {
+  background: linear-gradient(90deg, #b0982c, #d8c040);
 }
 
 #mobile-hud .hud-bar-value {
