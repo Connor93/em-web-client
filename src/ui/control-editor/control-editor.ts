@@ -104,17 +104,20 @@ export class ControlEditor {
     this.addLabel(this.attackContainer, 'Attack');
     this.addLabel(this.sitContainer, 'Sit');
 
-    // Touch handlers (capture to block input.ts)
+    // Touch handlers (capture to block input.ts, passive:false to allow preventDefault)
     for (const container of this.containers()) {
       container.addEventListener('touchstart', this.handleTouchStartCapture, {
         capture: true,
+        passive: false,
       });
     }
     document.addEventListener('touchmove', this.handleTouchMoveCapture, {
       capture: true,
+      passive: false,
     });
     document.addEventListener('touchend', this.handleTouchEndCapture, {
       capture: true,
+      passive: false,
     });
   }
 
