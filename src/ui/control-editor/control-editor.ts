@@ -30,6 +30,7 @@ export class ControlEditor {
   private controlsContainer = document.getElementById('mobile-controls')!;
 
   private labels: HTMLDivElement[] = [];
+  private customPositionsApplied = false;
 
   private emitter = mitt<ControlEditorEvents>();
 
@@ -82,22 +83,26 @@ export class ControlEditor {
     document.body.appendChild(banner);
     this.banner = banner;
 
-    // Reparent attack and sit out of the flex container so they can be independently positioned
-    // Read their rects BEFORE reparenting
+    // Snapshot current screen positions before any DOM changes
+    const joystickRect = this.joystick.getBoundingClientRect();
     const attackRect = this.attackButton.getBoundingClientRect();
     const sitRect = this.sitButton.getBoundingClientRect();
-    this.controlsContainer.appendChild(this.attackButton);
-    this.controlsContainer.appendChild(this.sitButton);
 
-    // Add labels below each control
+    // Ensure attack/sit are direct children of controls container (not flex)
+    if (!this.customPositionsApplied) {
+      this.controlsContainer.appendChild(this.attackButton);
+      this.controlsContainer.appendChild(this.sitButton);
+    }
+
+    // Add labels
     this.addLabel(this.joystick, 'Move');
     this.addLabel(this.attackButton, 'Attack');
     this.addLabel(this.sitButton, 'Sit');
 
-    // Convert current positions to fixed left/top for dragging
-    this.convertToFixed(this.joystick);
-    this.convertToFixedAt(this.attackButton, attackRect);
-    this.convertToFixedAt(this.sitButton, sitRect);
+    // Apply fixed pixel positions matching where they were on screen
+    this.setFixedPosition(this.joystick, joystickRect);
+    this.setFixedPosition(this.attackButton, attackRect);
+    this.setFixedPosition(this.sitButton, sitRect);
 
     // Set up touch drag handlers with capture to block input.ts
     for (const element of [this.joystick, this.attackButton, this.sitButton]) {
@@ -129,7 +134,7 @@ export class ControlEditor {
     }
     this.labels = [];
 
-    // Save positions before clearing inline styles
+    // Save current screen positions as viewport percentages
     this.savePositions();
 
     // Remove drag handlers
@@ -145,16 +150,8 @@ export class ControlEditor {
       capture: true,
     });
 
-    // Clear inline styles
-    this.joystick.style.cssText = '';
-    this.attackButton.style.cssText = '';
-    this.sitButton.style.cssText = '';
-
-    // Reparent attack and sit back into the flex container
-    this.actionsContainer.appendChild(this.attackButton);
-    this.actionsContainer.appendChild(this.sitButton);
-
-    // Re-apply stored positions (may set them back to fixed if custom positions exist)
+    // Clear all inline styles and re-apply from storage
+    this.clearInlineStyles();
     this.loadPositions();
 
     this.emitter.emit('done', undefined);
@@ -168,17 +165,12 @@ export class ControlEditor {
     this.labels.push(label);
   }
 
-  private convertToFixed(element: HTMLElement): void {
-    const rect = element.getBoundingClientRect();
-    this.convertToFixedAt(element, rect);
-  }
-
-  private convertToFixedAt(element: HTMLElement, rect: DOMRect): void {
-    element.style.position = 'fixed';
-    element.style.left = `${rect.left}px`;
-    element.style.top = `${rect.top}px`;
-    element.style.bottom = 'auto';
-    element.style.right = 'auto';
+  private setFixedPosition(element: HTMLElement, rect: DOMRect): void {
+    element.style.setProperty('position', 'fixed', 'important');
+    element.style.setProperty('left', `${rect.left}px`, 'important');
+    element.style.setProperty('top', `${rect.top}px`, 'important');
+    element.style.setProperty('bottom', 'auto', 'important');
+    element.style.setProperty('right', 'auto', 'important');
   }
 
   private onTouchStart(event: TouchEvent): void {
@@ -214,8 +206,8 @@ export class ControlEditor {
     newLeft = Math.max(0, Math.min(newLeft, viewportWidth - rect.width));
     newTop = Math.max(0, Math.min(newTop, viewportHeight - rect.height));
 
-    this.dragging.style.left = `${newLeft}px`;
-    this.dragging.style.top = `${newTop}px`;
+    this.dragging.style.setProperty('left', `${newLeft}px`, 'important');
+    this.dragging.style.setProperty('top', `${newTop}px`, 'important');
   }
 
   private onTouchEnd(event: TouchEvent): void {
@@ -229,13 +221,16 @@ export class ControlEditor {
 
   private loadPositions(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      this.restoreDefaults();
+      return;
+    }
 
     try {
       const positions: ControlPositions = JSON.parse(raw);
       this.applyStoredPositions(positions);
     } catch {
-      // Invalid JSON — ignore
+      this.restoreDefaults();
     }
   }
 
@@ -268,54 +263,100 @@ export class ControlEditor {
 
   private resetPositions(): void {
     localStorage.removeItem(STORAGE_KEY);
+    this.clearInlineStyles();
 
-    // Clear inline styles so CSS defaults take over
-    this.joystick.style.cssText = '';
-    this.attackButton.style.cssText = '';
-    this.sitButton.style.cssText = '';
-
-    // Temporarily reparent back to get correct default positions
+    // Reparent back to flex container for default layout
     this.actionsContainer.appendChild(this.attackButton);
     this.actionsContainer.appendChild(this.sitButton);
+    this.customPositionsApplied = false;
 
-    // Wait a frame for layout to recalculate
+    // Wait a frame for layout, then snapshot default positions and re-enter edit
     requestAnimationFrame(() => {
-      // Read default positions then reparent for editing
+      const joystickRect = this.joystick.getBoundingClientRect();
       const attackRect = this.attackButton.getBoundingClientRect();
       const sitRect = this.sitButton.getBoundingClientRect();
+
+      // Move back out for editing
       this.controlsContainer.appendChild(this.attackButton);
       this.controlsContainer.appendChild(this.sitButton);
 
-      // Re-convert to fixed for continued dragging
-      this.convertToFixed(this.joystick);
-      this.convertToFixedAt(this.attackButton, attackRect);
-      this.convertToFixedAt(this.sitButton, sitRect);
+      this.setFixedPosition(this.joystick, joystickRect);
+      this.setFixedPosition(this.attackButton, attackRect);
+      this.setFixedPosition(this.sitButton, sitRect);
     });
   }
 
   private applyStoredPositions(positions: ControlPositions): void {
+    // Reparent attack/sit out of flex container so fixed positioning works cleanly
+    if (
+      this.attackButton.parentElement === this.actionsContainer ||
+      this.sitButton.parentElement === this.actionsContainer
+    ) {
+      this.controlsContainer.appendChild(this.attackButton);
+      this.controlsContainer.appendChild(this.sitButton);
+    }
+    this.customPositionsApplied = true;
+
     if (positions.joystick) {
-      this.joystick.style.position = 'fixed';
-      this.joystick.style.left = `${positions.joystick.x}vw`;
-      this.joystick.style.top = `${positions.joystick.y}vh`;
-      this.joystick.style.bottom = 'auto';
-      this.joystick.style.right = 'auto';
+      this.joystick.style.setProperty('position', 'fixed', 'important');
+      this.joystick.style.setProperty(
+        'left',
+        `${positions.joystick.x}vw`,
+        'important',
+      );
+      this.joystick.style.setProperty(
+        'top',
+        `${positions.joystick.y}vh`,
+        'important',
+      );
+      this.joystick.style.setProperty('bottom', 'auto', 'important');
+      this.joystick.style.setProperty('right', 'auto', 'important');
     }
 
     if (positions.attack) {
-      this.attackButton.style.position = 'fixed';
-      this.attackButton.style.left = `${positions.attack.x}vw`;
-      this.attackButton.style.top = `${positions.attack.y}vh`;
-      this.attackButton.style.bottom = 'auto';
-      this.attackButton.style.right = 'auto';
+      this.attackButton.style.setProperty('position', 'fixed', 'important');
+      this.attackButton.style.setProperty(
+        'left',
+        `${positions.attack.x}vw`,
+        'important',
+      );
+      this.attackButton.style.setProperty(
+        'top',
+        `${positions.attack.y}vh`,
+        'important',
+      );
+      this.attackButton.style.setProperty('bottom', 'auto', 'important');
+      this.attackButton.style.setProperty('right', 'auto', 'important');
     }
 
     if (positions.sit) {
-      this.sitButton.style.position = 'fixed';
-      this.sitButton.style.left = `${positions.sit.x}vw`;
-      this.sitButton.style.top = `${positions.sit.y}vh`;
-      this.sitButton.style.bottom = 'auto';
-      this.sitButton.style.right = 'auto';
+      this.sitButton.style.setProperty('position', 'fixed', 'important');
+      this.sitButton.style.setProperty(
+        'left',
+        `${positions.sit.x}vw`,
+        'important',
+      );
+      this.sitButton.style.setProperty(
+        'top',
+        `${positions.sit.y}vh`,
+        'important',
+      );
+      this.sitButton.style.setProperty('bottom', 'auto', 'important');
+      this.sitButton.style.setProperty('right', 'auto', 'important');
     }
+  }
+
+  private restoreDefaults(): void {
+    if (this.customPositionsApplied) {
+      this.actionsContainer.appendChild(this.attackButton);
+      this.actionsContainer.appendChild(this.sitButton);
+      this.customPositionsApplied = false;
+    }
+  }
+
+  private clearInlineStyles(): void {
+    this.joystick.style.cssText = '';
+    this.attackButton.style.cssText = '';
+    this.sitButton.style.cssText = '';
   }
 }
