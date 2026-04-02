@@ -2,10 +2,10 @@ import mitt from 'mitt';
 
 import './control-editor.css';
 
-interface ControlPositions {
-  joystick?: { x: number; y: number };
-  attack?: { x: number; y: number };
-  sit?: { x: number; y: number };
+interface ControlOffsets {
+  joystick?: { dx: number; dy: number };
+  attack?: { dx: number; dy: number };
+  sit?: { dx: number; dy: number };
 }
 
 type ControlEditorEvents = {
@@ -17,21 +17,17 @@ const STORAGE_KEY = 'mobile-control-positions';
 /**
  * Draggable control editor.
  *
- * Each control lives in its own fixed-position container:
- *   #joystick-container, #attack-container, #sit-container
+ * Uses CSS transform: translate(dx, dy) to offset controls from their
+ * CSS-default positions. This avoids the mobile browser mismatch between
+ * getBoundingClientRect() (visual viewport) and position:fixed top/left
+ * (initial containing block).
  *
- * During edit mode we override each container's left/top/bottom/right
- * with pixel values (via !important) so the user can drag them.
- * On save we convert to viewport-percentage and store in localStorage.
- * On reset we remove stored data and clear inline styles so CSS defaults
- * take over again. No reparenting is needed.
+ * Stored offsets are in px. On load they're applied as a transform.
+ * On reset the transform is cleared and controls return to CSS defaults.
  */
 export class ControlEditor {
   private active = false;
   private banner: HTMLDivElement | null = null;
-  private dragging: HTMLElement | null = null;
-  private dragOffsetX = 0;
-  private dragOffsetY = 0;
 
   private joystickContainer = document.getElementById('joystick-container')!;
   private attackContainer = document.getElementById('attack-container')!;
@@ -39,6 +35,16 @@ export class ControlEditor {
 
   private labels: HTMLDivElement[] = [];
   private emitter = mitt<ControlEditorEvents>();
+
+  // Per-control drag state
+  private dragging: HTMLElement | null = null;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private dragStartOffsetX = 0;
+  private dragStartOffsetY = 0;
+
+  // Current accumulated offsets per container (px)
+  private offsets: Map<HTMLElement, { dx: number; dy: number }> = new Map();
 
   private handleTouchStartCapture: (e: TouchEvent) => void;
   private handleTouchMoveCapture: (e: TouchEvent) => void;
@@ -48,6 +54,11 @@ export class ControlEditor {
     this.handleTouchStartCapture = this.onTouchStart.bind(this);
     this.handleTouchMoveCapture = this.onTouchMove.bind(this);
     this.handleTouchEndCapture = this.onTouchEnd.bind(this);
+
+    // Initialize offsets
+    for (const container of this.containers()) {
+      this.offsets.set(container, { dx: 0, dy: 0 });
+    }
 
     this.loadPositions();
   }
@@ -88,18 +99,12 @@ export class ControlEditor {
     document.body.appendChild(banner);
     this.banner = banner;
 
-    // Snapshot current positions, then override with fixed px for dragging
-    for (const container of this.containers()) {
-      const rect = container.getBoundingClientRect();
-      this.setFixedPx(container, rect.left, rect.top);
-    }
-
     // Labels
     this.addLabel(this.joystickContainer, 'Move');
     this.addLabel(this.attackContainer, 'Attack');
     this.addLabel(this.sitContainer, 'Sit');
 
-    // Touch handlers
+    // Touch handlers (capture to block input.ts)
     for (const container of this.containers()) {
       container.addEventListener('touchstart', this.handleTouchStartCapture, {
         capture: true,
@@ -127,9 +132,6 @@ export class ControlEditor {
     }
     this.labels = [];
 
-    // Convert current px positions to viewport % and persist
-    this.savePositions();
-
     // Remove handlers
     for (const container of this.containers()) {
       container.removeEventListener(
@@ -145,12 +147,7 @@ export class ControlEditor {
       capture: true,
     });
 
-    // Clear px overrides, re-apply stored % positions
-    for (const container of this.containers()) {
-      container.style.cssText = '';
-    }
-    this.loadPositions();
-
+    this.savePositions();
     this.emitter.emit('done', undefined);
   }
 
@@ -168,11 +165,8 @@ export class ControlEditor {
     this.labels.push(label);
   }
 
-  private setFixedPx(element: HTMLElement, left: number, top: number): void {
-    element.style.setProperty('left', `${left}px`, 'important');
-    element.style.setProperty('top', `${top}px`, 'important');
-    element.style.setProperty('bottom', 'auto', 'important');
-    element.style.setProperty('right', 'auto', 'important');
+  private applyTransform(element: HTMLElement, dx: number, dy: number): void {
+    element.style.transform = `translate(${dx}px, ${dy}px)`;
   }
 
   // ── Touch drag ───────────────────────────────────────────────────────────
@@ -184,11 +178,13 @@ export class ControlEditor {
 
     const target = event.currentTarget as HTMLElement;
     const touch = event.changedTouches[0];
-    const rect = target.getBoundingClientRect();
+    const offset = this.offsets.get(target) ?? { dx: 0, dy: 0 };
 
     this.dragging = target;
-    this.dragOffsetX = touch.clientX - rect.left;
-    this.dragOffsetY = touch.clientY - rect.top;
+    this.dragStartX = touch.clientX;
+    this.dragStartY = touch.clientY;
+    this.dragStartOffsetX = offset.dx;
+    this.dragStartOffsetY = offset.dy;
   }
 
   private onTouchMove(event: TouchEvent): void {
@@ -197,15 +193,11 @@ export class ControlEditor {
     event.stopPropagation();
 
     const touch = event.changedTouches[0];
-    const rect = this.dragging.getBoundingClientRect();
-    let newLeft = touch.clientX - this.dragOffsetX;
-    let newTop = touch.clientY - this.dragOffsetY;
+    const dx = this.dragStartOffsetX + (touch.clientX - this.dragStartX);
+    const dy = this.dragStartOffsetY + (touch.clientY - this.dragStartY);
 
-    newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
-    newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
-
-    this.dragging.style.setProperty('left', `${newLeft}px`, 'important');
-    this.dragging.style.setProperty('top', `${newTop}px`, 'important');
+    this.offsets.set(this.dragging, { dx, dy });
+    this.applyTransform(this.dragging, dx, dy);
   }
 
   private onTouchEnd(event: TouchEvent): void {
@@ -222,64 +214,54 @@ export class ControlEditor {
     if (!raw) return;
 
     try {
-      const positions: ControlPositions = JSON.parse(raw);
-      this.applyStoredPositions(positions);
+      const stored: ControlOffsets = JSON.parse(raw);
+      const entries: [keyof ControlOffsets, HTMLElement][] = [
+        ['joystick', this.joystickContainer],
+        ['attack', this.attackContainer],
+        ['sit', this.sitContainer],
+      ];
+
+      for (const [key, container] of entries) {
+        const offset = stored[key];
+        if (!offset) continue;
+        this.offsets.set(container, { dx: offset.dx, dy: offset.dy });
+        this.applyTransform(container, offset.dx, offset.dy);
+      }
     } catch {
-      // Invalid data — ignore, CSS defaults apply
+      // Invalid data — ignore
     }
   }
 
   private savePositions(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const positions: ControlPositions = {};
-
-    for (const [key, container] of [
-      ['joystick', this.joystickContainer],
-      ['attack', this.attackContainer],
-      ['sit', this.sitContainer],
-    ] as const) {
-      const rect = container.getBoundingClientRect();
-      positions[key] = {
-        x: (rect.left / width) * 100,
-        y: (rect.top / height) * 100,
-      };
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-  }
-
-  private applyStoredPositions(positions: ControlPositions): void {
-    const entries: [keyof ControlPositions, HTMLElement][] = [
+    const stored: ControlOffsets = {};
+    const entries: [keyof ControlOffsets, HTMLElement][] = [
       ['joystick', this.joystickContainer],
       ['attack', this.attackContainer],
       ['sit', this.sitContainer],
     ];
 
+    let hasCustom = false;
     for (const [key, container] of entries) {
-      const pos = positions[key];
-      if (!pos) continue;
-      container.style.setProperty('left', `${pos.x}vw`, 'important');
-      container.style.setProperty('top', `${pos.y}vh`, 'important');
-      container.style.setProperty('bottom', 'auto', 'important');
-      container.style.setProperty('right', 'auto', 'important');
+      const offset = this.offsets.get(container) ?? { dx: 0, dy: 0 };
+      if (offset.dx !== 0 || offset.dy !== 0) {
+        hasCustom = true;
+      }
+      stored[key] = offset;
+    }
+
+    if (hasCustom) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
     }
   }
 
   private resetPositions(): void {
     localStorage.removeItem(STORAGE_KEY);
 
-    // Clear inline styles so CSS defaults take over
     for (const container of this.containers()) {
-      container.style.cssText = '';
+      this.offsets.set(container, { dx: 0, dy: 0 });
+      container.style.transform = '';
     }
-
-    // Re-snapshot default positions for continued editing
-    requestAnimationFrame(() => {
-      for (const container of this.containers()) {
-        const rect = container.getBoundingClientRect();
-        this.setFixedPx(container, rect.left, rect.top);
-      }
-    });
   }
 }
