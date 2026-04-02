@@ -487,11 +487,11 @@ div.icon[data-id="23"] {
   min-width: 18px;
 }
 
-#mobile-hud .hud-bar-label:first-child {
+#mobile-hud .hp-label {
   color: #e05050;
 }
 
-#mobile-hud .hud-bar-label:nth-child(3) {
+#mobile-hud .tp-label {
   color: #40c0d0;
 }
 
