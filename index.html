@@ -768,21 +768,23 @@
       <div id="mobile-toolbar" class="hidden"></div>
 
       <div id="mobile-hud" class="hidden">
-        <div class="hud-header">
-          <span class="hud-name"></span>
-          <span class="hud-level"></span>
-        </div>
-        <div class="hud-bar-row">
+        <div class="hud-bars">
           <span class="hud-bar-label">HP</span>
-          <div class="hud-bar-track"><div class="hud-bar-fill hp"></div></div>
-        </div>
-        <div class="hud-bar-row">
+          <div class="hud-bar-track">
+            <div class="hud-bar-fill hp"></div>
+            <span class="hud-bar-value hp-value"></span>
+          </div>
           <span class="hud-bar-label">TP</span>
-          <div class="hud-bar-track"><div class="hud-bar-fill tp"></div></div>
+          <div class="hud-bar-track">
+            <div class="hud-bar-fill tp"></div>
+            <span class="hud-bar-value tp-value"></span>
+          </div>
         </div>
-        <div class="hud-bar-row">
-          <span class="hud-bar-label">EXP</span>
-          <div class="hud-bar-track"><div class="hud-bar-fill exp"></div></div>
+        <div class="hud-actions">
+          <button id="btn-chat-badge" class="hud-badge">
+            <span class="badge-icon">💬</span>
+            <span class="badge-count hidden">0</span>
+          </button>
         </div>
       </div>
 

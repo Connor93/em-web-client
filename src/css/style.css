@@ -457,60 +457,49 @@ div.icon[data-id="23"] {
 
 /* Mobile-only overrides moved to mobile-ui.css */
 
-/* ── Mobile HUD panel (top-left) ── */
+/* ── Mobile HUD (slim top bar) ── */
 #mobile-hud {
   position: fixed;
-  top: 8px;
-  left: 8px;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1020;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border-radius: 8px;
-  padding: 8px 14px 10px 14px;
-  min-width: 150px;
-  color: #e0daca;
-  pointer-events: auto;
-}
-
-#mobile-hud .hud-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-
-#mobile-hud .hud-name {
-  font-size: 14px;
-  font-weight: bold;
-  color: #f0ead8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-#mobile-hud .hud-level {
-  font-size: 11px;
-  color: #b0a888;
-}
-
-#mobile-hud .hud-bar-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+#mobile-hud .hud-bars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
 }
 
 #mobile-hud .hud-bar-label {
   font-size: 10px;
-  width: 26px;
-  color: #a09880;
-  flex-shrink: 0;
+  font-weight: bold;
+  font-family: monospace;
+  min-width: 18px;
+}
+
+#mobile-hud .hud-bar-label:first-child {
+  color: #e05050;
+}
+
+#mobile-hud .hud-bar-label:nth-child(3) {
+  color: #40c0d0;
 }
 
 #mobile-hud .hud-bar-track {
   flex: 1;
+  max-width: 100px;
   height: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #333;
   border-radius: 5px;
   overflow: hidden;
   position: relative;
@@ -523,15 +512,65 @@ div.icon[data-id="23"] {
 }
 
 #mobile-hud .hud-bar-fill.hp {
-  background: linear-gradient(to right, #c03030, #e05050);
+  background: linear-gradient(90deg, #c03030, #e05050);
 }
 
 #mobile-hud .hud-bar-fill.tp {
-  background: linear-gradient(to right, #2090a0, #40c0d0);
+  background: linear-gradient(90deg, #2090a0, #40c0d0);
 }
 
-#mobile-hud .hud-bar-fill.exp {
-  background: linear-gradient(to right, #b0982c, #d8c040);
+#mobile-hud .hud-bar-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-family: monospace;
+  color: white;
+  text-shadow:
+    0 0 2px black,
+    0 0 2px black;
+  pointer-events: none;
+}
+
+#mobile-hud .hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
+}
+
+#mobile-hud .hud-badge {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#mobile-hud .badge-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+#mobile-hud .badge-count {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #e05050;
+  color: white;
+  font-size: 9px;
+  font-weight: bold;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  font-family: monospace;
 }
 
 .heart-sprite.low-health {
