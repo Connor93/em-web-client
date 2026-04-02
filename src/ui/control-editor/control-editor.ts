@@ -33,8 +33,14 @@ export class ControlEditor {
   private attackContainer = document.getElementById('attack-container')!;
   private sitContainer = document.getElementById('sit-container')!;
 
+  private attackButton = document.getElementById('btn-attack')!;
+  private sitButton = document.getElementById('btn-toggle-sit')!;
+
   private labels: HTMLDivElement[] = [];
   private emitter = mitt<ControlEditorEvents>();
+
+  // Map any touchable element to the container we want to drag
+  private containerOf = new Map<HTMLElement, HTMLElement>();
 
   // Per-control drag state
   private dragging: HTMLElement | null = null;
@@ -55,9 +61,17 @@ export class ControlEditor {
     this.handleTouchMoveCapture = this.onTouchMove.bind(this);
     this.handleTouchEndCapture = this.onTouchEnd.bind(this);
 
-    // Initialize offsets
+    // Initialize offsets and element→container mapping
     for (const container of this.containers()) {
       this.offsets.set(container, { dx: 0, dy: 0 });
+      this.containerOf.set(container, container);
+    }
+    // Map child buttons to their containers
+    this.containerOf.set(this.attackButton, this.attackContainer);
+    this.containerOf.set(this.sitButton, this.sitContainer);
+    // Map joystick children
+    for (const child of this.joystickContainer.children) {
+      this.containerOf.set(child as HTMLElement, this.joystickContainer);
     }
 
     this.loadPositions();
@@ -104,9 +118,9 @@ export class ControlEditor {
     this.addLabel(this.attackContainer, 'Attack');
     this.addLabel(this.sitContainer, 'Sit');
 
-    // Touch handlers (capture to block input.ts, passive:false to allow preventDefault)
-    for (const container of this.containers()) {
-      container.addEventListener('touchstart', this.handleTouchStartCapture, {
+    // Touch handlers on all draggable elements (containers + child buttons)
+    for (const element of this.containerOf.keys()) {
+      element.addEventListener('touchstart', this.handleTouchStartCapture, {
         capture: true,
         passive: false,
       });
@@ -136,12 +150,10 @@ export class ControlEditor {
     this.labels = [];
 
     // Remove handlers
-    for (const container of this.containers()) {
-      container.removeEventListener(
-        'touchstart',
-        this.handleTouchStartCapture,
-        { capture: true },
-      );
+    for (const element of this.containerOf.keys()) {
+      element.removeEventListener('touchstart', this.handleTouchStartCapture, {
+        capture: true,
+      });
     }
     document.removeEventListener('touchmove', this.handleTouchMoveCapture, {
       capture: true,
@@ -179,11 +191,14 @@ export class ControlEditor {
     event.preventDefault();
     event.stopPropagation();
 
-    const target = event.currentTarget as HTMLElement;
-    const touch = event.changedTouches[0];
-    const offset = this.offsets.get(target) ?? { dx: 0, dy: 0 };
+    const touched = event.currentTarget as HTMLElement;
+    const container = this.containerOf.get(touched);
+    if (!container) return;
 
-    this.dragging = target;
+    const touch = event.changedTouches[0];
+    const offset = this.offsets.get(container) ?? { dx: 0, dy: 0 };
+
+    this.dragging = container;
     this.dragStartX = touch.clientX;
     this.dragStartY = touch.clientY;
     this.dragStartOffsetX = offset.dx;
