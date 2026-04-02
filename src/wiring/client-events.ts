@@ -234,7 +234,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('chat', ({ icon, tab, message, name }) => {
     deps.chat.addMessage(tab, message, icon || ChatIcon.None, name);
     deps.mobileChat.addMessage(tab, message, icon || ChatIcon.None, name);
-    if (!deps.mobileChat.isOpen()) {
+    if (!deps.mobileChat.isOpen() && tab !== ChatTab.System) {
       deps.mobileHud.incrementUnread();
     }
 

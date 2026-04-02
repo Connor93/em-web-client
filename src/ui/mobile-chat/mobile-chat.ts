@@ -249,7 +249,7 @@ export class MobileChat extends Base {
 
   private filterMessages(lines: ChatLine[]): ChatLine[] {
     if (this.activeTab === 'all') {
-      return lines;
+      return lines.filter((line) => line.tab !== ChatTab.System);
     }
     return lines.filter((line) => line.tab === this.activeTab);
   }
