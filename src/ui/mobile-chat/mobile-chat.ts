@@ -49,7 +49,7 @@ export class MobileChat extends Base {
 
   private emitter = mitt<Events>();
   private messages: ChatLine[] = [];
-  private activeTab: ChatTab = ChatTab.Local;
+  private activeTab: ChatTab | 'all' = 'all';
   private drawerOpen = false;
   private fullscreenOpen = false;
   private drawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
@@ -114,8 +114,8 @@ export class MobileChat extends Base {
 
         const tabName = button.dataset.tab;
         switch (tabName) {
-          case 'local':
-            this.activeTab = ChatTab.Local;
+          case 'all':
+            this.activeTab = 'all';
             break;
           case 'global':
             this.activeTab = ChatTab.Global;
@@ -248,7 +248,7 @@ export class MobileChat extends Base {
   }
 
   private filterMessages(lines: ChatLine[]): ChatLine[] {
-    if (this.activeTab === ChatTab.Local) {
+    if (this.activeTab === 'all') {
       return lines;
     }
     return lines.filter((line) => line.tab === this.activeTab);
