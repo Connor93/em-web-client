@@ -24,6 +24,10 @@ export class ControlEditor {
   private joystick = document.getElementById('joystick-container')!;
   private attackButton = document.getElementById('btn-attack')!;
   private sitButton = document.getElementById('btn-toggle-sit')!;
+  private actionsContainer = document.getElementById(
+    'mobile-actions-container',
+  )!;
+  private controlsContainer = document.getElementById('mobile-controls')!;
 
   private labels: HTMLDivElement[] = [];
 
@@ -78,6 +82,13 @@ export class ControlEditor {
     document.body.appendChild(banner);
     this.banner = banner;
 
+    // Reparent attack and sit out of the flex container so they can be independently positioned
+    // Read their rects BEFORE reparenting
+    const attackRect = this.attackButton.getBoundingClientRect();
+    const sitRect = this.sitButton.getBoundingClientRect();
+    this.controlsContainer.appendChild(this.attackButton);
+    this.controlsContainer.appendChild(this.sitButton);
+
     // Add labels below each control
     this.addLabel(this.joystick, 'Move');
     this.addLabel(this.attackButton, 'Attack');
@@ -85,8 +96,8 @@ export class ControlEditor {
 
     // Convert current positions to fixed left/top for dragging
     this.convertToFixed(this.joystick);
-    this.convertToFixed(this.attackButton);
-    this.convertToFixed(this.sitButton);
+    this.convertToFixedAt(this.attackButton, attackRect);
+    this.convertToFixedAt(this.sitButton, sitRect);
 
     // Set up touch drag handlers with capture to block input.ts
     for (const element of [this.joystick, this.attackButton, this.sitButton]) {
@@ -134,11 +145,16 @@ export class ControlEditor {
       capture: true,
     });
 
-    // Clear inline styles then re-apply stored positions
+    // Clear inline styles
     this.joystick.style.cssText = '';
     this.attackButton.style.cssText = '';
     this.sitButton.style.cssText = '';
 
+    // Reparent attack and sit back into the flex container
+    this.actionsContainer.appendChild(this.attackButton);
+    this.actionsContainer.appendChild(this.sitButton);
+
+    // Re-apply stored positions (may set them back to fixed if custom positions exist)
     this.loadPositions();
 
     this.emitter.emit('done', undefined);
@@ -154,6 +170,10 @@ export class ControlEditor {
 
   private convertToFixed(element: HTMLElement): void {
     const rect = element.getBoundingClientRect();
+    this.convertToFixedAt(element, rect);
+  }
+
+  private convertToFixedAt(element: HTMLElement, rect: DOMRect): void {
     element.style.position = 'fixed';
     element.style.left = `${rect.left}px`;
     element.style.top = `${rect.top}px`;
@@ -254,10 +274,23 @@ export class ControlEditor {
     this.attackButton.style.cssText = '';
     this.sitButton.style.cssText = '';
 
-    // Re-convert to fixed for continued dragging
-    this.convertToFixed(this.joystick);
-    this.convertToFixed(this.attackButton);
-    this.convertToFixed(this.sitButton);
+    // Temporarily reparent back to get correct default positions
+    this.actionsContainer.appendChild(this.attackButton);
+    this.actionsContainer.appendChild(this.sitButton);
+
+    // Wait a frame for layout to recalculate
+    requestAnimationFrame(() => {
+      // Read default positions then reparent for editing
+      const attackRect = this.attackButton.getBoundingClientRect();
+      const sitRect = this.sitButton.getBoundingClientRect();
+      this.controlsContainer.appendChild(this.attackButton);
+      this.controlsContainer.appendChild(this.sitButton);
+
+      // Re-convert to fixed for continued dragging
+      this.convertToFixed(this.joystick);
+      this.convertToFixedAt(this.attackButton, attackRect);
+      this.convertToFixedAt(this.sitButton, sitRect);
+    });
   }
 
   private applyStoredPositions(positions: ControlPositions): void {
