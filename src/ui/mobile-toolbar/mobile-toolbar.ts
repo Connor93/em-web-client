@@ -16,7 +16,8 @@ type ToggleTarget =
   | 'guild'
   | 'quests'
   | 'settings'
-  | 'auto-battle';
+  | 'auto-battle'
+  | 'customize-controls';
 
 type Events = {
   toggle: ToggleTarget;
@@ -65,6 +66,11 @@ const MENU_ITEMS: { id: ToggleTarget; label: string; svg: string }[] = [
     svg: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM7 17l2-2h6l2 2H7zm0-4l2-2h6l2 2H7z"/></svg>`,
   },
   {
+    id: 'customize-controls',
+    label: 'Customize Controls',
+    svg: `<svg viewBox="0 0 24 24"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>`,
+  },
+  {
     id: 'settings',
     label: 'Settings',
     svg: `<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>`,
@@ -76,11 +82,29 @@ const MENU_ITEMS: { id: ToggleTarget; label: string; svg: string }[] = [
   },
 ];
 
+const GAME_PANEL_IDS: ToggleTarget[] = [
+  'inventory',
+  'map',
+  'spells',
+  'stats',
+  'online',
+  'party',
+  'guild',
+  'quests',
+];
+
+const UTILITY_IDS: ToggleTarget[] = [
+  'auto-battle',
+  'customize-controls',
+  'settings',
+];
+
 export class MobileToolbar extends Base {
   protected container: HTMLElement = document.getElementById('mobile-toolbar')!;
   private emitter = mitt<Events>();
   private overlay!: HTMLDivElement;
   private panel!: HTMLDivElement;
+  private playerHeader!: HTMLDivElement;
   private menuOpen = false;
 
   constructor(_client: Client) {
@@ -91,18 +115,6 @@ export class MobileToolbar extends Base {
 
   private buildCornerButtons() {
     this.container.innerHTML = '';
-
-    // Exit button (X)
-    const exitButton = document.createElement('button');
-    exitButton.className = 'corner-btn';
-    exitButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
-    exitButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playSfxById(SfxId.ButtonClick);
-      this.emitter.emit('exit');
-    });
-
-    // Hamburger button (☰)
     const menuButton = document.createElement('button');
     menuButton.className = 'corner-btn';
     menuButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>`;
@@ -111,8 +123,6 @@ export class MobileToolbar extends Base {
       playSfxById(SfxId.ButtonClick);
       this.toggleMenu();
     });
-
-    this.container.appendChild(exitButton);
     this.container.appendChild(menuButton);
   }
 
@@ -127,25 +137,86 @@ export class MobileToolbar extends Base {
     this.panel = document.createElement('div');
     this.panel.id = 'mobile-menu-panel';
 
-    const items = MENU_ITEMS.filter(
-      (item) => item.id !== 'auto-battle' || isAutoBattleUnlocked(),
+    // Player info header
+    this.playerHeader = document.createElement('div');
+    this.playerHeader.className = 'menu-player-header';
+    const playerName = document.createElement('div');
+    playerName.className = 'menu-player-name';
+    const playerDetail = document.createElement('div');
+    playerDetail.className = 'menu-player-detail';
+    this.playerHeader.appendChild(playerName);
+    this.playerHeader.appendChild(playerDetail);
+    this.panel.appendChild(this.playerHeader);
+
+    // Game panel items
+    const gamePanelItems = MENU_ITEMS.filter((item) =>
+      GAME_PANEL_IDS.includes(item.id),
     );
-    for (const item of items) {
-      const button = document.createElement('button');
-      button.className = 'menu-item-btn';
-      button.innerHTML = `${item.svg}<span>${item.label}</span>`;
-
-      button.addEventListener('click', (e) => {
-        e.stopPropagation();
-        playSfxById(SfxId.ButtonClick);
-        this.closeMenu();
-        this.emitter.emit('toggle', item.id);
-      });
-
-      this.panel.appendChild(button);
+    for (const item of gamePanelItems) {
+      this.panel.appendChild(this.createMenuItem(item));
     }
 
+    // Divider
+    this.panel.appendChild(this.createDivider());
+
+    // Utility items
+    const utilityItems = MENU_ITEMS.filter((item) => {
+      if (item.id === 'auto-battle' && !isAutoBattleUnlocked()) return false;
+      return UTILITY_IDS.includes(item.id);
+    });
+    for (const item of utilityItems) {
+      this.panel.appendChild(this.createMenuItem(item));
+    }
+
+    // Divider
+    this.panel.appendChild(this.createDivider());
+
+    // Exit button
+    const exitButton = document.createElement('button');
+    exitButton.className = 'menu-item-btn menu-item-exit';
+    exitButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg><span>Exit</span>`;
+    exitButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playSfxById(SfxId.ButtonClick);
+      this.closeMenu();
+      this.emitter.emit('exit');
+    });
+    this.panel.appendChild(exitButton);
+
     document.body.appendChild(this.panel);
+  }
+
+  private createMenuItem(item: {
+    id: ToggleTarget;
+    label: string;
+    svg: string;
+  }): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.className = 'menu-item-btn';
+    button.innerHTML = `${item.svg}<span>${item.label}</span>`;
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playSfxById(SfxId.ButtonClick);
+      this.closeMenu();
+      this.emitter.emit('toggle', item.id);
+    });
+    return button;
+  }
+
+  private createDivider(): HTMLDivElement {
+    const divider = document.createElement('div');
+    divider.className = 'menu-divider';
+    return divider;
+  }
+
+  setPlayerInfo(name: string, level: number, className: string) {
+    const nameElement = this.playerHeader.querySelector('.menu-player-name');
+    const detailElement = this.playerHeader.querySelector(
+      '.menu-player-detail',
+    );
+    if (nameElement) nameElement.textContent = name;
+    if (detailElement)
+      detailElement.textContent = `Level ${level} ${className}`;
   }
 
   private toggleMenu() {

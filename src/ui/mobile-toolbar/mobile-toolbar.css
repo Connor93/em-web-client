@@ -111,3 +111,37 @@
   background: rgba(255, 255, 255, 0.08);
   margin: 8px 24px;
 }
+
+/* Player info header */
+.menu-player-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu-player-name {
+  color: #ddd;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.menu-player-detail {
+  color: #888;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Exit item */
+.menu-item-exit {
+  color: #c05050 !important;
+}
+
+.menu-item-exit svg {
+  fill: #c05050 !important;
+}
+
+/* Portrait responsive width */
+@media (orientation: portrait) {
+  #mobile-menu-panel {
+    width: 65% !important;
+  }
+}
