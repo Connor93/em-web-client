@@ -75,7 +75,7 @@ function handleLoginReply(client: Client, reader: EoReader) {
   );
 
   if (
-    (client.reconnecting || client.rememberMe) &&
+    client.reconnecting &&
     (client.loginToken || client.sessionCredentials) &&
     reconnectMatch
   ) {
