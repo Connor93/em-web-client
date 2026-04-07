@@ -19,21 +19,9 @@ COPY . .
 RUN pnpm build
 
 # ===========================================
-# Stage 2: Install bridge dependencies
+# Stage 2: Serve with Nginx
 # ===========================================
-FROM node:24-alpine AS bridge-deps
-
-WORKDIR /app/bridge
-COPY bridge/package.json bridge/package-lock.json* ./
-RUN npm install --production
-
-# ===========================================
-# Stage 3: Serve with Nginx + WS Bridge
-# ===========================================
-FROM node:24-alpine
-
-# Install nginx
-RUN apk add --no-cache nginx
+FROM nginx:alpine
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -48,14 +36,6 @@ RUN printf '{\n  "host": "wss://client.calamity-online.cloud/ws",\n  "staticHost
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Copy bridge code and dependencies
-COPY bridge/bridge.js /app/bridge/
-COPY --from=bridge-deps /app/bridge/node_modules /app/bridge/node_modules
-
-# Copy entrypoint
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 EXPOSE 80
 
-CMD ["/app/entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
