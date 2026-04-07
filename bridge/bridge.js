@@ -29,6 +29,8 @@ function eoDecodeNumber(b1, b2) {
   return val;
 }
 
+const PING_INTERVAL_MS = 25_000; // 25s — well under typical 30-60s mobile NAT timeout
+
 const wss = new WebSocketServer({ host: '0.0.0.0', port: WS_PORT });
 
 console.log(
@@ -45,9 +47,26 @@ wss.on('connection', (ws, req) => {
   let tcpBuffer = Buffer.alloc(0);
   let alive = true;
 
+  // Keepalive: ping every 25s, terminate if no pong before next ping
+  ws.isAlive = true;
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
+
+  const pingTimer = setInterval(() => {
+    if (!ws.isAlive) {
+      console.log(`[bridge] No pong from ${clientAddr}, terminating`);
+      ws.terminate();
+      return;
+    }
+    ws.isAlive = false;
+    ws.ping();
+  }, PING_INTERVAL_MS);
+
   const cleanup = () => {
     if (!alive) return;
     alive = false;
+    clearInterval(pingTimer);
     try {
       ws.close();
     } catch (_) {}
