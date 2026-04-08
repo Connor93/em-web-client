@@ -28,6 +28,16 @@ function handleRangeReply(client: Client, reader: EoReader) {
           name: record.name,
         });
       }
+
+      // Track summoned adds
+      if (client.pendingAddsDetection && !record?.boss) {
+        client.bossAdds.add(npc.index);
+      }
+      if (client.pendingAddsDetection) {
+        setTimeout(() => {
+          client.pendingAddsDetection = false;
+        }, 500);
+      }
     }
   }
 

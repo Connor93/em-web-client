@@ -205,4 +205,5 @@ export type ClientEvents = {
   bossTimeout: { npcIndex: number };
   bossLoot: { items: string[] };
   bossExpGain: { amount: string };
+  bossBarsReset: undefined;
 };

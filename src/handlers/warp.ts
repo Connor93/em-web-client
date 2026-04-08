@@ -52,6 +52,7 @@ function handleWarpAgree(client: Client, reader: EoReader) {
   client.awakenedBosses.clear();
   client.bossAdds.clear();
   client.pendingAddsDetection = false;
+  client.emit('bossBarsReset', undefined);
   for (const npc of client.nearby.npcs) {
     const record = client.getEnfRecordById(npc.id);
     if (record?.boss) {

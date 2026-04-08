@@ -530,6 +530,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   // Boss bar events
   const { bossBar } = deps;
 
+  client.on('bossBarsReset', () => {
+    bossBar.clear();
+  });
+
   client.on('bossAppeared', ({ npcIndex, npcId, name }) => {
     bossBar.addBoss(npcIndex, npcId, name);
   });
