@@ -191,8 +191,6 @@ export class Client {
     new Map();
   /** Tracks NPC indices that are summoned adds (for glow effect) */
   bossAdds: Set<number> = new Set();
-  /** Flag set when [BOSS_ADDS] received — next spawned NPCs are adds */
-  pendingAddsDetection = false;
   characterHealthBars: Map<number, HealthBar> = new Map();
   characterEmotes: Map<number, Emote> = new Map();
   damageTracker = new DamageTracker();

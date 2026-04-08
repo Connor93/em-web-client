@@ -11,7 +11,6 @@ function handleRefreshReply(client: Client, reader: EoReader) {
   client.nearby = packet.nearby;
   client.awakenedBosses.clear();
   client.bossAdds.clear();
-  client.pendingAddsDetection = false;
   client.emit('bossBarsReset', undefined);
 
   // Detect boss NPCs already on the map

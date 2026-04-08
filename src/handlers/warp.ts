@@ -51,7 +51,6 @@ function handleWarpAgree(client: Client, reader: EoReader) {
   // Clear and re-detect boss NPCs on the new map
   client.awakenedBosses.clear();
   client.bossAdds.clear();
-  client.pendingAddsDetection = false;
   client.emit('bossBarsReset', undefined);
   for (const npc of client.nearby.npcs) {
     const record = client.getEnfRecordById(npc.id);

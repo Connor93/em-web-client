@@ -20,6 +20,7 @@ function handleRangeReply(client: Client, reader: EoReader) {
     if (!client.nearby.npcs.some((n) => n.index === npc.index)) {
       client.nearby.npcs.push(npc);
 
+      // Boss bar detection — awakened state and adds come from the boss state packet
       const record = client.getEnfRecordById(npc.id);
       if (record?.boss) {
         client.emit('bossAppeared', {
@@ -27,16 +28,6 @@ function handleRangeReply(client: Client, reader: EoReader) {
           npcId: npc.id,
           name: record.name,
         });
-      }
-
-      // Track summoned adds
-      if (client.pendingAddsDetection && !record?.boss) {
-        client.bossAdds.add(npc.index);
-      }
-      if (client.pendingAddsDetection) {
-        setTimeout(() => {
-          client.pendingAddsDetection = false;
-        }, 500);
       }
     }
   }
