@@ -8,7 +8,8 @@ export type ToastCategory =
   | 'loot'
   | 'exp'
   | 'action'
-  | 'quest';
+  | 'quest'
+  | 'boss-loot';
 
 const TOAST_DURATION = 4000;
 const MAX_TOASTS = 5;
@@ -45,6 +46,7 @@ const ICONS: Record<ToastCategory, string> = {
   exp: '✨',
   action: '⚡',
   quest: '📜',
+  'boss-loot': '👑',
 };
 
 export function showGameToast(
