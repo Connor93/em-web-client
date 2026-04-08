@@ -32,10 +32,78 @@ function isInternalMessage(message: string): boolean {
   );
 }
 
+/** Boss event prefixes — intercepted for UI, suppressed from chat. */
+function isBossMessage(message: string): boolean {
+  return message.startsWith('[BOSS_');
+}
+
+function handleBossMessage(client: Client, message: string): void {
+  if (message.startsWith('[BOSS_AWAKEN]')) {
+    for (const npc of client.nearby.npcs) {
+      const record = client.getEnfRecordById(npc.id);
+      if (record?.boss && record.name && message.includes(record.name)) {
+        client.awakenedBosses.set(npc.index, {
+          enraged: false,
+          shielded: false,
+        });
+        client.emit('bossAwakened', { npcIndex: npc.index, name: record.name });
+        break;
+      }
+    }
+  } else if (message.startsWith('[BOSS_ENRAGE_WARN]')) {
+    // Optional warning — no UI action yet
+  } else if (message.startsWith('[BOSS_ENRAGE]')) {
+    for (const [npcIndex] of client.awakenedBosses) {
+      const state = client.awakenedBosses.get(npcIndex)!;
+      state.enraged = true;
+      client.emit('bossEnraged', { npcIndex });
+    }
+  } else if (message.startsWith('[BOSS_SHIELD_UP]')) {
+    for (const [npcIndex] of client.awakenedBosses) {
+      const state = client.awakenedBosses.get(npcIndex)!;
+      state.shielded = true;
+      client.emit('bossShielded', { npcIndex, shielded: true });
+    }
+  } else if (message.startsWith('[BOSS_SHIELD_DOWN]')) {
+    for (const [npcIndex] of client.awakenedBosses) {
+      const state = client.awakenedBosses.get(npcIndex)!;
+      state.shielded = false;
+      client.emit('bossShielded', { npcIndex, shielded: false });
+    }
+  } else if (message.startsWith('[BOSS_ADDS]')) {
+    client.pendingAddsDetection = true;
+  } else if (message.startsWith('[BOSS_TIMEOUT]')) {
+    for (const [npcIndex] of client.awakenedBosses) {
+      client.awakenedBosses.delete(npcIndex);
+      client.emit('bossTimeout', { npcIndex });
+    }
+  } else if (message.startsWith('[BOSS_LOOT]')) {
+    const content = message
+      .replace('[BOSS_LOOT] You received ', '')
+      .replace('!', '');
+    const items = content
+      .split(', ')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    client.emit('bossLoot', { items });
+  } else if (message.startsWith('[BOSS_EXP]')) {
+    const amount = message.replace('[BOSS_EXP] ', '');
+    client.emit('bossExpGain', { amount });
+  } else if (message.startsWith('[BOSS_SNARE]')) {
+    // Player-specific effect, no boss bar change
+  }
+}
+
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
   // Also emit for guild panel buff aggregation
   client.emit('statusMessage', { message: packet.message });
+
+  // Intercept boss events — handle UI state, suppress from chat
+  if (isBossMessage(packet.message)) {
+    handleBossMessage(client, packet.message);
+    return;
+  }
 
   // Don't show internal guild/achievement data in chat
   if (isInternalMessage(packet.message)) return;
