@@ -12,6 +12,19 @@ function handleRefreshReply(client: Client, reader: EoReader) {
   client.awakenedBosses.clear();
   client.bossAdds.clear();
   client.pendingAddsDetection = false;
+
+  // Detect boss NPCs already on the map
+  for (const npc of client.nearby.npcs) {
+    const record = client.getEnfRecordById(npc.id);
+    if (record?.boss) {
+      client.emit('bossAppeared', {
+        npcIndex: npc.index,
+        npcId: npc.id,
+        name: record.name,
+      });
+    }
+  }
+
   client.atlas.reset();
   client.atlas.refresh();
 }
