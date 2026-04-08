@@ -4,6 +4,7 @@ import { DialogResourceID, EOResourceID } from '../edf';
 import { isMobile } from '../main';
 import { loadAutolootSettings } from '../managers/autoloot-manager';
 import { playSfxById, SfxId } from '../sfx';
+import type { BossBar } from '../ui/boss-bar';
 import { ChatIcon } from '../ui/chat/chat';
 import { showGameToast } from '../ui/game-toast/game-toast';
 import { createMobileSplitView } from '../ui/utils';
@@ -140,6 +141,7 @@ export interface ClientEventDeps {
     sentMessage(targetName: string, message: string): void;
   };
   autolootPanel: { show(): void; hide(): void };
+  bossBar: BossBar;
   reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
   resizeCanvases: () => void;
@@ -319,6 +321,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('reconnected', () => {
     resetReconnectAttempts();
     deps.reconnectOverlay.classList.add('hidden');
+    deps.bossBar.clear();
     console.log('Successfully reconnected to server');
   });
 
@@ -522,5 +525,47 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('partyUpdated', () => {
     deps.partyDialog.refresh();
+  });
+
+  // Boss bar events
+  const { bossBar } = deps;
+
+  client.on('bossAppeared', ({ npcIndex, npcId, name }) => {
+    bossBar.addBoss(npcIndex, npcId, name);
+  });
+
+  client.on('bossHealthUpdate', ({ npcIndex, healthPercentage }) => {
+    bossBar.updateHealth(npcIndex, healthPercentage);
+    bossBar.setActiveBoss(npcIndex);
+  });
+
+  client.on('bossDied', ({ npcIndex }) => {
+    bossBar.removeBoss(npcIndex);
+  });
+
+  client.on('bossAwakened', ({ npcIndex, name }) => {
+    bossBar.setAwakened(npcIndex, name);
+  });
+
+  client.on('bossEnraged', ({ npcIndex }) => {
+    bossBar.setEnraged(npcIndex);
+  });
+
+  client.on('bossShielded', ({ npcIndex, shielded }) => {
+    bossBar.setShielded(npcIndex, shielded);
+  });
+
+  client.on('bossTimeout', ({ npcIndex }) => {
+    bossBar.revertBoss(npcIndex);
+  });
+
+  client.on('bossLoot', ({ items }) => {
+    for (const item of items) {
+      showGameToast(EOResourceID.STATUS_LABEL_TYPE_ITEM, item, 'boss-loot');
+    }
+  });
+
+  client.on('bossExpGain', ({ amount }) => {
+    showGameToast(EOResourceID.STATUS_LABEL_TYPE_INFORMATION, amount, 'exp');
   });
 }

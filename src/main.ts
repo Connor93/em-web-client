@@ -34,6 +34,7 @@ import { BarberDialog } from './ui/barber-dialog/barber-dialog';
 import { initDraggableDialogs } from './ui/base-ui';
 import { BoardDialog } from './ui/board-dialog';
 import { Book } from './ui/book/book';
+import { BossBar } from './ui/boss-bar';
 import { ChangePasswordForm } from './ui/change-password';
 import { CharacterSelect } from './ui/character-select';
 import { Chat } from './ui/chat/chat';
@@ -249,6 +250,7 @@ const settingsDialog = new SettingsDialog();
 const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
+const bossBar = new BossBar();
 const partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
@@ -401,6 +403,7 @@ wireClientEvents({
   mobileToolbar,
   pmChatManager,
   autolootPanel,
+  bossBar,
   reconnectOverlay,
   initializeSocket,
   resizeCanvases,
