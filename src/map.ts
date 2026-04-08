@@ -66,6 +66,7 @@ import {
   NpcWalkAnimation,
 } from './render';
 import type { ChatBubble } from './render/chat-bubble';
+import { settings } from './settings';
 import type { NpcTooltip } from './ui/npc-tooltip';
 import type { PlayerTooltip } from './ui/player-tooltip';
 import {
@@ -1152,6 +1153,31 @@ export class MapRenderer {
       }
       sprite.y = screenY;
       sprite.alpha = alpha;
+
+      // Weapon aura effects
+      if (
+        settings.get('weaponAuras') === 'enabled' &&
+        this.client.auraManager &&
+        character.equipment.weapon > 0
+      ) {
+        const aura = this.client.auraManager.getAura(
+          character.equipment.weapon,
+        );
+        if (aura) {
+          const now = performance.now();
+          for (const effect of aura.effects) {
+            if (effect.update) effect.update(now);
+          }
+          if (aura.floatEffect) {
+            sprite.y += aura.floatEffect.getYOffset(now);
+          }
+          sprite.filters = aura.effects.map((e) => e.filter);
+        } else {
+          sprite.filters = [];
+        }
+      } else {
+        sprite.filters = [];
+      }
     }
 
     for (const effect of effects) {
