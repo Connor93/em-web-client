@@ -353,7 +353,7 @@ export class Client {
         document.querySelector<HTMLDivElement>('#main-menu-logo')!;
       mainMenuLogo!.setAttribute('data-slogan', config.slogan);
 
-      if (config.dashboardUrl) {
+      if (config.dashboardUrl !== undefined) {
         this.auraManager = new AuraManager(config.dashboardUrl);
         this.auraManager.fetch();
       }

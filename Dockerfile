@@ -31,7 +31,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 RUN find /usr/share/nginx/html/gfx -name '*.egf' -exec gzip -9 -k {} \;
 
 # Override config.json with production values
-RUN printf '{\n  "host": "wss://client.calamity-online.cloud/ws",\n  "staticHost": true,\n  "title": "Endless Memories",\n  "slogan": "Web Edition!",\n  "creditsUrl": "https://github.com/sorokya/eoweb"\n}\n' > /usr/share/nginx/html/config.json
+RUN printf '{\n  "host": "wss://client.calamity-online.cloud/ws",\n  "staticHost": true,\n  "title": "Endless Memories",\n  "slogan": "Web Edition!",\n  "creditsUrl": "https://github.com/sorokya/eoweb",\n  "dashboardUrl": ""\n}\n' > /usr/share/nginx/html/config.json
 
 # Copy custom nginx configuration (replace the default that ships with nginx:alpine)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
