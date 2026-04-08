@@ -19,6 +19,15 @@ function handleRangeReply(client: Client, reader: EoReader) {
   for (const npc of packet.nearby.npcs) {
     if (!client.nearby.npcs.some((n) => n.index === npc.index)) {
       client.nearby.npcs.push(npc);
+
+      const record = client.getEnfRecordById(npc.id);
+      if (record?.boss) {
+        client.emit('bossAppeared', {
+          npcIndex: npc.index,
+          npcId: npc.id,
+          name: record.name,
+        });
+      }
     }
   }
 
