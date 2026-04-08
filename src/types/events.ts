@@ -192,4 +192,17 @@ export type ClientEvents = {
   };
   fpsToggled: undefined;
   petStateChanged: { active: boolean };
+  bossHealthUpdate: {
+    npcIndex: number;
+    npcId: number;
+    healthPercentage: number;
+  };
+  bossAppeared: { npcIndex: number; npcId: number; name: string };
+  bossDied: { npcIndex: number };
+  bossAwakened: { npcIndex: number; name: string };
+  bossEnraged: { npcIndex: number };
+  bossShielded: { npcIndex: number; shielded: boolean };
+  bossTimeout: { npcIndex: number };
+  bossLoot: { items: string[] };
+  bossExpGain: { amount: string };
 };
