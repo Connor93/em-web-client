@@ -9,6 +9,9 @@ dist
 .gitignore
 .gitattributes
 
+# Local config overrides (must not reach production)
+public/config.local.json
+
 # IDE and OS files
 .DS_Store
 *.swp

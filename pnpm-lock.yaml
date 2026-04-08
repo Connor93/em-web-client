@@ -20,6 +20,9 @@ importers:
       notyf:
         specifier: ^3.10.0
         version: 3.10.0
+      pixi-filters:
+        specifier: ^6.1.5
+        version: 6.1.5(pixi.js@8.17.1)
       pixi.js:
         specifier: ^8.17.1
         version: 8.17.1
@@ -510,6 +513,9 @@ packages:
   '@types/earcut@3.0.0':
     resolution: {integrity: sha512-k/9fOUGO39yd2sCjrbAJvGDEQvRwRnQIZlBz43roGwUZo5SHAmyVvSFyaVVZkicRVCaDXPKlbxrUcBuJoSWunQ==}
 
+  '@types/gradient-parser@0.1.5':
+    resolution: {integrity: sha512-r7K3NkJz3A95WkVVmjs0NcchhHstC2C/VIYNX4JC6tieviUNo774FFeOHjThr3Vw/WCeMP9kAT77MKbIRlO/4w==}
+
   '@types/node@22.15.3':
     resolution: {integrity: sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==}
 
@@ -857,6 +863,11 @@ packages:
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
+
+  pixi-filters@6.1.5:
+    resolution: {integrity: sha512-Ewb/J+kxAbaNN+0/ATJbglAJG+skGJfh7BIDP3ILIDdD6wWk1p0pGa25pVf1T8hGBOQSUNVAmwwJBwkj+cyLLA==}
+    peerDependencies:
+      pixi.js: '>=8.0.0-0'
 
   pixi.js@8.17.1:
     resolution: {integrity: sha512-OB4TpZHrP5RYy+7FqmFrAc0IHRhfOoNIfF4sVeinvK3aG1r2pYrSMneJAKi9+WvGKC70Dj7GEpZ2OZGB6o/xdg==}
@@ -1425,6 +1436,8 @@ snapshots:
 
   '@types/earcut@3.0.0': {}
 
+  '@types/gradient-parser@0.1.5': {}
+
   '@types/node@22.15.3':
     dependencies:
       undici-types: 6.21.0
@@ -1722,6 +1735,11 @@ snapshots:
   picomatch@2.3.1: {}
 
   picomatch@4.0.3: {}
+
+  pixi-filters@6.1.5(pixi.js@8.17.1):
+    dependencies:
+      '@types/gradient-parser': 0.1.5
+      pixi.js: 8.17.1
 
   pixi.js@8.17.1:
     dependencies:

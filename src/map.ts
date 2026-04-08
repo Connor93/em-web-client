@@ -8,6 +8,7 @@ import {
   SitState,
 } from 'eolib';
 import { Graphics, Sprite, type Texture } from 'pixi.js';
+import { GlowFilter } from 'pixi-filters';
 import {
   CHARACTER_FRAME_OFFSETS,
   CharacterFrame,
@@ -1411,6 +1412,41 @@ export class MapRenderer {
     }
     sprite.y = screenY;
     sprite.alpha = alpha;
+
+    // Awakened boss / add glow effects
+    const awakenedState = this.client.awakenedBosses.get(npc.index);
+    const isAdd = this.client.bossAdds.has(npc.index);
+
+    if (awakenedState) {
+      if (awakenedState.enraged) {
+        const pulse = 0.8 + 0.4 * Math.sin(performance.now() / 300);
+        sprite.filters = [
+          new GlowFilter({
+            color: 0xff0000,
+            outerStrength: 3 * pulse,
+            innerStrength: 0.5,
+          }),
+        ];
+      } else {
+        sprite.filters = [
+          new GlowFilter({
+            color: 0xff8800,
+            outerStrength: 2.5,
+            innerStrength: 0.3,
+          }),
+        ];
+      }
+    } else if (isAdd) {
+      sprite.filters = [
+        new GlowFilter({
+          color: 0x9944ff,
+          outerStrength: 2,
+          innerStrength: 0.3,
+        }),
+      ];
+    } else {
+      sprite.filters = [];
+    }
 
     for (const effect of effects) {
       const effectKeyBase = `npc-effect:${npc.index}:${effect.instanceId}`;
