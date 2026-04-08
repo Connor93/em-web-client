@@ -127,10 +127,12 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
   frost(config: AuraConfig): AuraEffect {
     const rate = val(config, 'frostRate') * 1000;
     const speed = val(config, 'speed');
+    const brightness = val(config, 'frostBrightness');
+    const baseStrength = val(config, 'glowOuterStrength');
 
     const filter = new GlowFilter({
       color: parseColor(config.color),
-      outerStrength: val(config, 'glowOuterStrength'),
+      outerStrength: baseStrength,
       innerStrength: val(config, 'glowInnerStrength'),
     });
     filter.alpha = val(config, 'alpha');
@@ -139,7 +141,8 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       filter,
       update(now: number) {
         const t = 0.5 + 0.5 * Math.sin((now * speed * 2 * Math.PI) / rate);
-        filter.outerStrength = 1.5 + 1.5 * t;
+        filter.outerStrength =
+          baseStrength * (1.0 + (brightness - 1.0) * 2 * t);
       },
     };
   },
