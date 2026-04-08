@@ -48,6 +48,21 @@ function handleWarpAgree(client: Client, reader: EoReader) {
   const packet = WarpAgreeServerPacket.deserialize(reader);
   client.nearby = packet.nearby;
 
+  // Clear and re-detect boss NPCs on the new map
+  client.awakenedBosses.clear();
+  client.bossAdds.clear();
+  client.pendingAddsDetection = false;
+  for (const npc of client.nearby.npcs) {
+    const record = client.getEnfRecordById(npc.id);
+    if (record?.boss) {
+      client.emit('bossAppeared', {
+        npcIndex: npc.index,
+        npcId: npc.id,
+        name: record.name,
+      });
+    }
+  }
+
   if (
     packet.warpTypeData instanceof WarpAgreeServerPacket.WarpTypeDataMapSwitch
   ) {

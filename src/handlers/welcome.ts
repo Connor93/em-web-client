@@ -153,6 +153,19 @@ function handleEnterGame(
   client.spells = data.spells;
   client.weight = data.weight;
   client.nearby = data.nearby;
+
+  // Detect boss NPCs on the map at login
+  for (const npc of client.nearby.npcs) {
+    const record = client.getEnfRecordById(npc.id);
+    if (record?.boss) {
+      client.emit('bossAppeared', {
+        npcIndex: npc.index,
+        npcId: npc.id,
+        name: record.name,
+      });
+    }
+  }
+
   client.usageTicks = USAGE_TICKS;
   client.setState(GameState.InGame);
   client.emit('enterGame', { news: data.news });
