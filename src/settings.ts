@@ -11,6 +11,7 @@ export interface GameSettings {
   uiScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x' | '2.5x' | '3x';
   fpsLimit: 'Unlimited' | '60' | '30' | '20';
   wasdMovement: 'enabled' | 'disabled';
+  weaponAuras: 'enabled' | 'disabled';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -26,6 +27,7 @@ const DEFAULTS: GameSettings = {
   uiScale: '1x',
   fpsLimit: '30',
   wasdMovement: 'enabled',
+  weaponAuras: 'enabled',
 };
 
 export const SETTING_OPTIONS: {
@@ -41,6 +43,7 @@ export const SETTING_OPTIONS: {
   uiScale: ['1x', '1.25x', '1.5x', '1.75x', '2x', '2.5x', '3x'],
   fpsLimit: ['Unlimited', '60', '30', '20'],
   wasdMovement: ['enabled', 'disabled'],
+  weaponAuras: ['enabled', 'disabled'] as const,
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -52,6 +55,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   ghostNpcs: 'Ghost NPCs',
   movementSmoothing: 'Movement',
   wasdMovement: 'WASD Keys',
+  weaponAuras: 'Weapon Auras',
   uiScale: 'UI Scale',
   fpsLimit: 'FPS Limit',
 };

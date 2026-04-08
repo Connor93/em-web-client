@@ -26,6 +26,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'ghostNpcs',
   'movementSmoothing',
   'wasdMovement',
+  'weaponAuras',
   'uiScale',
   'fpsLimit',
 ];
