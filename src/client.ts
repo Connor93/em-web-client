@@ -40,6 +40,7 @@ import mitt, { type Emitter } from 'mitt';
 // biome-ignore lint/style/useImportType: used as values in initPixi
 import { Application, Container } from 'pixi.js';
 import { Atlas } from './atlas';
+import { AuraManager } from './aura/aura-manager';
 import type { PacketBus } from './bus';
 import type { ChatBubble } from './chat-bubble';
 import { clearRectangles } from './collision';
@@ -191,6 +192,7 @@ export class Client {
     new Map();
   /** Tracks NPC indices that are summoned adds (for glow effect) */
   bossAdds: Set<number> = new Set();
+  auraManager: AuraManager | null = null;
   characterHealthBars: Map<number, HealthBar> = new Map();
   characterEmotes: Map<number, Emote> = new Map();
   damageTracker = new DamageTracker();
@@ -350,6 +352,11 @@ export class Client {
       const mainMenuLogo =
         document.querySelector<HTMLDivElement>('#main-menu-logo')!;
       mainMenuLogo!.setAttribute('data-slogan', config.slogan);
+
+      if (config.dashboardUrl) {
+        this.auraManager = new AuraManager(config.dashboardUrl);
+        this.auraManager.fetch();
+      }
     });
     this.atlas = new Atlas(this);
     this.sans11 = new Sans11Font(this.atlas);

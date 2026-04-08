@@ -6,6 +6,7 @@ type Config = {
   title: string;
   slogan: string;
   creditsUrl: string;
+  dashboardUrl?: string;
   autoLogin?: {
     username: string;
     password: string;
