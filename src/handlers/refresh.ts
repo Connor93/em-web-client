@@ -9,6 +9,9 @@ import type { Client } from '../client';
 function handleRefreshReply(client: Client, reader: EoReader) {
   const packet = RefreshReplyServerPacket.deserialize(reader);
   client.nearby = packet.nearby;
+  client.awakenedBosses.clear();
+  client.bossAdds.clear();
+  client.pendingAddsDetection = false;
   client.atlas.reset();
   client.atlas.refresh();
 }

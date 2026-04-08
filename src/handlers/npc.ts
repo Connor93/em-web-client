@@ -113,6 +113,26 @@ function handleNpcAgree(client: Client, reader: EoReader) {
     } else {
       client.nearby.npcs.push(npc);
     }
+
+    const spawnedRecord = client.getEnfRecordById(npc.id);
+    if (spawnedRecord?.boss) {
+      client.emit('bossAppeared', {
+        npcIndex: npc.index,
+        npcId: npc.id,
+        name: spawnedRecord.name,
+      });
+    }
+
+    // Track summoned adds
+    if (client.pendingAddsDetection && !spawnedRecord?.boss) {
+      client.bossAdds.add(npc.index);
+    }
+
+    if (client.pendingAddsDetection) {
+      setTimeout(() => {
+        client.pendingAddsDetection = false;
+      }, 500);
+    }
   }
 
   client.atlas.refresh();
@@ -127,7 +147,18 @@ function handleNpcSpec(client: Client, reader: EoReader) {
     new HealthBar(0, damage, 0, isCritical),
   );
 
-  client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
+  const deadNpcIndex = packet.npcKilledData.npcIndex;
+  const deadNpc = client.nearby.npcs.find((n) => n.index === deadNpcIndex);
+  if (deadNpc) {
+    const deadRecord = client.getEnfRecordById(deadNpc.id);
+    if (deadRecord?.boss) {
+      client.emit('bossDied', { npcIndex: deadNpcIndex });
+      client.awakenedBosses.delete(deadNpcIndex);
+    }
+    client.bossAdds.delete(deadNpcIndex);
+  }
+
+  client.setNpcDeathAnimation(deadNpcIndex);
 
   if (packet.npcKilledData.dropIndex) {
     const item = new ItemMapInfo();
@@ -290,6 +321,14 @@ function handleNpcReply(client: Client, reader: EoReader) {
     npc.index,
     new HealthBar(packet.hpPercentage, damage, 0, isCritical),
   );
+
+  if (record.boss) {
+    client.emit('bossHealthUpdate', {
+      npcIndex: npc.index,
+      npcId: npc.id,
+      healthPercentage: packet.hpPercentage,
+    });
+  }
 
   if (
     packet.playerId === client.playerId &&
