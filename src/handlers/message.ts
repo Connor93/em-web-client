@@ -56,6 +56,17 @@ function handleBossMessage(client: Client, message: string): void {
   // All other [BOSS_*] messages are suppressed from chat (handled by boss state packet)
 }
 
+function isConfigReload(message: string): boolean {
+  return message.startsWith('[CONFIG_RELOAD]');
+}
+
+function handleConfigReload(client: Client, message: string): void {
+  const target = message.replace('[CONFIG_RELOAD]', '');
+  if (target === 'weapon_auras' && client.auraManager) {
+    client.auraManager.fetch();
+  }
+}
+
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
   // Also emit for guild panel buff aggregation
@@ -64,6 +75,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
   // Intercept boss events — handle UI state, suppress from chat
   if (isBossMessage(packet.message)) {
     handleBossMessage(client, packet.message);
+    return;
+  }
+
+  if (isConfigReload(packet.message)) {
+    handleConfigReload(client, packet.message);
     return;
   }
 
