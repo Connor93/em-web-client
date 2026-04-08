@@ -1,0 +1,159 @@
+#boss-bars {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#boss-bars.hidden {
+  display: none;
+}
+
+.boss-bar {
+  width: 340px;
+  text-align: center;
+}
+
+.boss-bar__name {
+  font-family: serif;
+  font-size: 14px;
+  color: #e0d8c8;
+  margin-bottom: 3px;
+  -webkit-text-stroke: 0.8px #000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 4px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.7);
+}
+
+.boss-bar__track {
+  height: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #444;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.boss-bar__fill {
+  height: 100%;
+  background: linear-gradient(to bottom, #c03030, #901818);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.boss-bar__percentage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  color: #fff;
+  line-height: 16px;
+  text-shadow: 0 1px 2px #000;
+}
+
+.boss-bar__status-tags {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.boss-bar--awakened .boss-bar__name {
+  color: #ffcc00;
+  text-shadow:
+    0 0 6px rgba(255, 180, 0, 0.6),
+    0 0 4px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.7);
+}
+
+.boss-bar--awakened .boss-bar__track {
+  height: 18px;
+  border-color: #ff8800;
+  box-shadow: 0 0 6px rgba(255, 136, 0, 0.3);
+}
+
+.boss-bar--awakened .boss-bar__fill {
+  background: linear-gradient(to bottom, #ff6600, #cc3300);
+}
+
+.boss-bar--awakened .boss-bar__percentage {
+  line-height: 18px;
+}
+
+.boss-bar--enraged .boss-bar__track {
+  border-color: #ff2200;
+  animation: enrage-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes enrage-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 0, 0, 0.8);
+  }
+}
+
+.boss-bar__tag {
+  font-size: 10px;
+  padding: 0 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.boss-bar__tag--enraged {
+  color: #ff6666;
+  background: rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 60, 60, 0.4);
+}
+
+.boss-bar__tag--shielded {
+  color: #6699ff;
+  background: rgba(0, 100, 255, 0.15);
+  border: 1px solid rgba(80, 140, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  #boss-bars {
+    top: auto;
+    bottom: 130px;
+  }
+
+  .boss-bar {
+    width: 260px;
+  }
+
+  .boss-bar__name {
+    font-size: 12px;
+  }
+
+  .boss-bar__track {
+    height: 12px;
+  }
+
+  .boss-bar__percentage {
+    font-size: 9px;
+    line-height: 12px;
+  }
+
+  .boss-bar__status-tags {
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .boss-bar__tag {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+}
