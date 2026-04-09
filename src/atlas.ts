@@ -2239,6 +2239,32 @@ export class Atlas {
           }
         }
 
+        if (
+          character.equipment.weapon &&
+          index === CharacterFrame.MeleeAttackDownRight2
+        ) {
+          // Draw the front weapon frame — designed to show the weapon
+          // extending outward during the swing animation
+          const graphicId = (character.equipment.weapon - 1) * 100 + 17;
+          const bmp = this.getBmp(
+            character.gender === Gender.Female
+              ? GfxType.FemaleWeapons
+              : GfxType.MaleWeapons,
+            graphicId,
+          );
+          if (bmp) {
+            const offset =
+              WEAPON_OFFSETS[character.gender][
+                CharacterFrame.MeleeAttackDownRight2
+              ];
+            const destX =
+              HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
+            const destY =
+              HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
+            this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+          }
+        }
+
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
 
         if (
