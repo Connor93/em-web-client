@@ -2427,14 +2427,16 @@ export class MapRenderer {
       return;
     }
 
-    // Compute the screen-space center of the target tile (same math as tile effects)
+    // Compute the screen-space center of the target tile.
+    // The tile effect math computes the top-left corner of the tile rect;
+    // we need the center for the diamond, so we add HALF_TILE back.
     const tileScreenX = (target.x - target.y) * HALF_TILE_WIDTH;
     const tileScreenY = (target.x + target.y) * HALF_TILE_HEIGHT;
     const centerX = Math.floor(
-      tileScreenX - HALF_TILE_WIDTH - playerScreen.x + this._halfGameWidth,
+      tileScreenX - playerScreen.x + this._halfGameWidth,
     );
     const centerY = Math.floor(
-      tileScreenY - HALF_TILE_HEIGHT - playerScreen.y + this._halfGameHeight,
+      tileScreenY - playerScreen.y + this._halfGameHeight,
     );
 
     // Gentle pulse: alpha oscillates between 0.35 and 0.65
