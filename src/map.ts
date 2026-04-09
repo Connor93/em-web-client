@@ -1139,7 +1139,6 @@ export class MapRenderer {
 
     // Weapon aura sprite renders BEFORE the character so it appears behind.
     // Skip for ghost trail (justCharacter = true) to avoid double-rendering.
-    let floatYOffset = 0;
     if (
       !justCharacter &&
       settings.get('weaponAuras') === 'enabled' &&
@@ -1179,8 +1178,7 @@ export class MapRenderer {
           if (effect.update) effect.update(now);
         }
         if (aura.floatEffect) {
-          floatYOffset = aura.floatEffect.getYOffset(now);
-          weaponSprite.y += floatYOffset;
+          weaponSprite.y += aura.floatEffect.getYOffset(now);
         }
         weaponSprite.filters = aura.effects.map((e) => e.filter);
       } else if (aura) {
@@ -1188,9 +1186,7 @@ export class MapRenderer {
         for (const effect of aura.effects) {
           if (effect.update) effect.update(now);
         }
-        if (aura.floatEffect) {
-          floatYOffset = aura.floatEffect.getYOffset(now);
-        }
+        // Float without weapon texture — no visual effect (weapon sprite needed)
       }
     }
 
@@ -1206,7 +1202,7 @@ export class MapRenderer {
       } else {
         sprite.x = Math.floor(screenX + frame.xOffset);
       }
-      sprite.y = screenY + floatYOffset;
+      sprite.y = screenY;
       sprite.alpha = alpha;
       sprite.filters = [];
     }
