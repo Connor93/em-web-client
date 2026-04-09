@@ -1148,7 +1148,10 @@ export class MapRenderer {
         character.playerId,
         characterFrame,
       );
-      const aura = this.client.auraManager.getAura(character.equipment.weapon);
+      const aura = this.client.auraManager.getAura(
+        character.equipment.weapon,
+        character.playerId,
+      );
 
       if (weaponTexture && aura) {
         const weaponSprite = this.ensureWorldSprite(

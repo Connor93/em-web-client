@@ -6,15 +6,17 @@ import type {
   FloatEffect,
 } from './types';
 
-interface CachedAura {
+export interface CachedAura {
   config: AuraConfig;
   effects: AuraEffect[];
   floatEffect?: FloatEffect;
 }
 
 export class AuraManager {
-  /** Lookup by weapon graphic ID */
-  private auras = new Map<number, CachedAura>();
+  /** Configs by weapon graphic ID */
+  private configs = new Map<number, AuraConfig>();
+  /** Per-character effect instances keyed by playerId */
+  private characterAuras = new Map<number, CachedAura>();
   private dashboardUrl: string;
 
   constructor(dashboardUrl: string) {
@@ -36,25 +38,31 @@ export class AuraManager {
   }
 
   private rebuild(configs: AuraConfig[]): void {
-    this.auras.clear();
+    this.configs.clear();
+    this.characterAuras.clear();
 
     for (const config of configs) {
       if (config.graphicId <= 0 || config.effects.length === 0) continue;
-
-      const { filters, floatEffect } = buildEffects(config);
-      this.auras.set(config.graphicId, {
-        config,
-        effects: filters,
-        floatEffect,
-      });
+      this.configs.set(config.graphicId, config);
     }
   }
 
-  getAura(weaponGraphicId: number): CachedAura | undefined {
-    return this.auras.get(weaponGraphicId);
+  /** Get or create per-character effect instances for a weapon aura. */
+  getAura(weaponGraphicId: number, playerId: number): CachedAura | undefined {
+    const config = this.configs.get(weaponGraphicId);
+    if (!config) return undefined;
+
+    let cached = this.characterAuras.get(playerId);
+    if (cached && cached.config === config) return cached;
+
+    // Build fresh filter instances for this character
+    const { filters, floatEffect } = buildEffects(config);
+    cached = { config, effects: filters, floatEffect };
+    this.characterAuras.set(playerId, cached);
+    return cached;
   }
 
   hasAuras(): boolean {
-    return this.auras.size > 0;
+    return this.configs.size > 0;
   }
 }
