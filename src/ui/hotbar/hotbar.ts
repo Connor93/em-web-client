@@ -72,6 +72,12 @@ export class Hotbar extends Base {
       const element = this.container.children[index] as HTMLDivElement;
       element.innerHTML = '';
 
+      element.classList.toggle(
+        'spell-active',
+        slot.type === SlotType.Skill &&
+          this.client.selectedSpellId === slot.typeId,
+      );
+
       if (slot.type === SlotType.Skill) {
         const skill = this.client.getEsfRecordById(slot.typeId);
         if (!skill) {
@@ -81,10 +87,6 @@ export class Hotbar extends Base {
         const img = document.createElement('div');
         img.classList.add('skill');
         img.style.backgroundImage = `url(/gfx/gfx025/${skill.iconId + 100}.png)`;
-
-        if (this.client.selectedSpellId === slot.typeId) {
-          img.style.backgroundPositionX = '-34px';
-        }
 
         element.appendChild(img);
       } else {
