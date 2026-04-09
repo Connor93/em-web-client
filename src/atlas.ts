@@ -2280,20 +2280,6 @@ export class Atlas {
           CHARACTER_FRAME_SIZE,
         );
 
-        // Erase weapon canvas pixels that overlap with the character body
-        // so the weapon glow doesn't show through the character
-        if (character.equipment.weapon) {
-          this.tmpWeaponCtx.globalCompositeOperation = 'destination-out';
-          this.tmpWeaponCtx.drawImage(
-            this.tmpBehindCanvas,
-            0,
-            0,
-            CHARACTER_FRAME_SIZE,
-            CHARACTER_FRAME_SIZE,
-          );
-          this.tmpWeaponCtx.globalCompositeOperation = 'source-over';
-        }
-
         const frameBounds = {
           x: CHARACTER_FRAME_SIZE,
           y: CHARACTER_FRAME_SIZE,
