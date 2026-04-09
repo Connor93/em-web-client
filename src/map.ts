@@ -18,7 +18,6 @@ import {
 import { type Client, GameState } from './client';
 import {
   getCharacterIntersecting,
-  getCharacterRectangle,
   getNpcIntersecting,
   Rectangle,
   setBoardRectangle,
@@ -37,10 +36,6 @@ import {
   HALF_TILE_HEIGHT,
   HALF_TILE_WIDTH,
   NPC_IDLE_ANIMATION_TICKS,
-  PLAYER_MENU_HEIGHT,
-  PLAYER_MENU_ITEM_HEIGHT,
-  PLAYER_MENU_OFFSET_Y,
-  PLAYER_MENU_WIDTH,
   TILE_HEIGHT,
   TILE_WIDTH,
   WALK_HEIGHT_FACTOR,
