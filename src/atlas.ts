@@ -2247,34 +2247,13 @@ export class Atlas {
             character.gender,
             character.equipment.weapon,
           );
-          this.renderWeaponFrontToCanvas(
-            this.tmpWeaponCtx,
-            character.gender,
-            character.equipment.weapon,
-          );
+          // Don't draw weapon front to weapon canvas — it would overlap
+          // the character body. The weapon-behind drawing is enough to
+          // generate the glow shape, and the weapon itself is already
+          // visible in the composited character texture.
         }
 
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
-
-        // On attack frames where the weapon is drawn in front of the body,
-        // erase weapon canvas pixels that overlap with the body so the glow
-        // doesn't show through the character's arm/torso.
-        // Use tmpCtx as the mask — it has the body front layers (skin, armor,
-        // boots, hat, hair, shield) but NOT the weapon behind layer.
-        if (
-          character.equipment.weapon &&
-          index === CharacterFrame.MeleeAttackDownRight2
-        ) {
-          this.tmpWeaponCtx.globalCompositeOperation = 'destination-out';
-          this.tmpWeaponCtx.drawImage(
-            this.tmpCanvas,
-            0,
-            0,
-            CHARACTER_FRAME_SIZE,
-            CHARACTER_FRAME_SIZE,
-          );
-          this.tmpWeaponCtx.globalCompositeOperation = 'source-over';
-        }
 
         if (
           character.equipment.weapon &&
