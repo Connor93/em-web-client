@@ -1154,16 +1154,52 @@ export class MapRenderer {
       sprite.y = screenY;
       sprite.alpha = alpha;
 
-      // Weapon aura effects
+      sprite.filters = [];
+
+      // Weapon aura overlay sprite — apply glow only to the weapon texture
       if (
         settings.get('weaponAuras') === 'enabled' &&
         this.client.auraManager &&
         character.equipment.weapon > 0
       ) {
+        const weaponTexture = this.client.atlas.getCharacterWeaponTexture(
+          character.playerId,
+          characterFrame,
+        );
         const aura = this.client.auraManager.getAura(
           character.equipment.weapon,
         );
-        if (aura) {
+
+        if (weaponTexture && aura) {
+          const weaponSprite = this.ensureWorldSprite(
+            `character:${character.playerId}:weapon-aura`,
+            `map:character-weapon-aura id=${character.playerId}`,
+          );
+          weaponSprite.texture = weaponTexture;
+          if (mirrored) {
+            weaponSprite.scale.x = -1;
+            weaponSprite.x = Math.floor(
+              screenX + frame.mirroredXOffset + frame.w,
+            );
+          } else {
+            weaponSprite.scale.x = 1;
+            weaponSprite.x = Math.floor(screenX + frame.xOffset);
+          }
+          weaponSprite.y = screenY;
+          weaponSprite.alpha = alpha;
+
+          const now = performance.now();
+          for (const effect of aura.effects) {
+            if (effect.update) effect.update(now);
+          }
+          if (aura.floatEffect) {
+            const yOffset = aura.floatEffect.getYOffset(now);
+            weaponSprite.y += yOffset;
+            sprite.y += yOffset;
+          }
+          weaponSprite.filters = aura.effects.map((e) => e.filter);
+        } else if (aura) {
+          // Aura exists but no weapon texture yet — apply float to main sprite
           const now = performance.now();
           for (const effect of aura.effects) {
             if (effect.update) effect.update(now);
@@ -1171,12 +1207,7 @@ export class MapRenderer {
           if (aura.floatEffect) {
             sprite.y += aura.floatEffect.getYOffset(now);
           }
-          sprite.filters = aura.effects.map((e) => e.filter);
-        } else {
-          sprite.filters = [];
         }
-      } else {
-        sprite.filters = [];
       }
     }
 
