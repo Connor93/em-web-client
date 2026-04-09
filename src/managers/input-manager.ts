@@ -1,4 +1,10 @@
-import { Coords, ItemGetClientPacket, MapTileSpec, SitState } from 'eolib';
+import {
+  Coords,
+  ItemGetClientPacket,
+  MapTileSpec,
+  SitState,
+  SkillType,
+} from 'eolib';
 import type { Client } from '../client';
 import {
   getBoardIntersecting,
@@ -31,6 +37,46 @@ export function handleClick(client: Client, e: MouseEvent): void {
   ) {
     client.stand();
     return;
+  }
+
+  if (client.selectedSpellId && client.mousePosition) {
+    const spellRecord = client.getEsfRecordById(client.selectedSpellId);
+    if (spellRecord) {
+      const characterAt = getCharacterIntersecting(client.mousePosition);
+      const npcAt = getNpcIntersecting(client.mousePosition);
+
+      if (spellRecord.type === SkillType.Heal) {
+        if (characterAt) {
+          const character = client.getCharacterById(characterAt.id);
+          if (character) {
+            client.clickCharacter(character);
+            return;
+          }
+        }
+        if (npcAt) {
+          const npc = client.nearby.npcs.find((n) => n.index === npcAt.id);
+          if (npc) {
+            client.clickNpc(npc);
+            return;
+          }
+        }
+      } else {
+        if (npcAt) {
+          const npc = client.nearby.npcs.find((n) => n.index === npcAt.id);
+          if (npc) {
+            client.clickNpc(npc);
+            return;
+          }
+        }
+        if (characterAt) {
+          const character = client.getCharacterById(characterAt.id);
+          if (character) {
+            client.clickCharacter(character);
+            return;
+          }
+        }
+      }
+    }
   }
 
   if (client.mouseCoords) {
