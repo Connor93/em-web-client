@@ -70,6 +70,12 @@ export function useHotbarSlot(client: Client, index: number): void {
       return;
     }
 
+    if (client.selectedSpellId === slot.typeId) {
+      client.selectedSpellId = 0;
+      client.emit('spellQueued', undefined);
+      return;
+    }
+
     client.selectedSpellId = slot.typeId;
     client.emit('spellQueued', undefined);
     playSfxById(SfxId.SpellActivate);
