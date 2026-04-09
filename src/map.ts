@@ -2038,15 +2038,17 @@ export class MapRenderer {
           const className =
             this.client.getEcfRecordById(character.classId)?.name ?? '';
 
+          const isLocalPlayer = character.playerId === this.client.playerId;
+
           this.playerTooltip.update(
             {
               name: `${charName}${guildSuffix}`,
-              level: character.level,
+              level: isLocalPlayer ? this.client.level : character.level,
               className,
-              hp: character.hp,
-              maxHp: character.maxHp,
-              tp: character.tp,
-              maxTp: character.maxTp,
+              hp: isLocalPlayer ? this.client.hp : character.hp,
+              maxHp: isLocalPlayer ? this.client.maxHp : character.maxHp,
+              tp: isLocalPlayer ? this.client.tp : character.tp,
+              maxTp: isLocalPlayer ? this.client.maxTp : character.maxTp,
             },
             pageX,
             pageY,
