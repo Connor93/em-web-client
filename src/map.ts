@@ -1137,9 +1137,11 @@ export class MapRenderer {
       alpha = Math.min(alpha, 0.4);
     }
 
-    // Weapon aura sprite renders BEFORE the character so it appears behind
+    // Weapon aura sprite renders BEFORE the character so it appears behind.
+    // Skip for ghost trail (justCharacter = true) to avoid double-rendering.
     let floatYOffset = 0;
     if (
+      !justCharacter &&
       settings.get('weaponAuras') === 'enabled' &&
       this.client.auraManager &&
       character.equipment.weapon > 0
