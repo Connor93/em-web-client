@@ -2160,6 +2160,17 @@ export class Atlas {
           );
         }
 
+        // Draw weapon front BEFORE skin so the arm renders on top of the weapon
+        if (
+          character.equipment.weapon &&
+          index === CharacterFrame.MeleeAttackDownRight2
+        ) {
+          this.renderCharacterWeaponFront(
+            character.gender,
+            character.equipment.weapon,
+          );
+        }
+
         const skinSize = this.getCharacterFrameSize(index);
         this.renderCharacterSkin(
           character.gender,
@@ -2237,20 +2248,6 @@ export class Atlas {
               false,
             );
           }
-        }
-
-        if (
-          character.equipment.weapon &&
-          index === CharacterFrame.MeleeAttackDownRight2
-        ) {
-          this.renderCharacterWeaponFront(
-            character.gender,
-            character.equipment.weapon,
-          );
-          // Don't draw weapon front to weapon canvas — it would overlap
-          // the character body. The weapon-behind drawing is enough to
-          // generate the glow shape, and the weapon itself is already
-          // visible in the composited character texture.
         }
 
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
