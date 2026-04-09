@@ -44,6 +44,7 @@ import { ControlEditor } from './ui/control-editor';
 import { CreateAccountForm } from './ui/create-account';
 import { CreateCharacterForm } from './ui/create-character';
 import { ExitGame } from './ui/exit-game';
+import { ExpeditionTracker } from './ui/expedition-tracker/expedition-tracker';
 import { GuildDialog } from './ui/guild-dialog/guild-dialog';
 import { GuildPanel } from './ui/guild-panel/guild-panel';
 import { Hotbar } from './ui/hotbar/hotbar';
@@ -251,7 +252,8 @@ const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
-const partyHud = new PartyHud(client);
+const expeditionTracker = new ExpeditionTracker(client);
+const _partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
 
@@ -404,6 +406,7 @@ wireClientEvents({
   pmChatManager,
   autolootPanel,
   bossBar,
+  expeditionTracker,
   reconnectOverlay,
   initializeSocket,
   resizeCanvases,

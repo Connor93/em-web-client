@@ -6,6 +6,7 @@ import { loadAutolootSettings } from '../managers/autoloot-manager';
 import { playSfxById, SfxId } from '../sfx';
 import type { BossBar } from '../ui/boss-bar';
 import { ChatIcon } from '../ui/chat/chat';
+import type { ExpeditionTracker } from '../ui/expedition-tracker/expedition-tracker';
 import { showGameToast } from '../ui/game-toast/game-toast';
 import { createMobileSplitView } from '../ui/utils';
 
@@ -142,6 +143,7 @@ export interface ClientEventDeps {
   };
   autolootPanel: { show(): void; hide(): void };
   bossBar: BossBar;
+  expeditionTracker: ExpeditionTracker;
   reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
   resizeCanvases: () => void;
@@ -571,5 +573,26 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('bossExpGain', ({ amount }) => {
     showGameToast(EOResourceID.STATUS_LABEL_TYPE_INFORMATION, amount, 'exp');
+  });
+
+  // Expedition tracker
+  const { expeditionTracker } = deps;
+
+  client.on('expeditionComplete', ({ tier }) => {
+    showGameToast(
+      EOResourceID.STATUS_LABEL_TYPE_WARNING,
+      `${tier.charAt(0).toUpperCase() + tier.slice(1)} expedition complete!`,
+    );
+  });
+
+  client.on('expeditionCancelled', ({ cooldownMinutes }) => {
+    showGameToast(
+      EOResourceID.STATUS_LABEL_TYPE_WARNING,
+      `Expedition cancelled. ${cooldownMinutes}min cooldown.`,
+    );
+  });
+
+  client.on('walked', () => {
+    expeditionTracker.onPlayerMoved();
   });
 }

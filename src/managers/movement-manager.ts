@@ -69,6 +69,7 @@ export function walk(
   client.idleTicks = INITIAL_IDLE_TICKS;
   client.setAmbientVolume();
   autolootNearby(client);
+  client.emit('walked', undefined);
 }
 
 export function attack(

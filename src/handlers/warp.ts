@@ -92,10 +92,12 @@ function handleWarpAgree(client: Client, reader: EoReader) {
       client.setMap(map!);
       client.atlas.refresh();
       client.movementController.freeze = false;
+      client.emit('walked', undefined);
     });
   } else {
     client.atlas.refresh();
     client.movementController.freeze = false;
+    client.emit('walked', undefined);
   }
 }
 

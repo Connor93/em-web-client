@@ -821,6 +821,8 @@ export class MapRenderer {
       this.addEffectFrontSprite(effect, effectKeyBase);
     }
 
+    this.addExpeditionTargetHighlight(playerScreen);
+
     // Player body at 40% alpha (ghost trail effect)
     const main = dynamics.find(
       (e) =>
@@ -2401,5 +2403,62 @@ export class MapRenderer {
     }
 
     return { x: 0, y: 0 };
+  }
+
+  /**
+   * Draws a pulsing gold diamond highlight on the expedition target tile when
+   * the player is on the correct map and within 5 tiles (Manhattan distance).
+   * Hidden when combat is active or conditions are not met.
+   */
+  private addExpeditionTargetHighlight(playerScreen: Vector2) {
+    const KEY = 'expedition:target-highlight';
+
+    const expedition = this.client.expedition;
+    const target = expedition?.target;
+
+    if (
+      !expedition ||
+      !target ||
+      this.client.mapId !== target.mapId ||
+      expedition.combat.active
+    ) {
+      return;
+    }
+
+    const player = this.client.getPlayerCoords();
+    const distance =
+      Math.abs(player.x - target.x) + Math.abs(player.y - target.y);
+    if (distance > 5) {
+      return;
+    }
+
+    // Compute the screen-space center of the target tile (same math as tile effects)
+    const tileScreenX = (target.x - target.y) * HALF_TILE_WIDTH;
+    const tileScreenY = (target.x + target.y) * HALF_TILE_HEIGHT;
+    const centerX = Math.floor(
+      tileScreenX - HALF_TILE_WIDTH - playerScreen.x + this._halfGameWidth,
+    );
+    const centerY = Math.floor(
+      tileScreenY - HALF_TILE_HEIGHT - playerScreen.y + this._halfGameHeight,
+    );
+
+    // Gentle pulse: alpha oscillates between 0.35 and 0.65
+    const pulse = Math.sin(Date.now() / 300);
+    const alpha = 0.5 + pulse * 0.15;
+
+    const graphics = this.ensureUiGraphics(
+      KEY,
+      'ui:expedition-target-highlight',
+    );
+    graphics.alpha = alpha;
+
+    // Draw an isometric diamond matching the tile footprint
+    graphics.poly([
+      { x: centerX, y: centerY - HALF_TILE_HEIGHT },
+      { x: centerX + HALF_TILE_WIDTH, y: centerY },
+      { x: centerX, y: centerY + HALF_TILE_HEIGHT },
+      { x: centerX - HALF_TILE_WIDTH, y: centerY },
+    ]);
+    graphics.fill({ color: 0xffd700 });
   }
 }

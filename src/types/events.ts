@@ -206,6 +206,7 @@ export type ClientEvents = {
   bossLoot: { items: string[] };
   bossExpGain: { amount: string };
   bossBarsReset: undefined;
+  walked: undefined;
   // Expedition events
   expeditionStarted: { tier: string; itemId: number; totalSteps: number };
   expeditionClue: { step: number; totalSteps: number; clue: string };
