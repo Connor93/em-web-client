@@ -233,6 +233,8 @@ type CharacterAtlasEntry = {
   hash: string;
   frames: (Frame | undefined)[];
   pendingFrames?: (Frame | undefined)[];
+  weaponFrames: (Frame | undefined)[];
+  pendingWeaponFrames?: (Frame | undefined)[];
 };
 
 export type TileAtlasEntry = {
@@ -409,8 +411,12 @@ export class Atlas {
   private currentAtlasIndex = 0;
   private ctx: CanvasRenderingContext2D;
   private temporaryCharacterFrames: CharacterFrameImg[] = [];
+  private temporaryWeaponFrames: CharacterFrameImg[] = [];
+  private weaponTextures = new Map<string, Texture>();
   private tmpBehindCanvas: HTMLCanvasElement;
   private tmpBehindCtx: CanvasRenderingContext2D;
+  private tmpWeaponCanvas: HTMLCanvasElement;
+  private tmpWeaponCtx: CanvasRenderingContext2D;
   private tmpCanvas: HTMLCanvasElement;
   private tmpCtx: CanvasRenderingContext2D;
 
@@ -436,6 +442,13 @@ export class Atlas {
     this.tmpBehindCanvas.width = CHARACTER_FRAME_SIZE;
     this.tmpBehindCanvas.height = CHARACTER_FRAME_SIZE;
     this.tmpBehindCtx = this.tmpBehindCanvas.getContext('2d', {
+      willReadFrequently: true,
+    })!;
+
+    this.tmpWeaponCanvas = document.createElement('canvas');
+    this.tmpWeaponCanvas.width = CHARACTER_FRAME_SIZE;
+    this.tmpWeaponCanvas.height = CHARACTER_FRAME_SIZE;
+    this.tmpWeaponCtx = this.tmpWeaponCanvas.getContext('2d', {
       willReadFrequently: true,
     })!;
   }
@@ -1447,6 +1460,7 @@ export class Atlas {
             equipment: char.equipment,
             hash,
             frames,
+            weaponFrames: [],
             tickCount: this.client.tickCount,
           });
         }
@@ -1584,6 +1598,18 @@ export class Atlas {
   private finishUpdatingAtlas() {
     this.placeFrames();
     this.temporaryCharacterFrames = [];
+
+    // Build weapon-only textures from temporary weapon frames
+    for (const [_key, tex] of this.weaponTextures) {
+      tex.destroy(true);
+    }
+    this.weaponTextures.clear();
+    for (const wf of this.temporaryWeaponFrames) {
+      if (!wf.img) continue;
+      const key = `${wf.playerId}:${wf.frameIndex}`;
+      this.weaponTextures.set(key, Texture.from(wf.img));
+    }
+    this.temporaryWeaponFrames = [];
 
     // Swap pending frames → active now that compositing is complete
     for (const character of this.characters) {
@@ -2048,6 +2074,7 @@ export class Atlas {
 
   private preRenderCharacterFrames() {
     this.temporaryCharacterFrames = [];
+    this.temporaryWeaponFrames = [];
     this.tmpCanvas.width = CHARACTER_FRAME_SIZE;
     this.tmpCanvas.height = CHARACTER_FRAME_SIZE;
 
@@ -2064,6 +2091,12 @@ export class Atlas {
 
         this.tmpCtx.clearRect(0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
         this.tmpBehindCtx.clearRect(
+          0,
+          0,
+          CHARACTER_FRAME_SIZE,
+          CHARACTER_FRAME_SIZE,
+        );
+        this.tmpWeaponCtx.clearRect(
           0,
           0,
           CHARACTER_FRAME_SIZE,
@@ -2105,6 +2138,12 @@ export class Atlas {
 
         if (character.equipment.weapon && weaponVisible) {
           this.renderCharacterWeaponBehind(
+            character.gender,
+            character.equipment.weapon,
+            index,
+          );
+          this.renderWeaponToCanvas(
+            this.tmpWeaponCtx,
             character.gender,
             character.equipment.weapon,
             index,
@@ -2208,6 +2247,11 @@ export class Atlas {
             character.gender,
             character.equipment.weapon,
           );
+          this.renderWeaponFrontToCanvas(
+            this.tmpWeaponCtx,
+            character.gender,
+            character.equipment.weapon,
+          );
         }
 
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
@@ -2290,6 +2334,22 @@ export class Atlas {
         );
 
         this.temporaryCharacterFrames.push(characterFrameImg);
+
+        if (character.equipment.weapon) {
+          const weaponFrameImg: CharacterFrameImg = {
+            playerId: character.playerId,
+            frameIndex: index,
+            img: null,
+            loaded: false,
+          };
+          this.pendingCharacterFramePromises.push(
+            createImageBitmap(this.tmpWeaponCanvas).then((bm) => {
+              weaponFrameImg.img = bm;
+              weaponFrameImg.loaded = true;
+            }),
+          );
+          this.temporaryWeaponFrames.push(weaponFrameImg);
+        }
       }
     }
   }
@@ -2858,6 +2918,67 @@ export class Atlas {
     const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
 
     this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+  }
+
+  private renderWeaponToCanvas(
+    ctx: CanvasRenderingContext2D,
+    gender: Gender,
+    weapon: number,
+    frame: CharacterFrame,
+  ) {
+    const graphicId =
+      (weapon - 1) * 100 +
+      (WEAPON_FRAME_MAP as Record<number, number>)[frame] +
+      1;
+
+    const bmp = this.getBmp(
+      gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
+      graphicId,
+    );
+
+    if (!bmp) return;
+
+    const offset = (
+      WEAPON_OFFSETS[gender] as Record<number, { x: number; y: number }>
+    )[frame];
+
+    const destX = Math.floor(
+      HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x,
+    );
+    const destY = Math.floor(
+      HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y,
+    );
+
+    ctx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+  }
+
+  private renderWeaponFrontToCanvas(
+    ctx: CanvasRenderingContext2D,
+    gender: Gender,
+    weapon: number,
+  ) {
+    const graphicId = (weapon - 1) * 100 + 17;
+
+    const bmp = this.getBmp(
+      gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
+      graphicId,
+    );
+
+    if (!bmp) return;
+
+    const offset = WEAPON_OFFSETS[gender][CharacterFrame.MeleeAttackDownRight2];
+
+    const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
+    const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
+
+    ctx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+  }
+
+  getCharacterWeaponTexture(
+    playerId: number,
+    frame: CharacterFrame,
+  ): Texture | undefined {
+    return this.weaponTextures.get(`${playerId}:${frame}`);
   }
 
   private renderCharacterBack(
