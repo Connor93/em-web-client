@@ -998,6 +998,11 @@ export class Atlas {
     this.items = [];
     this.mapId = this.client.mapId;
 
+    for (const [_key, tex] of this.weaponTextures) {
+      tex.destroy(true);
+    }
+    this.weaponTextures.clear();
+
     for (const atlas of this.atlases) {
       const ctx = atlas.getContext();
       atlas.skyline = [{ x: 0, y: 0, w: ATLAS_SIZE }];
@@ -1476,6 +1481,13 @@ export class Atlas {
           (c) => c.playerId === character.playerId,
         )
       ) {
+        // Clean up weapon textures for this character
+        for (const [key, tex] of this.weaponTextures) {
+          if (key.startsWith(`${character.playerId}:`)) {
+            tex.destroy(true);
+            this.weaponTextures.delete(key);
+          }
+        }
         this.characters.splice(i, 1);
       }
     }
@@ -1599,14 +1611,15 @@ export class Atlas {
     this.placeFrames();
     this.temporaryCharacterFrames = [];
 
-    // Build weapon-only textures from temporary weapon frames
-    for (const [_key, tex] of this.weaponTextures) {
-      tex.destroy(true);
-    }
-    this.weaponTextures.clear();
+    // Build weapon-only textures from temporary weapon frames.
+    // Only replace textures for characters that were re-rendered this cycle.
     for (const wf of this.temporaryWeaponFrames) {
       if (!wf.img) continue;
       const key = `${wf.playerId}:${wf.frameIndex}`;
+      const existing = this.weaponTextures.get(key);
+      if (existing) {
+        existing.destroy(true);
+      }
       this.weaponTextures.set(key, Texture.from(wf.img));
     }
     this.temporaryWeaponFrames = [];
