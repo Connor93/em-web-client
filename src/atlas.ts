@@ -2239,16 +2239,6 @@ export class Atlas {
           }
         }
 
-        if (
-          character.equipment.weapon &&
-          index === CharacterFrame.MeleeAttackDownRight2
-        ) {
-          this.renderCharacterWeaponFront(
-            character.gender,
-            character.equipment.weapon,
-          );
-        }
-
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
 
         if (
