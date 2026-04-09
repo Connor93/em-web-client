@@ -142,15 +142,15 @@ function handleTreasureMessage(client: Client, message: string): void {
     }
   } else if (message.startsWith('[TREASURE_COMPLETE]')) {
     const tier = message.replace('[TREASURE_COMPLETE]', '');
-    client.emit('expeditionComplete', { tier });
     client.expedition = null;
+    client.emit('expeditionComplete', { tier });
   } else if (message.startsWith('[TREASURE_CANCEL]')) {
     const cooldownMinutes = Number.parseInt(
       message.replace('[TREASURE_CANCEL]', ''),
       10,
     );
-    client.emit('expeditionCancelled', { cooldownMinutes });
     client.expedition = null;
+    client.emit('expeditionCancelled', { cooldownMinutes });
   } else if (message.startsWith('[TREASURE_RESTORE]')) {
     const parts = message.replace('[TREASURE_RESTORE]', '').split('|');
     if (parts.length >= 4) {
