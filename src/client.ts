@@ -192,6 +192,19 @@ export class Client {
     new Map();
   /** Tracks NPC indices that are summoned adds (for glow effect) */
   bossAdds: Set<number> = new Set();
+  // Expedition state
+  expedition: {
+    active: boolean;
+    tier: string;
+    itemId: number;
+    currentStep: number;
+    totalSteps: number;
+    currentClue: string;
+    clueHistory: { step: number; clue: string; completed: boolean }[];
+    target: { mapId: number; x: number; y: number } | null;
+    combat: { active: boolean; remaining: number };
+    trackerVisible: boolean;
+  } | null = null;
   auraManager: AuraManager | null = null;
   characterHealthBars: Map<number, HealthBar> = new Map();
   characterEmotes: Map<number, Emote> = new Map();

@@ -206,4 +206,22 @@ export type ClientEvents = {
   bossLoot: { items: string[] };
   bossExpGain: { amount: string };
   bossBarsReset: undefined;
+  // Expedition events
+  expeditionStarted: { tier: string; itemId: number; totalSteps: number };
+  expeditionClue: { step: number; totalSteps: number; clue: string };
+  expeditionTarget: { mapId: number; x: number; y: number };
+  expeditionWrongMap: undefined;
+  expeditionCombat: { enemyCount: number };
+  expeditionCombatKill: { remaining: number };
+  expeditionStepComplete: { step: number; totalSteps: number };
+  expeditionComplete: { tier: string };
+  expeditionCancelled: { cooldownMinutes: number };
+  expeditionRestored: {
+    tier: string;
+    itemId: number;
+    step: number;
+    totalSteps: number;
+    clue: string;
+  };
+  expeditionTrackerToggle: { visible: boolean };
 };
