@@ -346,6 +346,10 @@ function handleItemAccept(client: Client, reader: EoReader) {
     return;
   }
 
+  if (reader.remaining > 0) {
+    character.level = reader.getChar();
+  }
+
   client.characterEmotes.set(packet.playerId, new Emote(EmoteType.LevelUp));
   playSfxById(SfxId.LevelUp);
 }
