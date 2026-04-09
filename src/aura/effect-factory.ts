@@ -70,6 +70,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       innerStrength: val(config, 'glowInnerStrength'),
       distance: val(config, 'glowDistance'),
       quality: val(config, 'glowQuality'),
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
     return { filter };
@@ -85,6 +86,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: parseColor(config.color),
       outerStrength: min,
       innerStrength: val(config, 'glowInnerStrength'),
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
@@ -106,6 +108,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: parseColor(config.color),
       outerStrength: intensity,
       innerStrength: 0.3,
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
@@ -134,6 +137,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: parseColor(config.color),
       outerStrength: baseStrength,
       innerStrength: val(config, 'glowInnerStrength'),
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
@@ -155,6 +159,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: parseColor(config.color),
       outerStrength: 2.5,
       innerStrength: 0.3,
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
@@ -175,6 +180,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: parseColor(config.color),
       outerStrength: 2.5,
       innerStrength: 0.3,
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
@@ -193,6 +199,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       thickness: val(config, 'outlineThickness'),
       color: parseColor(outlineColorStr),
       alpha: val(config, 'outlineAlpha'),
+      knockout: true,
     });
     return { filter };
   },
@@ -274,6 +281,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
       color: 0xff0000,
       outerStrength: val(config, 'glowOuterStrength'),
       innerStrength: val(config, 'glowInnerStrength'),
+      knockout: true,
     });
     filter.alpha = val(config, 'alpha');
 
