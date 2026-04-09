@@ -56,6 +56,131 @@ function handleBossMessage(client: Client, message: string): void {
   // All other [BOSS_*] messages are suppressed from chat (handled by boss state packet)
 }
 
+function isTreasureMessage(message: string): boolean {
+  return message.startsWith('[TREASURE_');
+}
+
+function handleTreasureMessage(client: Client, message: string): void {
+  if (message.startsWith('[TREASURE_START]')) {
+    const parts = message.replace('[TREASURE_START]', '').split('|');
+    if (parts.length >= 3) {
+      client.expedition = {
+        active: true,
+        tier: parts[0],
+        itemId: Number.parseInt(parts[1], 10),
+        currentStep: 1,
+        totalSteps: Number.parseInt(parts[2], 10),
+        currentClue: '',
+        clueHistory: [],
+        target: null,
+        combat: { active: false, remaining: 0 },
+        trackerVisible: false,
+      };
+      client.emit('expeditionStarted', {
+        tier: parts[0],
+        itemId: Number.parseInt(parts[1], 10),
+        totalSteps: Number.parseInt(parts[2], 10),
+      });
+    }
+  } else if (message.startsWith('[TREASURE_CLUE]')) {
+    const parts = message.replace('[TREASURE_CLUE]', '').split('|');
+    if (parts.length >= 3 && client.expedition) {
+      const step = Number.parseInt(parts[0], 10);
+      const totalSteps = Number.parseInt(parts[1], 10);
+      const clue = parts.slice(2).join('|'); // Clue may contain pipe chars
+      client.expedition.currentStep = step;
+      client.expedition.totalSteps = totalSteps;
+      client.expedition.currentClue = clue;
+      // Mark previous clues as completed
+      for (const h of client.expedition.clueHistory) {
+        h.completed = true;
+      }
+      client.expedition.clueHistory.push({ step, clue, completed: false });
+      client.emit('expeditionClue', { step, totalSteps, clue });
+    }
+  } else if (message.startsWith('[TREASURE_TARGET]')) {
+    const parts = message.replace('[TREASURE_TARGET]', '').split('|');
+    if (parts.length >= 3 && client.expedition) {
+      const mapId = Number.parseInt(parts[0], 10);
+      const x = Number.parseInt(parts[1], 10);
+      const y = Number.parseInt(parts[2], 10);
+      client.expedition.target = { mapId, x, y };
+      client.emit('expeditionTarget', { mapId, x, y });
+    }
+  } else if (message.startsWith('[TREASURE_WRONGMAP]')) {
+    if (client.expedition) {
+      client.expedition.target = null;
+      client.emit('expeditionWrongMap', undefined);
+    }
+  } else if (message.startsWith('[TREASURE_COMBAT]')) {
+    const count = Number.parseInt(message.replace('[TREASURE_COMBAT]', ''), 10);
+    if (client.expedition) {
+      client.expedition.combat = { active: true, remaining: count };
+      client.emit('expeditionCombat', { enemyCount: count });
+    }
+  } else if (message.startsWith('[TREASURE_COMBATKILL]')) {
+    const remaining = Number.parseInt(
+      message.replace('[TREASURE_COMBATKILL]', ''),
+      10,
+    );
+    if (client.expedition) {
+      client.expedition.combat.remaining = remaining;
+      if (remaining <= 0) {
+        client.expedition.combat.active = false;
+      }
+      client.emit('expeditionCombatKill', { remaining });
+    }
+  } else if (message.startsWith('[TREASURE_STEP]')) {
+    const parts = message.replace('[TREASURE_STEP]', '').split('|');
+    if (parts.length >= 2 && client.expedition) {
+      const step = Number.parseInt(parts[0], 10);
+      const totalSteps = Number.parseInt(parts[1], 10);
+      client.expedition.currentStep = step;
+      client.expedition.combat = { active: false, remaining: 0 };
+      client.emit('expeditionStepComplete', { step, totalSteps });
+    }
+  } else if (message.startsWith('[TREASURE_COMPLETE]')) {
+    const tier = message.replace('[TREASURE_COMPLETE]', '');
+    client.emit('expeditionComplete', { tier });
+    client.expedition = null;
+  } else if (message.startsWith('[TREASURE_CANCEL]')) {
+    const cooldownMinutes = Number.parseInt(
+      message.replace('[TREASURE_CANCEL]', ''),
+      10,
+    );
+    client.emit('expeditionCancelled', { cooldownMinutes });
+    client.expedition = null;
+  } else if (message.startsWith('[TREASURE_RESTORE]')) {
+    const parts = message.replace('[TREASURE_RESTORE]', '').split('|');
+    if (parts.length >= 5) {
+      const tier = parts[0];
+      const itemId = Number.parseInt(parts[1], 10);
+      const step = Number.parseInt(parts[2], 10);
+      const totalSteps = Number.parseInt(parts[3], 10);
+      const clue = parts.slice(4).join('|');
+      client.expedition = {
+        active: true,
+        tier,
+        itemId,
+        currentStep: step,
+        totalSteps,
+        currentClue: clue,
+        clueHistory: [{ step, clue, completed: false }],
+        target: null,
+        combat: { active: false, remaining: 0 },
+        trackerVisible: false,
+      };
+      client.emit('expeditionRestored', {
+        tier,
+        itemId,
+        step,
+        totalSteps,
+        clue,
+      });
+    }
+  }
+}
+
 function isConfigReload(message: string): boolean {
   return message.startsWith('[CONFIG_RELOAD]');
 }
@@ -71,6 +196,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
   // Also emit for guild panel buff aggregation
   client.emit('statusMessage', { message: packet.message });
+
+  if (isTreasureMessage(packet.message)) {
+    handleTreasureMessage(client, packet.message);
+    return;
+  }
 
   // Intercept boss events — handle UI state, suppress from chat
   if (isBossMessage(packet.message)) {
