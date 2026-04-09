@@ -1137,6 +1137,58 @@ export class MapRenderer {
       alpha = Math.min(alpha, 0.4);
     }
 
+    // Weapon aura sprite renders BEFORE the character so it appears behind
+    let floatYOffset = 0;
+    if (
+      settings.get('weaponAuras') === 'enabled' &&
+      this.client.auraManager &&
+      character.equipment.weapon > 0
+    ) {
+      const weaponTexture = this.client.atlas.getCharacterWeaponTexture(
+        character.playerId,
+        characterFrame,
+      );
+      const aura = this.client.auraManager.getAura(character.equipment.weapon);
+
+      if (weaponTexture && aura) {
+        const weaponSprite = this.ensureWorldSprite(
+          `character:${character.playerId}:weapon-aura`,
+          `map:character-weapon-aura id=${character.playerId}`,
+        );
+        weaponSprite.texture = weaponTexture;
+        // Weapon texture is the full 100x100 canvas, not cropped like the
+        // character frame. Position using full-canvas offsets.
+        const fullCanvasYOffset = -100 + 32 - 8; // -CHARACTER_FRAME_SIZE + TILE_HEIGHT - HALF_HALF_TILE_HEIGHT
+        if (mirrored) {
+          weaponSprite.scale.x = -1;
+          weaponSprite.x = Math.floor(screenX - 50 + 100);
+        } else {
+          weaponSprite.scale.x = 1;
+          weaponSprite.x = Math.floor(screenX - 50);
+        }
+        weaponSprite.y = screenY - frame.yOffset + fullCanvasYOffset;
+        weaponSprite.alpha = alpha;
+
+        const now = performance.now();
+        for (const effect of aura.effects) {
+          if (effect.update) effect.update(now);
+        }
+        if (aura.floatEffect) {
+          floatYOffset = aura.floatEffect.getYOffset(now);
+          weaponSprite.y += floatYOffset;
+        }
+        weaponSprite.filters = aura.effects.map((e) => e.filter);
+      } else if (aura) {
+        const now = performance.now();
+        for (const effect of aura.effects) {
+          if (effect.update) effect.update(now);
+        }
+        if (aura.floatEffect) {
+          floatYOffset = aura.floatEffect.getYOffset(now);
+        }
+      }
+    }
+
     {
       const sprite = this.ensureWorldSprite(
         `character:${character.playerId}:${justCharacter ? 'ghost' : 'main'}`,
@@ -1144,74 +1196,14 @@ export class MapRenderer {
       );
       sprite.texture = texture;
       if (mirrored) {
-        // scale.x = -1 draws leftward from sprite.x, so place the right edge
-        // at screenX + mirroredXOffset + frame.w to get left edge at screenX + mirroredXOffset
         sprite.scale.x = -1;
         sprite.x = Math.floor(screenX + frame.mirroredXOffset + frame.w);
       } else {
         sprite.x = Math.floor(screenX + frame.xOffset);
       }
-      sprite.y = screenY;
+      sprite.y = screenY + floatYOffset;
       sprite.alpha = alpha;
-
       sprite.filters = [];
-
-      // Weapon aura overlay sprite — apply glow only to the weapon texture
-      if (
-        settings.get('weaponAuras') === 'enabled' &&
-        this.client.auraManager &&
-        character.equipment.weapon > 0
-      ) {
-        const weaponTexture = this.client.atlas.getCharacterWeaponTexture(
-          character.playerId,
-          characterFrame,
-        );
-        const aura = this.client.auraManager.getAura(
-          character.equipment.weapon,
-        );
-
-        if (weaponTexture && aura) {
-          const weaponSprite = this.ensureWorldSprite(
-            `character:${character.playerId}:weapon-aura`,
-            `map:character-weapon-aura id=${character.playerId}`,
-          );
-          weaponSprite.texture = weaponTexture;
-          // Weapon texture is the full 100x100 canvas, not cropped like the
-          // character frame. Position it using the full-canvas offsets:
-          // xOffset for full canvas = -HALF_CHARACTER_FRAME_SIZE (-50)
-          // yOffset difference = fullCanvasYOffset - frame.yOffset
-          const fullCanvasYOffset = -100 + 32 - 8; // -CHARACTER_FRAME_SIZE + TILE_HEIGHT - HALF_HALF_TILE_HEIGHT
-          if (mirrored) {
-            weaponSprite.scale.x = -1;
-            weaponSprite.x = Math.floor(screenX - 50 + 100); // -HALF + full width
-          } else {
-            weaponSprite.scale.x = 1;
-            weaponSprite.x = Math.floor(screenX - 50); // -HALF_CHARACTER_FRAME_SIZE
-          }
-          weaponSprite.y = screenY - frame.yOffset + fullCanvasYOffset;
-          weaponSprite.alpha = alpha;
-
-          const now = performance.now();
-          for (const effect of aura.effects) {
-            if (effect.update) effect.update(now);
-          }
-          if (aura.floatEffect) {
-            const yOffset = aura.floatEffect.getYOffset(now);
-            weaponSprite.y += yOffset;
-            sprite.y += yOffset;
-          }
-          weaponSprite.filters = aura.effects.map((e) => e.filter);
-        } else if (aura) {
-          // Aura exists but no weapon texture yet — apply float to main sprite
-          const now = performance.now();
-          for (const effect of aura.effects) {
-            if (effect.update) effect.update(now);
-          }
-          if (aura.floatEffect) {
-            sprite.y += aura.floatEffect.getYOffset(now);
-          }
-        }
-      }
     }
 
     for (const effect of effects) {
