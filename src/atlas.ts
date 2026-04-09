@@ -2951,28 +2951,6 @@ export class Atlas {
     ctx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
   }
 
-  private renderWeaponFrontToCanvas(
-    ctx: CanvasRenderingContext2D,
-    gender: Gender,
-    weapon: number,
-  ) {
-    const graphicId = (weapon - 1) * 100 + 17;
-
-    const bmp = this.getBmp(
-      gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
-      graphicId,
-    );
-
-    if (!bmp) return;
-
-    const offset = WEAPON_OFFSETS[gender][CharacterFrame.MeleeAttackDownRight2];
-
-    const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
-    const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
-
-    ctx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
-  }
-
   getCharacterWeaponTexture(
     playerId: number,
     frame: CharacterFrame,
