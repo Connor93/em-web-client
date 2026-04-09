@@ -93,6 +93,13 @@ function handleSpellTargetOther(client: Client, reader: EoReader) {
 
   character.hp = Math.round((character.maxHp * packet.hpPercentage) / 100);
 
+  if (reader.remaining > 0) {
+    const casterTpPercentage = reader.getChar();
+    if (caster) {
+      caster.tp = Math.round((caster.maxTp * casterTpPercentage) / 100);
+    }
+  }
+
   client.characterHealthBars.set(
     packet.victimId,
     new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),

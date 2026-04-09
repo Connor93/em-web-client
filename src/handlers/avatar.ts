@@ -157,6 +157,11 @@ function handleAvatarReply(client: Client, reader: EoReader) {
 
   victim.hp = Math.round((victim.maxHp * packet.hpPercentage) / 100);
 
+  if (reader.remaining > 0) {
+    const tpPercentage = reader.getChar();
+    victim.tp = Math.round((victim.maxTp * tpPercentage) / 100);
+  }
+
   client.characterHealthBars.set(
     packet.victimId,
     new HealthBar(packet.hpPercentage, packet.damage),
@@ -186,6 +191,11 @@ function handleAvatarAdmin(client: Client, reader: EoReader) {
   }
 
   victim.hp = Math.round((victim.maxHp * packet.hpPercentage) / 100);
+
+  if (reader.remaining > 0) {
+    const tpPercentage = reader.getChar();
+    victim.tp = Math.round((victim.maxTp * tpPercentage) / 100);
+  }
 
   client.characterHealthBars.set(
     packet.victimId,
