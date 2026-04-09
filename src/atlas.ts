@@ -2882,29 +2882,6 @@ export class Atlas {
     this.tmpBehindCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
   }
 
-  private renderCharacterWeaponFront(gender: Gender, weapon: number) {
-    const graphicId = (weapon - 1) * 100 + 17;
-
-    const bmp = this.getBmp(
-      gender === Gender.Female ? GfxType.FemaleWeapons : GfxType.MaleWeapons,
-      graphicId,
-    );
-
-    if (!bmp) {
-      console.error(
-        `Missing weapon bitmap for ${Gender[gender]} ${weapon} MeleeAttackDownRight2`,
-      );
-      return;
-    }
-
-    const offset = WEAPON_OFFSETS[gender][CharacterFrame.MeleeAttackDownRight2];
-
-    const destX = HALF_CHARACTER_FRAME_SIZE - (bmp.width >> 1) + offset.x;
-    const destY = HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
-
-    this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
-  }
-
   private renderWeaponToCanvas(
     ctx: CanvasRenderingContext2D,
     gender: Gender,
