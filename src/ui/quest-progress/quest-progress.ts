@@ -2,6 +2,7 @@ import {
   QuestPage,
   type QuestProgressEntry,
   QuestRequirementIcon,
+  TalkReportClientPacket,
 } from 'eolib';
 import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
@@ -34,9 +35,12 @@ export class QuestProgress extends Base {
   private historyTab: HTMLButtonElement = this.container.querySelector(
     'button[data-tab="history"]',
   )!;
+  private expeditionTab: HTMLButtonElement = this.container.querySelector(
+    'button[data-tab="expedition"]',
+  )!;
 
   private client: Client;
-  private activeTab: 'progress' | 'history' = 'progress';
+  private activeTab: 'progress' | 'history' | 'expedition' = 'progress';
   private quests: QuestProgressEntry[] = [];
   private completedQuests: string[] = [];
 
@@ -63,6 +67,28 @@ export class QuestProgress extends Base {
       this.client.requestQuestList(QuestPage.History);
     });
 
+    this.expeditionTab.addEventListener('click', () => {
+      if (this.activeTab === 'expedition') return;
+      playSfxById(SfxId.TextBoxFocus);
+      this.setActiveTab('expedition');
+      this.renderExpedition();
+    });
+
+    this.client.on('expeditionStarted', () => this.renderExpeditionIfActive());
+    this.client.on('expeditionClue', () => this.renderExpeditionIfActive());
+    this.client.on('expeditionStepComplete', () =>
+      this.renderExpeditionIfActive(),
+    );
+    this.client.on('expeditionComplete', () => this.renderExpeditionIfActive());
+    this.client.on('expeditionCancelled', () =>
+      this.renderExpeditionIfActive(),
+    );
+    this.client.on('expeditionRestored', () => this.renderExpeditionIfActive());
+    this.client.on('expeditionCombat', () => this.renderExpeditionIfActive());
+    this.client.on('expeditionCombatKill', () =>
+      this.renderExpeditionIfActive(),
+    );
+
     this.client.on('questProgressUpdated', (data) => {
       this.quests = data.quests;
       if (this.activeTab === 'progress') {
@@ -78,10 +104,11 @@ export class QuestProgress extends Base {
     });
   }
 
-  private setActiveTab(tab: 'progress' | 'history') {
+  private setActiveTab(tab: 'progress' | 'history' | 'expedition') {
     this.activeTab = tab;
     this.progressTab.classList.toggle('active', tab === 'progress');
     this.historyTab.classList.toggle('active', tab === 'history');
+    this.expeditionTab.classList.toggle('active', tab === 'expedition');
   }
 
   private renderProgress() {
@@ -182,10 +209,184 @@ export class QuestProgress extends Base {
     }
   }
 
+  private renderExpeditionIfActive() {
+    if (this.activeTab === 'expedition') {
+      this.renderExpedition();
+    }
+  }
+
+  private renderExpedition() {
+    this.body.innerHTML = '';
+    const exp = this.client.expedition;
+
+    if (!exp) {
+      const empty = document.createElement('div');
+      empty.className = 'expedition-empty';
+      empty.textContent =
+        'No active expedition. Use a Treasure Map to start one.';
+      this.body.appendChild(empty);
+      return;
+    }
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'expedition-header';
+
+    const tierLabel = document.createElement('span');
+    tierLabel.className = `expedition-tier ${exp.tier}`;
+    tierLabel.textContent = `${exp.tier.charAt(0).toUpperCase()}${exp.tier.slice(1)} Treasure Map`;
+    header.appendChild(tierLabel);
+
+    const stepLabel = document.createElement('span');
+    stepLabel.className = 'expedition-step-label';
+    stepLabel.textContent = `Step ${exp.currentStep} of ${exp.totalSteps}`;
+    header.appendChild(stepLabel);
+
+    this.body.appendChild(header);
+
+    // Combat indicator
+    if (exp.combat.active) {
+      const combat = document.createElement('div');
+      combat.className = 'expedition-combat';
+      combat.textContent = `\u2694 Defeat the guardians! (${exp.combat.remaining} remaining)`;
+      this.body.appendChild(combat);
+    }
+
+    // Current clue
+    if (exp.currentClue) {
+      const clueBox = document.createElement('div');
+      clueBox.className = 'expedition-clue-box';
+
+      const clueLabel = document.createElement('div');
+      clueLabel.className = 'expedition-clue-label';
+      clueLabel.textContent = 'Current Clue';
+      clueBox.appendChild(clueLabel);
+
+      const clueText = document.createElement('div');
+      clueText.className = 'expedition-clue-text';
+      clueText.textContent = `\u201C${exp.currentClue}\u201D`;
+      clueBox.appendChild(clueText);
+
+      this.body.appendChild(clueBox);
+    }
+
+    // Step history
+    const steps = document.createElement('div');
+    steps.className = 'expedition-steps';
+
+    for (let i = 0; i < exp.totalSteps; i++) {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'expedition-step';
+
+      const circle = document.createElement('div');
+      circle.className = 'expedition-step-circle';
+
+      const text = document.createElement('span');
+      text.className = 'expedition-step-text';
+
+      const historyEntry = exp.clueHistory.find((h) => h.step === i + 1);
+
+      if (historyEntry?.completed) {
+        circle.classList.add('completed');
+        circle.innerHTML = '\u2713';
+        text.classList.add('completed');
+        text.textContent = historyEntry.clue;
+      } else if (i + 1 === exp.currentStep) {
+        circle.classList.add('current');
+        circle.textContent = String(i + 1);
+        text.classList.add('current');
+        text.textContent = exp.currentClue || '...';
+      } else {
+        circle.classList.add('future');
+        circle.textContent = String(i + 1);
+        text.classList.add('future');
+        text.textContent = '???';
+      }
+
+      stepDiv.appendChild(circle);
+      stepDiv.appendChild(text);
+      steps.appendChild(stepDiv);
+    }
+
+    this.body.appendChild(steps);
+
+    // Action buttons
+    const actions = document.createElement('div');
+    actions.className = 'expedition-actions';
+
+    const trackerBtn = document.createElement('button');
+    trackerBtn.className = `expedition-btn-tracker${exp.trackerVisible ? ' active' : ''}`;
+    trackerBtn.textContent = exp.trackerVisible
+      ? '\u229F Hide Tracker'
+      : '\u229E Show Tracker';
+    trackerBtn.addEventListener('click', () => {
+      exp.trackerVisible = !exp.trackerVisible;
+      this.client.emit('expeditionTrackerToggle', {
+        visible: exp.trackerVisible,
+      });
+      this.renderExpedition();
+    });
+    actions.appendChild(trackerBtn);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'expedition-btn-cancel';
+    cancelBtn.textContent = 'Cancel Expedition';
+    cancelBtn.disabled = exp.combat.active;
+    cancelBtn.addEventListener('click', () => {
+      this.showCancelConfirm(actions);
+    });
+    actions.appendChild(cancelBtn);
+
+    this.body.appendChild(actions);
+  }
+
+  private showCancelConfirm(actionsDiv: HTMLElement) {
+    const confirm = document.createElement('div');
+    confirm.className = 'expedition-confirm';
+
+    const msg = document.createElement('p');
+    msg.textContent =
+      'Cancel expedition? Your map will be refunded but a cooldown will apply.';
+    confirm.appendChild(msg);
+
+    const btnRow = document.createElement('div');
+    btnRow.className = 'expedition-confirm-actions';
+
+    const yesBtn = document.createElement('button');
+    yesBtn.style.background = 'rgba(200, 50, 50, 0.3)';
+    yesBtn.style.border = '1px solid #e05050';
+    yesBtn.style.color = '#e05050';
+    yesBtn.textContent = 'Yes, Cancel';
+    yesBtn.addEventListener('click', () => {
+      const packet = new TalkReportClientPacket();
+      packet.message = '#treasure cancel';
+      this.client.bus.send(packet);
+    });
+
+    const noBtn = document.createElement('button');
+    noBtn.style.background = 'rgba(30, 28, 40, 0.8)';
+    noBtn.style.border = '1px solid #555';
+    noBtn.style.color = '#a09880';
+    noBtn.textContent = 'No, Keep Going';
+    noBtn.addEventListener('click', () => {
+      this.renderExpedition();
+    });
+
+    btnRow.appendChild(yesBtn);
+    btnRow.appendChild(noBtn);
+    confirm.appendChild(btnRow);
+
+    actionsDiv.replaceWith(confirm);
+  }
+
   requestAndShow() {
-    this.client.requestQuestList(
-      this.activeTab === 'progress' ? QuestPage.Progress : QuestPage.History,
-    );
+    if (this.activeTab === 'expedition') {
+      this.renderExpedition();
+    } else {
+      this.client.requestQuestList(
+        this.activeTab === 'progress' ? QuestPage.Progress : QuestPage.History,
+      );
+    }
     this.show();
   }
 
