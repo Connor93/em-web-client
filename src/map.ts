@@ -1176,16 +1176,19 @@ export class MapRenderer {
             `map:character-weapon-aura id=${character.playerId}`,
           );
           weaponSprite.texture = weaponTexture;
+          // Weapon texture is the full 100x100 canvas, not cropped like the
+          // character frame. Position it using the full-canvas offsets:
+          // xOffset for full canvas = -HALF_CHARACTER_FRAME_SIZE (-50)
+          // yOffset difference = fullCanvasYOffset - frame.yOffset
+          const fullCanvasYOffset = -100 + 32 - 8; // -CHARACTER_FRAME_SIZE + TILE_HEIGHT - HALF_HALF_TILE_HEIGHT
           if (mirrored) {
             weaponSprite.scale.x = -1;
-            weaponSprite.x = Math.floor(
-              screenX + frame.mirroredXOffset + frame.w,
-            );
+            weaponSprite.x = Math.floor(screenX - 50 + 100); // -HALF + full width
           } else {
             weaponSprite.scale.x = 1;
-            weaponSprite.x = Math.floor(screenX + frame.xOffset);
+            weaponSprite.x = Math.floor(screenX - 50); // -HALF_CHARACTER_FRAME_SIZE
           }
-          weaponSprite.y = screenY;
+          weaponSprite.y = screenY - frame.yOffset + fullCanvasYOffset;
           weaponSprite.alpha = alpha;
 
           const now = performance.now();
