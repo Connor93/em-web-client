@@ -136,6 +136,7 @@ function handleTreasureMessage(client: Client, message: string): void {
       const step = Number.parseInt(parts[0], 10);
       const totalSteps = Number.parseInt(parts[1], 10);
       client.expedition.currentStep = step;
+      client.expedition.target = null; // Clear stale target from previous step
       client.expedition.combat = { active: false, remaining: 0 };
       client.emit('expeditionStepComplete', { step, totalSteps });
     }
@@ -152,20 +153,20 @@ function handleTreasureMessage(client: Client, message: string): void {
     client.expedition = null;
   } else if (message.startsWith('[TREASURE_RESTORE]')) {
     const parts = message.replace('[TREASURE_RESTORE]', '').split('|');
-    if (parts.length >= 5) {
+    if (parts.length >= 4) {
       const tier = parts[0];
       const itemId = Number.parseInt(parts[1], 10);
       const step = Number.parseInt(parts[2], 10);
       const totalSteps = Number.parseInt(parts[3], 10);
-      const clue = parts.slice(4).join('|');
+      // Clue arrives separately via [TREASURE_CLUE] from SendClue()
       client.expedition = {
         active: true,
         tier,
         itemId,
         currentStep: step,
         totalSteps,
-        currentClue: clue,
-        clueHistory: [{ step, clue, completed: false }],
+        currentClue: '',
+        clueHistory: [],
         target: null,
         combat: { active: false, remaining: 0 },
         trackerVisible: false,
@@ -175,7 +176,7 @@ function handleTreasureMessage(client: Client, message: string): void {
         itemId,
         step,
         totalSteps,
-        clue,
+        clue: '', // Clue follows via [TREASURE_CLUE]
       });
     }
   }
@@ -194,15 +195,14 @@ function handleConfigReload(client: Client, message: string): void {
 
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
-  // Also emit for guild panel buff aggregation
-  client.emit('statusMessage', { message: packet.message });
 
+  // Intercept structured messages before emitting statusMessage —
+  // prevents raw protocol strings from flashing in the status bar
   if (isTreasureMessage(packet.message)) {
     handleTreasureMessage(client, packet.message);
     return;
   }
 
-  // Intercept boss events — handle UI state, suppress from chat
   if (isBossMessage(packet.message)) {
     handleBossMessage(client, packet.message);
     return;
@@ -213,8 +213,10 @@ function handleMessageOpen(client: Client, reader: EoReader) {
     return;
   }
 
-  // Don't show internal guild/achievement data in chat
   if (isInternalMessage(packet.message)) return;
+
+  // Emit for guild panel buff aggregation (only non-internal messages)
+  client.emit('statusMessage', { message: packet.message });
 
   client.setStatusLabel(EOResourceID.STATUS_LABEL_TYPE_WARNING, packet.message);
   client.emit('chat', {
