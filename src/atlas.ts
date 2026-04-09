@@ -2160,17 +2160,6 @@ export class Atlas {
           );
         }
 
-        // Draw weapon front BEFORE skin so the arm renders on top of the weapon
-        if (
-          character.equipment.weapon &&
-          index === CharacterFrame.MeleeAttackDownRight2
-        ) {
-          this.renderCharacterWeaponFront(
-            character.gender,
-            character.equipment.weapon,
-          );
-        }
-
         const skinSize = this.getCharacterFrameSize(index);
         this.renderCharacterSkin(
           character.gender,
@@ -2248,6 +2237,16 @@ export class Atlas {
               false,
             );
           }
+        }
+
+        if (
+          character.equipment.weapon &&
+          index === CharacterFrame.MeleeAttackDownRight2
+        ) {
+          this.renderCharacterWeaponFront(
+            character.gender,
+            character.equipment.weapon,
+          );
         }
 
         clipHair(this.tmpCtx, 0, 0, CHARACTER_FRAME_SIZE, CHARACTER_FRAME_SIZE);
