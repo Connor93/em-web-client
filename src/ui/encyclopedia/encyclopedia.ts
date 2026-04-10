@@ -94,6 +94,11 @@ export class Encyclopedia extends Base {
 
   show() {
     this.container.classList.remove('hidden');
+    // Reset mobile state so both panels are visible on open
+    this.container
+      .querySelector('.enc-list-panel')
+      ?.classList.remove('enc-mobile-hidden');
+    this.detailPanel.classList.remove('enc-mobile-hidden');
     this.searchInput.focus();
     this.renderList();
   }
@@ -499,6 +504,20 @@ export class Encyclopedia extends Base {
       back.textContent = '\u2190 Back';
       back.addEventListener('click', () => this.navigateBack());
       this.detailPanel.appendChild(back);
+    }
+
+    // Mobile: always show a "back to list" button
+    if (document.body.classList.contains('is-mobile')) {
+      const backToList = document.createElement('button');
+      backToList.className = 'enc-back';
+      backToList.textContent = '\u2190 List';
+      backToList.addEventListener('click', () => {
+        this.container
+          .querySelector('.enc-list-panel')
+          ?.classList.remove('enc-mobile-hidden');
+        this.detailPanel.classList.add('enc-mobile-hidden');
+      });
+      this.detailPanel.appendChild(backToList);
     }
 
     switch (this.selectedType) {
