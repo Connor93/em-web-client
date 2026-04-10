@@ -100,18 +100,27 @@ export class Encyclopedia extends Base {
       }
     });
 
-    // Draggable by header only (no MutationObserver — positioning handled in show())
+    // Draggable by header only
     makeDraggable(this.container as HTMLElement, '.enc-header');
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class' &&
+          !this.container.classList.contains('hidden')
+        ) {
+          restoreOrCenter(this.container as HTMLElement);
+        }
+      }
+    });
+    observer.observe(this.container, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
   }
 
   show() {
-    // Position before making visible to avoid flash at top-left
-    const element = this.container as HTMLElement;
-    element.style.visibility = 'hidden';
-    element.classList.remove('hidden');
-    restoreOrCenter(element);
-    element.style.visibility = '';
-
+    this.container.classList.remove('hidden');
     // Reset mobile state so both panels are visible on open
     this.container
       .querySelector('.enc-list-panel')
@@ -1137,7 +1146,7 @@ export class Encyclopedia extends Base {
     let zoomLevel = 1;
     const MIN_ZOOM = 1;
     const MAX_ZOOM = 6;
-    canvas.style.transformOrigin = 'center center';
+    canvas.style.transformOrigin = 'top left';
 
     wrapper.addEventListener(
       'wheel',
