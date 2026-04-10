@@ -1,0 +1,1 @@
+export { Encyclopedia } from './encyclopedia';
