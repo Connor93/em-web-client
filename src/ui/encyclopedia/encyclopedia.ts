@@ -207,12 +207,6 @@ export class Encyclopedia extends Base {
     this.listElement.innerHTML = '';
     const term = this.getSearchTerm();
 
-    // "All" tab with empty search: show category landing grid
-    if (this.activeTab === 'all' && term === '') {
-      this.renderCategoryLanding();
-      return;
-    }
-
     const MAX_RESULTS = 50;
     let totalCount = 0;
     let rendered = 0;
@@ -310,73 +304,6 @@ export class Encyclopedia extends Base {
       countDiv.textContent = `Showing ${rendered} of ${totalCount}`;
       this.listElement.appendChild(countDiv);
     }
-  }
-
-  private renderCategoryLanding() {
-    const grid = document.createElement('div');
-    grid.className = 'enc-cat-grid';
-
-    const categories: {
-      tab: EncyclopediaTab;
-      icon: string;
-      name: string;
-      count: number;
-    }[] = [
-      {
-        tab: 'items',
-        icon: '\u2694\uFE0F',
-        name: 'Items',
-        count: this.client.eif?.items.filter((item) => item?.name).length ?? 0,
-      },
-      {
-        tab: 'npcs',
-        icon: '\uD83D\uDC79',
-        name: 'NPCs',
-        count: this.client.enf?.npcs.filter((npc) => npc?.name).length ?? 0,
-      },
-      {
-        tab: 'spells',
-        icon: '\u2728',
-        name: 'Spells',
-        count:
-          this.client.esf?.skills.filter((spell) => spell?.name).length ?? 0,
-      },
-      {
-        tab: 'classes',
-        icon: '\uD83C\uDFAD',
-        name: 'Classes',
-        count: this.client.ecf?.classes.filter((cls) => cls?.name).length ?? 0,
-      },
-    ];
-
-    for (const category of categories) {
-      const card = document.createElement('div');
-      card.className = 'enc-cat-card';
-      card.addEventListener('click', () => {
-        this.activeTab = category.tab;
-        this.updateTabHighlight();
-        this.renderList();
-      });
-
-      const icon = document.createElement('div');
-      icon.className = 'enc-cat-icon';
-      icon.textContent = category.icon;
-      card.appendChild(icon);
-
-      const name = document.createElement('div');
-      name.className = 'enc-cat-name';
-      name.textContent = category.name;
-      card.appendChild(name);
-
-      const count = document.createElement('div');
-      count.className = 'enc-cat-count';
-      count.textContent = `${category.count} entries`;
-      card.appendChild(count);
-
-      grid.appendChild(card);
-    }
-
-    this.listElement.appendChild(grid);
   }
 
   private addGroupHeader(text: string) {
