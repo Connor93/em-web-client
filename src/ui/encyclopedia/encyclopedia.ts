@@ -1134,12 +1134,27 @@ export class Encyclopedia extends Base {
     wrapper.appendChild(tooltip);
 
     // Mouse interaction
-    canvas.addEventListener('mousemove', (event) => {
+    const showTooltip = (event: MouseEvent, text: string) => {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      tooltip.textContent = text;
+      tooltip.style.left = `${event.clientX - wrapperRect.left + 12}px`;
+      tooltip.style.top = `${event.clientY - wrapperRect.top - 8}px`;
+      tooltip.classList.add('visible');
+      canvas.style.cursor = 'pointer';
+    };
+
+    const getTileAt = (event: MouseEvent): { tileX: number; tileY: number } => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
       const mouseY = event.clientY - rect.top;
-      const tileX = Math.floor((mouseX / rect.width) * width);
-      const tileY = Math.floor((mouseY / rect.height) * height);
+      return {
+        tileX: Math.floor((mouseX / rect.width) * width),
+        tileY: Math.floor((mouseY / rect.height) * height),
+      };
+    };
+
+    canvas.addEventListener('mousemove', (event) => {
+      const { tileX, tileY } = getTileAt(event);
       const key = `${tileX},${tileY}`;
 
       // Check NPC at position
@@ -1148,12 +1163,7 @@ export class Encyclopedia extends Base {
       );
       if (npcAtPosition) {
         const record = this.client.getEnfRecordById(npcAtPosition.id);
-        const name = record?.name ?? `NPC #${npcAtPosition.id}`;
-        tooltip.textContent = name;
-        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
-        tooltip.style.top = `${event.clientY - rect.top - 8}px`;
-        tooltip.classList.add('visible');
-        canvas.style.cursor = 'pointer';
+        showTooltip(event, record?.name ?? `NPC #${npcAtPosition.id}`);
         return;
       }
 
@@ -1163,12 +1173,10 @@ export class Encyclopedia extends Base {
         const entry = this.mapManifest?.find(
           (map) => map.id === warp.destinationMap,
         );
-        const name = entry?.name ?? `Map #${warp.destinationMap}`;
-        tooltip.textContent = `\u2192 ${name}`;
-        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
-        tooltip.style.top = `${event.clientY - rect.top - 8}px`;
-        tooltip.classList.add('visible');
-        canvas.style.cursor = 'pointer';
+        showTooltip(
+          event,
+          `\u2192 ${entry?.name ?? `Map #${warp.destinationMap}`}`,
+        );
         return;
       }
 
@@ -1183,11 +1191,7 @@ export class Encyclopedia extends Base {
 
     // Click interaction
     canvas.addEventListener('click', (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      const tileX = Math.floor((mouseX / rect.width) * width);
-      const tileY = Math.floor((mouseY / rect.height) * height);
+      const { tileX, tileY } = getTileAt(event);
       const key = `${tileX},${tileY}`;
 
       // Check NPC at position
