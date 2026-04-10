@@ -43,6 +43,7 @@ import { CitizenDialog } from './ui/citizen-dialog/citizen-dialog';
 import { ControlEditor } from './ui/control-editor';
 import { CreateAccountForm } from './ui/create-account';
 import { CreateCharacterForm } from './ui/create-character';
+import { Encyclopedia } from './ui/encyclopedia';
 import { ExitGame } from './ui/exit-game';
 import { ExpeditionTracker } from './ui/expedition-tracker/expedition-tracker';
 import { GuildDialog } from './ui/guild-dialog/guild-dialog';
@@ -247,6 +248,7 @@ const hotbar = new Hotbar(client);
 const spellBook = new SpellBook(client);
 const partyDialog = new PartyDialog(client);
 const infoDialog = new InfoDialog(client);
+const encyclopedia = new Encyclopedia(client);
 const settingsDialog = new SettingsDialog();
 const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
@@ -447,6 +449,7 @@ wireUiEvents({
   autoBattleDialog,
   tradeDialog,
   guildPanel,
+  encyclopedia,
   questProgress,
   mobileToolbar,
   mobileChat,

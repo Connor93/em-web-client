@@ -120,6 +120,7 @@ export interface UiEventDeps {
   autoBattleDialog: { toggle(): void };
   tradeDialog: { offerItem(itemId: number): void };
   guildPanel: { toggle(): void };
+  encyclopedia: { toggle(): void };
   questProgress: { requestAndShow(): void; toggle(): void };
   mobileToolbar: { on(event: string, cb: (...args: any[]) => void): void };
   mobileChat: {
@@ -392,6 +393,9 @@ export function wireUiEvents(deps: UiEventDeps): void {
         break;
       case 'quests':
         deps.questProgress.requestAndShow();
+        break;
+      case 'encyclopedia':
+        deps.encyclopedia.toggle();
         break;
       case 'customize-controls':
         deps.controlEditor.enter();

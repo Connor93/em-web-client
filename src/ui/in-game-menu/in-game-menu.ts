@@ -13,6 +13,7 @@ type Events = {
     | 'online'
     | 'party'
     | 'quests'
+    | 'encyclopedia'
     | 'settings';
 };
 
