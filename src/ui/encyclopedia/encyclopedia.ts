@@ -120,14 +120,7 @@ export class Encyclopedia extends Base {
   }
 
   show() {
-    const element = this.container as HTMLElement;
-    // Make measurable but invisible, position, then reveal — all before paint
-    element.style.setProperty('visibility', 'hidden', 'important');
-    element.style.setProperty('display', 'flex', 'important');
-    restoreOrCenter(element);
-    element.classList.remove('hidden');
-    element.style.removeProperty('visibility');
-    element.style.removeProperty('display');
+    this.container.classList.remove('hidden');
     // Reset mobile state so both panels are visible on open
     this.container
       .querySelector('.enc-list-panel')

@@ -14,7 +14,6 @@
   overflow: hidden;
   color: #e0daca;
   font-family: inherit;
-  animation: enc-slide-in 0.18s ease-out;
 }
 
 #encyclopedia.hidden {
@@ -482,19 +481,6 @@ body.is-mobile #encyclopedia .enc-list-panel {
 
 body.is-mobile #encyclopedia .enc-mobile-hidden {
   display: none;
-}
-
-/* ── Slide-in animation ───────────────────────────────────────────── */
-
-@keyframes enc-slide-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 20px));
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
 }
 
 /* ── Map Canvas ──────────────────────────────────────────────────── */
