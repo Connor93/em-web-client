@@ -1,5 +1,5 @@
-import { rmSync } from 'fs';
-import { resolve } from 'path';
+import { rmSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import { mapManifestPlugin } from './vite-plugin-map-manifest';
 

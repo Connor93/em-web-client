@@ -1,6 +1,6 @@
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Emf, EoReader } from 'eolib';
-import { readdirSync, readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
 import type { Plugin } from 'vite';
 
 interface MapEntry {
