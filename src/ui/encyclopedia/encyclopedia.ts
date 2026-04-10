@@ -112,7 +112,13 @@ export class Encyclopedia extends Base {
   }
 
   show() {
-    this.container.classList.remove('hidden');
+    // Position before making visible to avoid flash at top-left
+    const element = this.container as HTMLElement;
+    element.style.visibility = 'hidden';
+    element.classList.remove('hidden');
+    restoreOrCenter(element);
+    element.style.visibility = '';
+
     // Reset mobile state so both panels are visible on open
     this.container
       .querySelector('.enc-list-panel')
