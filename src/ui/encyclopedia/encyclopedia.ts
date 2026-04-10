@@ -1148,6 +1148,24 @@ export class Encyclopedia extends Base {
 
     wrapper.appendChild(canvas);
 
+    // Zoom state
+    let zoomLevel = 1;
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 6;
+    canvas.style.transformOrigin = 'center center';
+
+    wrapper.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault();
+        const delta = event.deltaY > 0 ? -0.5 : 0.5;
+        zoomLevel = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoomLevel + delta));
+        canvas.style.transform = zoomLevel === 1 ? '' : `scale(${zoomLevel})`;
+        wrapper.style.overflow = zoomLevel > 1 ? 'auto' : 'hidden';
+      },
+      { passive: false },
+    );
+
     // Tooltip
     const tooltip = document.createElement('div');
     tooltip.className = 'enc-map-tooltip';
