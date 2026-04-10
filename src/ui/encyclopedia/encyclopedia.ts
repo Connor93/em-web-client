@@ -251,7 +251,7 @@ export class Encyclopedia extends Base {
           'item',
           item.id,
           item.record.name,
-          this.getItemSubtitle(item.record),
+          this.getItemSubtitle(item.record, item.id),
           this.getItemBadge(item.record),
           this.getItemIconPath(item.id, item.record),
         );
@@ -272,7 +272,7 @@ export class Encyclopedia extends Base {
             'npc',
             npc.id,
             npc.record.name,
-            this.getNpcSubtitle(npc.record),
+            this.getNpcSubtitle(npc.record, npc.id),
             this.getNpcBadge(npc.record),
             this.getNpcIconPath(npc.record),
           );
@@ -294,7 +294,7 @@ export class Encyclopedia extends Base {
             'spell',
             spell.id,
             spell.record.name,
-            this.getSpellSubtitle(spell.record),
+            this.getSpellSubtitle(spell.record, spell.id),
             this.getSpellBadge(spell.record),
             this.getSpellIconPath(spell.record),
           );
@@ -551,7 +551,7 @@ export class Encyclopedia extends Base {
     // Graphic
     this.addDetailGraphic(this.getItemIconPath(itemId, record));
     this.addDetailName(record.name);
-    this.addDetailType(this.getItemSubtitle(record));
+    this.addDetailType(this.getItemSubtitle(record, itemId));
 
     // Combat stats
     const combatStats: [string, string][] = [];
@@ -666,7 +666,7 @@ export class Encyclopedia extends Base {
     this.addDetailGraphic(this.getNpcIconPath(record));
     this.addDetailName(record.name);
 
-    let typeString = getNpcTypeName(record.type);
+    let typeString = `#${npcId} \u2022 ${getNpcTypeName(record.type)}`;
     if (record.boss) typeString += ' \u2022 Boss';
     this.addDetailType(typeString);
 
@@ -722,7 +722,7 @@ export class Encyclopedia extends Base {
     this.addDetailGraphic(this.getSpellIconPath(record));
     this.addDetailName(record.name);
     this.addDetailType(
-      `${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}`,
+      `#${spellId} \u2022 ${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}`,
     );
 
     // Costs
@@ -786,7 +786,7 @@ export class Encyclopedia extends Base {
     if (!record) return;
 
     this.addDetailName(record.name);
-    this.addDetailType(`Class Type ${record.parentType}`);
+    this.addDetailType(`#${classId} \u2022 Class Type ${record.parentType}`);
 
     // Base stat bonuses
     const stats: [string, string][] = [];
@@ -1688,11 +1688,12 @@ export class Encyclopedia extends Base {
 
   // ── Subtitle/badge helpers ──
 
-  private getItemSubtitle(record: EifRecord): string {
+  private getItemSubtitle(record: EifRecord, id?: number): string {
     const type = getItemTypeName(record.type);
+    const prefix = id !== undefined ? `#${id} \u2022 ` : '';
     if (record.levelRequirement > 0)
-      return `${type} \u2022 Lv ${record.levelRequirement}`;
-    return type;
+      return `${prefix}${type} \u2022 Lv ${record.levelRequirement}`;
+    return `${prefix}${type}`;
   }
 
   private getItemBadge(record: EifRecord): string {
@@ -1703,11 +1704,12 @@ export class Encyclopedia extends Base {
     return '';
   }
 
-  private getNpcSubtitle(record: EnfRecord): string {
+  private getNpcSubtitle(record: EnfRecord, id?: number): string {
     const type = getNpcTypeName(record.type);
-    if (record.boss) return `${type} \u2022 Boss`;
-    if (record.level > 0) return `${type} \u2022 Lv ${record.level}`;
-    return type;
+    const prefix = id !== undefined ? `#${id} \u2022 ` : '';
+    if (record.boss) return `${prefix}${type} \u2022 Boss`;
+    if (record.level > 0) return `${prefix}${type} \u2022 Lv ${record.level}`;
+    return `${prefix}${type}`;
   }
 
   private getNpcBadge(record: EnfRecord): string {
@@ -1715,10 +1717,12 @@ export class Encyclopedia extends Base {
     return '';
   }
 
-  private getSpellSubtitle(record: EsfRecord): string {
+  private getSpellSubtitle(record: EsfRecord, id?: number): string {
     const nature = getSkillNatureName(record.nature);
-    if (record.tpCost > 0) return `${nature} \u2022 TP ${record.tpCost}`;
-    return nature;
+    const prefix = id !== undefined ? `#${id} \u2022 ` : '';
+    if (record.tpCost > 0)
+      return `${prefix}${nature} \u2022 TP ${record.tpCost}`;
+    return `${prefix}${nature}`;
   }
 
   private getSpellBadge(record: EsfRecord): string {
