@@ -4,7 +4,6 @@ import {
   PacketFamily,
   SpellRequestServerPacket,
   SpellTargetGroupServerPacket,
-  SpellTargetOtherServerPacket,
   SpellTargetSelfServerPacket,
 } from 'eolib';
 import type { Client } from '../client';
@@ -72,43 +71,45 @@ function handleSpellTargetSelf(client: Client, reader: EoReader) {
 }
 
 function handleSpellTargetOther(client: Client, reader: EoReader) {
-  const packet = SpellTargetOtherServerPacket.deserialize(reader);
-  if (packet.hp) {
-    client.hp = packet.hp;
+  // Manual deserialization — the server includes a casterTpPercentage field
+  // that eolib's SpellTargetOtherServerPacket doesn't expect, which causes
+  // the optional hp field to be misread and corrupts nearby players' HP.
+  const victimId = reader.getShort();
+  const casterId = reader.getShort();
+  const casterDirection = reader.getChar();
+  const spellId = reader.getShort();
+  const spellHealHp = reader.getInt();
+  const hpPercentage = reader.getChar();
+  const casterTpPercentage = reader.getChar();
+
+  const caster = client.getCharacterById(casterId);
+  if (caster) {
+    caster.direction = casterDirection;
+    caster.tp = Math.round((caster.maxTp * casterTpPercentage) / 100);
+  } else {
+    client.requestCharacterRange([casterId]);
+  }
+
+  // Victim receives their actual HP appended to the packet
+  if (reader.remaining > 0) {
+    client.hp = reader.getShort();
     client.emit('statsUpdate', undefined);
   }
 
-  const caster = client.getCharacterById(packet.casterId);
-  if (caster) {
-    caster.direction = packet.casterDirection;
-  } else {
-    client.requestCharacterRange([packet.casterId]);
-  }
-
-  const character = client.getCharacterById(packet.victimId);
+  const character = client.getCharacterById(victimId);
   if (!character) {
-    client.requestCharacterRange([packet.victimId]);
+    client.requestCharacterRange([victimId]);
     return;
   }
 
-  character.hp = Math.round((character.maxHp * packet.hpPercentage) / 100);
-
-  if (reader.remaining > 0) {
-    const casterTpPercentage = reader.getChar();
-    if (caster) {
-      caster.tp = Math.round((caster.maxTp * casterTpPercentage) / 100);
-    }
-  }
+  character.hp = Math.round((character.maxHp * hpPercentage) / 100);
 
   client.characterHealthBars.set(
-    packet.victimId,
-    new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),
+    victimId,
+    new HealthBar(hpPercentage, 0, spellHealHp),
   );
 
-  client.playSpellEffect(
-    packet.spellId,
-    new EffectTargetCharacter(packet.victimId),
-  );
+  client.playSpellEffect(spellId, new EffectTargetCharacter(victimId));
 }
 
 function handleSpellTargetGroup(client: Client, reader: EoReader) {
