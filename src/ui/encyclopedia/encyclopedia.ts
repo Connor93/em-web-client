@@ -1150,8 +1150,8 @@ export class Encyclopedia extends Base {
         const record = this.client.getEnfRecordById(npcAtPosition.id);
         const name = record?.name ?? `NPC #${npcAtPosition.id}`;
         tooltip.textContent = name;
-        tooltip.style.left = `${event.clientX - rect.left + wrapper.offsetLeft + 10}px`;
-        tooltip.style.top = `${event.clientY - rect.top + wrapper.offsetTop - 20}px`;
+        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+        tooltip.style.top = `${event.clientY - rect.top - 8}px`;
         tooltip.classList.add('visible');
         canvas.style.cursor = 'pointer';
         return;
@@ -1165,8 +1165,8 @@ export class Encyclopedia extends Base {
         );
         const name = entry?.name ?? `Map #${warp.destinationMap}`;
         tooltip.textContent = `\u2192 ${name}`;
-        tooltip.style.left = `${event.clientX - rect.left + wrapper.offsetLeft + 10}px`;
-        tooltip.style.top = `${event.clientY - rect.top + wrapper.offsetTop - 20}px`;
+        tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+        tooltip.style.top = `${event.clientY - rect.top - 8}px`;
         tooltip.classList.add('visible');
         canvas.style.cursor = 'pointer';
         return;
