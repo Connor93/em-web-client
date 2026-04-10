@@ -1,13 +1,16 @@
 import {
   type EcfRecord,
   type EifRecord,
+  Emf,
   type EnfRecord,
   Element as EoElement,
+  EoReader,
   EoWriter,
   type EsfRecord,
   ItemSize,
   ItemSpecial,
   ItemType,
+  MapTileSpec,
   NpcType,
   PacketAction,
   PacketFamily,
@@ -49,7 +52,7 @@ export class Encyclopedia extends Base {
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
   private sourceCleanup: (() => void) | null = null;
   private mapManifest: { id: number; name: string }[] | null = null;
-  private mapCache: Map<number, unknown> = new Map();
+  private mapCache: Map<number, Emf> = new Map();
 
   constructor(client: Client) {
     super();
@@ -526,6 +529,14 @@ export class Encyclopedia extends Base {
       case 'class':
         this.renderClassDetail(this.selectedId);
         break;
+      case 'map': {
+        const loading = document.createElement('div');
+        loading.className = 'enc-loading';
+        loading.textContent = 'Loading map...';
+        this.detailPanel.appendChild(loading);
+        this.renderMapDetail(this.selectedId);
+        return;
+      }
     }
 
     // Handle mobile: show detail, hide list
@@ -832,6 +843,370 @@ export class Encyclopedia extends Base {
         this.detailPanel.appendChild(toggleButton);
       }
     }
+  }
+
+  // ── Map detail ──
+
+  private async loadMapEmf(mapId: number): Promise<Emf | null> {
+    const cached = this.mapCache.get(mapId);
+    if (cached) return cached;
+    const paddedId = String(mapId).padStart(5, '0');
+    try {
+      const response = await fetch(`/maps/${paddedId}.emf`);
+      if (!response.ok) return null;
+      const buffer = new Uint8Array(await response.arrayBuffer());
+      const reader = new EoReader(buffer);
+      const emf = Emf.deserialize(reader);
+      this.mapCache.set(mapId, emf);
+      return emf;
+    } catch {
+      return null;
+    }
+  }
+
+  private async renderMapDetail(mapId: number): Promise<void> {
+    const emf = await this.loadMapEmf(mapId);
+
+    // Clear panel (removes loading state)
+    this.detailPanel.innerHTML = '';
+
+    // Mobile: back-to-list button
+    if (document.body.classList.contains('is-mobile')) {
+      const backToList = document.createElement('button');
+      backToList.className = 'enc-back';
+      backToList.textContent = '\u2190 List';
+      backToList.addEventListener('click', () => {
+        this.container
+          .querySelector('.enc-list-panel')
+          ?.classList.remove('enc-mobile-hidden');
+        this.detailPanel.classList.add('enc-mobile-hidden');
+      });
+      this.detailPanel.appendChild(backToList);
+    }
+
+    // History back button
+    if (this.history.length > 0) {
+      const back = document.createElement('button');
+      back.className = 'enc-back';
+      back.textContent = '\u2190 Back';
+      back.addEventListener('click', () => this.navigateBack());
+      this.detailPanel.appendChild(back);
+    }
+
+    // Map name from manifest (fallback to EMF name)
+    const manifestEntry = this.mapManifest?.find((map) => map.id === mapId);
+    const mapName = emf?.name || manifestEntry?.name || 'Unknown';
+    this.addDetailName(mapName);
+    this.addDetailType(`Map #${mapId}`);
+
+    if (!emf) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'enc-loading';
+      errorDiv.textContent = 'Failed to load map data';
+      this.detailPanel.appendChild(errorDiv);
+      this.handleMobileDetailToggle();
+      return;
+    }
+
+    // Map info row
+    const infoRow = document.createElement('div');
+    infoRow.className = 'enc-map-info';
+
+    const sizeSpan = document.createElement('span');
+    sizeSpan.textContent = `Size: ${emf.width}\u00d7${emf.height}`;
+    infoRow.appendChild(sizeSpan);
+
+    if (emf.musicId > 0) {
+      const musicSpan = document.createElement('span');
+      musicSpan.textContent = `Music: ${emf.musicId}`;
+      infoRow.appendChild(musicSpan);
+    }
+
+    this.detailPanel.appendChild(infoRow);
+
+    // Legend
+    const legend = document.createElement('div');
+    legend.className = 'enc-map-legend';
+
+    const legendItems: [string, string][] = [
+      ['#1a1612', 'Walkable'],
+      ['#3d3428', 'Wall'],
+      ['#1a3050', 'Water'],
+      ['#4a3a20', 'Chest/Vault'],
+      ['#d4b896', 'Warp'],
+      ['#4caf50', 'NPC'],
+    ];
+    for (const [color, label] of legendItems) {
+      const item = document.createElement('div');
+      item.className = 'enc-map-legend-item';
+
+      const swatch = document.createElement('span');
+      swatch.className = 'enc-map-legend-swatch';
+      swatch.style.backgroundColor = color;
+      item.appendChild(swatch);
+
+      const text = document.createElement('span');
+      text.textContent = label;
+      item.appendChild(text);
+
+      legend.appendChild(item);
+    }
+    this.detailPanel.appendChild(legend);
+
+    // Canvas
+    this.renderMapCanvas(emf, mapId);
+
+    // NPC spawns list (deduplicated by NPC ID, summed amounts)
+    const npcSpawns = new Map<number, number>();
+    for (const npc of emf.npcs) {
+      const existing = npcSpawns.get(npc.id) ?? 0;
+      npcSpawns.set(npc.id, existing + npc.amount);
+    }
+    if (npcSpawns.size > 0) {
+      this.addSectionHeader('NPC Spawns');
+      for (const [npcId, amount] of npcSpawns) {
+        const record = this.client.getEnfRecordById(npcId);
+        const name = record?.name ?? `NPC #${npcId}`;
+        const suffix = amount > 1 ? ` x${amount}` : '';
+        if (record) {
+          this.addSourceLinkWithSuffix('npc', npcId, name, suffix);
+        } else {
+          const row = document.createElement('div');
+          row.className = 'enc-source-row';
+          row.textContent = `${name}${suffix}`;
+          this.detailPanel.appendChild(row);
+        }
+      }
+    }
+
+    // Connected maps (deduplicated by destination map ID)
+    const connectedMaps = new Set<number>();
+    for (const warpRow of emf.warpRows) {
+      for (const tile of warpRow.tiles) {
+        const destinationMap = tile.warp.destinationMap;
+        if (destinationMap > 0 && destinationMap !== mapId) {
+          connectedMaps.add(destinationMap);
+        }
+      }
+    }
+    if (connectedMaps.size > 0) {
+      this.addSectionHeader('Connected Maps');
+      for (const destinationMapId of connectedMaps) {
+        const entry = this.mapManifest?.find(
+          (map) => map.id === destinationMapId,
+        );
+        const name = entry?.name ?? `Map #${destinationMapId}`;
+        this.addSourceLink('map', destinationMapId, name);
+      }
+    }
+
+    this.handleMobileDetailToggle();
+  }
+
+  private handleMobileDetailToggle(): void {
+    if (document.body.classList.contains('is-mobile')) {
+      this.container
+        .querySelector('.enc-list-panel')
+        ?.classList.add('enc-mobile-hidden');
+      this.detailPanel.classList.remove('enc-mobile-hidden');
+    }
+  }
+
+  private renderMapCanvas(emf: Emf, mapId: number): void {
+    const width = emf.width;
+    const height = emf.height;
+    if (width === 0 || height === 0) return;
+
+    const maxCanvasWidth = 340;
+    const pixelsPerTile = Math.max(
+      1,
+      Math.floor(maxCanvasWidth / Math.max(width, height)),
+    );
+
+    const canvasWidth = width * pixelsPerTile;
+    const canvasHeight = height * pixelsPerTile;
+
+    // Build tile spec lookup
+    const tileSpecs = new Map<string, MapTileSpec>();
+    for (const row of emf.tileSpecRows) {
+      for (const tile of row.tiles) {
+        tileSpecs.set(`${tile.x},${row.y}`, tile.tileSpec);
+      }
+    }
+
+    // Build warp lookup
+    const warps = new Map<
+      string,
+      { destinationMap: number; x: number; y: number }
+    >();
+    for (const row of emf.warpRows) {
+      for (const tile of row.tiles) {
+        warps.set(`${tile.x},${row.y}`, {
+          destinationMap: tile.warp.destinationMap,
+          x: tile.warp.destinationCoords.x,
+          y: tile.warp.destinationCoords.y,
+        });
+      }
+    }
+
+    // Build NPC spawn lookup
+    const npcPositions: { x: number; y: number; id: number }[] = [];
+    for (const npc of emf.npcs) {
+      npcPositions.push({ x: npc.coords.x, y: npc.coords.y, id: npc.id });
+    }
+
+    // Canvas wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'enc-map-canvas-wrap';
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'enc-map-canvas';
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    // Draw tiles
+    for (let tileY = 0; tileY < height; tileY++) {
+      for (let tileX = 0; tileX < width; tileX++) {
+        const key = `${tileX},${tileY}`;
+        const spec = tileSpecs.get(key);
+        let color = '#1a1612'; // walkable default
+
+        if (spec !== undefined) {
+          if (
+            spec === MapTileSpec.Wall ||
+            spec === MapTileSpec.FakeWall ||
+            spec === MapTileSpec.Edge
+          ) {
+            color = '#3d3428';
+          } else if (spec === MapTileSpec.Water) {
+            color = '#1a3050';
+          } else if (
+            spec === MapTileSpec.Chest ||
+            spec === MapTileSpec.BankVault
+          ) {
+            color = '#4a3a20';
+          }
+        }
+
+        context.fillStyle = color;
+        context.fillRect(
+          tileX * pixelsPerTile,
+          tileY * pixelsPerTile,
+          pixelsPerTile,
+          pixelsPerTile,
+        );
+      }
+    }
+
+    // Overlay warps
+    context.fillStyle = '#d4b896';
+    for (const [key] of warps) {
+      const [tileXString, tileYString] = key.split(',');
+      const tileX = Number(tileXString);
+      const tileY = Number(tileYString);
+      context.fillRect(
+        tileX * pixelsPerTile,
+        tileY * pixelsPerTile,
+        pixelsPerTile,
+        pixelsPerTile,
+      );
+    }
+
+    // Overlay NPC dots
+    context.fillStyle = '#4caf50';
+    for (const npc of npcPositions) {
+      context.fillRect(
+        npc.x * pixelsPerTile,
+        npc.y * pixelsPerTile,
+        pixelsPerTile,
+        pixelsPerTile,
+      );
+    }
+
+    wrapper.appendChild(canvas);
+
+    // Tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'enc-map-tooltip';
+    wrapper.appendChild(tooltip);
+
+    // Mouse interaction
+    canvas.addEventListener('mousemove', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      const tileX = Math.floor((mouseX / rect.width) * width);
+      const tileY = Math.floor((mouseY / rect.height) * height);
+      const key = `${tileX},${tileY}`;
+
+      // Check NPC at position
+      const npcAtPosition = npcPositions.find(
+        (npc) => npc.x === tileX && npc.y === tileY,
+      );
+      if (npcAtPosition) {
+        const record = this.client.getEnfRecordById(npcAtPosition.id);
+        const name = record?.name ?? `NPC #${npcAtPosition.id}`;
+        tooltip.textContent = name;
+        tooltip.style.left = `${event.clientX - rect.left + wrapper.offsetLeft + 10}px`;
+        tooltip.style.top = `${event.clientY - rect.top + wrapper.offsetTop - 20}px`;
+        tooltip.classList.add('visible');
+        canvas.style.cursor = 'pointer';
+        return;
+      }
+
+      // Check warp at position
+      const warp = warps.get(key);
+      if (warp && warp.destinationMap > 0) {
+        const entry = this.mapManifest?.find(
+          (map) => map.id === warp.destinationMap,
+        );
+        const name = entry?.name ?? `Map #${warp.destinationMap}`;
+        tooltip.textContent = `\u2192 ${name}`;
+        tooltip.style.left = `${event.clientX - rect.left + wrapper.offsetLeft + 10}px`;
+        tooltip.style.top = `${event.clientY - rect.top + wrapper.offsetTop - 20}px`;
+        tooltip.classList.add('visible');
+        canvas.style.cursor = 'pointer';
+        return;
+      }
+
+      tooltip.classList.remove('visible');
+      canvas.style.cursor = 'default';
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('visible');
+      canvas.style.cursor = 'default';
+    });
+
+    // Click interaction
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      const tileX = Math.floor((mouseX / rect.width) * width);
+      const tileY = Math.floor((mouseY / rect.height) * height);
+      const key = `${tileX},${tileY}`;
+
+      // Check NPC at position
+      const npcAtPosition = npcPositions.find(
+        (npc) => npc.x === tileX && npc.y === tileY,
+      );
+      if (npcAtPosition) {
+        this.navigateTo('npc', npcAtPosition.id);
+        return;
+      }
+
+      // Check warp at position
+      const warp = warps.get(key);
+      if (warp && warp.destinationMap > 0 && warp.destinationMap !== mapId) {
+        this.navigateTo('map', warp.destinationMap);
+      }
+    });
+
+    this.detailPanel.appendChild(wrapper);
   }
 
   // ── Source data requests ──
