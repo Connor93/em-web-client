@@ -120,20 +120,14 @@ export class Encyclopedia extends Base {
   }
 
   show() {
-    // Set position before showing to prevent top-left flash
     const element = this.container as HTMLElement;
-    if (!element.style.left || element.style.left === 'auto') {
-      const uiElement = document.getElementById('ui');
-      const containerWidth = uiElement?.offsetWidth ?? window.innerWidth;
-      const containerHeight = uiElement?.offsetHeight ?? window.innerHeight;
-      element.style.position = 'fixed';
-      element.style.left = `${(containerWidth - 620) / 2}px`;
-      element.style.top = `${(containerHeight - 420) / 2}px`;
-      element.style.right = 'auto';
-      element.style.bottom = 'auto';
-      element.style.margin = '0';
-    }
-    this.container.classList.remove('hidden');
+    // Make measurable but invisible, position, then reveal — all before paint
+    element.style.visibility = 'hidden';
+    element.style.display = 'flex';
+    element.classList.remove('hidden');
+    restoreOrCenter(element);
+    element.style.visibility = '';
+    element.style.display = '';
     // Reset mobile state so both panels are visible on open
     this.container
       .querySelector('.enc-list-panel')
