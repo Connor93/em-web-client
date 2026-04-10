@@ -391,8 +391,9 @@ export class SpellBook extends BaseDialogMd<Events> {
     btnTrain.className = 'training-confirm';
     btnTrain.textContent = 'Train';
     btnTrain.addEventListener('click', () => {
+      // Stagger packets to avoid server flood disconnect
       for (let i = 0; i < amount; i++) {
-        this.client.trainSpell(spellId);
+        setTimeout(() => this.client.trainSpell(spellId), i * 50);
       }
       panel.remove();
     });
