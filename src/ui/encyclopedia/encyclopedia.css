@@ -533,6 +533,10 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
   display: none;
 }
 
+#encyclopedia .enc-map-tooltip.visible {
+  display: block;
+}
+
 /* ── Map Info ────────────────────────────────────────────────────── */
 
 #encyclopedia .enc-map-info {
