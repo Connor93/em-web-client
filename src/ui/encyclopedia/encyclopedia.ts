@@ -1013,18 +1013,45 @@ export class Encyclopedia extends Base {
   }
 
   private renderMapCanvas(emf: Emf, mapId: number): void {
-    const width = emf.width;
-    const height = emf.height;
-    if (width === 0 || height === 0) return;
+    const mapWidth = emf.width;
+    const mapHeight = emf.height;
+    if (mapWidth === 0 || mapHeight === 0) return;
 
+    // Isometric tile dimensions — scale to fit detail panel
     const maxCanvasWidth = 340;
-    const pixelsPerTile = Math.max(
-      1,
-      Math.floor(maxCanvasWidth / Math.max(width, height)),
+    const totalIsoDiagonal = mapWidth + mapHeight;
+    const halfTileWidth = Math.max(
+      2,
+      Math.floor(maxCanvasWidth / totalIsoDiagonal),
     );
+    const halfTileHeight = Math.max(1, Math.floor(halfTileWidth / 2));
 
-    const canvasWidth = width * pixelsPerTile;
-    const canvasHeight = height * pixelsPerTile;
+    const canvasWidth = totalIsoDiagonal * halfTileWidth;
+    const canvasHeight = totalIsoDiagonal * halfTileHeight;
+
+    // Isometric origin: top-center of the diamond
+    const originX = mapHeight * halfTileWidth;
+    const originY = 0;
+
+    // Tile grid → screen position (top of diamond)
+    const tileToScreen = (tileX: number, tileY: number) => ({
+      screenX: originX + (tileX - tileY) * halfTileWidth,
+      screenY: originY + (tileX + tileY) * halfTileHeight,
+    });
+
+    // Screen position → tile grid (inverse isometric)
+    const screenToTile = (screenX: number, screenY: number) => {
+      const relativeX = screenX - originX;
+      const relativeY = screenY - originY;
+      return {
+        tileX: Math.floor(
+          relativeX / (2 * halfTileWidth) + relativeY / (2 * halfTileHeight),
+        ),
+        tileY: Math.floor(
+          relativeY / (2 * halfTileHeight) - relativeX / (2 * halfTileWidth),
+        ),
+      };
+    };
 
     // Build tile spec lookup
     const tileSpecs = new Map<string, MapTileSpec>();
@@ -1067,9 +1094,22 @@ export class Encyclopedia extends Base {
     const context = canvas.getContext('2d');
     if (!context) return;
 
-    // Draw tiles
-    for (let tileY = 0; tileY < height; tileY++) {
-      for (let tileX = 0; tileX < width; tileX++) {
+    // Draw isometric diamond for a tile
+    const drawTile = (tileX: number, tileY: number, color: string) => {
+      const { screenX, screenY } = tileToScreen(tileX, tileY);
+      context.fillStyle = color;
+      context.beginPath();
+      context.moveTo(screenX, screenY);
+      context.lineTo(screenX + halfTileWidth, screenY + halfTileHeight);
+      context.lineTo(screenX, screenY + 2 * halfTileHeight);
+      context.lineTo(screenX - halfTileWidth, screenY + halfTileHeight);
+      context.closePath();
+      context.fill();
+    };
+
+    // Draw all tiles
+    for (let tileY = 0; tileY < mapHeight; tileY++) {
+      for (let tileX = 0; tileX < mapWidth; tileX++) {
         const key = `${tileX},${tileY}`;
         const spec = tileSpecs.get(key);
         let color = '#1a1612'; // walkable default
@@ -1091,39 +1131,19 @@ export class Encyclopedia extends Base {
           }
         }
 
-        context.fillStyle = color;
-        context.fillRect(
-          tileX * pixelsPerTile,
-          tileY * pixelsPerTile,
-          pixelsPerTile,
-          pixelsPerTile,
-        );
+        drawTile(tileX, tileY, color);
       }
     }
 
     // Overlay warps
-    context.fillStyle = '#d4b896';
     for (const [key] of warps) {
       const [tileXString, tileYString] = key.split(',');
-      const tileX = Number(tileXString);
-      const tileY = Number(tileYString);
-      context.fillRect(
-        tileX * pixelsPerTile,
-        tileY * pixelsPerTile,
-        pixelsPerTile,
-        pixelsPerTile,
-      );
+      drawTile(Number(tileXString), Number(tileYString), '#d4b896');
     }
 
     // Overlay NPC dots
-    context.fillStyle = '#4caf50';
     for (const npc of npcPositions) {
-      context.fillRect(
-        npc.x * pixelsPerTile,
-        npc.y * pixelsPerTile,
-        pixelsPerTile,
-        pixelsPerTile,
-      );
+      drawTile(npc.x, npc.y, '#4caf50');
     }
 
     wrapper.appendChild(canvas);
@@ -1147,16 +1167,18 @@ export class Encyclopedia extends Base {
 
     const getTileAt = (event: MouseEvent): { tileX: number; tileY: number } => {
       const rect = canvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-      return {
-        tileX: Math.floor((mouseX / rect.width) * width),
-        tileY: Math.floor((mouseY / rect.height) * height),
-      };
+      const mouseX = ((event.clientX - rect.left) / rect.width) * canvasWidth;
+      const mouseY = ((event.clientY - rect.top) / rect.height) * canvasHeight;
+      return screenToTile(mouseX, mouseY);
     };
 
     canvas.addEventListener('mousemove', (event) => {
       const { tileX, tileY } = getTileAt(event);
+      if (tileX < 0 || tileY < 0 || tileX >= mapWidth || tileY >= mapHeight) {
+        tooltip.classList.remove('visible');
+        canvas.style.cursor = 'default';
+        return;
+      }
       const key = `${tileX},${tileY}`;
 
       // Check NPC at position
@@ -1194,6 +1216,8 @@ export class Encyclopedia extends Base {
     // Click interaction
     canvas.addEventListener('click', (event) => {
       const { tileX, tileY } = getTileAt(event);
+      if (tileX < 0 || tileY < 0 || tileX >= mapWidth || tileY >= mapHeight)
+        return;
       const key = `${tileX},${tileY}`;
 
       // Check NPC at position
