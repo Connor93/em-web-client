@@ -1176,13 +1176,15 @@ export class Encyclopedia extends Base {
       panStartY = event.clientY;
       scrollStartX = wrapper.scrollLeft;
       scrollStartY = wrapper.scrollTop;
-      wrapper.setPointerCapture(event.pointerId);
-      wrapper.style.cursor = 'grabbing';
-      event.preventDefault();
     });
 
     wrapper.addEventListener('pointermove', (event) => {
       if (!isPanning) return;
+      // Capture pointer on first move to avoid interfering with clicks
+      if (!wrapper.hasPointerCapture(event.pointerId)) {
+        wrapper.setPointerCapture(event.pointerId);
+        wrapper.style.cursor = 'grabbing';
+      }
       wrapper.scrollLeft = scrollStartX - (event.clientX - panStartX);
       wrapper.scrollTop = scrollStartY - (event.clientY - panStartY);
     });
