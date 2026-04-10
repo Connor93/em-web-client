@@ -100,23 +100,8 @@ export class Encyclopedia extends Base {
       }
     });
 
-    // Draggable by header only
+    // Draggable by header only (no MutationObserver — positioning handled in show())
     makeDraggable(this.container as HTMLElement, '.enc-header');
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'class' &&
-          !this.container.classList.contains('hidden')
-        ) {
-          restoreOrCenter(this.container as HTMLElement);
-        }
-      }
-    });
-    observer.observe(this.container, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
   }
 
   show() {
@@ -1166,6 +1151,46 @@ export class Encyclopedia extends Base {
       { passive: false },
     );
 
+    // Click-to-drag panning when zoomed
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+    let scrollStartX = 0;
+    let scrollStartY = 0;
+
+    wrapper.addEventListener('pointerdown', (event) => {
+      if (zoomLevel <= 1) return;
+      const target = event.target as HTMLElement;
+      if (target.closest('.enc-map-tooltip')) return;
+      isPanning = true;
+      panStartX = event.clientX;
+      panStartY = event.clientY;
+      scrollStartX = wrapper.scrollLeft;
+      scrollStartY = wrapper.scrollTop;
+      wrapper.setPointerCapture(event.pointerId);
+      wrapper.style.cursor = 'grabbing';
+      event.preventDefault();
+    });
+
+    wrapper.addEventListener('pointermove', (event) => {
+      if (!isPanning) return;
+      wrapper.scrollLeft = scrollStartX - (event.clientX - panStartX);
+      wrapper.scrollTop = scrollStartY - (event.clientY - panStartY);
+    });
+
+    let didPan = false;
+
+    wrapper.addEventListener('pointerup', (event) => {
+      if (isPanning) {
+        const distance =
+          Math.abs(event.clientX - panStartX) +
+          Math.abs(event.clientY - panStartY);
+        didPan = distance > 5;
+      }
+      isPanning = false;
+      wrapper.style.cursor = '';
+    });
+
     // Tooltip
     const tooltip = document.createElement('div');
     tooltip.className = 'enc-map-tooltip';
@@ -1231,8 +1256,12 @@ export class Encyclopedia extends Base {
       canvas.style.cursor = 'default';
     });
 
-    // Click interaction
+    // Click interaction (suppress after drag)
     canvas.addEventListener('click', (event) => {
+      if (didPan) {
+        didPan = false;
+        return;
+      }
       const { tileX, tileY } = getTileAt(event);
       if (tileX < 0 || tileY < 0 || tileX >= mapWidth || tileY >= mapHeight)
         return;
