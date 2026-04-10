@@ -19,6 +19,7 @@ import {
 import type { Client } from '../../client';
 import { getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
+import { makeDraggable, restoreOrCenter } from '../utils/draggable';
 
 import './encyclopedia.css';
 
@@ -89,6 +90,24 @@ export class Encyclopedia extends Base {
       ) {
         this.hide();
       }
+    });
+
+    // Draggable by header only
+    makeDraggable(this.container as HTMLElement, '.enc-header');
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class' &&
+          !this.container.classList.contains('hidden')
+        ) {
+          restoreOrCenter(this.container as HTMLElement);
+        }
+      }
+    });
+    observer.observe(this.container, {
+      attributes: true,
+      attributeFilter: ['class'],
     });
   }
 
