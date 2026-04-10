@@ -1,12 +1,14 @@
 import { rmSync } from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
+import { mapManifestPlugin } from './vite-plugin-map-manifest';
 
 export default defineConfig({
   define: {
     __BUILD_VERSION__: JSON.stringify(Date.now().toString()),
   },
   plugins: [
+    mapManifestPlugin(),
     {
       name: 'exclude-local-config',
       closeBundle() {

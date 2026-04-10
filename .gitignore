@@ -9,4 +9,5 @@ dist
 *.DS_Store
 .env.deploy
 public/config.local.json
+public/map-manifest.json
 .superpowers/
