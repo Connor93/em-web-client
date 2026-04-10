@@ -1135,10 +1135,9 @@ export class Encyclopedia extends Base {
 
     // Mouse interaction
     const showTooltip = (event: MouseEvent, text: string) => {
-      const wrapperRect = wrapper.getBoundingClientRect();
       tooltip.textContent = text;
-      tooltip.style.left = `${event.clientX - wrapperRect.left + 12}px`;
-      tooltip.style.top = `${event.clientY - wrapperRect.top - 8}px`;
+      tooltip.style.left = `${event.clientX + 12}px`;
+      tooltip.style.top = `${event.clientY - 8}px`;
       tooltip.classList.add('visible');
       canvas.style.cursor = 'pointer';
     };

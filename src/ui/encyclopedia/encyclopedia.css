@@ -520,7 +520,7 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
 /* ── Map Tooltip ─────────────────────────────────────────────────── */
 
 #encyclopedia .enc-map-tooltip {
-  position: absolute;
+  position: fixed;
   padding: 3px 8px;
   background: rgba(18, 16, 12, 0.95);
   border: 1px solid rgba(212, 184, 150, 0.3);
@@ -529,7 +529,7 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
   font-size: 10px;
   pointer-events: none;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 9999;
   display: none;
 }
 
