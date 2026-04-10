@@ -406,6 +406,9 @@ export class Encyclopedia extends Base {
   // ── Entry selection & detail ──
 
   selectEntry(type: 'item' | 'npc' | 'spell' | 'class' | 'map', id: number) {
+    // Skip if already viewing this entry
+    if (this.selectedType === type && this.selectedId === id) return;
+
     // Push to history if navigating from another entry
     if (this.selectedId > 0 && this.selectedType !== '') {
       this.history.push({
