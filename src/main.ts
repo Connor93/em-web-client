@@ -481,6 +481,7 @@ initDraggableDialogs([
   'quest-progress',
   'info-dialog',
   'guild-panel',
+  'encyclopedia',
 ]);
 
 // ── Movable UI elements (HUD, Chat) ─────────────────────────────────
