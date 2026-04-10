@@ -748,6 +748,13 @@ export class Client {
     this.emitter.on(event, handler);
   }
 
+  off<Event extends keyof ClientEvents>(
+    event: Event,
+    handler: (data: ClientEvents[Event]) => void,
+  ) {
+    this.emitter.off(event, handler);
+  }
+
   setBus(bus: PacketBus) {
     this.bus = bus;
     registerAllHandlers(this);

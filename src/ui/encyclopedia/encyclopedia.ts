@@ -5,6 +5,8 @@ import {
   Element as EoElement,
   EoWriter,
   type EsfRecord,
+  ItemSize,
+  ItemSpecial,
   ItemType,
   NpcType,
   PacketAction,
@@ -88,14 +90,6 @@ export class Encyclopedia extends Base {
         this.hide();
       }
     });
-  }
-
-  toggle() {
-    if (this.container.classList.contains('hidden')) {
-      this.show();
-    } else {
-      this.hide();
-    }
   }
 
   show() {
@@ -197,6 +191,7 @@ export class Encyclopedia extends Base {
 
     const MAX_RESULTS = 50;
     let totalCount = 0;
+    let rendered = 0;
 
     if (this.activeTab === 'all' || this.activeTab === 'items') {
       const items = this.filterItems(term);
@@ -204,7 +199,8 @@ export class Encyclopedia extends Base {
       if (items.length > 0 && this.activeTab === 'all') {
         this.addGroupHeader(`Items (${items.length})`);
       }
-      for (const item of items.slice(0, MAX_RESULTS)) {
+      const limit = MAX_RESULTS - rendered;
+      for (const item of items.slice(0, limit)) {
         this.addListRow(
           'item',
           item.id,
@@ -213,68 +209,81 @@ export class Encyclopedia extends Base {
           this.getItemBadge(item.record),
           this.getItemIconPath(item.id, item.record),
         );
+        rendered++;
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'npcs') {
       const npcs = this.filterNpcs(term);
       totalCount += npcs.length;
-      if (npcs.length > 0 && this.activeTab === 'all') {
-        this.addGroupHeader(`NPCs (${npcs.length})`);
-      }
-      for (const npc of npcs.slice(0, MAX_RESULTS)) {
-        this.addListRow(
-          'npc',
-          npc.id,
-          npc.record.name,
-          this.getNpcSubtitle(npc.record),
-          this.getNpcBadge(npc.record),
-          this.getNpcIconPath(npc.record),
-        );
+      if (rendered < MAX_RESULTS) {
+        if (npcs.length > 0 && this.activeTab === 'all') {
+          this.addGroupHeader(`NPCs (${npcs.length})`);
+        }
+        const limit = MAX_RESULTS - rendered;
+        for (const npc of npcs.slice(0, limit)) {
+          this.addListRow(
+            'npc',
+            npc.id,
+            npc.record.name,
+            this.getNpcSubtitle(npc.record),
+            this.getNpcBadge(npc.record),
+            this.getNpcIconPath(npc.record),
+          );
+          rendered++;
+        }
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'spells') {
       const spells = this.filterSpells(term);
       totalCount += spells.length;
-      if (spells.length > 0 && this.activeTab === 'all') {
-        this.addGroupHeader(`Spells (${spells.length})`);
-      }
-      for (const spell of spells.slice(0, MAX_RESULTS)) {
-        this.addListRow(
-          'spell',
-          spell.id,
-          spell.record.name,
-          this.getSpellSubtitle(spell.record),
-          this.getSpellBadge(spell.record),
-          this.getSpellIconPath(spell.record),
-        );
+      if (rendered < MAX_RESULTS) {
+        if (spells.length > 0 && this.activeTab === 'all') {
+          this.addGroupHeader(`Spells (${spells.length})`);
+        }
+        const limit = MAX_RESULTS - rendered;
+        for (const spell of spells.slice(0, limit)) {
+          this.addListRow(
+            'spell',
+            spell.id,
+            spell.record.name,
+            this.getSpellSubtitle(spell.record),
+            this.getSpellBadge(spell.record),
+            this.getSpellIconPath(spell.record),
+          );
+          rendered++;
+        }
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'classes') {
       const classes = this.filterClasses(term);
       totalCount += classes.length;
-      if (classes.length > 0 && this.activeTab === 'all') {
-        this.addGroupHeader(`Classes (${classes.length})`);
-      }
-      for (const cls of classes.slice(0, MAX_RESULTS)) {
-        this.addListRow(
-          'class',
-          cls.id,
-          cls.record.name,
-          this.getClassSubtitle(cls.record),
-          '',
-          null,
-        );
+      if (rendered < MAX_RESULTS) {
+        if (classes.length > 0 && this.activeTab === 'all') {
+          this.addGroupHeader(`Classes (${classes.length})`);
+        }
+        const limit = MAX_RESULTS - rendered;
+        for (const cls of classes.slice(0, limit)) {
+          this.addListRow(
+            'class',
+            cls.id,
+            cls.record.name,
+            this.getClassSubtitle(cls.record),
+            '',
+            null,
+          );
+          rendered++;
+        }
       }
     }
 
     // Show result count if capped
-    if (totalCount > MAX_RESULTS && this.activeTab !== 'all') {
+    if (totalCount > MAX_RESULTS) {
       const countDiv = document.createElement('div');
       countDiv.className = 'enc-result-count';
-      countDiv.textContent = `Showing ${MAX_RESULTS} of ${totalCount}`;
+      countDiv.textContent = `Showing ${rendered} of ${totalCount}`;
       this.listElement.appendChild(countDiv);
     }
   }
@@ -363,6 +372,8 @@ export class Encyclopedia extends Base {
   ) {
     const row = document.createElement('div');
     row.className = 'enc-row';
+    row.dataset.type = type;
+    row.dataset.id = String(id);
     if (this.selectedType === type && this.selectedId === id) {
       row.classList.add('selected');
     }
@@ -453,9 +464,12 @@ export class Encyclopedia extends Base {
 
   private highlightSelectedRow() {
     for (const row of this.listElement.querySelectorAll('.enc-row')) {
-      row.classList.remove('selected');
+      const element = row as HTMLElement;
+      const isMatch =
+        element.dataset.type === this.selectedType &&
+        element.dataset.id === String(this.selectedId);
+      element.classList.toggle('selected', isMatch);
     }
-    // Selection highlight is applied during renderList via selectedType/selectedId matching
   }
 
   private cleanupSourceListeners() {
@@ -531,7 +545,7 @@ export class Encyclopedia extends Base {
     if (record.evade > 0) combatStats.push(['Evade', `+${record.evade}`]);
     if (record.armor > 0) combatStats.push(['Armor', `+${record.armor}`]);
     if (record.returnDamage > 0)
-      combatStats.push(['Return Dmg', `+${record.returnDamage}`]);
+      combatStats.push(['Return Damage', `+${record.returnDamage}`]);
     if (combatStats.length > 0)
       this.addStatSection('Combat Stats', combatStats);
 
@@ -576,7 +590,13 @@ export class Encyclopedia extends Base {
 
     // Properties
     const properties: [string, string][] = [];
+    if (record.size !== ItemSize.Size1x1)
+      properties.push(['Size', getItemSizeName(record.size)]);
     if (record.weight > 0) properties.push(['Weight', `${record.weight}`]);
+    if (record.special === ItemSpecial.Cursed)
+      properties.push(['Special', 'Cursed']);
+    if (record.special === ItemSpecial.Lore)
+      properties.push(['Special', 'Lore']);
     if (properties.length > 0) this.addStatSection('Properties', properties);
 
     // Requirements
@@ -644,7 +664,7 @@ export class Encyclopedia extends Base {
     if (record.evade > 0) combatStats.push(['Evade', `${record.evade}`]);
     if (record.armor > 0) combatStats.push(['Armor', `${record.armor}`]);
     if (record.returnDamage > 0)
-      combatStats.push(['Return Dmg', `${record.returnDamage}`]);
+      combatStats.push(['Return Damage', `${record.returnDamage}`]);
     if (record.level > 0) combatStats.push(['Level', `${record.level}`]);
     if (record.experience > 0)
       combatStats.push(['Experience', `${record.experience}`]);
@@ -896,13 +916,14 @@ export class Encyclopedia extends Base {
       }
     };
 
-    let cancelled = false;
     const wrappedHandler = (data: Parameters<typeof handler>[0]) => {
-      if (!cancelled) handler(data);
+      this.client.off('updateItemSources', wrappedHandler);
+      this.sourceCleanup = null;
+      handler(data);
     };
     this.client.on('updateItemSources', wrappedHandler);
     this.sourceCleanup = () => {
-      cancelled = true;
+      this.client.off('updateItemSources', wrappedHandler);
     };
 
     // Send the source request packet
@@ -1027,13 +1048,14 @@ export class Encyclopedia extends Base {
       }
     };
 
-    let cancelled = false;
     const wrappedHandler = (data: Parameters<typeof handler>[0]) => {
-      if (!cancelled) handler(data);
+      this.client.off('updateNpcSources', wrappedHandler);
+      this.sourceCleanup = null;
+      handler(data);
     };
     this.client.on('updateNpcSources', wrappedHandler);
     this.sourceCleanup = () => {
-      cancelled = true;
+      this.client.off('updateNpcSources', wrappedHandler);
     };
 
     // Send the source request packet
@@ -1374,6 +1396,29 @@ function getTargetRestrictName(restrict: SkillTargetRestrict): string {
       return 'Opponent';
     default:
       return 'None';
+  }
+}
+
+function getItemSizeName(size: ItemSize): string {
+  switch (size) {
+    case ItemSize.Size1x1:
+      return '1x1';
+    case ItemSize.Size1x2:
+      return '1x2';
+    case ItemSize.Size1x3:
+      return '1x3';
+    case ItemSize.Size1x4:
+      return '1x4';
+    case ItemSize.Size2x1:
+      return '2x1';
+    case ItemSize.Size2x2:
+      return '2x2';
+    case ItemSize.Size2x3:
+      return '2x3';
+    case ItemSize.Size2x4:
+      return '2x4';
+    default:
+      return '1x1';
   }
 }
 
