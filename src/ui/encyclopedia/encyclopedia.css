@@ -496,3 +496,78 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
     transform: translate(-50%, -50%);
   }
 }
+
+/* ── Map Canvas ──────────────────────────────────────────────────── */
+
+#encyclopedia .enc-map-canvas-wrap {
+  position: relative;
+  margin-bottom: 8px;
+  background: #0d0b08;
+  border: 1px solid rgba(212, 184, 150, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+#encyclopedia .enc-map-canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ── Map Tooltip ─────────────────────────────────────────────────── */
+
+#encyclopedia .enc-map-tooltip {
+  position: absolute;
+  padding: 3px 8px;
+  background: rgba(18, 16, 12, 0.95);
+  border: 1px solid rgba(212, 184, 150, 0.3);
+  border-radius: 3px;
+  color: #e0daca;
+  font-size: 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  display: none;
+}
+
+/* ── Map Info ────────────────────────────────────────────────────── */
+
+#encyclopedia .enc-map-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 10px;
+  color: #a89b8c;
+}
+
+#encyclopedia .enc-map-info span {
+  color: #e0daca;
+}
+
+/* ── Map Legend ───────────────────────────────────────────────────── */
+
+#encyclopedia .enc-map-legend {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 9px;
+  color: #a89b8c;
+  margin-bottom: 6px;
+}
+
+#encyclopedia .enc-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#encyclopedia .enc-map-legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}

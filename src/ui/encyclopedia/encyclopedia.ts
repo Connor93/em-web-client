@@ -27,11 +27,11 @@ import './encyclopedia.css';
 const ITEM_SOURCE_ACTION = 19 as unknown as PacketAction;
 const NPC_SOURCE_ACTION = PacketAction.Tell; // action 20
 
-type EncyclopediaTab = 'all' | 'items' | 'npcs' | 'spells' | 'classes';
+type EncyclopediaTab = 'all' | 'items' | 'npcs' | 'spells' | 'classes' | 'maps';
 
 interface HistoryEntry {
   tab: EncyclopediaTab;
-  type: 'item' | 'npc' | 'spell' | 'class';
+  type: 'item' | 'npc' | 'spell' | 'class' | 'map';
   id: number;
 }
 
@@ -44,10 +44,12 @@ export class Encyclopedia extends Base {
   private detailPanel: HTMLDivElement;
   private activeTab: EncyclopediaTab = 'all';
   private selectedId = 0;
-  private selectedType: 'item' | 'npc' | 'spell' | 'class' | '' = '';
+  private selectedType: 'item' | 'npc' | 'spell' | 'class' | 'map' | '' = '';
   private history: HistoryEntry[] = [];
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
   private sourceCleanup: (() => void) | null = null;
+  private mapManifest: { id: number; name: string }[] | null = null;
+  private mapCache: Map<number, unknown> = new Map();
 
   constructor(client: Client) {
     super();
@@ -69,9 +71,12 @@ export class Encyclopedia extends Base {
 
     // Tab switching
     for (const button of this.tabButtons) {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         this.activeTab = button.dataset.tab as EncyclopediaTab;
         this.updateTabHighlight();
+        if (this.activeTab === 'maps') {
+          await this.loadMapManifest();
+        }
         this.renderList();
       });
     }
@@ -207,6 +212,26 @@ export class Encyclopedia extends Base {
     return results;
   }
 
+  private async loadMapManifest(): Promise<void> {
+    if (this.mapManifest) return;
+    try {
+      const response = await fetch('/map-manifest.json');
+      this.mapManifest = await response.json();
+    } catch {
+      this.mapManifest = [];
+    }
+  }
+
+  private filterMaps(term: string): { id: number; name: string }[] {
+    if (!this.mapManifest) return [];
+    return this.mapManifest.filter((map) => {
+      if (term === '') return true;
+      if (map.name.toLowerCase().includes(term)) return true;
+      if (String(map.id).includes(term)) return true;
+      return false;
+    });
+  }
+
   // ── List rendering ──
 
   renderList() {
@@ -303,6 +328,16 @@ export class Encyclopedia extends Base {
       }
     }
 
+    if (this.activeTab === 'maps') {
+      const maps = this.filterMaps(term);
+      totalCount += maps.length;
+      const limit = MAX_RESULTS - rendered;
+      for (const map of maps.slice(0, limit)) {
+        this.addListRow('map', map.id, map.name, `Map #${map.id}`, '', null);
+        rendered++;
+      }
+    }
+
     // Show result count if capped
     if (totalCount > MAX_RESULTS) {
       const countDiv = document.createElement('div');
@@ -320,7 +355,7 @@ export class Encyclopedia extends Base {
   }
 
   private addListRow(
-    type: 'item' | 'npc' | 'spell' | 'class',
+    type: 'item' | 'npc' | 'spell' | 'class' | 'map',
     id: number,
     name: string,
     subtitle: string,
@@ -373,7 +408,7 @@ export class Encyclopedia extends Base {
 
   // ── Entry selection & detail ──
 
-  selectEntry(type: 'item' | 'npc' | 'spell' | 'class', id: number) {
+  selectEntry(type: 'item' | 'npc' | 'spell' | 'class' | 'map', id: number) {
     // Push to history if navigating from another entry
     if (this.selectedId > 0 && this.selectedType !== '') {
       this.history.push({
@@ -404,17 +439,23 @@ export class Encyclopedia extends Base {
     this.renderDetail();
   }
 
-  private navigateTo(type: 'item' | 'npc' | 'spell' | 'class', id: number) {
-    // Switch to the appropriate tab
+  private async navigateTo(
+    type: 'item' | 'npc' | 'spell' | 'class' | 'map',
+    id: number,
+  ) {
     const tabMap = {
       item: 'items',
       npc: 'npcs',
       spell: 'spells',
       class: 'classes',
+      map: 'maps',
     } as const;
     this.activeTab = tabMap[type];
     this.updateTabHighlight();
     this.searchInput.value = '';
+    if (type === 'map') {
+      await this.loadMapManifest();
+    }
     this.selectEntry(type, id);
     this.renderList();
   }
@@ -1133,7 +1174,7 @@ export class Encyclopedia extends Base {
   }
 
   private addSourceLink(
-    type: 'item' | 'npc' | 'spell' | 'class',
+    type: 'item' | 'npc' | 'spell' | 'class' | 'map',
     id: number,
     name: string,
   ) {
@@ -1148,7 +1189,7 @@ export class Encyclopedia extends Base {
   }
 
   private addSourceLinkWithSuffix(
-    type: 'item' | 'npc' | 'spell' | 'class',
+    type: 'item' | 'npc' | 'spell' | 'class' | 'map',
     id: number,
     name: string,
     suffix: string,
