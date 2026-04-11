@@ -29,7 +29,13 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   opacity: 0;
   transform: translateY(10px);
   pointer-events: auto;
@@ -90,7 +96,12 @@
 .game-toast--action {
   background: var(--theme-bg-dark);
   color: var(--theme-accent);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
 }
 
 .game-toast--quest {

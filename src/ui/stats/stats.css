@@ -3,7 +3,13 @@
 #stats {
   width: 320px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   color: var(--theme-text);
@@ -17,7 +23,13 @@
 /* ── Top Section (base stats + secondary) ────────────────────────── */
 
 #stats > div:first-child {
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   padding: 8px 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -46,7 +58,12 @@
 }
 
 #stats .stat:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.06);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.06
+  );
 }
 
 /* ── Stat label ─────────────────────────────────────────────────── */
@@ -64,7 +81,13 @@
 
 #stats .upgrade {
   background: none;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 3px;
   color: var(--theme-accent);
   font-size: 10px;
@@ -77,8 +100,18 @@
 }
 
 #stats .upgrade:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
 }
 
 /* ── Close button ────────────────────────────────────────────────── */

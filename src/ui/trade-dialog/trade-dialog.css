@@ -1,9 +1,20 @@
 /* Shared button styles for trade dialog and notification */
 .trade-btn {
   padding: 4px 16px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 4px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.1
+  );
   color: var(--theme-accent);
   font-family: inherit;
   font-size: 11px;
@@ -14,8 +25,18 @@
 }
 
 .trade-btn:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.5
+  );
 }
 
 .trade-btn.primary {
@@ -43,7 +64,13 @@
   transform: translate(-50%, -50%);
   width: 440px;
   background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 8px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.6),
@@ -56,9 +83,24 @@
 }
 
 #trade-dialog .trade-header {
-  background: linear-gradient(90deg, rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15), transparent);
+  background: linear-gradient(
+    90deg,
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    ),
+    transparent
+  );
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   font-size: 13px;
   font-weight: bold;
   letter-spacing: 0.5px;
@@ -68,7 +110,12 @@
 #trade-dialog .trade-columns {
   display: flex;
   gap: 1px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.1
+  );
   min-height: 180px;
 }
 
@@ -86,7 +133,13 @@
   align-items: center;
   padding-bottom: 4px;
   margin-bottom: 4px;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    );
 }
 
 #trade-dialog .trade-col-name {
@@ -139,7 +192,12 @@
 }
 
 #trade-dialog .trade-item-row.removable:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.1
+  );
 }
 
 #trade-dialog .trade-item-row .item-name {
@@ -165,7 +223,13 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   background: rgba(0, 0, 0, 0.15);
 }
 
@@ -207,7 +271,12 @@
 }
 
 #trade-dialog .trade-overlay-row:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.15
+  );
 }
 
 #trade-dialog .trade-overlay-row .item-amount {
@@ -243,7 +312,13 @@
 #trade-dialog .trade-prompt-input {
   width: 100px;
   padding: 4px 8px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 3px;
   background: var(--theme-input-bg);
   color: var(--theme-text);
@@ -279,7 +354,13 @@
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(145deg, #1a1a2e, #16213e);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   padding: 12px 20px;

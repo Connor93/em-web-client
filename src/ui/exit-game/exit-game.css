@@ -14,7 +14,13 @@
   width: 28px;
   height: 28px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 4px;
   color: var(--theme-dim);
   font-size: 16px;

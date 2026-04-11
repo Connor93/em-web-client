@@ -52,6 +52,18 @@ function handleBossMessage(client: Client, message: string): void {
   } else if (message.startsWith('[BOSS_EXP]')) {
     const amount = message.replace('[BOSS_EXP] ', '');
     client.emit('bossExpGain', { amount });
+  } else if (
+    message.startsWith('[BOSS_HEALBLOCK]') ||
+    message.startsWith('[BOSS_SWAP]')
+  ) {
+    const content = message.replace(/\[BOSS_\w+\]\s*/, '');
+    if (content) {
+      client.emit('chat', {
+        tab: ChatTab.System,
+        icon: ChatIcon.QuestMessage,
+        message: content,
+      });
+    }
   }
   // All other [BOSS_*] messages are suppressed from chat (handled by boss state packet)
 }

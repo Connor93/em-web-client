@@ -6,7 +6,13 @@
   width: 320px;
   min-height: 200px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
@@ -23,7 +29,13 @@
   font-weight: 600;
   color: var(--theme-accent);
   background: var(--theme-bg-light);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 /* ── Member List ─────────────────────────────────────────────────── */
@@ -117,7 +129,13 @@
   justify-content: center;
   gap: 6px;
   padding: 8px 12px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 #party .leave-party-button {

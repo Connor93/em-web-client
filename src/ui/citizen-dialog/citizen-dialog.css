@@ -5,7 +5,13 @@
   transform: translate(-50%, -50%);
   width: 340px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 8px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.6),
@@ -18,9 +24,24 @@
 }
 
 #citizen-dialog .citizen-header {
-  background: linear-gradient(90deg, rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15), transparent);
+  background: linear-gradient(
+    90deg,
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    ),
+    transparent
+  );
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   font-size: 13px;
   font-weight: bold;
   letter-spacing: 0.5px;
@@ -41,9 +62,20 @@
 #citizen-dialog .citizen-menu-btn {
   width: 100%;
   padding: 6px 12px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 4px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.08
+  );
   color: var(--theme-accent);
   font-family: inherit;
   font-size: 12px;
@@ -53,7 +85,12 @@
 }
 
 #citizen-dialog .citizen-menu-btn:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.18
+  );
 }
 
 #citizen-dialog .citizen-question {
@@ -70,7 +107,13 @@
 #citizen-dialog .citizen-question input {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 3px;
   background: var(--theme-input-bg);
   color: var(--theme-text);
@@ -81,7 +124,12 @@
 
 #citizen-dialog .citizen-question input:focus {
   outline: none;
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.5
+  );
 }
 
 #citizen-dialog .citizen-message {
@@ -102,15 +150,32 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 8px 12px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   background: rgba(0, 0, 0, 0.15);
 }
 
 #citizen-dialog .citizen-btn {
   padding: 4px 16px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 4px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.1
+  );
   color: var(--theme-accent);
   font-family: inherit;
   font-size: 11px;
@@ -121,8 +186,18 @@
 }
 
 #citizen-dialog .citizen-btn:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.5
+  );
 }
 
 #citizen-dialog .citizen-btn.primary {

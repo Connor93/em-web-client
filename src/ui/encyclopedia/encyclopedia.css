@@ -5,7 +5,13 @@
   width: 620px;
   height: 420px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
   z-index: 1055;
@@ -33,7 +39,13 @@
     var(--theme-bg-light) 0%,
     var(--theme-bg-medium) 100%
   );
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   flex-shrink: 0;
 }
 
@@ -66,7 +78,13 @@
   display: flex;
   flex-direction: row;
   background: rgba(24, 20, 14, 0.9);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   flex-shrink: 0;
 }
 
@@ -88,13 +106,23 @@
 
 #encyclopedia .enc-tab:hover {
   color: var(--theme-text);
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.05);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.05
+  );
 }
 
 #encyclopedia .enc-tab.active {
   color: var(--theme-accent);
   border-bottom-color: var(--theme-accent);
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.07);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.07
+  );
 }
 
 /* ── Body ─────────────────────────────────────────────────────────── */
@@ -113,7 +141,13 @@
   width: 40%;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-right: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   min-height: 0;
   flex-shrink: 0;
 }
@@ -121,14 +155,26 @@
 #encyclopedia .enc-search-wrap {
   padding: 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
 }
 
 #encyclopedia .enc-search {
   width: 100%;
   box-sizing: border-box;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 4px;
   color: var(--theme-text);
   font-family: inherit;
@@ -143,7 +189,12 @@
 }
 
 #encyclopedia .enc-search:focus {
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.5
+  );
 }
 
 #encyclopedia .enc-list {
@@ -151,7 +202,13 @@
   overflow-y: auto;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2) transparent;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    )
+    transparent;
 }
 
 #encyclopedia .enc-list::-webkit-scrollbar {
@@ -163,7 +220,12 @@
 }
 
 #encyclopedia .enc-list::-webkit-scrollbar-thumb {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
   border-radius: 2px;
 }
 
@@ -187,16 +249,32 @@
   gap: 8px;
   padding: 4px 10px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.06);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.06
+    );
   transition: background 0.1s;
 }
 
 #encyclopedia .enc-row:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.07);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.07
+  );
 }
 
 #encyclopedia .enc-row.selected {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
 }
 
 #encyclopedia .enc-row-icon {
@@ -204,7 +282,13 @@
   height: 28px;
   flex-shrink: 0;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    );
   border-radius: 3px;
   overflow: hidden;
   display: flex;
@@ -246,8 +330,19 @@
 #encyclopedia .enc-row-badge {
   font-size: 9px;
   color: var(--theme-accent);
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.1
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 3px;
   padding: 1px 5px;
   flex-shrink: 0;
@@ -269,7 +364,13 @@
   padding: 10px;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2) transparent;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    )
+    transparent;
 }
 
 #encyclopedia .enc-detail-panel::-webkit-scrollbar {
@@ -281,7 +382,12 @@
 }
 
 #encyclopedia .enc-detail-panel::-webkit-scrollbar-thumb {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
   border-radius: 2px;
 }
 
@@ -303,7 +409,13 @@
   height: 64px;
   margin: 0 auto 8px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -370,7 +482,13 @@
   font-size: 10px;
   font-weight: 700;
   color: var(--theme-accent);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   padding-bottom: 3px;
   margin-top: 8px;
   margin-bottom: 4px;
@@ -544,8 +662,19 @@
 
 #encyclopedia .enc-admin-popup-cancel {
   padding: 4px 10px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.08
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 3px;
   color: var(--theme-dim);
   font-size: 10px;
@@ -555,7 +684,12 @@
 }
 
 #encyclopedia .enc-admin-popup-cancel:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.18
+  );
 }
 
 /* ── Mobile ───────────────────────────────────────────────────────── */
@@ -579,7 +713,13 @@ body.is-mobile #encyclopedia .enc-body {
 body.is-mobile #encyclopedia .enc-list-panel {
   width: 100%;
   border-right: none;
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 body.is-mobile #encyclopedia .enc-mobile-hidden {
@@ -592,7 +732,13 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
   position: relative;
   margin-bottom: 8px;
   background: #0d0b08;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 4px;
   overflow: hidden;
   display: flex;
@@ -612,7 +758,13 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
   position: fixed;
   padding: 3px 8px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 3px;
   color: var(--theme-text);
   font-size: 10px;

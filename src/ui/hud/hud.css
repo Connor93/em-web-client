@@ -6,7 +6,13 @@
   top: 8px;
   left: 8px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.18
+    );
   border-radius: 8px;
   padding: 12px 18px 14px 18px;
   min-width: 260px;

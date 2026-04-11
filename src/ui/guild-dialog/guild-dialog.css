@@ -5,7 +5,13 @@
     var(--theme-bg-medium),
     rgba(22, 19, 15, 0.98)
   );
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 6px;
   overflow: hidden;
   font-size: 11px;
@@ -16,13 +22,29 @@
 .guild-header {
   background: linear-gradient(
     90deg,
-    rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12),
-    rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04)
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    ),
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.04
+    )
   );
   padding: 8px 12px;
   font-weight: bold;
   color: var(--theme-accent);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   font-size: 12px;
 }
 
@@ -34,7 +56,13 @@
 
 .guild-footer {
   padding: 8px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
   display: flex;
   justify-content: flex-end;
   gap: 6px;
@@ -46,8 +74,19 @@
   width: 100%;
   padding: 8px 12px;
   margin-bottom: 4px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.06);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.06
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    );
   border-radius: 4px;
   color: var(--theme-text);
   cursor: pointer;
@@ -58,7 +97,12 @@
 }
 
 .guild-menu-btn:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.15
+  );
 }
 
 .guild-menu-btn:last-child {
@@ -68,8 +112,19 @@
 /* Generic guild button */
 .guild-btn {
   padding: 5px 12px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.08
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 3px;
   color: var(--theme-text);
   cursor: pointer;
@@ -79,17 +134,37 @@
 }
 
 .guild-btn:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.18
+  );
 }
 
 .guild-btn.primary {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.15
+  );
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
   color: var(--theme-accent);
 }
 
 .guild-btn.primary:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.28);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.28
+  );
 }
 
 .guild-btn.danger {
@@ -134,7 +209,12 @@
 }
 
 .guild-member-row:nth-child(even) {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.04
+  );
 }
 
 .guild-member-name {
@@ -155,7 +235,12 @@
 }
 
 .guild-staff-row:nth-child(even) {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.04
+  );
 }
 
 .guild-staff-name {
@@ -171,7 +256,13 @@
 .guild-input {
   width: 100%;
   padding: 5px 8px;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 3px;
   background: var(--theme-input-bg);
   color: var(--theme-text);
@@ -182,7 +273,12 @@
 
 .guild-input:focus {
   outline: none;
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.4
+  );
 }
 
 textarea.guild-input {
@@ -275,7 +371,13 @@ textarea.guild-input {
     var(--theme-bg-medium),
     rgba(22, 19, 15, 0.98)
   );
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 6px;
   padding: 10px 16px;
   color: var(--theme-text);

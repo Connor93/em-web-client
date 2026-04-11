@@ -19,7 +19,12 @@
 
 .locker-filters .themed-btn.active {
   opacity: 1;
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.4
+  );
 }
 
 .locker-grid {

@@ -5,6 +5,7 @@ import {
   TalkMsgClientPacket,
   TalkOpenClientPacket,
   TalkReportClientPacket,
+  TalkRequestClientPacket,
   TalkTellClientPacket,
 } from 'eolib';
 import { ChatBubble } from '../chat-bubble';
@@ -87,6 +88,20 @@ export function chat(client: Client, message: string): void {
 
     client.emit('chat', {
       tab: ChatTab.Global,
+      message: `${packet.message}`,
+      name: `${capitalize(client.name)}`,
+    });
+    return;
+  }
+
+  if (trimmed.startsWith('&') && client.guildTag) {
+    const packet = new TalkRequestClientPacket();
+    packet.message = trimmed.substring(1);
+    client.bus.send(packet);
+
+    client.emit('chat', {
+      tab: ChatTab.Group,
+      icon: ChatIcon.Guild,
       message: `${packet.message}`,
       name: `${capitalize(client.name)}`,
     });

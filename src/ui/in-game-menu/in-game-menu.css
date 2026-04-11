@@ -22,7 +22,13 @@
     var(--theme-bg-medium),
     rgba(22, 19, 15, 0.92)
   );
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.18
+    );
   border-radius: 4px;
   color: var(--theme-accent);
   font-family: inherit;
@@ -41,12 +47,22 @@
     rgba(42, 36, 28, 0.92),
     var(--theme-bg-medium)
   );
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
   color: var(--theme-text);
 }
 
 .menu-btn:active {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
 }
 
 .menu-btn svg {

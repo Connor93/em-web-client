@@ -5,7 +5,13 @@
   box-sizing: border-box;
   width: 340px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
@@ -22,7 +28,13 @@
   justify-content: space-between;
   padding: 8px 12px;
   background: var(--theme-bg-light);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 #auto-battle-dialog .ab-title {
@@ -67,7 +79,13 @@
   letter-spacing: 0.8px;
   padding: 6px 0 2px;
   margin-top: 2px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.08
+    );
 }
 
 #auto-battle-dialog .ab-section:first-child {
@@ -84,7 +102,13 @@
   justify-content: space-between;
   padding: 5px 8px;
   background: var(--theme-bg-medium);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
   border-radius: 4px;
   transition:
     background 0.15s,
@@ -93,7 +117,12 @@
 
 #auto-battle-dialog .ab-row:hover {
   background: rgba(42, 36, 28, 0.85);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
 }
 
 #auto-battle-dialog .ab-label {
@@ -158,7 +187,13 @@
 #auto-battle-dialog .ab-number {
   width: 48px;
   background: rgba(20, 16, 12, 0.8);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 3px;
   color: var(--theme-text);
   font-size: 10px;
@@ -170,7 +205,12 @@
 }
 
 #auto-battle-dialog .ab-number:focus {
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
 }
 
 /* ── Select ──────────────────────────────────────────────────── */
@@ -217,7 +257,13 @@
   justify-content: space-between;
   padding: 8px 12px;
   background: var(--theme-bg-light);
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
 }
 
 #auto-battle-dialog .ab-footer .ab-shortcut {
@@ -226,8 +272,19 @@
 }
 
 #auto-battle-dialog .ab-footer .ab-shortcut kbd {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 3px;
   padding: 1px 4px;
   font-family: inherit;

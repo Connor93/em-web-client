@@ -166,7 +166,7 @@ function handleTalkRequest(client: Client, reader: EoReader) {
     tab: ChatTab.Group,
     name: capitalize(packet.playerName),
     message: packet.message,
-    icon: ChatIcon.PlayerParty,
+    icon: ChatIcon.Guild,
   });
   playSfxById(SfxId.GroupChatReceived);
 }

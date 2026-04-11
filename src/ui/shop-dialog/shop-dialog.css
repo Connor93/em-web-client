@@ -49,7 +49,13 @@
   justify-content: center;
   padding: 6px 4px 4px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
   border-radius: 4px;
   cursor: pointer;
   transition:
@@ -61,7 +67,12 @@
 
 .grid-card:hover {
   background: rgba(42, 36, 28, 0.9);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
 }
 
 .grid-card .card-img-wrap {
@@ -93,8 +104,19 @@
 .grid-card .card-badge {
   font-size: 9px;
   color: var(--theme-accent);
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 3px;
   padding: 1px 5px;
   margin-top: 3px;
@@ -105,7 +127,13 @@
   display: none;
   position: fixed;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 4px;
   padding: 6px 10px;
   color: var(--theme-accent);

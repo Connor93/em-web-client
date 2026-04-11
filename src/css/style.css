@@ -348,7 +348,13 @@ div.icon[data-id="23"] {
   padding: 6px 18px;
   min-width: 70px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 4px;
   color: var(--theme-accent);
   font-family: inherit;
@@ -364,7 +370,12 @@ div.icon[data-id="23"] {
 
 .themed-btn:hover {
   background: rgba(42, 36, 28, 0.95);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.45);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.45
+  );
   color: #e8d5b8;
 }
 
@@ -615,7 +626,12 @@ div.icon[data-id="23"] {
   right: 16px;
   width: 16px;
   height: 15px;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.3
+  );
   border-radius: 3px;
   touch-action: none;
   user-select: none;
@@ -770,7 +786,13 @@ div.icon[data-id="23"] {
   width: 320px;
   min-height: 260px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   color: var(--theme-text);
@@ -786,7 +808,13 @@ div.icon[data-id="23"] {
   font-size: 13px;
   font-weight: 600;
   color: var(--theme-accent);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    );
   display: flex;
   align-items: center;
   gap: 8px;
@@ -797,7 +825,13 @@ div.icon[data-id="23"] {
   display: flex;
   justify-content: center;
   gap: 8px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.08
+    );
   margin-top: auto;
 }
 
@@ -807,7 +841,13 @@ div.icon[data-id="23"] {
   margin: 4px 12px;
   padding: 5px 8px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 4px;
   color: var(--theme-accent);
   font-size: 11px;
@@ -816,11 +856,21 @@ div.icon[data-id="23"] {
 }
 
 .dialog-search::placeholder {
-  color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
 }
 
 .dialog-search:focus {
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.45);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.45
+  );
 }
 
 .dialog-md .dialog-contents .player {
@@ -837,7 +887,12 @@ div.icon[data-id="23"] {
 
 .dialog-md .dialog-contents .player:hover {
   position: relative;
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.08
+  );
 }
 
 .dialog-md .dialog-contents .player .nameplate {
@@ -883,7 +938,12 @@ div.icon[data-id="23"] {
 }
 
 .dialog-md .dialog-contents::-webkit-scrollbar-thumb {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.3
+  );
   border-radius: 2px;
 }
 
@@ -930,7 +990,13 @@ div.icon[data-id="23"] {
   font-weight: 600;
   color: var(--theme-accent);
   background: var(--theme-bg-light);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 .dialog-md .player-count {
@@ -947,7 +1013,13 @@ div.icon[data-id="23"] {
 /* ── Movable UI unlock indicators ──────────────────────────────── */
 
 .ui-unlocked {
-  border: 1px dashed rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4) !important;
+  border: 1px dashed
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.4
+    ) !important;
   cursor: move !important;
 }
 

@@ -5,7 +5,13 @@
   box-sizing: border-box;
   width: 320px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
@@ -22,7 +28,13 @@
   justify-content: space-between;
   padding: 8px 12px;
   background: var(--theme-bg-light);
-  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
 }
 
 #settings-dialog .settings-title {
@@ -69,7 +81,13 @@
   justify-content: space-between;
   padding: 5px 8px;
   background: var(--theme-bg-medium);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
   border-radius: 4px;
   transition:
     background 0.15s,
@@ -78,7 +96,12 @@
 
 #settings-dialog .setting-row:hover {
   background: rgba(42, 36, 28, 0.85);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.2
+  );
 }
 
 #settings-dialog .setting-label {
@@ -140,7 +163,13 @@
   width: 28px;
   height: 20px;
   padding: 0;
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    );
   border-radius: 3px;
   background: transparent;
   cursor: pointer;
@@ -156,8 +185,19 @@
 }
 
 #settings-dialog .theme-reset-button {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.08
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 3px;
   color: var(--theme-dim);
   font-size: 9px;
@@ -168,7 +208,12 @@
 }
 
 #settings-dialog .theme-reset-button:hover {
-  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.18
+  );
 }
 
 /* ── Mobile fullscreen ─────────────────────────────────────────── */
@@ -217,14 +262,26 @@ body.is-mobile #settings-dialog .setting-value::after {
   display: flex;
   gap: 6px;
   padding: 8px 12px 12px;
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
 }
 
 #settings-dialog .settings-action-button {
   flex: 1;
   padding: 6px 10px;
   background: var(--theme-bg-medium);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 4px;
   color: var(--theme-accent);
   font-size: 10px;
@@ -237,7 +294,12 @@ body.is-mobile #settings-dialog .setting-value::after {
 
 #settings-dialog .settings-action-button:hover {
   background: rgba(42, 36, 28, 0.85);
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.35
+  );
 }
 
 #settings-dialog .settings-action-button.active {

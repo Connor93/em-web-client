@@ -65,7 +65,13 @@
   z-index: 1020;
   top: 30px;
   background: var(--theme-bg-dark);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 8px;
   width: 200px;
   color: var(--theme-text);
@@ -80,7 +86,13 @@
 #chat-message {
   padding: 5px;
   background: rgba(30, 25, 18, 0.7);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   border-radius: 4px;
   color: var(--theme-text);
   width: 100%;
@@ -92,14 +104,25 @@
 }
 
 #chat-message:focus {
-  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.4
+  );
 }
 
 #btn-toggle-chat {
   padding: 3px 8px;
   background: rgba(30, 25, 18, 0.85);
   color: var(--theme-dim);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 4px;
   outline: none;
   user-select: none;
@@ -121,7 +144,13 @@
   padding: 3px 8px;
   background: rgba(30, 25, 18, 0.85);
   color: var(--theme-dim);
-  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
   border-radius: 4px 4px 0 0;
   outline: none;
   user-select: none;
