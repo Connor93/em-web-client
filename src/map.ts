@@ -1329,7 +1329,7 @@ export class MapRenderer {
     const totalWidth =
       effects.length * iconSize + (effects.length - 1) * iconGap;
     const startX = Math.floor(topCenter.x - totalWidth / 2);
-    const iconY = Math.floor(topCenter.y - 22);
+    const iconY = Math.floor(topCenter.y - 30);
 
     for (let i = 0; i < effects.length; i++) {
       const effect = effects[i];
