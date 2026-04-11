@@ -91,6 +91,17 @@ export class Chat extends Base {
     const msgContainer = document.createElement('div');
     msgContainer.classList.add('msg');
 
+    // Timestamp — 12-hour format with AM/PM
+    const now = new Date();
+    const rawHours = now.getHours();
+    const period = rawHours >= 12 ? 'PM' : 'AM';
+    const displayHours = rawHours % 12 || 12;
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timestamp = document.createElement('span');
+    timestamp.classList.add('chat-timestamp');
+    timestamp.textContent = `[${displayHours}:${minutes} ${period}]`;
+    msgContainer.appendChild(timestamp);
+
     if (name) {
       const playerName = document.createElement('span');
       playerName.classList.add('author');
@@ -115,16 +126,8 @@ export class Chat extends Base {
         click();
       });
 
-      msgContainer.prepend(playerName);
+      msgContainer.appendChild(playerName);
     }
-
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const timestamp = document.createElement('span');
-    timestamp.classList.add('chat-timestamp');
-    timestamp.textContent = `${hours}:${minutes}`;
-    msgContainer.appendChild(timestamp);
 
     const msg = document.createElement('span');
     msg.classList.add('chat-message');
