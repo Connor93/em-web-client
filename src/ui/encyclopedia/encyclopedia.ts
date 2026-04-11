@@ -741,7 +741,11 @@ export class Encyclopedia extends Base {
         if (!amountString) return;
         const amount = Number.parseInt(amountString, 10);
         if (Number.isNaN(amount) || amount <= 0) return;
-        this.sendAdminCommand(`$snpc ${npcId} ${amount}`);
+        const speedString = prompt('Speed (seconds between spawns):', '2');
+        if (!speedString) return;
+        const speed = Number.parseInt(speedString, 10);
+        if (Number.isNaN(speed) || speed < 0) return;
+        this.sendAdminCommand(`$snpc ${npcId} ${amount} ${speed}`);
       });
     }
   }
