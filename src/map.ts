@@ -1494,6 +1494,15 @@ export class MapRenderer {
           innerStrength: 0.3,
         }),
       ];
+    } else if (this.client.expeditionCombatNpcs.has(npc.index)) {
+      const pulse = 0.7 + 0.3 * Math.sin(performance.now() / 500);
+      sprite.filters = [
+        new GlowFilter({
+          color: 0x00ccff,
+          outerStrength: 2.5 * pulse,
+          innerStrength: 0.3,
+        }),
+      ];
     } else {
       sprite.filters = [];
     }

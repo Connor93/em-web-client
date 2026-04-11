@@ -127,6 +127,7 @@ function handleTreasureMessage(client: Client, message: string): void {
       client.expedition.combat.remaining = remaining;
       if (remaining <= 0) {
         client.expedition.combat.active = false;
+        client.expeditionCombatNpcs.clear();
       }
       client.emit('expeditionCombatKill', { remaining });
     }
@@ -138,11 +139,13 @@ function handleTreasureMessage(client: Client, message: string): void {
       client.expedition.currentStep = step;
       client.expedition.target = null; // Clear stale target from previous step
       client.expedition.combat = { active: false, remaining: 0 };
+      client.expeditionCombatNpcs.clear();
       client.emit('expeditionStepComplete', { step, totalSteps });
     }
   } else if (message.startsWith('[TREASURE_COMPLETE]')) {
     const tier = message.replace('[TREASURE_COMPLETE]', '');
     client.expedition = null;
+    client.expeditionCombatNpcs.clear();
     client.emit('expeditionComplete', { tier });
   } else if (message.startsWith('[TREASURE_CANCEL]')) {
     const cooldownMinutes = Number.parseInt(
@@ -150,6 +153,7 @@ function handleTreasureMessage(client: Client, message: string): void {
       10,
     );
     client.expedition = null;
+    client.expeditionCombatNpcs.clear();
     client.emit('expeditionCancelled', { cooldownMinutes });
   } else if (message.startsWith('[TREASURE_RESTORE]')) {
     const parts = message.replace('[TREASURE_RESTORE]', '').split('|');

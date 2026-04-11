@@ -112,6 +112,11 @@ function handleNpcAgree(client: Client, reader: EoReader) {
       existing.direction = npc.direction;
     } else {
       client.nearby.npcs.push(npc);
+
+      // Track NPCs that spawn during expedition combat as encounter mobs
+      if (client.expedition?.combat.active) {
+        client.expeditionCombatNpcs.add(npc.index);
+      }
     }
 
     // Boss bar detection — awakened state and adds come from the boss state packet

@@ -192,6 +192,8 @@ export class Client {
     new Map();
   /** Tracks NPC indices that are summoned adds (for glow effect) */
   bossAdds: Set<number> = new Set();
+  /** Tracks NPC indices that are expedition combat encounters (for glow effect) */
+  expeditionCombatNpcs: Set<number> = new Set();
   // Expedition state
   expedition: {
     active: boolean;
