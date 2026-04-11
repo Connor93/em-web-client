@@ -670,11 +670,15 @@ export class Encyclopedia extends Base {
     // Admin: spawn item button
     if (this.client.admin !== AdminLevel.Player) {
       this.addAdminAction('Spawn Item', () => {
-        const amountString = prompt('Amount to spawn:', '1');
-        if (!amountString) return;
-        const amount = Number.parseInt(amountString, 10);
-        if (Number.isNaN(amount) || amount <= 0) return;
-        this.sendAdminCommand(`$sitem ${itemId} ${amount}`);
+        this.showAdminPopup(
+          'Spawn Item',
+          [{ label: 'Amount', defaultValue: '1' }],
+          ([amountValue]) => {
+            const amount = Number.parseInt(amountValue, 10);
+            if (Number.isNaN(amount) || amount <= 0) return;
+            this.sendAdminCommand(`$sitem ${itemId} ${amount}`);
+          },
+        );
       });
     }
   }
@@ -737,15 +741,20 @@ export class Encyclopedia extends Base {
     // Admin: spawn NPC button
     if (this.client.admin !== AdminLevel.Player) {
       this.addAdminAction('Spawn NPC', () => {
-        const amountString = prompt('Amount to spawn:', '1');
-        if (!amountString) return;
-        const amount = Number.parseInt(amountString, 10);
-        if (Number.isNaN(amount) || amount <= 0) return;
-        const speedString = prompt('Act speed (1=fastest, 7=stationary):', '2');
-        if (!speedString) return;
-        const speed = Number.parseInt(speedString, 10);
-        if (Number.isNaN(speed) || speed < 1 || speed > 7) return;
-        this.sendAdminCommand(`$snpc ${npcId} ${amount} ${speed}`);
+        this.showAdminPopup(
+          'Spawn NPC',
+          [
+            { label: 'Amount', defaultValue: '1' },
+            { label: 'Act Speed (1=fastest, 7=stationary)', defaultValue: '2' },
+          ],
+          ([amountValue, speedValue]) => {
+            const amount = Number.parseInt(amountValue, 10);
+            if (Number.isNaN(amount) || amount <= 0) return;
+            const speed = Number.parseInt(speedValue, 10);
+            if (Number.isNaN(speed) || speed < 1 || speed > 7) return;
+            this.sendAdminCommand(`$snpc ${npcId} ${amount} ${speed}`);
+          },
+        );
       });
     }
   }
@@ -1334,9 +1343,13 @@ export class Encyclopedia extends Base {
 
       // Admin: warp to clicked tile
       if (this.client.admin !== AdminLevel.Player) {
-        if (confirm(`Warp to Map ${mapId} (${tileX}, ${tileY})?`)) {
-          this.sendAdminCommand(`$warp ${mapId} ${tileX} ${tileY}`);
-        }
+        this.showAdminPopup(
+          `Warp to Map ${mapId} (${tileX}, ${tileY})?`,
+          [],
+          () => {
+            this.sendAdminCommand(`$warp ${mapId} ${tileX} ${tileY}`);
+          },
+        );
       }
     });
 
@@ -1728,6 +1741,81 @@ export class Encyclopedia extends Base {
     button.textContent = label;
     button.addEventListener('click', onClick);
     this.detailPanel.appendChild(button);
+  }
+
+  private showAdminPopup(
+    title: string,
+    fields: { label: string; defaultValue: string; type?: string }[],
+    onConfirm: (values: string[]) => void,
+  ) {
+    // Remove any existing popup
+    this.container.querySelector('.enc-admin-popup')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'enc-admin-popup';
+
+    const popup = document.createElement('div');
+    popup.className = 'enc-admin-popup-inner';
+
+    const heading = document.createElement('div');
+    heading.className = 'enc-admin-popup-title';
+    heading.textContent = title;
+    popup.appendChild(heading);
+
+    const inputs: HTMLInputElement[] = [];
+    for (const field of fields) {
+      const group = document.createElement('div');
+      group.className = 'enc-admin-popup-field';
+
+      const fieldLabel = document.createElement('label');
+      fieldLabel.textContent = field.label;
+      group.appendChild(fieldLabel);
+
+      const input = document.createElement('input');
+      input.type = field.type ?? 'number';
+      input.value = field.defaultValue;
+      input.className = 'enc-admin-popup-input';
+      group.appendChild(input);
+
+      inputs.push(input);
+      popup.appendChild(group);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'enc-admin-popup-actions';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'enc-admin-action';
+    confirmButton.textContent = 'Confirm';
+    confirmButton.addEventListener('click', () => {
+      const values = inputs.map((input) => input.value);
+      overlay.remove();
+      onConfirm(values);
+    });
+
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'enc-admin-popup-cancel';
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', () => overlay.remove());
+
+    actions.appendChild(confirmButton);
+    actions.appendChild(cancelButton);
+    popup.appendChild(actions);
+    overlay.appendChild(popup);
+    this.container.appendChild(overlay);
+
+    // Focus first input and suppress game input
+    inputs[0]?.focus();
+    this.client.typing = true;
+
+    // Restore typing state when popup closes
+    const observer = new MutationObserver(() => {
+      if (!this.container.querySelector('.enc-admin-popup')) {
+        this.client.typing = false;
+        observer.disconnect();
+      }
+    });
+    observer.observe(this.container, { childList: true, subtree: true });
   }
 
   // ── Graphic path helpers ──
