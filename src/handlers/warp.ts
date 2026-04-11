@@ -48,13 +48,19 @@ function handleWarpAgree(client: Client, reader: EoReader) {
   const packet = WarpAgreeServerPacket.deserialize(reader);
   client.nearby = packet.nearby;
 
-  // Clear and re-detect boss NPCs on the new map
-  client.awakenedBosses.clear();
-  client.bossAdds.clear();
-  client.emit('bossBarsReset', undefined);
+  const isMapChange = client.mapId !== client.warpMapId;
+
+  // Only clear boss state on map changes — local warps preserve state
+  // since the boss state sync packet from the server re-sends it
+  if (isMapChange) {
+    client.awakenedBosses.clear();
+    client.bossAdds.clear();
+    client.emit('bossBarsReset', undefined);
+  }
+
   for (const npc of client.nearby.npcs) {
     const record = client.getEnfRecordById(npc.id);
-    if (record?.boss) {
+    if (record?.boss && !client.awakenedBosses.has(npc.index)) {
       client.emit('bossAppeared', {
         npcIndex: npc.index,
         npcId: npc.id,

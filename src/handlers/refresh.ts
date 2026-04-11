@@ -9,9 +9,9 @@ import type { Client } from '../client';
 function handleRefreshReply(client: Client, reader: EoReader) {
   const packet = RefreshReplyServerPacket.deserialize(reader);
   client.nearby = packet.nearby;
-  client.awakenedBosses.clear();
-  client.bossAdds.clear();
-  client.emit('bossBarsReset', undefined);
+
+  // Don't clear awakened state on refresh — it's the same map
+  // The server will re-send boss state sync if needed
 
   // Detect boss NPCs already on the map
   for (const npc of client.nearby.npcs) {
