@@ -51,12 +51,11 @@ body.themed .confirm {
   filter: var(--theme-filter);
 }
 
-/* Counter-rotate asset images so they appear normal */
-body.themed img,
-body.themed canvas,
-body.themed .icon[data-id],
-body.themed .menu-item-img,
-body.themed .hud-bar-fill {
+/* Counter-rotate asset images inside themed panels so they appear normal */
+body.themed #ui img,
+body.themed #ui .icon[data-id],
+body.themed #ui .menu-item-img,
+body.themed #ui .hud-bar-fill {
   filter: var(--theme-filter-invert);
 }
 
