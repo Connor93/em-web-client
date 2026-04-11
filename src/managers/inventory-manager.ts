@@ -1,11 +1,14 @@
 import {
   ByteCoords,
+  EoWriter,
   Item,
   ItemDropClientPacket,
   ItemJunkClientPacket,
   ItemSpecial,
   ItemType,
   ItemUseClientPacket,
+  PacketAction,
+  PacketFamily,
   PaperdollAddClientPacket,
   PaperdollRemoveClientPacket,
   ThreeItem,
@@ -48,9 +51,33 @@ export function junkItem(client: Client, id: number, amount: number): void {
   client.bus.send(packet);
 }
 
+// Title certificate item IDs (server config: TitleCert)
+const TITLE_CERT_IDS = [494, 862];
+
+function useTitleCert(client: Client, itemId: number): void {
+  const title = prompt('Enter your new title:');
+  if (!title || !title.trim()) return;
+
+  const writer = new EoWriter();
+  writer.addShort(itemId);
+  writer.addByte(0xff);
+  writer.addString(title.trim());
+  client.bus.sendBuf(
+    PacketFamily.Item,
+    PacketAction.Report,
+    writer.toByteArray(),
+  );
+}
+
 export function useItem(client: Client, id: number): void {
   const item = client.items.find((i) => i.id === id);
   if (!item) {
+    return;
+  }
+
+  // Title certificate — show text prompt instead of normal use
+  if (TITLE_CERT_IDS.includes(id)) {
+    useTitleCert(client, id);
     return;
   }
 
