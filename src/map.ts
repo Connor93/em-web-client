@@ -1300,35 +1300,66 @@ export class MapRenderer {
   }
 
   private addStatusEffectIcons(playerId: number, topCenter: Vector2) {
-    const icons: { label: string; color: string }[] = [];
+    const effects: {
+      key: string;
+      fillColor: number;
+      borderColor: number;
+      symbol: string;
+    }[] = [];
 
     if (this.client.playerStatusEffects.has(`healblock:${playerId}`)) {
-      icons.push({ label: 'HEAL BLOCKED', color: '#ff4444' });
+      effects.push({
+        key: 'healblock',
+        fillColor: 0x661111,
+        borderColor: 0xff4444,
+        symbol: 'X',
+      });
     }
     if (this.client.playerStatusEffects.has(`root:${playerId}`)) {
-      icons.push({ label: 'ROOTED', color: '#4488ff' });
+      effects.push({
+        key: 'root',
+        fillColor: 0x112266,
+        borderColor: 0x4488ff,
+        symbol: 'O',
+      });
     }
 
-    let yOffset = -30;
-    for (const icon of icons) {
-      const key = `ui:status:${playerId}:${icon.label}`;
-      const drawX = Math.floor(topCenter.x);
-      const drawY = Math.floor(topCenter.y + yOffset);
+    const iconSize = 10;
+    const iconGap = 2;
+    const totalWidth =
+      effects.length * iconSize + (effects.length - 1) * iconGap;
+    const startX = Math.floor(topCenter.x - totalWidth / 2);
+    const iconY = Math.floor(topCenter.y - 22);
 
-      this.addAtlasTextSprites(
-        `${key}:shadow`,
-        icon.label,
-        { x: drawX + 1, y: drawY + 1 },
-        '#000',
-      );
-      this.addAtlasTextSprites(
-        key,
-        icon.label,
-        { x: drawX, y: drawY },
-        icon.color,
-      );
+    for (let i = 0; i < effects.length; i++) {
+      const effect = effects[i];
+      const iconX = startX + i * (iconSize + iconGap);
+      const pulse = 0.75 + 0.25 * Math.sin(performance.now() / 350 + i);
 
-      yOffset -= 10;
+      // Draw icon badge background
+      const graphics = this.ensureUiGraphics(
+        `ui:status-icon:${playerId}:${effect.key}`,
+        `ui:status-icon ${effect.key}`,
+      );
+      graphics.roundRect(iconX, iconY, iconSize, iconSize, 2);
+      graphics.fill({ color: effect.fillColor, alpha: 0.85 * pulse });
+      graphics.stroke({
+        color: effect.borderColor,
+        width: 1,
+        alpha: pulse,
+      });
+
+      // Draw symbol centered in the badge
+      const symbolX = iconX + iconSize / 2;
+      const symbolY = iconY + 1;
+      this.addAtlasTextSprites(
+        `ui:status-symbol:${playerId}:${effect.key}`,
+        effect.symbol,
+        { x: symbolX, y: symbolY },
+        effect.key === 'healblock' ? '#ff6666' : '#6699ff',
+        true,
+        false,
+      );
     }
   }
 

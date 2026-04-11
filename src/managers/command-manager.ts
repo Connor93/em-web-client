@@ -110,25 +110,6 @@ export function handleCommand(client: Client, input: string): boolean {
       client.bus.send(packet);
       return true;
     }
-
-    case '#teststatus': {
-      // Test command: simulate status effects on yourself for 10 seconds
-      const expiresAt = Date.now() + 10000;
-      client.playerStatusEffects.set(`healblock:${client.playerId}`, {
-        playerId: client.playerId,
-        type: 'healblock',
-        expiresAt,
-      });
-      client.playerStatusEffects.set(`root:${client.playerId}`, {
-        playerId: client.playerId,
-        type: 'root',
-        expiresAt,
-      });
-      client.emit('serverChat', {
-        message: 'Test: HEAL BLOCKED + ROOTED for 10 seconds',
-      });
-      return true;
-    }
   }
 
   return false;
