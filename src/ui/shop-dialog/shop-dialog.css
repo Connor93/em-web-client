@@ -25,7 +25,7 @@
 
 .shop-tabs .themed-btn.active {
   opacity: 1;
-  border-bottom-color: #d4b896;
+  border-bottom-color: var(--theme-accent);
 }
 
 /* Item grid */
@@ -48,8 +48,8 @@
   align-items: center;
   justify-content: center;
   padding: 6px 4px 4px;
-  background: rgba(18, 16, 12, 0.7);
-  border: 1px solid rgba(212, 184, 150, 0.1);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
   border-radius: 4px;
   cursor: pointer;
   transition:
@@ -61,7 +61,7 @@
 
 .grid-card:hover {
   background: rgba(42, 36, 28, 0.9);
-  border-color: rgba(212, 184, 150, 0.35);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
 }
 
 .grid-card .card-img-wrap {
@@ -81,7 +81,7 @@
 
 .grid-card .card-name {
   font-size: 11px;
-  color: #a89880;
+  color: var(--theme-dim);
   text-align: center;
   line-height: 1.2;
   max-width: 100%;
@@ -92,9 +92,9 @@
 
 .grid-card .card-badge {
   font-size: 9px;
-  color: #d4b896;
-  background: rgba(212, 184, 150, 0.12);
-  border: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-accent);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 3px;
   padding: 1px 5px;
   margin-top: 3px;
@@ -104,11 +104,11 @@
 .grid-card .tooltip {
   display: none;
   position: fixed;
-  background: rgba(18, 16, 12, 0.96);
-  border: 1px solid rgba(212, 184, 150, 0.3);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 4px;
   padding: 6px 10px;
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 10px;
   white-space: pre-line;
   z-index: 2000;
@@ -125,7 +125,7 @@
 .shop-grid-empty {
   grid-column: 1 / -1;
   text-align: center;
-  color: #6b5f52;
+  color: var(--theme-very-dim);
   font-size: 11px;
   padding: 24px 0;
   font-style: italic;

@@ -4,15 +4,15 @@
   position: absolute;
   right: 120px;
   width: 210px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   padding: 0;
   user-select: none;
   z-index: 1050;
   overflow: visible;
-  color: #e0daca;
+  color: var(--theme-text);
   font-family: inherit;
 }
 
@@ -23,8 +23,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background: rgba(45, 38, 28, 0.9);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  background: var(--theme-bg-light);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
 }
 
 #inventory .top > div {
@@ -32,7 +32,7 @@
 }
 
 #inventory .weight {
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 11px;
 }
 
@@ -42,7 +42,7 @@
   display: flex;
   gap: 0;
   background: rgba(30, 25, 18, 0.85);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.12);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
 }
 
 #inventory .tabs button {
@@ -50,7 +50,7 @@
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 10px;
   padding: 5px 4px;
   cursor: pointer;
@@ -59,14 +59,14 @@
 }
 
 #inventory .tabs button:hover {
-  color: #d4b896;
-  background: rgba(212, 184, 150, 0.06);
+  color: var(--theme-accent);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.06);
 }
 
 #inventory .tabs button.active {
-  color: #d4b896;
-  border-bottom-color: #d4b896;
-  background: rgba(212, 184, 150, 0.08);
+  color: var(--theme-accent);
+  border-bottom-color: var(--theme-accent);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
 }
 
 /* ── Item Grid ──────────────────────────────────────────────────── */
@@ -81,7 +81,7 @@
   padding: 4px;
   box-sizing: border-box;
   gap: 1px;
-  background: rgba(212, 184, 150, 0.15);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
 }
 
 /* Empty placeholder cells that make the grid visible */
@@ -103,9 +103,9 @@
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(18, 16, 12, 0.95);
-  border: 1px solid rgba(212, 184, 150, 0.3);
-  color: #e0daca;
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
+  color: var(--theme-text);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -120,7 +120,7 @@
 }
 
 #inventory .item:hover {
-  background: rgba(212, 184, 150, 0.08);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
 }
 
 #inventory .item img {
@@ -174,13 +174,13 @@
   gap: 4px;
   justify-content: flex-end;
   padding: 4px 8px;
-  border-top: 1px solid rgba(212, 184, 150, 0.12);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
 }
 
 #inventory .buttons button {
   background: none;
   border: none;
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 10px;
   cursor: pointer;
   padding: 2px 8px;
@@ -189,5 +189,5 @@
 }
 
 #inventory .buttons button:hover {
-  color: #d4b896;
+  color: var(--theme-accent);
 }

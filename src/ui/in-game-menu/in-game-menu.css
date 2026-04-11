@@ -19,12 +19,12 @@
   padding: 7px 10px;
   background: linear-gradient(
     180deg,
-    rgba(30, 26, 20, 0.85),
+    var(--theme-bg-medium),
     rgba(22, 19, 15, 0.92)
   );
-  border: 1px solid rgba(212, 184, 150, 0.18);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
   border-radius: 4px;
-  color: #d4b896;
+  color: var(--theme-accent);
   font-family: inherit;
   font-size: 11px;
   letter-spacing: 0.3px;
@@ -39,14 +39,14 @@
   background: linear-gradient(
     180deg,
     rgba(42, 36, 28, 0.92),
-    rgba(30, 26, 20, 0.96)
+    var(--theme-bg-medium)
   );
-  border-color: rgba(212, 184, 150, 0.35);
-  color: #e8d4b2;
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  color: var(--theme-text);
 }
 
 .menu-btn:active {
-  background: rgba(212, 184, 150, 0.12);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
 }
 
 .menu-btn svg {

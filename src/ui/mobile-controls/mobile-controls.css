@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 15px var(--theme-input-bg);
 }
 
 #btn-attack::after {
@@ -131,7 +131,7 @@
   font-size: 10px;
   color: #a09070;
   letter-spacing: 0.5px;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 10px var(--theme-input-bg);
 }
 
 #btn-toggle-sit::after {

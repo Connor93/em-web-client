@@ -4,12 +4,12 @@
   user-select: none;
   box-sizing: border-box;
   width: 320px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
-  color: #e0daca;
+  color: var(--theme-text);
   /* biome-ignore lint/a11y/useGenericFontNames: fallback for bitmap font */
   font-family: w95fa, "Segoe UI", Tahoma, Arial !important;
 }
@@ -20,9 +20,9 @@
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #d4b896;
-  background: rgba(45, 38, 28, 0.9);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-accent);
+  background: var(--theme-bg-light);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -49,7 +49,7 @@
 }
 
 #info-dialog .item-list::-webkit-scrollbar-thumb {
-  background: rgba(212, 184, 150, 0.3);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 2px;
 }
 
@@ -60,23 +60,23 @@
   gap: 6px;
   justify-content: center;
   padding: 8px 12px;
-  border-top: 1px solid rgba(212, 184, 150, 0.15);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   background: rgba(0, 0, 0, 0.15);
 }
 
 /* ── Sections ───────────────────────────────────────────────────── */
 
 #info-dialog .section-header {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 11px;
   font-weight: 600;
   padding: 4px 0 2px 0;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   margin-top: 6px;
 }
 
 #info-dialog .info-row {
-  color: #d4c4a8;
+  color: var(--theme-text);
   font-size: 12px;
   padding: 2px 4px;
   white-space: normal;
@@ -92,8 +92,8 @@
 }
 
 #info-dialog .info-row.clickable:hover {
-  color: #e8d4b2;
-  background: rgba(212, 184, 150, 0.1);
+  color: var(--theme-text);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
 }
 
 /* ── Mobile: slide-in side panel ─────────────────────────────────── */

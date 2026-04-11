@@ -4,13 +4,13 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 340px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.3);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 8px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  color: #e0daca;
+  color: var(--theme-text);
   font-family: "MS Sans Serif", Tahoma, sans-serif;
   font-size: 12px;
   overflow: hidden;
@@ -18,13 +18,13 @@
 }
 
 #citizen-dialog .citizen-header {
-  background: linear-gradient(90deg, rgba(212, 184, 150, 0.15), transparent);
+  background: linear-gradient(90deg, rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15), transparent);
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.2);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   font-size: 13px;
   font-weight: bold;
   letter-spacing: 0.5px;
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #citizen-dialog .citizen-body {
@@ -41,10 +41,10 @@
 #citizen-dialog .citizen-menu-btn {
   width: 100%;
   padding: 6px 12px;
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 4px;
-  background: rgba(212, 184, 150, 0.08);
-  color: #d4b896;
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  color: var(--theme-accent);
   font-family: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -53,7 +53,7 @@
 }
 
 #citizen-dialog .citizen-menu-btn:hover {
-  background: rgba(212, 184, 150, 0.18);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
 }
 
 #citizen-dialog .citizen-question {
@@ -62,7 +62,7 @@
 
 #citizen-dialog .citizen-question label {
   display: block;
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 11px;
   margin-bottom: 3px;
 }
@@ -70,10 +70,10 @@
 #citizen-dialog .citizen-question input {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid rgba(212, 184, 150, 0.3);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #e0daca;
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
   font-family: inherit;
   font-size: 12px;
   box-sizing: border-box;
@@ -81,11 +81,11 @@
 
 #citizen-dialog .citizen-question input:focus {
   outline: none;
-  border-color: rgba(212, 184, 150, 0.5);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
 }
 
 #citizen-dialog .citizen-message {
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 12px;
   line-height: 1.5;
   text-align: center;
@@ -102,16 +102,16 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 8px 12px;
-  border-top: 1px solid rgba(212, 184, 150, 0.15);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   background: rgba(0, 0, 0, 0.15);
 }
 
 #citizen-dialog .citizen-btn {
   padding: 4px 16px;
-  border: 1px solid rgba(212, 184, 150, 0.3);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 4px;
-  background: rgba(212, 184, 150, 0.1);
-  color: #d4b896;
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  color: var(--theme-accent);
   font-family: inherit;
   font-size: 11px;
   cursor: pointer;
@@ -121,8 +121,8 @@
 }
 
 #citizen-dialog .citizen-btn:hover {
-  background: rgba(212, 184, 150, 0.2);
-  border-color: rgba(212, 184, 150, 0.5);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
 }
 
 #citizen-dialog .citizen-btn.primary {

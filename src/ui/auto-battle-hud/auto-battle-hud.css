@@ -9,14 +9,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(18, 16, 12, 0.92);
+  background: var(--theme-bg-dark);
   border: 1px solid rgba(140, 200, 90, 0.3);
   border-radius: 20px;
   padding: 4px 12px 4px 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
   user-select: none;
   font-family: inherit;
-  color: #e0daca;
+  color: var(--theme-text);
   transition:
     opacity 0.2s,
     transform 0.2s;
@@ -58,7 +58,7 @@
   display: flex;
   gap: 10px;
   font-size: 9px;
-  color: #a89880;
+  color: var(--theme-dim);
 }
 
 #auto-battle-hud .ab-stats span {
@@ -66,7 +66,7 @@
 }
 
 #auto-battle-hud .ab-stats .ab-stat-val {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-weight: 600;
 }
 
@@ -125,14 +125,14 @@ body.is-mobile #auto-battle-hud .ab-stop-btn {
   justify-content: center;
   flex-direction: column;
   gap: 12px;
-  color: #e0daca;
+  color: var(--theme-text);
   font-family: inherit;
   cursor: pointer;
 }
 
 #auto-battle-sleep .sleep-text {
   font-size: 14px;
-  color: #a89880;
+  color: var(--theme-dim);
   animation: ab-pulse-anim 2s ease-in-out infinite;
 }
 

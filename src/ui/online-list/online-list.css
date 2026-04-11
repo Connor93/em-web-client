@@ -5,10 +5,10 @@
 #online-list .online-search {
   width: 100%;
   padding: 4px 8px;
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #e0daca;
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
   font-family: inherit;
   font-size: 11px;
   box-sizing: border-box;
@@ -16,11 +16,11 @@
 }
 
 #online-list .online-search:focus {
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 #online-list .online-search::placeholder {
-  color: #6b5f52;
+  color: var(--theme-very-dim);
 }
 
 #online-list.dialog-md .dialog-contents {

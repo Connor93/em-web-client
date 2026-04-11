@@ -12,12 +12,12 @@
 
 #bank .balance {
   font-size: 12px;
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #bank .balance::before {
   content: "Gold: ";
-  color: #a89880;
+  color: var(--theme-dim);
 }
 
 .bank-actions {

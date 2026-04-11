@@ -4,14 +4,14 @@
   user-select: none;
   box-sizing: border-box;
   width: 340px;
-  background: rgba(18, 16, 12, 0.96);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   z-index: 1050;
   font-family: inherit;
-  color: #e0daca;
+  color: var(--theme-text);
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -21,20 +21,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(45, 38, 28, 0.9);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  background: var(--theme-bg-light);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
 }
 
 #auto-battle-dialog .ab-title {
   font-size: 13px;
   font-weight: 600;
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #auto-battle-dialog .ab-close {
   background: none;
   border: none;
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 18px;
   cursor: pointer;
   padding: 0 4px;
@@ -43,7 +43,7 @@
 }
 
 #auto-battle-dialog .ab-close:hover {
-  color: #e0daca;
+  color: var(--theme-text);
 }
 
 /* ── Body ────────────────────────────────────────────────────── */
@@ -62,12 +62,12 @@
 #auto-battle-dialog .ab-section {
   font-size: 9px;
   font-weight: 700;
-  color: #a89880;
+  color: var(--theme-dim);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   padding: 6px 0 2px;
   margin-top: 2px;
-  border-top: 1px solid rgba(212, 184, 150, 0.08);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
 }
 
 #auto-battle-dialog .ab-section:first-child {
@@ -83,8 +83,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 5px 8px;
-  background: rgba(30, 26, 20, 0.7);
-  border: 1px solid rgba(212, 184, 150, 0.1);
+  background: var(--theme-bg-medium);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
   border-radius: 4px;
   transition:
     background 0.15s,
@@ -93,11 +93,11 @@
 
 #auto-battle-dialog .ab-row:hover {
   background: rgba(42, 36, 28, 0.85);
-  border-color: rgba(212, 184, 150, 0.2);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
 }
 
 #auto-battle-dialog .ab-label {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 10px;
   font-weight: 500;
   white-space: nowrap;
@@ -137,7 +137,7 @@
   top: 2px;
   width: 12px;
   height: 12px;
-  background: #a89880;
+  background: var(--theme-dim);
   border-radius: 50%;
   transition:
     transform 0.2s,
@@ -158,9 +158,9 @@
 #auto-battle-dialog .ab-number {
   width: 48px;
   background: rgba(20, 16, 12, 0.8);
-  border: 1px solid rgba(212, 184, 150, 0.15);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 3px;
-  color: #e0daca;
+  color: var(--theme-text);
   font-size: 10px;
   font-family: inherit;
   padding: 2px 4px;
@@ -170,7 +170,7 @@
 }
 
 #auto-battle-dialog .ab-number:focus {
-  border-color: rgba(212, 184, 150, 0.35);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
 }
 
 /* ── Select ──────────────────────────────────────────────────── */
@@ -186,7 +186,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #e0daca;
+  color: var(--theme-text);
   font-size: 10px;
   font-family: inherit;
   cursor: pointer;
@@ -195,7 +195,7 @@
 
 #auto-battle-dialog .ab-select option {
   background: #1a1206;
-  color: #d4c4a8;
+  color: var(--theme-text);
 }
 
 #auto-battle-dialog .ab-select-wrap::after {
@@ -204,7 +204,7 @@
   right: 2px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 7px;
   pointer-events: none;
 }
@@ -216,8 +216,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(45, 38, 28, 0.5);
-  border-top: 1px solid rgba(212, 184, 150, 0.1);
+  background: var(--theme-bg-light);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
 }
 
 #auto-battle-dialog .ab-footer .ab-shortcut {
@@ -226,13 +226,13 @@
 }
 
 #auto-battle-dialog .ab-footer .ab-shortcut kbd {
-  background: rgba(212, 184, 150, 0.12);
-  border: 1px solid rgba(212, 184, 150, 0.15);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 3px;
   padding: 1px 4px;
   font-family: inherit;
   font-size: 9px;
-  color: #a89880;
+  color: var(--theme-dim);
 }
 
 #auto-battle-dialog .ab-start-btn {

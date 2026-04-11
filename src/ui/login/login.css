@@ -2,14 +2,14 @@
 
 #login-form {
   width: 340px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   margin: auto;
   padding: 16px 20px;
   box-sizing: border-box;
-  color: #e0daca;
+  color: var(--theme-text);
   font-family: inherit;
 }
 
@@ -20,7 +20,7 @@
 #login-form .login-field label {
   display: block;
   font-size: 11px;
-  color: #a89880;
+  color: var(--theme-dim);
   margin-bottom: 3px;
 }
 
@@ -29,9 +29,9 @@ input[type="password"] {
   width: 100%;
   padding: 6px 10px;
   background: rgba(30, 25, 18, 0.7);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 4px;
-  color: #e0daca;
+  color: var(--theme-text);
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -40,12 +40,12 @@ input[type="password"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 label[for="login-remember"] {
   font-size: 11px;
-  color: #a89880;
+  color: var(--theme-dim);
   display: flex;
   align-items: center;
   gap: 6px;

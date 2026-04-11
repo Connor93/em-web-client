@@ -64,25 +64,25 @@
   position: absolute;
   z-index: 1020;
   top: 30px;
-  background: rgba(18, 16, 12, 0.88);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 8px;
   width: 200px;
-  color: #e0daca;
+  color: var(--theme-text);
   padding: 5px;
   font-family: inherit;
 }
 
 #chat a {
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #chat-message {
   padding: 5px;
   background: rgba(30, 25, 18, 0.7);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 4px;
-  color: #e0daca;
+  color: var(--theme-text);
   width: 100%;
   height: 24px;
   margin-top: 5px;
@@ -92,14 +92,14 @@
 }
 
 #chat-message:focus {
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 #btn-toggle-chat {
   padding: 3px 8px;
   background: rgba(30, 25, 18, 0.85);
-  color: #a89880;
-  border: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-dim);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 4px;
   outline: none;
   user-select: none;
@@ -110,7 +110,7 @@
 }
 
 #btn-toggle-chat:hover {
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #chat-tab-bar {
@@ -120,8 +120,8 @@
 #chat-tab-bar button {
   padding: 3px 8px;
   background: rgba(30, 25, 18, 0.85);
-  color: #a89880;
-  border: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-dim);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 4px 4px 0 0;
   outline: none;
   user-select: none;
@@ -131,12 +131,12 @@
 }
 
 #chat-tab-bar button:hover {
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #chat-tab-bar button.active {
-  color: #d4b896;
-  background: rgba(45, 38, 28, 0.9);
+  color: var(--theme-accent);
+  background: var(--theme-bg-light);
   border-bottom-color: transparent;
 }
 
@@ -160,12 +160,12 @@
 }
 
 #chat li div.msg > .author {
-  color: #d4b896;
+  color: var(--theme-accent);
   padding-right: 5px;
 }
 
 #chat li div.msg > .chat-timestamp {
-  color: #6b5f52;
+  color: var(--theme-very-dim);
   font-size: 14px;
   padding-right: 4px;
 }

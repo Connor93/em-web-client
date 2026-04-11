@@ -23,8 +23,8 @@
 
 #character-select .character {
   width: 280px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   padding: 12px;
@@ -36,7 +36,7 @@
 }
 
 #character-select .character:hover {
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 #character-select .character .preview {
@@ -51,14 +51,14 @@
 }
 
 #character-select .character .name {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
 }
 
 #character-select .character .level {
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 11px;
 }
 
@@ -78,7 +78,7 @@
 #character-select .character .admin-level.level-2,
 #character-select .character .admin-level.level-3,
 #character-select .character .admin-level.level-4 {
-  background: #d4b896;
+  background: var(--theme-accent);
   border-radius: 50%;
 }
 

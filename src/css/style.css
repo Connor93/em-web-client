@@ -1,53 +1,19 @@
 :root {
   --eo-brown: #7b5a29;
   --eo-font-color-light: #f0f0c8;
-  --theme-filter: none;
-}
 
-/* ── Theme color filter ──────────────────────────────────────────── */
-
-body.themed #hud,
-body.themed #in-game-menu,
-body.themed #chat,
-body.themed #hotbar,
-body.themed #boss-bar,
-body.themed #party-hud,
-body.themed #expedition-tracker,
-body.themed #mobile-toolbar,
-body.themed #mobile-menu-panel,
-body.themed #pm-chat-container,
-body.themed #inventory,
-body.themed #stats,
-body.themed #spell-book,
-body.themed #online-list,
-body.themed #party,
-body.themed #settings-dialog,
-body.themed #info-dialog,
-body.themed #encyclopedia,
-body.themed #guild-panel,
-body.themed #guild-dialog,
-body.themed #guild-create-invite,
-body.themed #quest-dialog,
-body.themed #quest-progress,
-body.themed #shop,
-body.themed #bank,
-body.themed #chest,
-body.themed #locker,
-body.themed #skill-master,
-body.themed #board,
-body.themed #book,
-body.themed #barber,
-body.themed #citizen,
-body.themed #trade,
-body.themed #paperdoll,
-body.themed #auto-battle-dialog,
-body.themed #auto-battle-hud,
-body.themed #autoloot-panel,
-body.themed #item-amount-dialog,
-body.themed #exit-game,
-body.themed .alert,
-body.themed .confirm {
-  filter: var(--theme-filter);
+  /* Theme variables — overridden by JS when user picks a custom color */
+  --theme-accent: #d4b896;
+  --theme-text: #e0daca;
+  --theme-dim: #a89b8c;
+  --theme-very-dim: #6b5f52;
+  --theme-accent-r: 212;
+  --theme-accent-g: 184;
+  --theme-accent-b: 150;
+  --theme-bg-dark: rgba(18, 16, 12, 0.94);
+  --theme-bg-medium: rgba(30, 26, 20, 0.92);
+  --theme-bg-light: rgba(45, 38, 28, 0.9);
+  --theme-input-bg: rgba(0, 0, 0, 0.3);
 }
 
 @font-face {
@@ -367,7 +333,7 @@ div.icon[data-id="23"] {
   --height: auto;
   background: none;
   font-size: 11px;
-  color: #d4b896;
+  color: var(--theme-accent);
   min-width: 60px;
   text-align: right;
   line-height: 24px;
@@ -381,10 +347,10 @@ div.icon[data-id="23"] {
   justify-content: center;
   padding: 6px 18px;
   min-width: 70px;
-  background: rgba(18, 16, 12, 0.88);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 4px;
-  color: #d4b896;
+  color: var(--theme-accent);
   font-family: inherit;
   font-size: 12px;
   letter-spacing: 0.5px;
@@ -398,7 +364,7 @@ div.icon[data-id="23"] {
 
 .themed-btn:hover {
   background: rgba(42, 36, 28, 0.95);
-  border-color: rgba(212, 184, 150, 0.45);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.45);
   color: #e8d5b8;
 }
 
@@ -649,7 +615,7 @@ div.icon[data-id="23"] {
   right: 16px;
   width: 16px;
   height: 15px;
-  background: rgba(212, 184, 150, 0.3);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 3px;
   touch-action: none;
   user-select: none;
@@ -803,11 +769,11 @@ div.icon[data-id="23"] {
 .dialog-md {
   width: 320px;
   min-height: 260px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
-  color: #e0daca;
+  color: var(--theme-text);
   user-select: none;
   overflow: hidden;
   font-family: inherit;
@@ -819,8 +785,8 @@ div.icon[data-id="23"] {
   padding: 10px 16px 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #d4b896;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.12);
+  color: var(--theme-accent);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -831,7 +797,7 @@ div.icon[data-id="23"] {
   display: flex;
   justify-content: center;
   gap: 8px;
-  border-top: 1px solid rgba(212, 184, 150, 0.08);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
   margin-top: auto;
 }
 
@@ -840,28 +806,28 @@ div.icon[data-id="23"] {
   width: calc(100% - 24px);
   margin: 4px 12px;
   padding: 5px 8px;
-  background: rgba(18, 16, 12, 0.8);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 4px;
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 11px;
   font-family: inherit;
   outline: none;
 }
 
 .dialog-search::placeholder {
-  color: rgba(212, 184, 150, 0.35);
+  color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
 }
 
 .dialog-search:focus {
-  border-color: rgba(212, 184, 150, 0.45);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.45);
 }
 
 .dialog-md .dialog-contents .player {
   flex-direction: column;
   width: 103px;
   font-size: 12px;
-  color: #a89880;
+  color: var(--theme-dim);
   align-items: center;
   padding: 5px;
   z-index: 1;
@@ -871,7 +837,7 @@ div.icon[data-id="23"] {
 
 .dialog-md .dialog-contents .player:hover {
   position: relative;
-  background: rgba(212, 184, 150, 0.08);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
 }
 
 .dialog-md .dialog-contents .player .nameplate {
@@ -882,7 +848,7 @@ div.icon[data-id="23"] {
 .dialog-md .dialog-contents .player .nameplate .name {
   text-transform: capitalize;
   font-weight: bold;
-  color: #d4b896;
+  color: var(--theme-accent);
   padding: 0 2px;
 }
 
@@ -895,7 +861,7 @@ div.icon[data-id="23"] {
 .dialog-md .dialog-contents .player .title {
   font-style: italic;
   text-align: center;
-  color: #8a7e6e;
+  color: var(--theme-very-dim);
 }
 
 .dialog-md .dialog-contents {
@@ -917,7 +883,7 @@ div.icon[data-id="23"] {
 }
 
 .dialog-md .dialog-contents::-webkit-scrollbar-thumb {
-  background: rgba(212, 184, 150, 0.3);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
   border-radius: 2px;
 }
 
@@ -928,14 +894,14 @@ div.icon[data-id="23"] {
 }
 
 .dialog-md .spell-name {
-  color: #d4c4a8;
+  color: var(--theme-text);
   font-size: 10px;
   max-width: 40px;
   text-align: center;
 }
 
 .dialog-md .spell-level {
-  color: #8a7e6e;
+  color: var(--theme-very-dim);
   font-size: 9px;
   position: relative;
 }
@@ -962,15 +928,15 @@ div.icon[data-id="23"] {
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #d4b896;
-  background: rgba(45, 38, 28, 0.9);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-accent);
+  background: var(--theme-bg-light);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
 }
 
 .dialog-md .player-count {
   padding: 4px 12px;
   font-size: 11px;
-  color: #a89880;
+  color: var(--theme-dim);
 }
 
 .dialog-md button[data-id="cancel"] {
@@ -981,7 +947,7 @@ div.icon[data-id="23"] {
 /* ── Movable UI unlock indicators ──────────────────────────────── */
 
 .ui-unlocked {
-  border: 1px dashed rgba(212, 184, 150, 0.4) !important;
+  border: 1px dashed rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4) !important;
   cursor: move !important;
 }
 

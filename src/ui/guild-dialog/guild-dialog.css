@@ -2,27 +2,27 @@
   width: 340px;
   background: linear-gradient(
     180deg,
-    rgba(30, 26, 20, 0.97),
+    var(--theme-bg-medium),
     rgba(22, 19, 15, 0.98)
   );
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 6px;
   overflow: hidden;
   font-size: 11px;
-  color: #e0daca;
+  color: var(--theme-text);
   position: relative;
 }
 
 .guild-header {
   background: linear-gradient(
     90deg,
-    rgba(212, 184, 150, 0.12),
-    rgba(212, 184, 150, 0.04)
+    rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12),
+    rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04)
   );
   padding: 8px 12px;
   font-weight: bold;
-  color: #d4b896;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-accent);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   font-size: 12px;
 }
 
@@ -34,7 +34,7 @@
 
 .guild-footer {
   padding: 8px;
-  border-top: 1px solid rgba(212, 184, 150, 0.1);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
   display: flex;
   justify-content: flex-end;
   gap: 6px;
@@ -46,10 +46,10 @@
   width: 100%;
   padding: 8px 12px;
   margin-bottom: 4px;
-  background: rgba(212, 184, 150, 0.06);
-  border: 1px solid rgba(212, 184, 150, 0.12);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.06);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
   border-radius: 4px;
-  color: #e0daca;
+  color: var(--theme-text);
   cursor: pointer;
   text-align: left;
   font-size: 11px;
@@ -58,7 +58,7 @@
 }
 
 .guild-menu-btn:hover {
-  background: rgba(212, 184, 150, 0.15);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
 }
 
 .guild-menu-btn:last-child {
@@ -68,10 +68,10 @@
 /* Generic guild button */
 .guild-btn {
   padding: 5px 12px;
-  background: rgba(212, 184, 150, 0.08);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 3px;
-  color: #e0daca;
+  color: var(--theme-text);
   cursor: pointer;
   font-size: 11px;
   font-family: inherit;
@@ -79,17 +79,17 @@
 }
 
 .guild-btn:hover {
-  background: rgba(212, 184, 150, 0.18);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.18);
 }
 
 .guild-btn.primary {
-  background: rgba(212, 184, 150, 0.15);
-  border-color: rgba(212, 184, 150, 0.35);
-  color: #d4b896;
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.35);
+  color: var(--theme-accent);
 }
 
 .guild-btn.primary:hover {
-  background: rgba(212, 184, 150, 0.28);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.28);
 }
 
 .guild-btn.danger {
@@ -107,7 +107,7 @@
 }
 
 .guild-info-label {
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -115,12 +115,12 @@
 }
 
 .guild-info-value {
-  color: #e0daca;
+  color: var(--theme-text);
   padding: 2px 0;
 }
 
 .guild-info-value.highlight {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-weight: bold;
 }
 
@@ -134,15 +134,15 @@
 }
 
 .guild-member-row:nth-child(even) {
-  background: rgba(212, 184, 150, 0.04);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04);
 }
 
 .guild-member-name {
-  color: #e0daca;
+  color: var(--theme-text);
 }
 
 .guild-member-rank {
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 10px;
 }
 
@@ -155,15 +155,15 @@
 }
 
 .guild-staff-row:nth-child(even) {
-  background: rgba(212, 184, 150, 0.04);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.04);
 }
 
 .guild-staff-name {
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 .guild-staff-type {
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 10px;
 }
 
@@ -171,10 +171,10 @@
 .guild-input {
   width: 100%;
   padding: 5px 8px;
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.3);
-  color: #e0daca;
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
   font-family: inherit;
   font-size: 11px;
   box-sizing: border-box;
@@ -182,7 +182,7 @@
 
 .guild-input:focus {
   outline: none;
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 textarea.guild-input {
@@ -195,7 +195,7 @@ textarea.guild-input {
 
 .guild-input-group label {
   display: block;
-  color: #a89b8c;
+  color: var(--theme-dim);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -233,7 +233,7 @@ textarea.guild-input {
 .guild-waiting {
   text-align: center;
   padding: 16px;
-  color: #a89b8c;
+  color: var(--theme-dim);
 }
 
 .guild-create-list {
@@ -272,13 +272,13 @@ textarea.guild-input {
   transform: translateX(-50%);
   background: linear-gradient(
     180deg,
-    rgba(30, 26, 20, 0.97),
+    var(--theme-bg-medium),
     rgba(22, 19, 15, 0.98)
   );
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 6px;
   padding: 10px 16px;
-  color: #e0daca;
+  color: var(--theme-text);
   font-size: 11px;
   z-index: 200;
   text-align: center;
@@ -290,7 +290,7 @@ textarea.guild-input {
 }
 
 #guild-create-invite .guild-invite-name {
-  color: #d4b896;
+  color: var(--theme-accent);
   font-weight: bold;
 }
 

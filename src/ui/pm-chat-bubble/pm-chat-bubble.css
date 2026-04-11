@@ -16,8 +16,8 @@
 .pm-bubble {
   pointer-events: auto;
   width: 140px;
-  background: rgba(18, 16, 12, 0.92);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
   cursor: pointer;
@@ -31,11 +31,11 @@
     box-shadow 0.2s;
   position: relative;
   font-family: inherit;
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 .pm-bubble:hover {
-  border-color: rgba(212, 184, 150, 0.5);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.5);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
 }
 
@@ -71,7 +71,7 @@
   height: 16px;
   font-size: 12px;
   line-height: 1;
-  color: rgba(212, 184, 150, 0.4);
+  color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
   cursor: pointer;
   flex-shrink: 0;
   border-radius: 50%;
@@ -81,8 +81,8 @@
 }
 
 .pm-bubble .pm-close-btn:hover {
-  color: #e0daca;
-  background: rgba(212, 184, 150, 0.12);
+  color: var(--theme-text);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.12);
 }
 
 @keyframes pm-pulse {
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.1);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
   cursor: move;
 }
 
@@ -152,31 +152,31 @@
 
 .pm-bubble.expanded .pm-input-row {
   display: flex;
-  border-top: 1px solid rgba(212, 184, 150, 0.1);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
 }
 
 .pm-bubble .pm-input {
   flex: 1;
-  background: rgba(18, 16, 12, 0.8);
+  background: var(--theme-bg-dark);
   border: none;
   border-radius: 0 0 0 8px;
   padding: 6px 8px;
-  color: #e0daca;
+  color: var(--theme-text);
   font-size: 11px;
   font-family: inherit;
   outline: none;
 }
 
 .pm-bubble .pm-input::placeholder {
-  color: rgba(212, 184, 150, 0.3);
+  color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.3);
 }
 
 .pm-bubble .pm-send-btn {
-  background: rgba(212, 184, 150, 0.1);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
   border: none;
   border-radius: 0 0 8px 0;
   padding: 6px 10px;
-  color: #d4b896;
+  color: var(--theme-accent);
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
@@ -184,7 +184,7 @@
 }
 
 .pm-bubble .pm-send-btn:hover {
-  background: rgba(212, 184, 150, 0.2);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
 }
 
 /* ── Message styling ─────────────────────────────────────────────── */
@@ -198,14 +198,14 @@
 
 .pm-msg.sent {
   align-self: flex-end;
-  background: rgba(212, 184, 150, 0.1);
-  color: #d4b896;
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.1);
+  color: var(--theme-accent);
 }
 
 .pm-msg.received {
   align-self: flex-start;
   background: rgba(255, 255, 255, 0.06);
-  color: #e0daca;
+  color: var(--theme-text);
 }
 
 .pm-msg .pm-msg-author {

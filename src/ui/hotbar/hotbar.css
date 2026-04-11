@@ -16,8 +16,8 @@
   position: relative;
   width: 4em;
   height: 4em;
-  background: rgba(18, 16, 12, 0.85);
-  border: 1px solid rgba(212, 184, 150, 0.2);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
   border-radius: 6px;
   display: flex;
   justify-content: center;
@@ -27,7 +27,7 @@
 }
 
 #hotbar .slot:hover {
-  border-color: rgba(212, 184, 150, 0.4);
+  border-color: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.4);
 }
 
 #hotbar .slot::before {
@@ -44,14 +44,14 @@
   width: 14px;
   height: 14px;
   content: counter(slot-counter);
-  color: #a89880;
+  color: var(--theme-dim);
   font-size: 10px;
   top: 3px;
   left: 3px;
-  background: rgba(18, 16, 12, 0.8);
+  background: var(--theme-bg-dark);
   position: absolute;
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
-  border-right: 1px solid rgba(212, 184, 150, 0.15);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
+  border-right: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   border-radius: 0 0 6px 0;
   align-items: center;
   justify-content: center;

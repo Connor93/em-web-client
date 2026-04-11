@@ -5,12 +5,12 @@
   box-sizing: border-box;
   width: 320px;
   min-height: 180px;
-  background: rgba(18, 16, 12, 0.94);
-  border: 1px solid rgba(212, 184, 150, 0.25);
+  background: var(--theme-bg-dark);
+  border: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.25);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   overflow: hidden;
-  color: #e0daca;
+  color: var(--theme-text);
   font-family: inherit;
   z-index: 1050;
   display: flex;
@@ -23,9 +23,9 @@
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #d4b896;
-  background: rgba(45, 38, 28, 0.9);
-  border-bottom: 1px solid rgba(212, 184, 150, 0.15);
+  color: var(--theme-accent);
+  background: var(--theme-bg-light);
+  border-bottom: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,7 +38,7 @@
   list-style: none;
   margin: 0;
   padding: 10px 12px;
-  color: #d4c4a8;
+  color: var(--theme-text);
   font-size: 12px;
   flex: 1;
   overflow-y: auto;
@@ -54,11 +54,11 @@
 #quest-dialog li.link {
   text-decoration: underline;
   cursor: pointer;
-  color: #d4b896;
+  color: var(--theme-accent);
 }
 
 #quest-dialog li:hover {
-  background: rgba(212, 184, 150, 0.08);
+  background: rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.08);
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────── */
@@ -68,6 +68,6 @@
   justify-content: flex-end;
   gap: 6px;
   padding: 8px 12px;
-  border-top: 1px solid rgba(212, 184, 150, 0.15);
+  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.15);
   flex-shrink: 0;
 }
