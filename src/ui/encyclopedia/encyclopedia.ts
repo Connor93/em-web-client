@@ -824,6 +824,21 @@ export class Encyclopedia extends Base {
       info.push(['Max Level', `${record.maxSkillLevel}`]);
     if (record.chant) info.push(['Chant', record.chant]);
     if (info.length > 0) this.addStatSection('Info', info);
+
+    // Admin: learn spell button
+    if (this.client.admin !== AdminLevel.Player) {
+      this.addAdminAction('Learn Spell', () => {
+        this.showAdminPopup(
+          'Learn Spell',
+          [{ label: 'Level (0-100)', defaultValue: '1' }],
+          ([levelValue]) => {
+            const level = Number.parseInt(levelValue, 10);
+            if (Number.isNaN(level) || level < 0 || level > 100) return;
+            this.sendAdminCommand(`$learn ${spellId} ${level}`);
+          },
+        );
+      });
+    }
   }
 
   // ── Class detail ──
