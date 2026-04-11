@@ -1300,66 +1300,57 @@ export class MapRenderer {
   }
 
   private addStatusEffectIcons(playerId: number, topCenter: Vector2) {
-    const effects: {
-      key: string;
-      fillColor: number;
-      borderColor: number;
-      symbol: string;
-    }[] = [];
+    const activeEffects: string[] = [];
 
     if (this.client.playerStatusEffects.has(`healblock:${playerId}`)) {
-      effects.push({
-        key: 'healblock',
-        fillColor: 0x661111,
-        borderColor: 0xff4444,
-        symbol: 'X',
-      });
+      activeEffects.push('healblock');
     }
     if (this.client.playerStatusEffects.has(`root:${playerId}`)) {
-      effects.push({
-        key: 'root',
-        fillColor: 0x112266,
-        borderColor: 0x4488ff,
-        symbol: 'O',
-      });
+      activeEffects.push('root');
     }
 
-    const iconSize = 10;
-    const iconGap = 2;
+    const iconSize = 12;
+    const iconGap = 3;
     const totalWidth =
-      effects.length * iconSize + (effects.length - 1) * iconGap;
+      activeEffects.length * iconSize + (activeEffects.length - 1) * iconGap;
     const startX = Math.floor(topCenter.x - totalWidth / 2);
     const iconY = Math.floor(topCenter.y - 30);
 
-    for (let i = 0; i < effects.length; i++) {
-      const effect = effects[i];
-      const iconX = startX + i * (iconSize + iconGap);
-      const pulse = 0.75 + 0.25 * Math.sin(performance.now() / 350 + i);
+    for (let i = 0; i < activeEffects.length; i++) {
+      const effectType = activeEffects[i];
+      const centerX = startX + i * (iconSize + iconGap) + iconSize / 2;
+      const centerY = iconY + iconSize / 2;
+      const pulse = 0.7 + 0.3 * Math.sin(performance.now() / 350 + i);
+      const radius = iconSize / 2;
 
-      // Draw icon badge background
       const graphics = this.ensureUiGraphics(
-        `ui:status-icon:${playerId}:${effect.key}`,
-        `ui:status-icon ${effect.key}`,
+        `ui:status-icon:${playerId}:${effectType}`,
+        `ui:status-icon ${effectType}`,
       );
-      graphics.roundRect(iconX, iconY, iconSize, iconSize, 2);
-      graphics.fill({ color: effect.fillColor, alpha: 0.85 * pulse });
-      graphics.stroke({
-        color: effect.borderColor,
-        width: 1,
-        alpha: pulse,
-      });
 
-      // Draw symbol centered in the badge
-      const symbolX = iconX + iconSize / 2;
-      const symbolY = iconY + 1;
-      this.addAtlasTextSprites(
-        `ui:status-symbol:${playerId}:${effect.key}`,
-        effect.symbol,
-        { x: symbolX, y: symbolY },
-        effect.key === 'healblock' ? '#ff6666' : '#6699ff',
-        true,
-        false,
-      );
+      if (effectType === 'healblock') {
+        // Red "no" symbol — circle with diagonal slash
+        graphics.circle(centerX, centerY, radius);
+        graphics.fill({ color: 0x880000, alpha: 0.8 * pulse });
+        graphics.stroke({ color: 0xff3333, width: 1.5, alpha: pulse });
+        // Diagonal slash
+        const slashOffset = radius * 0.6;
+        graphics.moveTo(centerX - slashOffset, centerY - slashOffset);
+        graphics.lineTo(centerX + slashOffset, centerY + slashOffset);
+        graphics.stroke({ color: 0xff5555, width: 1.5, alpha: pulse });
+      } else if (effectType === 'root') {
+        // Blue diamond — chain/lock symbol
+        graphics.moveTo(centerX, centerY - radius);
+        graphics.lineTo(centerX + radius, centerY);
+        graphics.lineTo(centerX, centerY + radius);
+        graphics.lineTo(centerX - radius, centerY);
+        graphics.closePath();
+        graphics.fill({ color: 0x002288, alpha: 0.8 * pulse });
+        graphics.stroke({ color: 0x4488ff, width: 1.5, alpha: pulse });
+        // Inner dot
+        graphics.circle(centerX, centerY, 2);
+        graphics.fill({ color: 0x88bbff, alpha: pulse });
+      }
     }
   }
 
