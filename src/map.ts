@@ -1565,6 +1565,40 @@ export class MapRenderer {
       tileScreenY - playerScreen.y + this._halfGameHeight + frame.yOffset,
     );
 
+    // Pulsing tile highlight beneath the item
+    const cursorEntry = this.client.atlas.getStaticEntry(
+      StaticAtlasEntryType.Cursor,
+    );
+    if (cursorEntry) {
+      const highlightTexture = this.client.atlas.getFrameTexture({
+        atlasIndex: cursorEntry.atlasIndex,
+        x: cursorEntry.x + TILE_WIDTH,
+        y: cursorEntry.y,
+        w: TILE_WIDTH,
+        h: TILE_HEIGHT,
+      });
+      if (highlightTexture) {
+        const tileX = Math.floor(
+          tileScreenX - HALF_TILE_WIDTH - playerScreen.x + this._halfGameWidth,
+        );
+        const tileY = Math.floor(
+          tileScreenY -
+            HALF_TILE_HEIGHT -
+            playerScreen.y +
+            this._halfGameHeight,
+        );
+        const highlight = this.ensureWorldSprite(
+          `item-glow:${item.uid}`,
+          `map:item-glow uid=${item.uid}`,
+        );
+        highlight.texture = highlightTexture;
+        highlight.position.set(tileX, tileY);
+        highlight.tint = 0xd4b896;
+        const pulse = Math.sin(Date.now() / 400) * 0.15 + 0.35;
+        highlight.alpha = pulse;
+      }
+    }
+
     const sprite = this.ensureWorldSprite(
       `item:${item.uid}`,
       `map:item id=${item.id} uid=${item.uid}`,
