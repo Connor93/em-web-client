@@ -34,20 +34,27 @@ function hexToHsl(hex: string): { h: number; s: number; l: number } {
 }
 
 export function applyThemeColor(hex: string | null) {
-  const ui = document.getElementById('ui');
-  if (!ui) return;
-
   if (!hex) {
-    ui.style.filter = '';
+    document.documentElement.style.removeProperty('--theme-filter');
+    document.documentElement.style.removeProperty('--theme-filter-invert');
+    document.body.classList.remove('themed');
     return;
   }
 
   const { h, s } = hexToHsl(hex);
   const rotation = h - DEFAULT_HUE;
-  // Adjust saturation relative to default (default is moderately saturated ~0.4)
   const saturationBoost = s > 0.1 ? s / 0.4 : 0.25;
 
-  ui.style.filter = `hue-rotate(${rotation.toFixed(1)}deg) saturate(${saturationBoost.toFixed(2)})`;
+  document.documentElement.style.setProperty(
+    '--theme-filter',
+    `hue-rotate(${rotation.toFixed(1)}deg) saturate(${saturationBoost.toFixed(2)})`,
+  );
+  // Counter-rotation for asset images inside themed panels
+  document.documentElement.style.setProperty(
+    '--theme-filter-invert',
+    `saturate(${(1 / saturationBoost).toFixed(2)}) hue-rotate(${(-rotation).toFixed(1)}deg)`,
+  );
+  document.body.classList.add('themed');
 }
 
 // Apply saved theme on load

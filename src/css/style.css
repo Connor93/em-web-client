@@ -1,6 +1,63 @@
 :root {
   --eo-brown: #7b5a29;
   --eo-font-color-light: #f0f0c8;
+  --theme-filter: none;
+  --theme-filter-invert: none;
+}
+
+/* ── Theme color filter ──────────────────────────────────────────── */
+
+body.themed #hud,
+body.themed #in-game-menu,
+body.themed #chat,
+body.themed #hotbar,
+body.themed #boss-bar,
+body.themed #party-hud,
+body.themed #expedition-tracker,
+body.themed #mobile-toolbar,
+body.themed #mobile-menu-panel,
+body.themed #pm-chat-container,
+body.themed #inventory,
+body.themed #stats,
+body.themed #spell-book,
+body.themed #online-list,
+body.themed #party,
+body.themed #settings-dialog,
+body.themed #info-dialog,
+body.themed #encyclopedia,
+body.themed #guild-panel,
+body.themed #guild-dialog,
+body.themed #guild-create-invite,
+body.themed #quest-dialog,
+body.themed #quest-progress,
+body.themed #shop,
+body.themed #bank,
+body.themed #chest,
+body.themed #locker,
+body.themed #skill-master,
+body.themed #board,
+body.themed #book,
+body.themed #barber,
+body.themed #citizen,
+body.themed #trade,
+body.themed #paperdoll,
+body.themed #auto-battle-dialog,
+body.themed #auto-battle-hud,
+body.themed #autoloot-panel,
+body.themed #item-amount-dialog,
+body.themed #exit-game,
+body.themed .alert,
+body.themed .confirm {
+  filter: var(--theme-filter);
+}
+
+/* Counter-rotate asset images so they appear normal */
+body.themed img,
+body.themed canvas,
+body.themed .icon[data-id],
+body.themed .menu-item-img,
+body.themed .hud-bar-fill {
+  filter: var(--theme-filter-invert);
 }
 
 @font-face {
