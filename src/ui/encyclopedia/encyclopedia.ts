@@ -1590,10 +1590,12 @@ export class Encyclopedia extends Base {
 
       if (data.spawnMaps.length > 0) {
         this.addSectionHeader('Spawn Maps');
-        const row = document.createElement('div');
-        row.className = 'enc-source-row';
-        row.textContent = `Maps: ${data.spawnMaps.join(', ')}`;
-        this.detailPanel.appendChild(row);
+        for (const mapId of data.spawnMaps) {
+          const mapName =
+            this.mapManifest?.find((m) => m.id === mapId)?.name ??
+            `Map #${mapId}`;
+          this.addSourceLinkWithSuffix('map', mapId, mapName, '');
+        }
       }
     };
 
