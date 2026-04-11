@@ -12,12 +12,19 @@ import { resetMovablePositions, setMovableLocked } from '../utils/movable';
 
 import './settings-dialog.css';
 
-const DEFAULT_HUE = 35; // The gold/brown base hue of the default theme
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  return {
+    r: Number.parseInt(hex.slice(1, 3), 16),
+    g: Number.parseInt(hex.slice(3, 5), 16),
+    b: Number.parseInt(hex.slice(5, 7), 16),
+  };
+}
 
 function hexToHsl(hex: string): { h: number; s: number; l: number } {
-  const r = Number.parseInt(hex.slice(1, 3), 16) / 255;
-  const g = Number.parseInt(hex.slice(3, 5), 16) / 255;
-  const b = Number.parseInt(hex.slice(5, 7), 16) / 255;
+  const { r: ri, g: gi, b: bi } = hexToRgb(hex);
+  const r = ri / 255;
+  const g = gi / 255;
+  const b = bi / 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const l = (max + min) / 2;
@@ -33,22 +40,96 @@ function hexToHsl(hex: string): { h: number; s: number; l: number } {
   return { h: h * 360, s, l };
 }
 
+function hslToHex(h: number, s: number, l: number): string {
+  const hue = ((h % 360) + 360) % 360;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + hue / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * Math.max(0, Math.min(1, color)))
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+/**
+ * From a single base hex color, derive the full theme palette and set CSS variables.
+ * The palette is designed to match the structure of the default gold theme:
+ * - accent: the chosen color at medium lightness
+ * - text: a very light desaturated version
+ * - dim: a medium-light desaturated version
+ * - borders: the accent color as RGB for use with rgba()
+ * - backgrounds: very dark, slightly tinted with the accent hue
+ */
 export function applyThemeColor(hex: string | null) {
+  const root = document.documentElement;
+
   if (!hex) {
-    document.documentElement.style.removeProperty('--theme-filter');
-    document.body.classList.remove('themed');
+    // Remove all theme variables — CSS falls back to defaults
+    const variables = [
+      '--theme-accent',
+      '--theme-text',
+      '--theme-dim',
+      '--theme-very-dim',
+      '--theme-accent-r',
+      '--theme-accent-g',
+      '--theme-accent-b',
+      '--theme-bg-dark',
+      '--theme-bg-medium',
+      '--theme-bg-light',
+      '--theme-input-bg',
+    ];
+    for (const variable of variables) {
+      root.style.removeProperty(variable);
+    }
     return;
   }
 
   const { h, s } = hexToHsl(hex);
-  const rotation = h - DEFAULT_HUE;
-  const saturationBoost = s > 0.1 ? s / 0.4 : 0.25;
 
-  document.documentElement.style.setProperty(
-    '--theme-filter',
-    `hue-rotate(${rotation.toFixed(1)}deg) saturate(${saturationBoost.toFixed(2)})`,
+  // Accent: the chosen color, clamped to readable lightness
+  const accent = hslToHex(h, Math.max(s, 0.3), 0.72);
+  const accentRgb = hexToRgb(accent);
+
+  // Text: very light, lightly tinted
+  const text = hslToHex(h, Math.min(s, 0.2), 0.88);
+
+  // Dim text: medium light, lightly tinted
+  const dim = hslToHex(h, Math.min(s, 0.15), 0.62);
+
+  // Very dim: darker still
+  const veryDim = hslToHex(h, Math.min(s, 0.12), 0.38);
+
+  // Backgrounds: very dark, tinted with the accent hue, with transparency
+  const bgDarkRgb = hexToRgb(hslToHex(h, Math.max(s, 0.2), 0.06));
+  const bgMediumRgb = hexToRgb(hslToHex(h, Math.max(s, 0.15), 0.1));
+  const bgLightRgb = hexToRgb(hslToHex(h, Math.max(s, 0.12), 0.15));
+  const inputBgRgb = hexToRgb(hslToHex(h, Math.max(s, 0.1), 0.04));
+
+  root.style.setProperty('--theme-accent', accent);
+  root.style.setProperty('--theme-text', text);
+  root.style.setProperty('--theme-dim', dim);
+  root.style.setProperty('--theme-very-dim', veryDim);
+  root.style.setProperty('--theme-accent-r', String(accentRgb.r));
+  root.style.setProperty('--theme-accent-g', String(accentRgb.g));
+  root.style.setProperty('--theme-accent-b', String(accentRgb.b));
+  root.style.setProperty(
+    '--theme-bg-dark',
+    `rgba(${bgDarkRgb.r}, ${bgDarkRgb.g}, ${bgDarkRgb.b}, 0.94)`,
   );
-  document.body.classList.add('themed');
+  root.style.setProperty(
+    '--theme-bg-medium',
+    `rgba(${bgMediumRgb.r}, ${bgMediumRgb.g}, ${bgMediumRgb.b}, 0.92)`,
+  );
+  root.style.setProperty(
+    '--theme-bg-light',
+    `rgba(${bgLightRgb.r}, ${bgLightRgb.g}, ${bgLightRgb.b}, 0.9)`,
+  );
+  root.style.setProperty(
+    '--theme-input-bg',
+    `rgba(${inputBgRgb.r}, ${inputBgRgb.g}, ${inputBgRgb.b}, 0.3)`,
+  );
 }
 
 // Apply saved theme on load
