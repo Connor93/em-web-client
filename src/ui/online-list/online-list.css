@@ -1,7 +1,11 @@
 #online-list.dialog-md .dialog-contents {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+#online-list.dialog-md .dialog-contents .player {
+  width: auto;
 }
 
 #online-list .admin-actions {
