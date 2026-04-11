@@ -122,14 +122,15 @@ export class PartyDialog extends Base {
         this.client.playerId === leaderPlayerId &&
         member.playerId !== this.client.playerId
       ) {
-        const removeIcon = document.createElement('div');
-        removeIcon.classList.add('remove-icon');
-        removeIcon.textContent = '\u00D7';
-        removeIcon.title = 'Kick from party';
-        removeIcon.addEventListener('click', () => {
+        const kickButton = document.createElement('button');
+        kickButton.className = 'kick-button';
+        kickButton.textContent = 'Kick';
+        kickButton.title = `Kick ${capitalize(member.name)}`;
+        kickButton.addEventListener('click', (event) => {
+          event.stopPropagation();
           this.client.removePartyMember(member.playerId);
         });
-        memberDiv.appendChild(removeIcon);
+        memberDiv.appendChild(kickButton);
       }
 
       this.memberList.appendChild(memberDiv);

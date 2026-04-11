@@ -71,18 +71,21 @@
   white-space: nowrap;
 }
 
-#party .remove-icon {
-  width: 12px;
-  height: 12px;
+#party .kick-button {
+  margin-top: 2px;
+  padding: 1px 6px;
+  background: rgba(244, 67, 54, 0.12);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 2px;
+  color: #ef9a9a;
+  font-size: 8px;
+  font-family: inherit;
   cursor: pointer;
-  color: #a89880;
-  font-size: 12px;
-  line-height: 1;
-  transition: color 0.15s;
+  transition: background 0.15s;
 }
 
-#party .remove-icon:hover {
-  color: #ef9a9a;
+#party .kick-button:hover {
+  background: rgba(244, 67, 54, 0.3);
 }
 
 #party .member-level {
