@@ -118,6 +118,14 @@ export class Chat extends Base {
       msgContainer.prepend(playerName);
     }
 
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timestamp = document.createElement('span');
+    timestamp.classList.add('chat-timestamp');
+    timestamp.textContent = `${hours}:${minutes}`;
+    msgContainer.appendChild(timestamp);
+
     const msg = document.createElement('span');
     msg.classList.add('chat-message');
     msg.innerHTML = this.replaceLinks(this.sanitize(message));

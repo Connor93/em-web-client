@@ -164,6 +164,12 @@
   padding-right: 5px;
 }
 
+#chat li div.msg > .chat-timestamp {
+  color: #6b5f52;
+  font-size: 10px;
+  padding-right: 4px;
+}
+
 #chat li.error-message {
   color: #ef9a9a;
 }
