@@ -1,3 +1,28 @@
+#online-list .online-search-wrap {
+  padding: 4px 10px;
+}
+
+#online-list .online-search {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #e0daca;
+  font-family: inherit;
+  font-size: 11px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+#online-list .online-search:focus {
+  border-color: rgba(212, 184, 150, 0.4);
+}
+
+#online-list .online-search::placeholder {
+  color: #6b5f52;
+}
+
 #online-list.dialog-md .dialog-contents {
   display: grid;
   grid-template-columns: 1fr 1fr;
