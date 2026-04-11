@@ -89,6 +89,12 @@ export class Encyclopedia extends Base {
       if (this.searchTimeout) clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => this.renderList(), 150);
     });
+    this.searchInput.addEventListener('focus', () => {
+      this.client.typing = true;
+    });
+    this.searchInput.addEventListener('blur', () => {
+      this.client.typing = false;
+    });
 
     // Escape key
     document.addEventListener('keydown', (event) => {
@@ -133,6 +139,7 @@ export class Encyclopedia extends Base {
   hide() {
     this.container.classList.add('hidden');
     this.cleanupSourceListeners();
+    this.client.typing = false;
   }
 
   // ── Tab management ──
