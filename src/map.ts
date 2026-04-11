@@ -1309,7 +1309,7 @@ export class MapRenderer {
       icons.push({ label: 'ROOTED', color: '#4488ff' });
     }
 
-    let yOffset = -14;
+    let yOffset = -30;
     for (const icon of icons) {
       const key = `ui:status:${playerId}:${icon.label}`;
       const drawX = Math.floor(topCenter.x);

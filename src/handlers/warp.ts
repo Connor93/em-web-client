@@ -55,6 +55,7 @@ function handleWarpAgree(client: Client, reader: EoReader) {
   if (isMapChange) {
     client.awakenedBosses.clear();
     client.bossAdds.clear();
+    client.playerStatusEffects.clear();
     client.emit('bossBarsReset', undefined);
   }
 
