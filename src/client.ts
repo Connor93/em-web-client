@@ -194,6 +194,11 @@ export class Client {
   bossAdds: Set<number> = new Set();
   /** Tracks NPC indices that are expedition combat encounters (for glow effect) */
   expeditionCombatNpcs: Set<number> = new Set();
+  /** Active status effects on players (heal block, root) with expiry times */
+  playerStatusEffects: Map<
+    string,
+    { playerId: number; type: 'healblock' | 'root'; expiresAt: number }
+  > = new Map();
   // Expedition state
   expedition: {
     active: boolean;

@@ -1224,11 +1224,13 @@ export class MapRenderer {
             )
           : undefined;
 
+      const hasStatus = this.hasActiveStatusEffects(character.playerId);
       if (
         !bubble &&
         !healthBar &&
         !emote &&
         !partyMember &&
+        !hasStatus &&
         (!(animation instanceof CharacterSpellChantAnimation) ||
           animation.animationFrame)
       ) {
@@ -1275,6 +1277,58 @@ export class MapRenderer {
           topCenter,
         );
       }
+
+      // Status effect floating icons
+      if (hasStatus) {
+        this.addStatusEffectIcons(character.playerId, topCenter);
+      }
+    }
+  }
+
+  private hasActiveStatusEffects(playerId: number): boolean {
+    const now = Date.now();
+    // Clean up expired effects
+    for (const [key, effect] of this.client.playerStatusEffects) {
+      if (effect.expiresAt <= now) {
+        this.client.playerStatusEffects.delete(key);
+      }
+    }
+    return (
+      this.client.playerStatusEffects.has(`healblock:${playerId}`) ||
+      this.client.playerStatusEffects.has(`root:${playerId}`)
+    );
+  }
+
+  private addStatusEffectIcons(playerId: number, topCenter: Vector2) {
+    const icons: { label: string; color: string }[] = [];
+
+    if (this.client.playerStatusEffects.has(`healblock:${playerId}`)) {
+      icons.push({ label: 'HEAL BLOCKED', color: '#ff4444' });
+    }
+    if (this.client.playerStatusEffects.has(`root:${playerId}`)) {
+      icons.push({ label: 'ROOTED', color: '#4488ff' });
+    }
+
+    let yOffset = -14;
+    for (const icon of icons) {
+      const key = `ui:status:${playerId}:${icon.label}`;
+      const drawX = Math.floor(topCenter.x);
+      const drawY = Math.floor(topCenter.y + yOffset);
+
+      this.addAtlasTextSprites(
+        `${key}:shadow`,
+        icon.label,
+        { x: drawX + 1, y: drawY + 1 },
+        '#000',
+      );
+      this.addAtlasTextSprites(
+        key,
+        icon.label,
+        { x: drawX, y: drawY },
+        icon.color,
+      );
+
+      yOffset -= 10;
     }
   }
 

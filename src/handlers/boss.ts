@@ -39,6 +39,8 @@ function handleBossReply(client: Client, reader: EoReader) {
       client.awakenedBosses.set(npcIndex, { enraged, shielded });
 
       if (record) {
+        // Add the boss to the bar first (may not exist after reconnect)
+        client.emit('bossAppeared', { npcIndex, npcId, name: record.name });
         client.emit('bossAwakened', { npcIndex, name: record.name });
         if (enraged) {
           client.emit('bossEnraged', { npcIndex });
@@ -113,11 +115,47 @@ function handleBossAgree(client: Client, reader: EoReader) {
   }
 }
 
+// Status effect types
+const STATUS_HEAL_BLOCK = 1;
+const STATUS_ROOT = 2;
+
+/**
+ * PACKET_BOSS PACKET_SPEC — Status effect applied to players.
+ * Visual indicators for heal block and root.
+ */
+function handleBossSpec(client: Client, reader: EoReader) {
+  const statusType = reader.getChar();
+  const count = reader.getChar();
+
+  for (let i = 0; i < count; i++) {
+    const playerId = reader.getShort();
+    const duration = reader.getShort();
+    const expiresAt = Date.now() + duration * 1000;
+
+    if (statusType === STATUS_HEAL_BLOCK) {
+      client.playerStatusEffects.set(`healblock:${playerId}`, {
+        playerId,
+        type: 'healblock',
+        expiresAt,
+      });
+    } else if (statusType === STATUS_ROOT) {
+      client.playerStatusEffects.set(`root:${playerId}`, {
+        playerId,
+        type: 'root',
+        expiresAt,
+      });
+    }
+  }
+}
+
 export function registerBossHandlers(client: Client) {
   client.bus.registerPacketHandler(PACKET_BOSS, PacketAction.Reply, (reader) =>
     handleBossReply(client, reader),
   );
   client.bus.registerPacketHandler(PACKET_BOSS, PacketAction.Agree, (reader) =>
     handleBossAgree(client, reader),
+  );
+  client.bus.registerPacketHandler(PACKET_BOSS, PacketAction.Spec, (reader) =>
+    handleBossSpec(client, reader),
   );
 }
