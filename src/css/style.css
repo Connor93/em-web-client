@@ -2,7 +2,6 @@
   --eo-brown: #7b5a29;
   --eo-font-color-light: #f0f0c8;
   --theme-filter: none;
-  --theme-filter-invert: none;
 }
 
 /* ── Theme color filter ──────────────────────────────────────────── */
@@ -49,14 +48,6 @@ body.themed #exit-game,
 body.themed .alert,
 body.themed .confirm {
   filter: var(--theme-filter);
-}
-
-/* Counter-rotate asset images inside themed panels so they appear normal */
-body.themed #ui img,
-body.themed #ui .icon[data-id],
-body.themed #ui .menu-item-img,
-body.themed #ui .hud-bar-fill {
-  filter: var(--theme-filter-invert);
 }
 
 @font-face {

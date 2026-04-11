@@ -36,7 +36,6 @@ function hexToHsl(hex: string): { h: number; s: number; l: number } {
 export function applyThemeColor(hex: string | null) {
   if (!hex) {
     document.documentElement.style.removeProperty('--theme-filter');
-    document.documentElement.style.removeProperty('--theme-filter-invert');
     document.body.classList.remove('themed');
     return;
   }
@@ -48,11 +47,6 @@ export function applyThemeColor(hex: string | null) {
   document.documentElement.style.setProperty(
     '--theme-filter',
     `hue-rotate(${rotation.toFixed(1)}deg) saturate(${saturationBoost.toFixed(2)})`,
-  );
-  // Counter-rotation for asset images inside themed panels
-  document.documentElement.style.setProperty(
-    '--theme-filter-invert',
-    `saturate(${(1 / saturationBoost).toFixed(2)}) hue-rotate(${(-rotation).toFixed(1)}deg)`,
   );
   document.body.classList.add('themed');
 }
