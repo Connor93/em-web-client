@@ -12,6 +12,51 @@ import { resetMovablePositions, setMovableLocked } from '../utils/movable';
 
 import './settings-dialog.css';
 
+const DEFAULT_HUE = 35; // The gold/brown base hue of the default theme
+
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const r = Number.parseInt(hex.slice(1, 3), 16) / 255;
+  const g = Number.parseInt(hex.slice(3, 5), 16) / 255;
+  const b = Number.parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  return { h: h * 360, s, l };
+}
+
+export function applyThemeColor(hex: string | null) {
+  const ui = document.getElementById('ui');
+  if (!ui) return;
+
+  if (!hex) {
+    ui.style.filter = '';
+    return;
+  }
+
+  const { h, s } = hexToHsl(hex);
+  const rotation = h - DEFAULT_HUE;
+  // Adjust saturation relative to default (default is moderately saturated ~0.4)
+  const saturationBoost = s > 0.1 ? s / 0.4 : 0.25;
+
+  ui.style.filter = `hue-rotate(${rotation.toFixed(1)}deg) saturate(${saturationBoost.toFixed(2)})`;
+}
+
+// Apply saved theme on load
+function initTheme() {
+  const saved = localStorage.getItem('theme-color');
+  if (saved) applyThemeColor(saved);
+}
+initTheme();
+
 /** Left column settings, in display order. */
 const LEFT_KEYS: (keyof GameSettings)[] = [
   'soundEffect',
@@ -142,6 +187,48 @@ export class SettingsDialog extends Base {
     for (const key of RIGHT_KEYS) {
       rightColumn.appendChild(this.createRow(key));
     }
+
+    // Theme color picker
+    this.renderThemeRow(rightColumn);
+  }
+
+  private renderThemeRow(column: Element) {
+    const row = document.createElement('div');
+    row.className = 'setting-row';
+
+    const label = document.createElement('span');
+    label.className = 'setting-label';
+    label.textContent = 'Theme Color';
+    row.appendChild(label);
+
+    const valueWrapper = document.createElement('div');
+    valueWrapper.className = 'setting-value theme-value';
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.className = 'theme-color-input';
+    colorInput.value = localStorage.getItem('theme-color') || '#d4b896';
+
+    const resetButton = document.createElement('button');
+    resetButton.className = 'theme-reset-button';
+    resetButton.textContent = 'Reset';
+    resetButton.addEventListener('click', () => {
+      localStorage.removeItem('theme-color');
+      colorInput.value = '#d4b896';
+      applyThemeColor(null);
+      playSfxById(SfxId.ButtonClick);
+    });
+
+    colorInput.addEventListener('input', () => {
+      const hex = colorInput.value;
+      localStorage.setItem('theme-color', hex);
+      applyThemeColor(hex);
+    });
+
+    valueWrapper.appendChild(colorInput);
+    valueWrapper.appendChild(resetButton);
+    row.appendChild(valueWrapper);
+    column.appendChild(row);
   }
 
   private createRow(key: keyof GameSettings): HTMLDivElement {

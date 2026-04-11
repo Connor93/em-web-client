@@ -126,6 +126,51 @@
   pointer-events: none;
 }
 
+#settings-dialog .theme-value::after {
+  display: none;
+}
+
+#settings-dialog .theme-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#settings-dialog .theme-color-input {
+  width: 28px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(212, 184, 150, 0.3);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+}
+
+#settings-dialog .theme-color-input::-webkit-color-swatch-wrapper {
+  padding: 1px;
+}
+
+#settings-dialog .theme-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+#settings-dialog .theme-reset-button {
+  background: rgba(212, 184, 150, 0.08);
+  border: 1px solid rgba(212, 184, 150, 0.2);
+  border-radius: 3px;
+  color: #a89b8c;
+  font-size: 9px;
+  font-family: inherit;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#settings-dialog .theme-reset-button:hover {
+  background: rgba(212, 184, 150, 0.18);
+}
+
 /* ── Mobile fullscreen ─────────────────────────────────────────── */
 
 body.is-mobile #settings-dialog:not(.hidden) {
