@@ -116,3 +116,13 @@
   padding: 8px 12px;
   border-top: 1px solid rgba(212, 184, 150, 0.15);
 }
+
+#party .leave-party-button {
+  background: rgba(244, 67, 54, 0.12);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #ef9a9a;
+}
+
+#party .leave-party-button:hover {
+  background: rgba(244, 67, 54, 0.25);
+}

@@ -119,12 +119,13 @@ export class PartyDialog extends Base {
       memberDiv.appendChild(hpBarContainer);
 
       if (
-        this.client.playerId === leaderPlayerId ||
-        member.playerId === this.client.playerId
+        this.client.playerId === leaderPlayerId &&
+        member.playerId !== this.client.playerId
       ) {
         const removeIcon = document.createElement('div');
         removeIcon.classList.add('remove-icon');
-        removeIcon.title = 'Remove from party';
+        removeIcon.textContent = '\u00D7';
+        removeIcon.title = 'Kick from party';
         removeIcon.addEventListener('click', () => {
           this.client.removePartyMember(member.playerId);
         });
@@ -132,6 +133,22 @@ export class PartyDialog extends Base {
       }
 
       this.memberList.appendChild(memberDiv);
+    }
+
+    // Add/update leave button in footer
+    const footer = this.container.querySelector('.dialog-footer')!;
+    let leaveButton = footer.querySelector<HTMLButtonElement>(
+      '.leave-party-button',
+    );
+    if (!leaveButton) {
+      leaveButton = document.createElement('button');
+      leaveButton.className = 'themed-btn danger leave-party-button';
+      leaveButton.type = 'button';
+      leaveButton.textContent = 'Leave Party';
+      leaveButton.addEventListener('click', () => {
+        this.client.removePartyMember(this.client.playerId);
+      });
+      footer.insertBefore(leaveButton, footer.firstChild);
     }
   }
 }
