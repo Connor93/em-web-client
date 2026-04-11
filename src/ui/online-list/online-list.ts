@@ -1,4 +1,8 @@
-import { PlayersRequestClientPacket } from 'eolib';
+import {
+  AdminLevel,
+  PlayersRequestClientPacket,
+  TalkReportClientPacket,
+} from 'eolib';
 import type { Client } from '../../client';
 import { BaseDialogMd } from '../base-dialog-md';
 import { characterIconToChatIcon } from '../utils';
@@ -63,6 +67,39 @@ export class OnlineList extends BaseDialogMd<Events> {
         playerElement.appendChild(nameplateElement);
         playerElement.appendChild(classElement);
         playerElement.appendChild(titleElement);
+
+        // Admin: warp buttons
+        if (client.admin !== AdminLevel.Player) {
+          const adminActions = document.createElement('div');
+          adminActions.className = 'admin-actions';
+
+          const warpToMe = document.createElement('button');
+          warpToMe.className = 'admin-warp-button';
+          warpToMe.textContent = 'WTM';
+          warpToMe.title = 'Warp player to me';
+          warpToMe.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const packet = new TalkReportClientPacket();
+            packet.message = `$warptome ${player.name}`;
+            client.bus.send(packet);
+          });
+
+          const warpMeTo = document.createElement('button');
+          warpMeTo.className = 'admin-warp-button';
+          warpMeTo.textContent = 'WMT';
+          warpMeTo.title = 'Warp me to player';
+          warpMeTo.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const packet = new TalkReportClientPacket();
+            packet.message = `$warpmeto ${player.name}`;
+            client.bus.send(packet);
+          });
+
+          adminActions.appendChild(warpToMe);
+          adminActions.appendChild(warpMeTo);
+          playerElement.appendChild(adminActions);
+        }
+
         playersContainer.appendChild(playerElement);
 
         playerElement.addEventListener('contextmenu', () => {

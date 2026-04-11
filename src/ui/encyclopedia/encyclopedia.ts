@@ -1,4 +1,5 @@
 import {
+  AdminLevel,
   type EcfRecord,
   type EifRecord,
   Emf,
@@ -18,6 +19,7 @@ import {
   SkillTargetRestrict,
   SkillTargetType,
   SkillType,
+  TalkReportClientPacket,
 } from 'eolib';
 import type { Client } from '../../client';
 import { getItemGraphicPath } from '../../utils';
@@ -664,6 +666,17 @@ export class Encyclopedia extends Base {
     this.detailPanel.appendChild(loadingDiv);
 
     this.requestItemSources(itemId, loadingDiv);
+
+    // Admin: spawn item button
+    if (this.client.admin !== AdminLevel.Player) {
+      this.addAdminAction('Spawn Item', () => {
+        const amountString = prompt('Amount to spawn:', '1');
+        if (!amountString) return;
+        const amount = Number.parseInt(amountString, 10);
+        if (Number.isNaN(amount) || amount <= 0) return;
+        this.sendAdminCommand(`$sitem ${itemId} ${amount}`);
+      });
+    }
   }
 
   // ── NPC detail ──
@@ -720,6 +733,17 @@ export class Encyclopedia extends Base {
     this.detailPanel.appendChild(loadingDiv);
 
     this.requestNpcSources(npcId, loadingDiv);
+
+    // Admin: spawn NPC button
+    if (this.client.admin !== AdminLevel.Player) {
+      this.addAdminAction('Spawn NPC', () => {
+        const amountString = prompt('Amount to spawn:', '1');
+        if (!amountString) return;
+        const amount = Number.parseInt(amountString, 10);
+        if (Number.isNaN(amount) || amount <= 0) return;
+        this.sendAdminCommand(`$snpc ${npcId} ${amount}`);
+      });
+    }
   }
 
   // ── Spell detail ──
@@ -1301,6 +1325,14 @@ export class Encyclopedia extends Base {
       const warp = warps.get(key);
       if (warp && warp.destinationMap > 0 && warp.destinationMap !== mapId) {
         this.navigateTo('map', warp.destinationMap);
+        return;
+      }
+
+      // Admin: warp to clicked tile
+      if (this.client.admin !== AdminLevel.Player) {
+        if (confirm(`Warp to Map ${mapId} (${tileX}, ${tileY})?`)) {
+          this.sendAdminCommand(`$warp ${mapId} ${tileX} ${tileY}`);
+        }
       }
     });
 
@@ -1676,6 +1708,22 @@ export class Encyclopedia extends Base {
     row.appendChild(link);
     row.appendChild(document.createTextNode(suffix));
     this.detailPanel.appendChild(row);
+  }
+
+  // ── Admin helpers ──
+
+  private sendAdminCommand(command: string) {
+    const packet = new TalkReportClientPacket();
+    packet.message = command;
+    this.client.bus.send(packet);
+  }
+
+  private addAdminAction(label: string, onClick: () => void) {
+    const button = document.createElement('button');
+    button.className = 'enc-admin-action';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    this.detailPanel.appendChild(button);
   }
 
   // ── Graphic path helpers ──
