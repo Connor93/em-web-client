@@ -97,9 +97,15 @@ function handleEffectUse(client: Client, reader: EoReader) {
   }
 }
 
+// Tile effect IDs to suppress (0-based packet values).
+// These are server-side visual cues for the OG client that the web client handles differently.
+// Effect 12 in config = 11 in packet (expedition waypoint + awakened boss effects)
+const SUPPRESSED_TILE_EFFECTS = new Set([11]);
+
 function handleEffectAgree(client: Client, reader: EoReader) {
   const packet = EffectAgreeServerPacket.deserialize(reader);
   for (const effect of packet.effects) {
+    if (SUPPRESSED_TILE_EFFECTS.has(effect.effectId)) continue;
     const meta = client.getEffectMetadata(effect.effectId + 1);
     if (meta.sfx) {
       playSfxById(meta.sfx);
