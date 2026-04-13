@@ -94,7 +94,7 @@ export function chat(client: Client, message: string): void {
     return;
   }
 
-  if (trimmed.startsWith('&') && client.guildTag) {
+  if (trimmed.startsWith('&') && client.guildName) {
     const packet = new TalkRequestClientPacket();
     packet.message = trimmed.substring(1);
     client.bus.send(packet);

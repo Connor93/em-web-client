@@ -221,7 +221,7 @@ export class GuildPanel extends Base {
     if (this.container.classList.contains('hidden')) {
       this.show();
       // Auto-request guild data
-      if (this.client.guildTag) {
+      if (this.client.guildName) {
         this.requestTabData(this.activeTab);
       }
     } else {
@@ -259,10 +259,8 @@ export class GuildPanel extends Base {
     const titleEl = this.container.querySelector(
       '.gp-header-title',
     ) as HTMLElement;
-    if (this.client.guildTag && this.client.guildName) {
+    if (this.client.guildName) {
       titleEl.textContent = `${this.client.guildName} [${this.client.guildTag}]`;
-    } else if (this.client.guildTag) {
-      titleEl.textContent = `Guild [${this.client.guildTag}]`;
     } else {
       titleEl.textContent = 'Guild';
     }
@@ -270,7 +268,7 @@ export class GuildPanel extends Base {
     const content = this.container.querySelector('.gp-content')!;
     content.innerHTML = '';
 
-    if (!this.client.guildTag) {
+    if (!this.client.guildName) {
       content.innerHTML =
         '<div class="gp-no-guild">You are not in a guild.<br>Join or create one at a Guild NPC.</div>';
       return;

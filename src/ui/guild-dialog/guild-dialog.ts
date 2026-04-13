@@ -240,7 +240,7 @@ export class GuildDialog extends Base {
   // ── Menu ──────────────────────────────────────────────────────────────
 
   private renderMenu(body: Element, footer: Element) {
-    const inGuild = !!this.client.guildTag;
+    const inGuild = !!this.client.guildName;
     const rank = this.client.guildRank;
 
     if (!inGuild) {
