@@ -21,7 +21,6 @@ import {
   SkillType,
   TalkReportClientPacket,
 } from 'eolib';
-// biome-ignore lint/style/useImportType: used as values in addDetailGraphicWithAura
 import { Application, Assets, Sprite } from 'pixi.js';
 import type { Client } from '../../client';
 import { getItemGraphicPath } from '../../utils';
@@ -61,7 +60,6 @@ export class Encyclopedia extends Base {
   private paginationElement: HTMLDivElement;
   private pageInfoElement: HTMLSpanElement;
   private auraPreviewApp: Application | null = null;
-  private auraPreviewInitialized = false;
   private auraTickerCallback: (() => void) | null = null;
 
   constructor(client: Client) {
