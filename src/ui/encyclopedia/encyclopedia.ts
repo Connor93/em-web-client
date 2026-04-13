@@ -1809,7 +1809,6 @@ export class Encyclopedia extends Base {
           antialias: false,
         });
         this.auraPreviewApp = app;
-        this.auraPreviewInitialized = true;
         const canvas = app.canvas as HTMLCanvasElement;
         canvas.style.imageRendering = 'pixelated';
       }
