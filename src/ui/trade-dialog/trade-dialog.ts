@@ -1,6 +1,7 @@
 import type { TradeItemData } from 'eolib';
 import {
   Item,
+  ItemSpecial,
   TradeAcceptClientPacket,
   TradeAddClientPacket,
   TradeAgreeClientPacket,
@@ -171,7 +172,7 @@ export class TradeDialog extends Base {
     if (!item) return;
     const record = this.client.getEifRecordById(itemId);
     if (!record) return;
-    if (record.special === 1) return;
+    if (record.special === ItemSpecial.Lore) return;
     this.promptAmount(itemId, item.amount);
   }
 
@@ -287,7 +288,7 @@ export class TradeDialog extends Base {
     const items = this.client.items.filter((i) => {
       const record = this.client.getEifRecordById(i.id);
       if (!record) return false;
-      return record.special !== 1;
+      return record.special !== ItemSpecial.Lore;
     });
 
     if (items.length === 0) return;

@@ -1,4 +1,4 @@
-import type { ItemSpecial } from 'eolib';
+import { ItemSpecial } from 'eolib';
 import type { Client } from '../client';
 import { ChatTab, GameState } from '../client';
 import {
@@ -583,8 +583,7 @@ function wireInventoryEvents(deps: UiEventDeps): void {
       const record = client.getEifRecordById(itemId);
       if (!record) return;
 
-      if ((record as { special: ItemSpecial }).special === 1) {
-        // ItemSpecial.Lore
+      if ((record as { special: ItemSpecial }).special === ItemSpecial.Lore) {
         const strings = client.getDialogStrings(
           DialogResourceID.ITEM_IS_LORE_ITEM,
         );
@@ -653,6 +652,15 @@ function wireInventoryEvents(deps: UiEventDeps): void {
 
     const record = client.getEifRecordById(id);
     if (!record) return;
+
+    if ((record as { special: ItemSpecial }).special === ItemSpecial.Lore) {
+      const strings = client.getDialogStrings(
+        DialogResourceID.ITEM_IS_LORE_ITEM,
+      );
+      deps.smallAlert.setContent(strings![1]!, strings![0]!);
+      deps.smallAlert.show();
+      return;
+    }
 
     if (item.amount > 1) {
       client.typing = true;
