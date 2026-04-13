@@ -62,6 +62,17 @@ export class AuraManager {
     return cached;
   }
 
+  /** Get aura config by item ID (for encyclopedia/UI previews). */
+  getAuraByItemId(itemId: number): CachedAura | undefined {
+    for (const config of this.configs.values()) {
+      if (config.itemId === itemId) {
+        const { filters, floatEffect } = buildEffects(config);
+        return { config, effects: filters, floatEffect };
+      }
+    }
+    return undefined;
+  }
+
   hasAuras(): boolean {
     return this.configs.size > 0;
   }

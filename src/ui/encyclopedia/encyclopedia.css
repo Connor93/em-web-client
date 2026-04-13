@@ -453,6 +453,16 @@
   overflow: hidden;
 }
 
+#encyclopedia .enc-detail-graphic--aura {
+  overflow: visible;
+  background: none;
+  border: none;
+}
+
+#encyclopedia .enc-detail-graphic--aura canvas {
+  image-rendering: pixelated;
+}
+
 #encyclopedia .enc-detail-graphic img {
   image-rendering: pixelated;
   max-width: 100%;
@@ -566,7 +576,13 @@
 }
 
 #encyclopedia .enc-divider {
-  border-top: 1px solid rgba(var(--theme-accent-r), var(--theme-accent-g), var(--theme-accent-b), 0.2);
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
   margin: 4px 0;
 }
 

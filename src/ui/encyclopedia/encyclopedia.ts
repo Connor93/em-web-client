@@ -21,6 +21,8 @@ import {
   SkillType,
   TalkReportClientPacket,
 } from 'eolib';
+// biome-ignore lint/style/useImportType: used as values in addDetailGraphicWithAura
+import { Application, Assets, Sprite } from 'pixi.js';
 import type { Client } from '../../client';
 import { getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
@@ -58,6 +60,9 @@ export class Encyclopedia extends Base {
   private currentPage = 0;
   private paginationElement: HTMLDivElement;
   private pageInfoElement: HTMLSpanElement;
+  private auraPreviewApp: Application | null = null;
+  private auraPreviewInitialized = false;
+  private auraTickerCallback: (() => void) | null = null;
 
   constructor(client: Client) {
     super();
@@ -165,11 +170,13 @@ export class Encyclopedia extends Base {
     this.detailPanel.classList.remove('enc-mobile-hidden');
     this.searchInput.focus();
     this.renderList();
+    this.renderDetail();
   }
 
   hide() {
     this.container.classList.add('hidden');
     this.cleanupSourceListeners();
+    this.destroyAuraPreview();
     this.client.typing = false;
   }
 
@@ -540,6 +547,7 @@ export class Encyclopedia extends Base {
   // ── Detail rendering ──
 
   private renderDetail() {
+    this.destroyAuraPreview();
     this.detailPanel.innerHTML = '';
 
     if (this.selectedType === '' || this.selectedId === 0) {
@@ -611,8 +619,19 @@ export class Encyclopedia extends Base {
     const record = this.client.getEifRecordById(itemId);
     if (!record) return;
 
-    // Graphic
-    this.addDetailGraphic(this.getItemIconPath(itemId, record));
+    // Graphic (with aura for weapons that have one)
+    const auraConfig =
+      record.type === ItemType.Weapon && this.client.auraManager
+        ? this.client.auraManager.getAuraByItemId(itemId)
+        : undefined;
+    if (auraConfig) {
+      this.addDetailGraphicWithAura(
+        this.getItemIconPath(itemId, record),
+        auraConfig,
+      );
+    } else {
+      this.addDetailGraphic(this.getItemIconPath(itemId, record));
+    }
     this.addDetailName(record.name);
     this.addDetailType(this.getItemSubtitle(record, itemId));
 
@@ -1769,6 +1788,115 @@ export class Encyclopedia extends Base {
       container.appendChild(image);
     }
     this.detailPanel.appendChild(container);
+  }
+
+  private addDetailGraphicWithAura(
+    iconPath: string | null,
+    aura: import('../../aura/aura-manager').CachedAura,
+  ) {
+    const container = document.createElement('div');
+    container.className = 'enc-detail-graphic enc-detail-graphic--aura';
+    this.detailPanel.appendChild(container);
+
+    if (!iconPath) return;
+
+    (async () => {
+      // Lazily create a single persistent app
+      if (!this.auraPreviewApp) {
+        const app = new Application();
+        await app.init({
+          width: 64,
+          height: 64,
+          backgroundAlpha: 0,
+          antialias: false,
+        });
+        this.auraPreviewApp = app;
+        this.auraPreviewInitialized = true;
+        const canvas = app.canvas as HTMLCanvasElement;
+        canvas.style.imageRendering = 'pixelated';
+      }
+
+      const app = this.auraPreviewApp;
+      this.clearAuraPreview();
+
+      // Re-parent the canvas into the current container
+      container.appendChild(app.canvas as HTMLCanvasElement);
+
+      const texture = await Assets.load(iconPath);
+
+      // Verify container is still in the DOM (user didn't navigate away)
+      if (!container.isConnected) return;
+
+      // Scale down effect intensities for the small preview icon.
+      // Wrap animated update functions so they also apply at reduced scale.
+      const PREVIEW_SCALE = 0.35;
+      for (const effect of aura.effects) {
+        const f = effect.filter as unknown as Record<string, unknown>;
+        if ('distance' in f && typeof f.distance === 'number') {
+          f.distance = Math.max(2, f.distance * 0.4);
+        }
+        if ('thickness' in f && typeof f.thickness === 'number') {
+          f.thickness = Math.max(1, f.thickness * 0.5);
+        }
+        if ('bloomScale' in f && typeof f.bloomScale === 'number') {
+          f.bloomScale *= 0.4;
+        }
+        if ('knockout' in f) {
+          f.knockout = false;
+        }
+        if ('outerStrength' in f) {
+          (f as Record<string, number>).outerStrength *= PREVIEW_SCALE;
+        }
+        if ('innerStrength' in f) {
+          (f as Record<string, number>).innerStrength *= PREVIEW_SCALE;
+        }
+
+        if (effect.update) {
+          const origUpdate = effect.update;
+          effect.update = (now: number) => {
+            origUpdate(now);
+            if ('outerStrength' in f) {
+              (f as Record<string, number>).outerStrength *= PREVIEW_SCALE;
+            }
+            if ('innerStrength' in f) {
+              (f as Record<string, number>).innerStrength *= PREVIEW_SCALE;
+            }
+          };
+        }
+      }
+
+      const sprite = new Sprite(texture);
+      sprite.anchor.set(0.5);
+      sprite.position.set(32, 32);
+      sprite.filters = aura.effects.map((e) => e.filter);
+      app.stage.addChild(sprite);
+
+      const hasAnimated = aura.effects.some((e) => e.update);
+      if (hasAnimated) {
+        const callback = () => {
+          const now = performance.now();
+          for (const effect of aura.effects) {
+            effect.update?.(now);
+          }
+        };
+        this.auraTickerCallback = callback;
+        app.ticker.add(callback);
+      }
+    })();
+  }
+
+  private clearAuraPreview() {
+    if (this.auraPreviewApp) {
+      this.auraPreviewApp.stage.removeChildren();
+      if (this.auraTickerCallback) {
+        this.auraPreviewApp.ticker.remove(this.auraTickerCallback);
+        this.auraTickerCallback = null;
+      }
+    }
+  }
+
+  private destroyAuraPreview() {
+    this.clearAuraPreview();
   }
 
   private addDetailName(name: string) {

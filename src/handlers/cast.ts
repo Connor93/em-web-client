@@ -66,6 +66,18 @@ function handleCastSpec(client: Client, reader: EoReader) {
 
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
 
+  const deadNpc = client.nearby.npcs.find(
+    (n) => n.index === packet.npcKilledData.npcIndex,
+  );
+  if (deadNpc) {
+    const deadRecord = client.getEnfRecordById(deadNpc.id);
+    if (deadRecord?.boss) {
+      client.emit('bossDied', { npcIndex: packet.npcKilledData.npcIndex });
+      client.awakenedBosses.delete(packet.npcKilledData.npcIndex);
+    }
+    client.bossAdds.delete(packet.npcKilledData.npcIndex);
+  }
+
   if (packet.npcKilledData.dropIndex) {
     const item = new ItemMapInfo();
     item.uid = packet.npcKilledData.dropIndex;
@@ -133,6 +145,18 @@ function handleCastAccept(client: Client, reader: EoReader) {
   );
 
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
+
+  const deadNpc = client.nearby.npcs.find(
+    (n) => n.index === packet.npcKilledData.npcIndex,
+  );
+  if (deadNpc) {
+    const deadRecord = client.getEnfRecordById(deadNpc.id);
+    if (deadRecord?.boss) {
+      client.emit('bossDied', { npcIndex: packet.npcKilledData.npcIndex });
+      client.awakenedBosses.delete(packet.npcKilledData.npcIndex);
+    }
+    client.bossAdds.delete(packet.npcKilledData.npcIndex);
+  }
 
   if (packet.npcKilledData.dropIndex) {
     const item = new ItemMapInfo();
