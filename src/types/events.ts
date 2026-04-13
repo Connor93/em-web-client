@@ -168,6 +168,17 @@ export type ClientEvents = {
     shopItems: { itemName: string; buyPrice: number; sellPrice: number }[];
     crafts: { itemName: string; ingredients: string }[];
     spawnMaps: number[];
+    awakened: {
+      hp: number;
+      minDamage: number;
+      maxDamage: number;
+      armor: number;
+      accuracy: number;
+      evade: number;
+      killThreshold: number;
+      cooldownSeconds: number;
+      drops: { itemName: string; amount: string; dropRate: number }[];
+    } | null;
   };
   reconnected: undefined;
   resize: undefined;

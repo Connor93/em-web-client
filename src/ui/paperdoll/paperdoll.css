@@ -98,9 +98,9 @@
 }
 #paperdoll .item[data-id="gloves"] {
   left: 18px;
-  top: 44px;
+  top: 18px;
   width: 54px;
-  height: 52px;
+  height: 48px;
 }
 #paperdoll .item[data-id="boots"] {
   left: 82px;
@@ -178,11 +178,12 @@
       var(--theme-accent-b),
       0.3
     );
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   color: var(--theme-text);
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 4px;
-  font-size: 11px;
-  white-space: pre-wrap;
+  font-size: 12px;
+  white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   z-index: 10;

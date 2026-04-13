@@ -40,6 +40,8 @@ export class ExpeditionTracker extends Base {
       this.client.on(event, () => this.refresh());
     }
 
+    this.client.on('expeditionStarted', () => this.show());
+
     // Toggle visibility from the quest progress expedition tab
     this.client.on('expeditionTrackerToggle', (data) => {
       if (data.visible) {

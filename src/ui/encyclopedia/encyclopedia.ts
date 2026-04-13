@@ -55,6 +55,9 @@ export class Encyclopedia extends Base {
   private sourceCleanup: (() => void) | null = null;
   private mapManifest: { id: number; name: string }[] | null = null;
   private mapCache: Map<number, Emf> = new Map();
+  private currentPage = 0;
+  private paginationElement: HTMLDivElement;
+  private pageInfoElement: HTMLSpanElement;
 
   constructor(client: Client) {
     super();
@@ -78,6 +81,7 @@ export class Encyclopedia extends Base {
     for (const button of this.tabButtons) {
       button.addEventListener('click', async () => {
         this.activeTab = button.dataset.tab as EncyclopediaTab;
+        this.currentPage = 0;
         this.updateTabHighlight();
         if (this.activeTab === 'maps') {
           await this.loadMapManifest();
@@ -89,6 +93,7 @@ export class Encyclopedia extends Base {
     // Search input (debounced)
     this.searchInput.addEventListener('input', () => {
       if (this.searchTimeout) clearTimeout(this.searchTimeout);
+      this.currentPage = 0;
       this.searchTimeout = setTimeout(() => this.renderList(), 150);
     });
     this.searchInput.addEventListener('focus', () => {
@@ -97,6 +102,30 @@ export class Encyclopedia extends Base {
     this.searchInput.addEventListener('blur', () => {
       this.client.typing = false;
     });
+
+    // Pagination
+    this.paginationElement =
+      this.container.querySelector<HTMLDivElement>('.enc-pagination')!;
+    this.pageInfoElement =
+      this.container.querySelector<HTMLSpanElement>('.enc-page-info')!;
+
+    this.container
+      .querySelector('[data-id="enc-prev"]')!
+      .addEventListener('click', () => {
+        if (this.currentPage > 0) {
+          this.currentPage--;
+          this.renderList();
+          this.listElement.scrollTop = 0;
+        }
+      });
+
+    this.container
+      .querySelector('[data-id="enc-next"]')!
+      .addEventListener('click', () => {
+        this.currentPage++;
+        this.renderList();
+        this.listElement.scrollTop = 0;
+      });
 
     // Escape key
     document.addEventListener('keydown', (event) => {
@@ -243,113 +272,135 @@ export class Encyclopedia extends Base {
   renderList() {
     this.listElement.innerHTML = '';
     const term = this.getSearchTerm();
+    const PAGE_SIZE = 50;
 
-    const MAX_RESULTS = 50;
-    let totalCount = 0;
-    let rendered = 0;
+    // Collect all matching entries into a flat list
+    type Entry = {
+      type: 'item' | 'npc' | 'spell' | 'class' | 'map';
+      id: number;
+      name: string;
+      subtitle: string;
+      badge: string;
+      icon: string | null;
+    };
+    const allEntries: Entry[] = [];
 
     if (this.activeTab === 'all' || this.activeTab === 'items') {
-      const items = this.filterItems(term);
-      totalCount += items.length;
-      if (items.length > 0 && this.activeTab === 'all') {
-        this.addGroupHeader(`Items (${items.length})`);
-      }
-      const limit = MAX_RESULTS - rendered;
-      for (const item of items.slice(0, limit)) {
-        this.addListRow(
-          'item',
-          item.id,
-          item.record.name,
-          this.getItemSubtitle(item.record, item.id),
-          this.getItemBadge(item.record),
-          this.getItemIconPath(item.id, item.record),
-        );
-        rendered++;
+      for (const item of this.filterItems(term)) {
+        allEntries.push({
+          type: 'item',
+          id: item.id,
+          name: item.record.name,
+          subtitle: this.getItemSubtitle(item.record, item.id),
+          badge: this.getItemBadge(item.record),
+          icon: this.getItemIconPath(item.id, item.record),
+        });
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'npcs') {
-      const npcs = this.filterNpcs(term);
-      totalCount += npcs.length;
-      if (rendered < MAX_RESULTS) {
-        if (npcs.length > 0 && this.activeTab === 'all') {
-          this.addGroupHeader(`NPCs (${npcs.length})`);
-        }
-        const limit = MAX_RESULTS - rendered;
-        for (const npc of npcs.slice(0, limit)) {
-          this.addListRow(
-            'npc',
-            npc.id,
-            npc.record.name,
-            this.getNpcSubtitle(npc.record, npc.id),
-            this.getNpcBadge(npc.record),
-            this.getNpcIconPath(npc.record),
-          );
-          rendered++;
-        }
+      for (const npc of this.filterNpcs(term)) {
+        allEntries.push({
+          type: 'npc',
+          id: npc.id,
+          name: npc.record.name,
+          subtitle: this.getNpcSubtitle(npc.record, npc.id),
+          badge: this.getNpcBadge(npc.record),
+          icon: this.getNpcIconPath(npc.record),
+        });
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'spells') {
-      const spells = this.filterSpells(term);
-      totalCount += spells.length;
-      if (rendered < MAX_RESULTS) {
-        if (spells.length > 0 && this.activeTab === 'all') {
-          this.addGroupHeader(`Spells (${spells.length})`);
-        }
-        const limit = MAX_RESULTS - rendered;
-        for (const spell of spells.slice(0, limit)) {
-          this.addListRow(
-            'spell',
-            spell.id,
-            spell.record.name,
-            this.getSpellSubtitle(spell.record, spell.id),
-            this.getSpellBadge(spell.record),
-            this.getSpellIconPath(spell.record),
-          );
-          rendered++;
-        }
+      for (const spell of this.filterSpells(term)) {
+        allEntries.push({
+          type: 'spell',
+          id: spell.id,
+          name: spell.record.name,
+          subtitle: this.getSpellSubtitle(spell.record, spell.id),
+          badge: this.getSpellBadge(spell.record),
+          icon: this.getSpellIconPath(spell.record),
+        });
       }
     }
 
     if (this.activeTab === 'all' || this.activeTab === 'classes') {
-      const classes = this.filterClasses(term);
-      totalCount += classes.length;
-      if (rendered < MAX_RESULTS) {
-        if (classes.length > 0 && this.activeTab === 'all') {
-          this.addGroupHeader(`Classes (${classes.length})`);
-        }
-        const limit = MAX_RESULTS - rendered;
-        for (const cls of classes.slice(0, limit)) {
-          this.addListRow(
-            'class',
-            cls.id,
-            cls.record.name,
-            this.getClassSubtitle(cls.record),
-            '',
-            null,
-          );
-          rendered++;
-        }
+      for (const cls of this.filterClasses(term)) {
+        allEntries.push({
+          type: 'class',
+          id: cls.id,
+          name: cls.record.name,
+          subtitle: this.getClassSubtitle(cls.record),
+          badge: '',
+          icon: null,
+        });
       }
     }
 
     if (this.activeTab === 'maps') {
-      const maps = this.filterMaps(term);
-      totalCount += maps.length;
-      const limit = MAX_RESULTS - rendered;
-      for (const map of maps.slice(0, limit)) {
-        this.addListRow('map', map.id, map.name, `Map #${map.id}`, '', null);
-        rendered++;
+      for (const map of this.filterMaps(term)) {
+        allEntries.push({
+          type: 'map',
+          id: map.id,
+          name: map.name,
+          subtitle: `Map #${map.id}`,
+          badge: '',
+          icon: null,
+        });
       }
     }
 
-    // Show result count if capped
-    if (totalCount > MAX_RESULTS) {
-      const countDiv = document.createElement('div');
-      countDiv.className = 'enc-result-count';
-      countDiv.textContent = `Showing ${rendered} of ${totalCount}`;
-      this.listElement.appendChild(countDiv);
+    const totalCount = allEntries.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+    if (this.currentPage >= totalPages) {
+      this.currentPage = totalPages - 1;
+    }
+
+    const start = this.currentPage * PAGE_SIZE;
+    const pageEntries = allEntries.slice(start, start + PAGE_SIZE);
+
+    // Render group headers for "all" tab
+    let lastType = '';
+    for (const entry of pageEntries) {
+      if (this.activeTab === 'all' && entry.type !== lastType) {
+        const typeCounts: Record<string, number> = {};
+        for (const e of allEntries) {
+          typeCounts[e.type] = (typeCounts[e.type] ?? 0) + 1;
+        }
+        const label =
+          entry.type === 'class'
+            ? 'Classes'
+            : `${entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}s`;
+        this.addGroupHeader(`${label} (${typeCounts[entry.type]})`);
+        lastType = entry.type;
+      }
+      this.addListRow(
+        entry.type,
+        entry.id,
+        entry.name,
+        entry.subtitle,
+        entry.badge,
+        entry.icon,
+      );
+    }
+
+    // Update pagination
+    if (totalCount > PAGE_SIZE) {
+      this.paginationElement.classList.remove('hidden');
+      this.pageInfoElement.textContent = `${start + 1}–${start + pageEntries.length} of ${totalCount}`;
+      const prevButton =
+        this.paginationElement.querySelector<HTMLButtonElement>(
+          '[data-id="enc-prev"]',
+        )!;
+      const nextButton =
+        this.paginationElement.querySelector<HTMLButtonElement>(
+          '[data-id="enc-next"]',
+        )!;
+      prevButton.disabled = this.currentPage === 0;
+      nextButton.disabled = this.currentPage >= totalPages - 1;
+    } else {
+      this.paginationElement.classList.add('hidden');
     }
   }
 
@@ -565,6 +616,21 @@ export class Encyclopedia extends Base {
     this.addDetailName(record.name);
     this.addDetailType(this.getItemSubtitle(record, itemId));
 
+    // Admin: spawn item button
+    if (this.client.admin !== AdminLevel.Player) {
+      this.addAdminAction('Spawn Item', () => {
+        this.showAdminPopup(
+          'Spawn Item',
+          [{ label: 'Amount', defaultValue: '1' }],
+          ([amountValue]) => {
+            const amount = Number.parseInt(amountValue, 10);
+            if (Number.isNaN(amount) || amount <= 0) return;
+            this.sendAdminCommand(`$sitem ${itemId} ${amount}`);
+          },
+        );
+      });
+    }
+
     // Combat stats
     const combatStats: [string, string][] = [];
     if (record.minDamage > 0 || record.maxDamage > 0)
@@ -666,21 +732,6 @@ export class Encyclopedia extends Base {
     this.detailPanel.appendChild(loadingDiv);
 
     this.requestItemSources(itemId, loadingDiv);
-
-    // Admin: spawn item button
-    if (this.client.admin !== AdminLevel.Player) {
-      this.addAdminAction('Spawn Item', () => {
-        this.showAdminPopup(
-          'Spawn Item',
-          [{ label: 'Amount', defaultValue: '1' }],
-          ([amountValue]) => {
-            const amount = Number.parseInt(amountValue, 10);
-            if (Number.isNaN(amount) || amount <= 0) return;
-            this.sendAdminCommand(`$sitem ${itemId} ${amount}`);
-          },
-        );
-      });
-    }
   }
 
   // ── NPC detail ──
@@ -696,6 +747,26 @@ export class Encyclopedia extends Base {
     let typeString = `#${npcId} \u2022 ${getNpcTypeName(record.type)}`;
     if (record.boss) typeString += ' \u2022 Boss';
     this.addDetailType(typeString);
+
+    // Admin: spawn NPC button
+    if (this.client.admin !== AdminLevel.Player) {
+      this.addAdminAction('Spawn NPC', () => {
+        this.showAdminPopup(
+          'Spawn NPC',
+          [
+            { label: 'Amount', defaultValue: '1' },
+            { label: 'Act Speed (1=fastest, 7=stationary)', defaultValue: '2' },
+          ],
+          ([amountValue, speedValue]) => {
+            const amount = Number.parseInt(amountValue, 10);
+            if (Number.isNaN(amount) || amount <= 0) return;
+            const speed = Number.parseInt(speedValue, 10);
+            if (Number.isNaN(speed) || speed < 1 || speed > 7) return;
+            this.sendAdminCommand(`$snpc ${npcId} ${amount} ${speed}`);
+          },
+        );
+      });
+    }
 
     // Combat stats
     const combatStats: [string, string][] = [];
@@ -737,26 +808,6 @@ export class Encyclopedia extends Base {
     this.detailPanel.appendChild(loadingDiv);
 
     this.requestNpcSources(npcId, loadingDiv);
-
-    // Admin: spawn NPC button
-    if (this.client.admin !== AdminLevel.Player) {
-      this.addAdminAction('Spawn NPC', () => {
-        this.showAdminPopup(
-          'Spawn NPC',
-          [
-            { label: 'Amount', defaultValue: '1' },
-            { label: 'Act Speed (1=fastest, 7=stationary)', defaultValue: '2' },
-          ],
-          ([amountValue, speedValue]) => {
-            const amount = Number.parseInt(amountValue, 10);
-            if (Number.isNaN(amount) || amount <= 0) return;
-            const speed = Number.parseInt(speedValue, 10);
-            if (Number.isNaN(speed) || speed < 1 || speed > 7) return;
-            this.sendAdminCommand(`$snpc ${npcId} ${amount} ${speed}`);
-          },
-        );
-      });
-    }
   }
 
   // ── Spell detail ──
@@ -1396,7 +1447,8 @@ export class Encyclopedia extends Base {
       if (data.drops.length > 0) {
         this.addSectionHeader('Dropped By');
         for (const drop of data.drops) {
-          const npcId = this.findNpcIdByName(drop.npcName);
+          const baseName = drop.npcName.replace(' (Awakened)', '');
+          const npcId = this.findNpcIdByName(baseName);
           if (npcId > 0) {
             this.addSourceLinkWithSuffix(
               'npc',

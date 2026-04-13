@@ -356,6 +356,36 @@
   padding: 6px 0;
 }
 
+#encyclopedia .enc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
+  flex-shrink: 0;
+}
+
+#encyclopedia .enc-pagination button {
+  font-size: 10px;
+  padding: 2px 8px;
+}
+
+#encyclopedia .enc-pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+#encyclopedia .enc-page-info {
+  font-size: 10px;
+  color: var(--theme-dim);
+}
+
 /* ── Detail Panel ─────────────────────────────────────────────────── */
 
 #encyclopedia .enc-detail-panel {
@@ -577,7 +607,7 @@
 
 #encyclopedia .enc-admin-action {
   display: block;
-  margin-top: 8px;
+  margin: 8px auto 0;
   padding: 5px 12px;
   background: rgba(244, 67, 54, 0.12);
   border: 1px solid rgba(244, 67, 54, 0.3);

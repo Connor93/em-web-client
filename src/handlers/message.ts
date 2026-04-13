@@ -124,6 +124,13 @@ function handleTreasureMessage(client: Client, message: string): void {
       client.expedition.target = null;
       client.emit('expeditionWrongMap', undefined);
     }
+  } else if (message.startsWith('[TREASURE_ENCOUNTER_NPCS]')) {
+    const indices = message.replace('[TREASURE_ENCOUNTER_NPCS]', '').split(',');
+    client.expeditionCombatNpcs.clear();
+    for (const idx of indices) {
+      const n = Number.parseInt(idx, 10);
+      if (!Number.isNaN(n)) client.expeditionCombatNpcs.add(n);
+    }
   } else if (message.startsWith('[TREASURE_COMBAT]')) {
     const count = Number.parseInt(message.replace('[TREASURE_COMBAT]', ''), 10);
     if (client.expedition) {

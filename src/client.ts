@@ -553,7 +553,13 @@ export class Client {
     return { x: 0, y: 0 };
   }
 
-  setMousePosition(position: Vector2) {
+  setMousePosition(position: Vector2 | null) {
+    if (!position) {
+      this.mousePosition = undefined;
+      this.mouseCoords = undefined;
+      return;
+    }
+
     this.mousePosition = position;
 
     const player = this.getPlayerCoords();

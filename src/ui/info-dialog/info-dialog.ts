@@ -22,6 +22,17 @@ export interface NpcSourceInfo {
   shopItems: { itemName: string; buyPrice: number; sellPrice: number }[];
   crafts: { itemName: string; ingredients: string }[];
   spawnMaps: number[];
+  awakened: {
+    hp: number;
+    minDamage: number;
+    maxDamage: number;
+    armor: number;
+    accuracy: number;
+    evade: number;
+    killThreshold: number;
+    cooldownSeconds: number;
+    drops: { itemName: string; amount: string; dropRate: number }[];
+  } | null;
 }
 
 export class InfoDialog extends Base {
@@ -226,13 +237,16 @@ export class InfoDialog extends Base {
 
     // Stats
     const stats: string[] = [];
-    if (npc.hp > 0) stats.push(`HP: ${npc.hp}`);
-    if (npc.tp > 0) stats.push(`TP: ${npc.tp}`);
+    if (npc.hp > 0) stats.push(`HP: ${npc.hp.toLocaleString()}`);
+    if (npc.tp > 0) stats.push(`TP: ${npc.tp.toLocaleString()}`);
     if (npc.minDamage > 0 || npc.maxDamage > 0)
-      stats.push(`Damage: ${npc.minDamage}-${npc.maxDamage}`);
-    if (npc.accuracy > 0) stats.push(`Accuracy: ${npc.accuracy}`);
-    if (npc.evade > 0) stats.push(`Evade: ${npc.evade}`);
-    if (npc.armor > 0) stats.push(`Armor: ${npc.armor}`);
+      stats.push(
+        `Damage: ${npc.minDamage.toLocaleString()}-${npc.maxDamage.toLocaleString()}`,
+      );
+    if (npc.accuracy > 0)
+      stats.push(`Accuracy: ${npc.accuracy.toLocaleString()}`);
+    if (npc.evade > 0) stats.push(`Evade: ${npc.evade.toLocaleString()}`);
+    if (npc.armor > 0) stats.push(`Armor: ${npc.armor.toLocaleString()}`);
     if (stats.length > 0) {
       this.addRow(stats.join(' | '));
     }
@@ -255,7 +269,8 @@ export class InfoDialog extends Base {
       sources.drops.length > 0 ||
       sources.shopItems.length > 0 ||
       sources.crafts.length > 0 ||
-      sources.spawnMaps.length > 0;
+      sources.spawnMaps.length > 0 ||
+      sources.awakened;
 
     if (!hasData) {
       this.addSection('Sources');
@@ -264,12 +279,47 @@ export class InfoDialog extends Base {
       return;
     }
 
-    if (sources.drops.length > 0) {
+    if (sources.awakened) {
+      const a = sources.awakened;
+
+      // Format cooldown as hours and minutes
+      const totalMinutes = Math.floor(a.cooldownSeconds / 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      let cooldownStr = '';
+      if (hours > 0) cooldownStr += `${hours}h`;
+      if (minutes > 0) cooldownStr += `${cooldownStr ? ' ' : ''}${minutes}m`;
+      if (!cooldownStr) cooldownStr = '< 1m';
+
+      this.addSection('Awakened Stats');
+      this.addRow(
+        `HP: ${a.hp.toLocaleString()} | Damage: ${a.minDamage.toLocaleString()}-${a.maxDamage.toLocaleString()}`,
+      );
+      this.addRow(
+        `Armor: ${a.armor.toLocaleString()} | Accuracy: ${a.accuracy.toLocaleString()} | Evade: ${a.evade.toLocaleString()}`,
+      );
+      this.addRow(
+        `Kills to awaken: ${a.killThreshold.toLocaleString()} | Cooldown: ${cooldownStr}`,
+      );
+    }
+
+    if (
+      sources.drops.length > 0 ||
+      (sources.awakened && sources.awakened.drops.length > 0)
+    ) {
       this.addSection('Drops');
       for (const drop of sources.drops) {
         this.addRow(
           `${drop.itemName} x${drop.amount} (${drop.dropRate.toFixed(1)}%)`,
         );
+      }
+      if (sources.awakened && sources.awakened.drops.length > 0) {
+        if (sources.drops.length > 0) this.addDivider();
+        for (const drop of sources.awakened.drops) {
+          this.addRow(
+            `${drop.itemName} x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+          );
+        }
       }
     }
 
@@ -330,6 +380,12 @@ export class InfoDialog extends Base {
     const element = document.createElement('div');
     element.classList.add('info-row');
     element.innerText = text;
+    this.itemList.appendChild(element);
+  }
+
+  private addDivider() {
+    const element = document.createElement('div');
+    element.classList.add('info-divider');
     this.itemList.appendChild(element);
   }
 

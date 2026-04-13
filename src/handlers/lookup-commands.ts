@@ -164,7 +164,11 @@ function handleItemSourceResponse(client: Client, reader: EoReader) {
     if (type === 1) {
       // Drop
       const dropRate = reader.getShort() / 100.0;
-      drops.push({ npcName, dropRate });
+      const isAwakened = reader.getChar() === 1;
+      drops.push({
+        npcName: isAwakened ? `${npcName} (Awakened)` : npcName,
+        dropRate,
+      });
     } else if (type === 2) {
       // Shop
       const price = reader.getInt();
@@ -256,11 +260,67 @@ function handleNpcSourceResponse(client: Client, reader: EoReader) {
     spawnMaps.push(reader.getShort());
   }
 
+  // Awakened boss data
+  let awakened: {
+    hp: number;
+    minDamage: number;
+    maxDamage: number;
+    armor: number;
+    accuracy: number;
+    evade: number;
+    killThreshold: number;
+    cooldownSeconds: number;
+    drops: { itemName: string; amount: string; dropRate: number }[];
+  } | null = null;
+
+  const hasAwakened = reader.getChar();
+  if (hasAwakened === 1) {
+    const hp = reader.getInt();
+    const minDamage = reader.getShort();
+    const maxDamage = reader.getShort();
+    const armor = reader.getShort();
+    const accuracy = reader.getShort();
+    const evade = reader.getShort();
+    const killThreshold = reader.getShort();
+    const cooldownSeconds = reader.getInt();
+
+    const awakenedDropCount = reader.getChar();
+    const awakenedDrops: {
+      itemName: string;
+      amount: string;
+      dropRate: number;
+    }[] = [];
+    for (let i = 0; i < awakenedDropCount; i++) {
+      const itemId = reader.getShort();
+      const minAmount = reader.getShort();
+      const maxAmount = reader.getShort();
+      const dropRate = reader.getShort() / 100.0;
+      const itemRecord = client.getEifRecordById(itemId);
+      const itemName = itemRecord ? itemRecord.name : `Item #${itemId}`;
+      const amount =
+        minAmount === maxAmount ? `${minAmount}` : `${minAmount}-${maxAmount}`;
+      awakenedDrops.push({ itemName, amount, dropRate });
+    }
+
+    awakened = {
+      hp,
+      minDamage,
+      maxDamage,
+      armor,
+      accuracy,
+      evade,
+      killThreshold,
+      cooldownSeconds,
+      drops: awakenedDrops,
+    };
+  }
+
   client.emit('updateNpcSources', {
     drops,
     shopItems,
     crafts: craftRecipes,
     spawnMaps,
+    awakened,
   });
 }
 

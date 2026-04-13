@@ -538,6 +538,20 @@ window.addEventListener(
 window.addEventListener('mousemove', (e) => {
   const canvas = getCanvas();
   if (!canvas) return;
+
+  const elements = document.elementsFromPoint(e.clientX, e.clientY);
+  const overPanel = elements.some((el) => {
+    if (!(el instanceof HTMLElement)) return false;
+    const panel = el.closest<HTMLElement>(
+      '#dialogs > :not(.hidden), #inventory:not(.hidden), #encyclopedia:not(.hidden), #guild-panel:not(.hidden)',
+    );
+    return panel !== null;
+  });
+  if (overPanel) {
+    client.setMousePosition(null);
+    return;
+  }
+
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;

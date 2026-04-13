@@ -158,7 +158,11 @@ export function handleClick(client: Client, e: MouseEvent): void {
     }
   }
 
-  const npcAt = getNpcIntersecting(client.mousePosition!);
+  if (!client.mousePosition) {
+    return;
+  }
+
+  const npcAt = getNpcIntersecting(client.mousePosition);
   if (npcAt) {
     const npc = client.nearby.npcs.find((n) => n.index === npcAt.id);
     if (npc) {
@@ -167,7 +171,7 @@ export function handleClick(client: Client, e: MouseEvent): void {
     }
   }
 
-  const characterAt = getCharacterIntersecting(client.mousePosition!);
+  const characterAt = getCharacterIntersecting(client.mousePosition);
   if (characterAt) {
     const character = client.getCharacterById(characterAt.id);
     if (character) {
