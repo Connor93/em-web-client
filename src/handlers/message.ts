@@ -85,6 +85,7 @@ function handleTreasureMessage(client: Client, message: string): void {
         currentClue: '',
         clueHistory: [],
         target: null,
+        mapDistance: -1,
         combat: { active: false, remaining: 0 },
         trackerVisible: false,
       };
@@ -117,11 +118,15 @@ function handleTreasureMessage(client: Client, message: string): void {
       const x = Number.parseInt(parts[1], 10);
       const y = Number.parseInt(parts[2], 10);
       client.expedition.target = { mapId, x, y };
+      client.expedition.mapDistance = 0;
       client.emit('expeditionTarget', { mapId, x, y });
     }
   } else if (message.startsWith('[TREASURE_WRONGMAP]')) {
     if (client.expedition) {
       client.expedition.target = null;
+      const distStr = message.replace('[TREASURE_WRONGMAP]', '');
+      client.expedition.mapDistance =
+        distStr.length > 0 ? Number.parseInt(distStr, 10) : -1;
       client.emit('expeditionWrongMap', undefined);
     }
   } else if (message.startsWith('[TREASURE_ENCOUNTER_NPCS]')) {
@@ -191,6 +196,7 @@ function handleTreasureMessage(client: Client, message: string): void {
         currentClue: '',
         clueHistory: [],
         target: null,
+        mapDistance: -1,
         combat: { active: false, remaining: 0 },
         trackerVisible: false,
       };

@@ -209,6 +209,7 @@ export class Client {
     currentClue: string;
     clueHistory: { step: number; clue: string; completed: boolean }[];
     target: { mapId: number; x: number; y: number } | null;
+    mapDistance: number; // -1 = unreachable/unknown, 0 = on correct map
     combat: { active: boolean; remaining: number };
     trackerVisible: boolean;
   } | null = null;

@@ -151,8 +151,22 @@ export class ExpeditionTracker extends Base {
     const exp = this.client.expedition;
     const target = exp?.target ?? null;
 
-    // No target or wrong map
+    // No target or wrong map — use map distance for proximity
     if (!target || this.client.mapId !== target.mapId) {
+      const dist = exp?.mapDistance ?? -1;
+      if (dist === 1) {
+        return {
+          level: 'warm',
+          fillPercent: 30,
+          hint: 'Very close, one map away',
+        };
+      }
+      if (dist === 2) {
+        return { level: 'cool', fillPercent: 20, hint: 'A couple maps away' };
+      }
+      if (dist >= 3 && dist <= 4) {
+        return { level: 'cold', fillPercent: 10, hint: 'Several maps away' };
+      }
       return { level: 'cold', fillPercent: 5, hint: 'Search the world...' };
     }
 
