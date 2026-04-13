@@ -1547,6 +1547,17 @@ export class Encyclopedia extends Base {
       }[];
       crafts: { itemName: string; ingredients: string }[];
       spawnMaps: number[];
+      awakened: {
+        hp: number;
+        minDamage: number;
+        maxDamage: number;
+        armor: number;
+        accuracy: number;
+        evade: number;
+        killThreshold: number;
+        cooldownSeconds: number;
+        drops: { itemName: string; amount: string; dropRate: number }[];
+      } | null;
     }) => {
       loadingDiv.remove();
 
@@ -1554,7 +1565,8 @@ export class Encyclopedia extends Base {
         data.drops.length > 0 ||
         data.shopItems.length > 0 ||
         data.crafts.length > 0 ||
-        data.spawnMaps.length > 0;
+        data.spawnMaps.length > 0 ||
+        data.awakened;
       if (!hasData) {
         const row = document.createElement('div');
         row.className = 'enc-source-row';
@@ -1563,7 +1575,34 @@ export class Encyclopedia extends Base {
         return;
       }
 
-      if (data.drops.length > 0) {
+      if (data.awakened) {
+        const a = data.awakened;
+        const totalMinutes = Math.floor(a.cooldownSeconds / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        let cooldownStr = '';
+        if (hours > 0) cooldownStr += `${hours}h`;
+        if (minutes > 0) cooldownStr += `${cooldownStr ? ' ' : ''}${minutes}m`;
+        if (!cooldownStr) cooldownStr = '< 1m';
+
+        this.addStatSection('Awakened Stats', [
+          ['HP', a.hp.toLocaleString()],
+          [
+            'Damage',
+            `${a.minDamage.toLocaleString()}-${a.maxDamage.toLocaleString()}`,
+          ],
+          ['Armor', a.armor.toLocaleString()],
+          ['Accuracy', a.accuracy.toLocaleString()],
+          ['Evade', a.evade.toLocaleString()],
+          ['Kills to Awaken', a.killThreshold.toLocaleString()],
+          ['Cooldown', cooldownStr],
+        ]);
+      }
+
+      if (
+        data.drops.length > 0 ||
+        (data.awakened && data.awakened.drops.length > 0)
+      ) {
         this.addSectionHeader('Drops');
         for (const drop of data.drops) {
           const itemId = this.findItemIdByName(drop.itemName);
@@ -1586,6 +1625,36 @@ export class Encyclopedia extends Base {
               ),
             );
             this.detailPanel.appendChild(row);
+          }
+        }
+        if (data.awakened && data.awakened.drops.length > 0) {
+          if (data.drops.length > 0) {
+            const divider = document.createElement('div');
+            divider.className = 'enc-divider';
+            this.detailPanel.appendChild(divider);
+          }
+          for (const drop of data.awakened.drops) {
+            const itemId = this.findItemIdByName(drop.itemName);
+            if (itemId > 0) {
+              this.addSourceLinkWithSuffix(
+                'item',
+                itemId,
+                drop.itemName,
+                ` x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+              );
+            } else {
+              const row = document.createElement('div');
+              row.className = 'enc-source-row';
+              const nameSpan = document.createElement('span');
+              nameSpan.textContent = drop.itemName;
+              row.appendChild(nameSpan);
+              row.appendChild(
+                document.createTextNode(
+                  ` x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+                ),
+              );
+              this.detailPanel.appendChild(row);
+            }
           }
         }
       }
