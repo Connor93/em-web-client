@@ -353,13 +353,9 @@ export function wireUiEvents(deps: UiEventDeps): void {
     client.chat(message as string);
   });
 
-  deps.chat.on('focus', () => {
-    client.typing = true;
-  });
-
-  deps.chat.on('blur', () => {
-    client.typing = false;
-  });
+  // Chat focus no longer blocks movement/attacks — players can type and move
+  // simultaneously like the original EO client. Only dialog opens set
+  // client.typing to block input.
 
   // In-game menu toggles
   const handleToggle = (which: unknown) => {

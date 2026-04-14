@@ -234,11 +234,6 @@ export class Chat extends Base {
     this.form.addEventListener('submit', (e) => {
       e.preventDefault();
       this.emitter.emit('chat', this.message.value);
-      if (!this.message.value) {
-        setTimeout(() => {
-          this.message.blur();
-        }, 200);
-      }
       this.message.value = '';
       return false;
     });
@@ -246,7 +241,6 @@ export class Chat extends Base {
     this.message.addEventListener('keyup', (e) => {
       if (e.key === 'Escape') {
         this.message.value = '';
-        this.message.blur();
       }
     });
 

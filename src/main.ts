@@ -509,6 +509,35 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+// Escape — close the topmost open window, one at a time
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || client.state !== GameState.InGame) return;
+
+  // Close dialogs first (inside #dialogs container)
+  const dialogs = document.getElementById('dialogs');
+  if (dialogs && !dialogs.classList.contains('hidden')) {
+    const openDialog = dialogs.querySelector(':scope > :not(.hidden)');
+    if (openDialog) {
+      (openDialog as HTMLElement).classList.add('hidden');
+      if (!dialogs.querySelector(':scope > :not(.hidden)')) {
+        dialogs.classList.add('hidden');
+        client.typing = false;
+      }
+      return;
+    }
+  }
+
+  // Then close standalone panels
+  const panels = ['encyclopedia', 'inventory', 'guild-panel', 'online-list'];
+  for (const id of panels) {
+    const panel = document.getElementById(id);
+    if (panel && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      return;
+    }
+  }
+});
+
 window.addEventListener(
   'touchmove',
   (e) => {

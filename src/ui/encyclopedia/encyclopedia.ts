@@ -130,16 +130,6 @@ export class Encyclopedia extends Base {
         this.listElement.scrollTop = 0;
       });
 
-    // Escape key
-    document.addEventListener('keydown', (event) => {
-      if (
-        event.key === 'Escape' &&
-        !this.container.classList.contains('hidden')
-      ) {
-        this.hide();
-      }
-    });
-
     // Draggable by header only
     makeDraggable(this.container as HTMLElement, '.enc-header');
     const observer = new MutationObserver((mutations) => {

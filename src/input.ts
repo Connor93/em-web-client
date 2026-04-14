@@ -87,29 +87,37 @@ window.addEventListener('keydown', (e) => {
     if (e.key === '=' || e.key === '+') zoomIn();
     else zoomOut();
   }
+
+  // When a text input is focused, only process keys that don't produce text
+  // (arrows, ctrl, space) so players can type and move simultaneously.
+  const inTextInput =
+    document.activeElement instanceof HTMLInputElement ||
+    document.activeElement instanceof HTMLTextAreaElement;
+
   const wasd = settings.get('wasdMovement') === 'enabled';
   switch (e.code) {
     case 'KeyW':
     case 'ArrowUp':
-      if (e.code === 'KeyW' && !wasd) break;
+      if (e.code === 'KeyW' && (!wasd || inTextInput)) break;
       updateInputHeld(Input.Up, true);
       break;
     case 'KeyA':
     case 'ArrowLeft':
-      if (e.code === 'KeyA' && !wasd) break;
+      if (e.code === 'KeyA' && (!wasd || inTextInput)) break;
       updateInputHeld(Input.Left, true);
       break;
     case 'KeyS':
     case 'ArrowDown':
-      if (e.code === 'KeyS' && !wasd) break;
+      if (e.code === 'KeyS' && (!wasd || inTextInput)) break;
       updateInputHeld(Input.Down, true);
       break;
     case 'KeyD':
     case 'ArrowRight':
-      if (e.code === 'KeyD' && !wasd) break;
+      if (e.code === 'KeyD' && (!wasd || inTextInput)) break;
       updateInputHeld(Input.Right, true);
       break;
     case 'KeyX':
+      if (inTextInput) break;
       updateInputHeld(Input.SitStand, true);
       break;
     case 'Space':
@@ -156,7 +164,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteHappy, true);
         break;
       }
-      updateInputHeld(Input.Hotbar1, true);
+      if (!inTextInput) updateInputHeld(Input.Hotbar1, true);
       break;
     case 'Digit2':
       if (e.altKey) {
@@ -164,7 +172,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteDepressed, true);
         break;
       }
-      updateInputHeld(Input.Hotbar2, true);
+      if (!inTextInput) updateInputHeld(Input.Hotbar2, true);
       break;
     case 'Digit3':
       if (e.altKey) {
@@ -172,7 +180,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteSad, true);
         break;
       }
-      updateInputHeld(Input.Hotbar3, true);
+      if (!inTextInput) updateInputHeld(Input.Hotbar3, true);
       break;
     case 'Digit4':
       if (e.altKey) {
@@ -180,7 +188,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteAngry, true);
         break;
       }
-      updateInputHeld(Input.Hotbar4, true);
+      if (!inTextInput) updateInputHeld(Input.Hotbar4, true);
       break;
     case 'Digit5':
       if (e.altKey) {
@@ -188,7 +196,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteConfused, true);
         break;
       }
-      updateInputHeld(Input.Hotbar5, true);
+      if (!inTextInput) updateInputHeld(Input.Hotbar5, true);
       break;
     case 'Digit6':
       if (e.altKey) {
@@ -221,11 +229,13 @@ window.addEventListener('keydown', (e) => {
       }
       break;
     case 'Tab':
-      updateInputHeld(Input.Tab, true);
-      e.preventDefault();
+      if (!inTextInput) {
+        updateInputHeld(Input.Tab, true);
+        e.preventDefault();
+      }
       break;
     case 'KeyR':
-      updateInputHeld(Input.Refresh, true);
+      if (!inTextInput) updateInputHeld(Input.Refresh, true);
       break;
   }
 });

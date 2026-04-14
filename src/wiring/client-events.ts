@@ -35,6 +35,7 @@ export interface ClientEventDeps {
   chat: {
     clear(): void;
     show(): void;
+    focus(): void;
     addMessage(tab: ChatTab, msg: string, icon: ChatIcon, name?: string): void;
     setMessage(msg: string): void;
   };
@@ -282,6 +283,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
       deps.playerContextMenu.show(playerId, screenX, screenY);
     });
     deps.chat.show();
+    deps.chat.focus();
     deps.hud.setStats(client);
     deps.mobileHud.setStats(client);
     deps.hud.show();
