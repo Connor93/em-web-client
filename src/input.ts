@@ -125,7 +125,7 @@ window.addEventListener('keydown', (e) => {
       updateInputHeld(Input.Attack, true);
       break;
     case 'Space':
-      if (inTextInput) break;
+      if (inTextInput && !e.ctrlKey) break;
       updateInputHeld(Input.Attack, true);
       break;
     case 'NumpadDecimal':
