@@ -120,9 +120,11 @@ window.addEventListener('keydown', (e) => {
       if (inTextInput) break;
       updateInputHeld(Input.SitStand, true);
       break;
-    case 'Space':
     case 'ControlLeft':
     case 'ControlRight':
+      updateInputHeld(Input.Attack, true);
+      break;
+    case 'Space':
       if (inTextInput) break;
       updateInputHeld(Input.Attack, true);
       break;
