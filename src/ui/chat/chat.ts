@@ -244,15 +244,33 @@ export class Chat extends Base {
       }
     });
 
-    // Allow typing while holding Ctrl (for attacking). The browser normally
-    // treats Ctrl+letter as a shortcut and won't insert the character, so
-    // we manually insert it. Preserve real shortcuts (Ctrl+A/C/V/X/Z).
+    // Suppress default behavior for keys that conflict with game controls:
+    // - Ctrl+letter: prevent select-all, etc. and manually insert the character
+    //   (allows attacking with Ctrl while typing)
+    // - Arrow keys: prevent cursor movement in the input (allows walking while typing)
+    // Preserve Ctrl+C/V/X/Z for clipboard operations.
     this.message.addEventListener('keydown', (e) => {
+      // Suppress arrow keys so they don't move the cursor
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Suppress Home/End to prevent cursor jumping
+      if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        return;
+      }
+
       if (!e.ctrlKey || e.metaKey || e.altKey) return;
-      if (['a', 'c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) return;
+
+      // Preserve clipboard shortcuts
+      if (['c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) return;
+
+      // Suppress Ctrl+A (select all) and other Ctrl combos, insert char instead
+      e.preventDefault();
       if (e.key.length !== 1) return;
 
-      e.preventDefault();
       const start = this.message.selectionStart ?? this.message.value.length;
       const end = this.message.selectionEnd ?? start;
       this.message.value =
