@@ -250,6 +250,15 @@ export class Chat extends Base {
 
     this.message.addEventListener('blur', () => {
       this.emitter.emit('blur', undefined);
+      // Re-focus chat unless another text input took focus (e.g. encyclopedia search)
+      setTimeout(() => {
+        if (
+          !(document.activeElement instanceof HTMLInputElement) &&
+          !(document.activeElement instanceof HTMLTextAreaElement)
+        ) {
+          this.message.focus();
+        }
+      }, 0);
     });
 
     this.btnToggle.addEventListener('click', () => {
