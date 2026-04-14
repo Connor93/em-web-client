@@ -91,11 +91,11 @@ window.addEventListener('keydown', (e) => {
   // When actively typing (text input focused AND has content), character keys
   // go to chat. When the input is empty, hotkeys (X, digits, etc.) trigger
   // game actions instead. Arrow keys and Ctrl always go to game input.
-  const activeInput = document.activeElement as HTMLInputElement | null;
+  const active = document.activeElement;
   const inTextInput =
-    (activeInput instanceof HTMLInputElement ||
-      activeInput instanceof HTMLTextAreaElement) &&
-    activeInput.value.length > 0;
+    (active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement) &&
+    active.value.length > 0;
 
   const wasd = settings.get('wasdMovement') === 'enabled';
   switch (e.code) {
