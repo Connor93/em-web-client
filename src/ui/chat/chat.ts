@@ -284,8 +284,15 @@ export class Chat extends Base {
   }
 
   private sanitize(input: string): string {
-    const sanitized = input.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
-    return sanitized;
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '/': '&#x2F;',
+    };
+    return input.replace(/[&<>"'/]/g, (char) => map[char]).trim();
   }
 
   private replaceLinks(input: string): string {
