@@ -244,6 +244,25 @@ export class Chat extends Base {
       }
     });
 
+    // Allow typing while holding Ctrl (for attacking). The browser normally
+    // treats Ctrl+letter as a shortcut and won't insert the character, so
+    // we manually insert it. Preserve real shortcuts (Ctrl+A/C/V/X/Z).
+    this.message.addEventListener('keydown', (e) => {
+      if (!e.ctrlKey || e.metaKey || e.altKey) return;
+      if (['a', 'c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) return;
+      if (e.key.length !== 1) return;
+
+      e.preventDefault();
+      const start = this.message.selectionStart ?? this.message.value.length;
+      const end = this.message.selectionEnd ?? start;
+      this.message.value =
+        this.message.value.slice(0, start) +
+        e.key +
+        this.message.value.slice(end);
+      this.message.selectionStart = start + 1;
+      this.message.selectionEnd = start + 1;
+    });
+
     this.message.addEventListener('focus', () => {
       this.emitter.emit('focus', undefined);
     });
