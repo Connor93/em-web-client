@@ -123,6 +123,7 @@ window.addEventListener('keydown', (e) => {
     case 'Space':
     case 'ControlLeft':
     case 'ControlRight':
+      if (inTextInput) break;
       updateInputHeld(Input.Attack, true);
       break;
     case 'NumpadDecimal':
