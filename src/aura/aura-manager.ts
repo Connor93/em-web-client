@@ -15,6 +15,8 @@ export interface CachedAura {
 export class AuraManager {
   /** Configs by weapon graphic ID */
   private configs = new Map<number, AuraConfig>();
+  /** Configs by weapon item ID */
+  private configsByItemId = new Map<number, AuraConfig>();
   /** Per-character effect instances keyed by playerId */
   private characterAuras = new Map<number, CachedAura>();
   private dashboardUrl: string;
@@ -39,11 +41,15 @@ export class AuraManager {
 
   private rebuild(configs: AuraConfig[]): void {
     this.configs.clear();
+    this.configsByItemId.clear();
     this.characterAuras.clear();
 
     for (const config of configs) {
       if (config.graphicId <= 0 || config.effects.length === 0) continue;
       this.configs.set(config.graphicId, config);
+      if (config.itemId > 0) {
+        this.configsByItemId.set(config.itemId, config);
+      }
     }
   }
 
@@ -62,15 +68,29 @@ export class AuraManager {
     return cached;
   }
 
+  /** Get or create per-character effect instances by weapon item ID. */
+  getAuraForCharacter(
+    weaponItemId: number,
+    playerId: number,
+  ): CachedAura | undefined {
+    const config = this.configsByItemId.get(weaponItemId);
+    if (!config) return undefined;
+
+    let cached = this.characterAuras.get(playerId);
+    if (cached && cached.config === config) return cached;
+
+    const { filters, floatEffect } = buildEffects(config);
+    cached = { config, effects: filters, floatEffect };
+    this.characterAuras.set(playerId, cached);
+    return cached;
+  }
+
   /** Get aura config by item ID (for encyclopedia/UI previews). */
   getAuraByItemId(itemId: number): CachedAura | undefined {
-    for (const config of this.configs.values()) {
-      if (config.itemId === itemId) {
-        const { filters, floatEffect } = buildEffects(config);
-        return { config, effects: filters, floatEffect };
-      }
-    }
-    return undefined;
+    const config = this.configsByItemId.get(itemId);
+    if (!config) return undefined;
+    const { filters, floatEffect } = buildEffects(config);
+    return { config, effects: filters, floatEffect };
   }
 
   hasAuras(): boolean {
