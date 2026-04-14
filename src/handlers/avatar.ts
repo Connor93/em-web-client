@@ -60,6 +60,7 @@ function handleAvatarRemove(client: Client, reader: EoReader) {
   client.nearby.characters = client.nearby.characters.filter(
     (c) => c.playerId !== packet.playerId,
   );
+  client.weaponItemIds.delete(packet.playerId);
 }
 
 const AVATAR_CHANGE_TYPE_SKIN = 4;

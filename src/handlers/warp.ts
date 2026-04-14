@@ -46,6 +46,7 @@ function handleWarpRequest(client: Client, reader: EoReader) {
 
 function handleWarpAgree(client: Client, reader: EoReader) {
   const packet = WarpAgreeServerPacket.deserialize(reader);
+  client.weaponItemIds.clear();
   client.nearby = packet.nearby;
 
   const isMapChange = client.mapId !== client.warpMapId;

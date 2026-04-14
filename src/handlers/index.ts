@@ -43,6 +43,7 @@ import { registerTalkHandlers } from './talk';
 import { registerTradeHandlers } from './trade';
 import { registerWalkHandlers } from './walk';
 import { registerWarpHandlers } from './warp';
+import { registerWeaponInfoHandlers } from './weapon-info';
 import { registerWelcomeHandlers } from './welcome';
 
 export { handleItemCommand, handleNpcCommand } from './lookup-commands';
@@ -90,6 +91,7 @@ export {
   registerTradeHandlers,
   registerWalkHandlers,
   registerWarpHandlers,
+  registerWeaponInfoHandlers,
   registerWelcomeHandlers,
 };
 
@@ -139,4 +141,5 @@ export function registerAllHandlers(client: Client): void {
   registerPartyHandlers(client);
   registerGuildHandlers(client);
   registerLookupCommandHandlers(client);
+  registerWeaponInfoHandlers(client);
 }

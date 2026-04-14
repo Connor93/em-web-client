@@ -222,6 +222,7 @@ export class Client {
   mouseCoords: Vector2 | undefined;
   movementController: MovementController;
   npcMetadata = getNpcMetaData();
+  weaponItemIds = new Map<number, number>();
   weaponMetadata: Map<number, IWeaponMetadata> = new Map();
   shieldMetadata = getShieldMetaData();
   effectMetadata = getEffectMetaData();
