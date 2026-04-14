@@ -248,9 +248,7 @@ export class Chat extends Base {
       this.emitter.emit('focus', undefined);
     });
 
-    this.message.addEventListener('blur', () => {
-      this.emitter.emit('blur', undefined);
-      // Re-focus chat unless another interactive element took focus
+    const refocusChat = () => {
       setTimeout(() => {
         const active = document.activeElement;
         if (
@@ -262,6 +260,18 @@ export class Chat extends Base {
         }
         this.message.focus();
       }, 0);
+    };
+
+    this.message.addEventListener('blur', () => {
+      this.emitter.emit('blur', undefined);
+      refocusChat();
+    });
+
+    // Re-focus chat when other interactive elements (dropdowns, etc.) lose focus
+    document.addEventListener('focusout', (e) => {
+      if (e.target !== this.message) {
+        refocusChat();
+      }
     });
 
     this.btnToggle.addEventListener('click', () => {
