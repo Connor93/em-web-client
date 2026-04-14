@@ -264,8 +264,9 @@ export class Chat extends Base {
 
       if (!e.ctrlKey || e.metaKey || e.altKey) return;
 
-      // Preserve clipboard shortcuts
+      // Preserve clipboard shortcuts and let Ctrl+Space through for attack
       if (['c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) return;
+      if (e.key === ' ') return;
 
       // Suppress Ctrl+A (select all) and other Ctrl combos, insert char instead
       e.preventDefault();
