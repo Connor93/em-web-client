@@ -88,11 +88,14 @@ window.addEventListener('keydown', (e) => {
     else zoomOut();
   }
 
-  // When a text input is focused, only process keys that don't produce text
-  // (arrows, ctrl, space) so players can type and move simultaneously.
+  // When actively typing (text input focused AND has content), character keys
+  // go to chat. When the input is empty, hotkeys (X, digits, etc.) trigger
+  // game actions instead. Arrow keys and Ctrl always go to game input.
+  const activeInput = document.activeElement as HTMLInputElement | null;
   const inTextInput =
-    document.activeElement instanceof HTMLInputElement ||
-    document.activeElement instanceof HTMLTextAreaElement;
+    (activeInput instanceof HTMLInputElement ||
+      activeInput instanceof HTMLTextAreaElement) &&
+    activeInput.value.length > 0;
 
   const wasd = settings.get('wasdMovement') === 'enabled';
   switch (e.code) {

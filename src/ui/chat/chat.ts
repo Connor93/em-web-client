@@ -250,6 +250,16 @@ export class Chat extends Base {
     // - Arrow keys: prevent cursor movement in the input (allows walking while typing)
     // Preserve Ctrl+C/V/X/Z for clipboard operations.
     this.message.addEventListener('keydown', (e) => {
+      // When the chat input is empty, suppress hotkey characters so they
+      // trigger game actions (sit, hotbar, refresh) instead of typing
+      if (this.message.value.length === 0 && !e.ctrlKey) {
+        const hotkeys = ['x', '1', '2', '3', '4', '5', 'r'];
+        if (hotkeys.includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          return;
+        }
+      }
+
       // Suppress arrow keys so they don't move the cursor
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
