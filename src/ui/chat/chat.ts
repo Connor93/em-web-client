@@ -268,7 +268,7 @@ export class Chat extends Base {
       if (['c', 'v', 'x', 'z'].includes(e.key.toLowerCase())) return;
 
       // Suppress Ctrl+A (select all) and other Ctrl combos, insert char instead
-      if (e.key !== ' ') e.preventDefault();
+      e.preventDefault();
       if (e.key.length !== 1) return;
 
       const start = this.message.selectionStart ?? this.message.value.length;

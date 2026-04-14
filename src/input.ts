@@ -124,10 +124,6 @@ window.addEventListener('keydown', (e) => {
     case 'ControlRight':
       updateInputHeld(Input.Attack, true);
       break;
-    case 'Space':
-      if (inTextInput && !e.ctrlKey) break;
-      updateInputHeld(Input.Attack, true);
-      break;
     case 'NumpadDecimal':
       updateInputHeld(Input.EmoteEmbarassed, true);
       break;
@@ -269,7 +265,6 @@ window.addEventListener('keyup', (e) => {
     case 'KeyX':
       updateInputHeld(Input.SitStand, false);
       break;
-    case 'Space':
     case 'ControlLeft':
     case 'ControlRight':
       updateInputHeld(Input.Attack, false);
