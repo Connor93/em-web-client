@@ -131,7 +131,55 @@ export class Chat extends Base {
 
     const msg = document.createElement('span');
     msg.classList.add('chat-message');
-    msg.innerHTML = this.replaceLinks(this.sanitize(message));
+
+    const urlRegex = /\b((https?:\/\/|www\.)[^\s<]+)/gi;
+
+    let lastIndex = 0;
+    let match: RegExpExecArray | null = urlRegex.exec(message);
+    while (match !== null) {
+      let rawUrl = match[0];
+
+      const trailingMatch = rawUrl.match(/[.,!?)\]}]+$/);
+      let trailing = '';
+
+      if (trailingMatch) {
+        trailing = trailingMatch[0];
+        rawUrl = rawUrl.slice(0, -trailing.length);
+      }
+
+      if (match.index > lastIndex) {
+        msg.appendChild(
+          document.createTextNode(message.slice(lastIndex, match.index)),
+        );
+      }
+
+      const normalizedUrl = rawUrl.startsWith('www.')
+        ? `https://${rawUrl}`
+        : rawUrl;
+
+      if (this.isSafeUrl(normalizedUrl)) {
+        const anchor = document.createElement('a');
+        anchor.href = normalizedUrl;
+        anchor.textContent = rawUrl;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer nofollow';
+        msg.appendChild(anchor);
+      } else {
+        msg.appendChild(document.createTextNode(rawUrl));
+      }
+
+      if (trailing) {
+        msg.appendChild(document.createTextNode(trailing));
+      }
+
+      lastIndex = match.index + match[0].length;
+      match = urlRegex.exec(message);
+    }
+
+    if (lastIndex < message.length) {
+      msg.appendChild(document.createTextNode(message.slice(lastIndex)));
+    }
+
     msgContainer.appendChild(msg);
     li.appendChild(msgContainer);
 
@@ -283,22 +331,12 @@ export class Chat extends Base {
     this.emitter.on(event, handler);
   }
 
-  private sanitize(input: string): string {
-    const map: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;',
-    };
-    return input.replace(/[&<>"'/]/g, (char) => map[char]).trim();
-  }
-
-  private replaceLinks(input: string): string {
-    const urlRegex = /(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g;
-    return input.replace(urlRegex, (url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-    });
+  private isSafeUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
   }
 }
