@@ -1147,9 +1147,10 @@ export class MapRenderer {
         characterFrame,
       );
       const weaponItemId =
-        character.playerId === this.client.playerId
+        this.client.weaponItemIds.get(character.playerId) ??
+        (character.playerId === this.client.playerId
           ? this.client.equipment.weapon
-          : this.client.weaponItemIds.get(character.playerId);
+          : undefined);
       const aura = weaponItemId
         ? this.client.auraManager.getAuraForCharacter(
             weaponItemId,
