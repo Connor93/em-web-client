@@ -301,6 +301,8 @@ export class Client {
   sans11: Sans11Font;
   debug = false;
   showFps = false;
+  /** Cached from settings — updated via settings.on('change') to avoid per-frame lookups */
+  smoothMovement = settings.get('movementSmoothing') === 'enabled';
   itemProtectionTimers: Map<
     number,
     {
@@ -325,6 +327,11 @@ export class Client {
     this.version.minor = 0;
     this.version.patch = 28;
     this.challenge = 0;
+    settings.on('change', ({ key, value }) => {
+      if (key === 'movementSmoothing') {
+        this.smoothMovement = value === 'enabled';
+      }
+    });
     // Start loading weapon metadata JSON immediately
     startLoadingWeaponMetadata();
     getEif().then(async (eif) => {
@@ -651,7 +658,9 @@ export class Client {
     }
 
     this.worldContainer = new Container();
+    this.worldContainer.sortableChildren = true;
     this.uiContainer = new Container();
+    this.uiContainer.sortableChildren = true;
     this.minimapContainer = new Container();
 
     this.app.stage.addChild(this.worldContainer);
@@ -660,9 +669,9 @@ export class Client {
   }
 
   render(interpolation: number) {
-    const smooth = settings.get('movementSmoothing') === 'enabled';
-    this.mapRenderer.update(smooth ? interpolation : 1);
-    this.minimapRenderer.update(smooth ? interpolation : 1);
+    const t = this.smoothMovement ? interpolation : 1;
+    this.mapRenderer.update(t);
+    this.minimapRenderer.update(t);
   }
 
   setMap(map: Emf) {

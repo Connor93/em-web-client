@@ -221,7 +221,10 @@ export class MapRenderer {
   private interpolation = 0;
   // Viewport-cached sorted static entities — only rebuilt when player moves
   private cachedStaticEntities: Entity[] = [];
-  private cachedViewportKey = '';
+  private _cachedPlayerX = -1;
+  private _cachedPlayerY = -1;
+  private _cachedRangeX = -1;
+  private _cachedRangeY = -1;
   // Per-frame render caches — updated once at the top of render() to avoid repeated lookups
   private _halfGameWidth = 0;
   private _halfGameHeight = 0;
@@ -240,6 +243,12 @@ export class MapRenderer {
   private readonly _seenUiGraphics = new Set<string>();
   private _worldOrder = 0;
   private _uiOrder = 0;
+  /** Cached once per frame in beginFrame() — avoids repeated performance.now()/Date.now() calls */
+  private _frameTime = 0;
+  /** Reusable GlowFilter instances keyed by NPC index — avoids per-frame filter allocation */
+  private readonly _npcGlowFilters = new Map<number, GlowFilter>();
+  private readonly _npcGlowArrays = new Map<number, GlowFilter[]>();
+  private readonly _emptyFilters: [] = [];
   private cachedCanvas: HTMLCanvasElement | null = null;
   private cachedUiElement: HTMLElement | null = null;
 
@@ -255,8 +264,7 @@ export class MapRenderer {
   }
 
   private beginFrame() {
-    this.client.worldContainer.sortableChildren = true;
-    this.client.uiContainer.sortableChildren = true;
+    this._frameTime = performance.now();
     this._seenWorldSprites.clear();
     this._seenUiSprites.clear();
     this._seenUiGraphics.clear();
@@ -407,6 +415,10 @@ export class MapRenderer {
   }
 
   buildCaches() {
+    this._npcGlowFilters.clear();
+    this._npcGlowArrays.clear();
+    this._cachedPlayerX = -1;
+
     const w = this.client.map!.width;
     const h = this.client.map!.height;
 
@@ -452,7 +464,7 @@ export class MapRenderer {
     }
 
     this.buildingCache = false;
-    this.cachedViewportKey = ''; // Invalidate viewport cache on map change
+    this._cachedPlayerX = -1; // Invalidate viewport cache on map change
     this.clearSceneNodes();
   }
 
@@ -584,8 +596,12 @@ export class MapRenderer {
     const rangeX = Math.min(this.client.map.width, range);
     const rangeY = Math.min(this.client.map.height, range);
 
-    const viewportKey = `${player.x},${player.y},${rangeX},${rangeY}`;
-    if (viewportKey !== this.cachedViewportKey) {
+    if (
+      player.x !== this._cachedPlayerX ||
+      player.y !== this._cachedPlayerY ||
+      rangeX !== this._cachedRangeX ||
+      rangeY !== this._cachedRangeY
+    ) {
       this.cachedStaticEntities.length = 0;
       for (let y = player.y - rangeY; y <= player.y + rangeY; y++) {
         if (y < 0 || y > this.client.map.height) continue;
@@ -606,7 +622,10 @@ export class MapRenderer {
         }
       }
       this.cachedStaticEntities.sort((a, b) => a.depth - b.depth);
-      this.cachedViewportKey = viewportKey;
+      this._cachedPlayerX = player.x;
+      this._cachedPlayerY = player.y;
+      this._cachedRangeX = rangeX;
+      this._cachedRangeY = rangeY;
     }
 
     // Collect dynamic entities
@@ -1177,18 +1196,16 @@ export class MapRenderer {
         weaponSprite.y = screenY - frame.yOffset + fullCanvasYOffset;
         weaponSprite.alpha = alpha;
 
-        const now = performance.now();
         for (const effect of aura.effects) {
-          if (effect.update) effect.update(now);
+          if (effect.update) effect.update(this._frameTime);
         }
         if (aura.floatEffect) {
-          weaponSprite.y += aura.floatEffect.getYOffset(now);
+          weaponSprite.y += aura.floatEffect.getYOffset(this._frameTime);
         }
         weaponSprite.filters = aura.effects.map((e) => e.filter);
       } else if (aura) {
-        const now = performance.now();
         for (const effect of aura.effects) {
-          if (effect.update) effect.update(now);
+          if (effect.update) effect.update(this._frameTime);
         }
         // Float without weapon texture — no visual effect (weapon sprite needed)
       }
@@ -1292,11 +1309,30 @@ export class MapRenderer {
     }
   }
 
+  private getNpcGlowFilter(npcIndex: number): GlowFilter {
+    let filter = this._npcGlowFilters.get(npcIndex);
+    if (!filter) {
+      filter = new GlowFilter();
+      this._npcGlowFilters.set(npcIndex, filter);
+    }
+    return filter;
+  }
+
+  private getNpcGlowArray(npcIndex: number, filter: GlowFilter): GlowFilter[] {
+    let array = this._npcGlowArrays.get(npcIndex);
+    if (!array) {
+      array = [filter];
+      this._npcGlowArrays.set(npcIndex, array);
+    } else {
+      array[0] = filter;
+    }
+    return array;
+  }
+
   private hasActiveStatusEffects(playerId: number): boolean {
-    const now = Date.now();
     // Clean up expired effects
     for (const [key, effect] of this.client.playerStatusEffects) {
-      if (effect.expiresAt <= now) {
+      if (effect.expiresAt <= this._frameTime) {
         this.client.playerStatusEffects.delete(key);
       }
     }
@@ -1327,7 +1363,7 @@ export class MapRenderer {
       const effectType = activeEffects[i];
       const centerX = startX + i * (iconSize + iconGap) + iconSize / 2;
       const centerY = iconY + iconSize / 2;
-      const pulse = 0.7 + 0.3 * Math.sin(performance.now() / 350 + i);
+      const pulse = 0.7 + 0.3 * Math.sin(this._frameTime / 350 + i);
       const radius = iconSize / 2;
 
       const graphics = this.ensureUiGraphics(
@@ -1546,48 +1582,38 @@ export class MapRenderer {
     sprite.y = screenY;
     sprite.alpha = alpha;
 
-    // Awakened boss / add glow effects
+    // Awakened boss / add glow effects — reuse filter instances to avoid per-frame allocation
     const awakenedState = this.client.awakenedBosses.get(npc.index);
     const isAdd = this.client.bossAdds.has(npc.index);
 
     if (awakenedState) {
+      const filter = this.getNpcGlowFilter(npc.index);
       if (awakenedState.enraged) {
-        const pulse = 0.8 + 0.4 * Math.sin(performance.now() / 300);
-        sprite.filters = [
-          new GlowFilter({
-            color: 0xff0000,
-            outerStrength: 3 * pulse,
-            innerStrength: 0.5,
-          }),
-        ];
+        const pulse = 0.8 + 0.4 * Math.sin(this._frameTime / 300);
+        filter.color = 0xff0000;
+        filter.outerStrength = 3 * pulse;
+        filter.innerStrength = 0.5;
       } else {
-        sprite.filters = [
-          new GlowFilter({
-            color: 0xff8800,
-            outerStrength: 2.5,
-            innerStrength: 0.3,
-          }),
-        ];
+        filter.color = 0xff8800;
+        filter.outerStrength = 2.5;
+        filter.innerStrength = 0.3;
       }
+      sprite.filters = this.getNpcGlowArray(npc.index, filter);
     } else if (isAdd) {
-      sprite.filters = [
-        new GlowFilter({
-          color: 0x9944ff,
-          outerStrength: 2,
-          innerStrength: 0.3,
-        }),
-      ];
+      const filter = this.getNpcGlowFilter(npc.index);
+      filter.color = 0x9944ff;
+      filter.outerStrength = 2;
+      filter.innerStrength = 0.3;
+      sprite.filters = this.getNpcGlowArray(npc.index, filter);
     } else if (this.client.expeditionCombatNpcs.has(npc.index)) {
-      const pulse = 0.7 + 0.3 * Math.sin(performance.now() / 500);
-      sprite.filters = [
-        new GlowFilter({
-          color: 0x00ccff,
-          outerStrength: 2.5 * pulse,
-          innerStrength: 0.3,
-        }),
-      ];
+      const pulse = 0.7 + 0.3 * Math.sin(this._frameTime / 500);
+      const filter = this.getNpcGlowFilter(npc.index);
+      filter.color = 0x00ccff;
+      filter.outerStrength = 2.5 * pulse;
+      filter.innerStrength = 0.3;
+      sprite.filters = this.getNpcGlowArray(npc.index, filter);
     } else {
-      sprite.filters = [];
+      sprite.filters = this._emptyFilters;
     }
 
     for (const effect of effects) {
@@ -1686,7 +1712,7 @@ export class MapRenderer {
         highlight.texture = highlightTexture;
         highlight.position.set(tileX, tileY);
         highlight.tint = 0xd4b896;
-        const pulse = Math.sin(Date.now() / 400) * 0.15 + 0.35;
+        const pulse = Math.sin(this._frameTime / 400) * 0.15 + 0.35;
         highlight.alpha = pulse;
       }
     }
@@ -2566,7 +2592,7 @@ export class MapRenderer {
     );
 
     // Gentle pulse: alpha oscillates between 0.35 and 0.65
-    const pulse = Math.sin(Date.now() / 300);
+    const pulse = Math.sin(this._frameTime / 300);
     const alpha = 0.5 + pulse * 0.15;
 
     const graphics = this.ensureUiGraphics(

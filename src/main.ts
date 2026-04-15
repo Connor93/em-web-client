@@ -133,6 +133,9 @@ export function zoomOut() {
   resizeCanvases();
 }
 
+// Cached canvas bounding rect — invalidated on resize to avoid per-mousemove reflow
+let cachedCanvasRect: DOMRect | null = null;
+
 function resizeCanvases() {
   const container = document.getElementById('container')!;
   if (!container) return;
@@ -169,11 +172,13 @@ function resizeCanvases() {
     mobileToolbar.hide();
     mobileHud.hide();
   }
+  cachedCanvasRect = null;
 }
 
 resizeCanvases();
 let resizeRaf = 0;
 window.addEventListener('resize', () => {
+  cachedCanvasRect = null;
   cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(resizeCanvases);
 });
@@ -495,6 +500,18 @@ function getCanvas(): HTMLCanvasElement {
   return client.app?.renderer?.canvas as HTMLCanvasElement;
 }
 
+function getCanvasRect(): DOMRect | null {
+  if (cachedCanvasRect) return cachedCanvasRect;
+  const canvas = getCanvas();
+  if (!canvas) return null;
+  cachedCanvasRect = canvas.getBoundingClientRect();
+  return cachedCanvasRect;
+}
+
+// Panel selector used to detect when the mouse is over a UI panel
+const PANEL_SELECTOR =
+  '#dialogs > :not(.hidden), #inventory:not(.hidden), #encyclopedia:not(.hidden), #guild-panel:not(.hidden)';
+
 // ── Input Listeners ──────────────────────────────────────────────────────
 
 // F9 — Toggle auto-battle (only when unlocked via URL param)
@@ -546,7 +563,8 @@ window.addEventListener(
     const canvas = getCanvas();
     if (!target || !canvas?.contains(target)) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = getCanvasRect();
+    if (!rect) return;
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     client.setMousePosition({
@@ -565,23 +583,16 @@ window.addEventListener(
 );
 
 window.addEventListener('mousemove', (e) => {
-  const canvas = getCanvas();
-  if (!canvas) return;
+  const rect = getCanvasRect();
+  if (!rect) return;
 
-  const elements = document.elementsFromPoint(e.clientX, e.clientY);
-  const overPanel = elements.some((el) => {
-    if (!(el instanceof HTMLElement)) return false;
-    const panel = el.closest<HTMLElement>(
-      '#dialogs > :not(.hidden), #inventory:not(.hidden), #encyclopedia:not(.hidden), #guild-panel:not(.hidden)',
-    );
-    return panel !== null;
-  });
-  if (overPanel) {
+  const target = e.target;
+  if (target instanceof HTMLElement && target.closest(PANEL_SELECTOR)) {
     client.setMousePosition(null);
     return;
   }
 
-  const rect = canvas.getBoundingClientRect();
+  const canvas = getCanvas();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
   client.setMousePosition({
