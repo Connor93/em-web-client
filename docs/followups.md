@@ -19,10 +19,30 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 **Context:** PACKET_BOSS sync is sent on map entry but not when an awakened boss walks into visible range on the same map. The boss bar and glow won't show until the player leaves and re-enters. Needs server-side fix to send boss state on NPC range entry.
 **Related:** `src/handlers/boss.ts`, etheos `src/map.cpp` (NPC walk range), `src/awakened_system.cpp`
 
-### Boss Bar — GlowFilter Performance
-**Added:** 2026-04-08
-**Context:** The GlowFilter in `addNpcSprites()` creates new filter instances every render frame. Should cache filters per NPC index and reuse across frames. Only 1-6 filtered sprites so impact is minor, but still wasteful.
-**Related:** `src/map.ts:addNpcSprites()`
+### Performance — Atlas getBmp() Linear Search
+**Added:** 2026-04-15
+**Context:** `atlas.ts:getBmp()` uses `.find()` on `bmpsToLoad` array, called 1000+ times during atlas refresh. Replace with `Map<string, ImageBitmap>` keyed by `${gfxType}:${graphicId}` for O(1) lookup.
+**Related:** `src/atlas.ts:2773-2778`
+
+### Performance — Atlas Refresh Batching
+**Added:** 2026-04-15
+**Context:** `atlas.refresh()` is called from 15+ handlers with no debouncing. Multiple simultaneous events (e.g. 5 NPCs spawning) trigger 5 full atlas updates. Batch with `requestAnimationFrame` or microtask queue.
+**Related:** `src/atlas.ts:905-950`
+
+### Performance — Atlas Canvas Size Thrashing
+**Added:** 2026-04-15
+**Context:** `tmpCanvas.width/height` reassigned for every frame in `calculateFrameSizes()`, triggering GPU pipeline flushes. Pre-allocate to max size and only use `clearRect`.
+**Related:** `src/atlas.ts:2420-2488`
+
+### Performance — Inventory Full DOM Rebuild + Listener Leak
+**Added:** 2026-04-15
+**Context:** `inventory.render()` rebuilds 800+ DOM nodes on every inventory change and adds new `addEventListener` calls each time (accumulates). Fix with incremental updates + event delegation on `.grid` container.
+**Related:** `src/ui/inventory/inventory.ts:426-500`
+
+### Performance — Online Player List Full Rebuild
+**Added:** 2026-04-15
+**Context:** `playersContainer.innerHTML = ''` then rebuilds entire player list (6+ elements per player × 100+ players) on every update. Fix with DocumentFragment + diffing or virtual list.
+**Related:** `src/ui/online-list/online-list.ts:61`
 
 ### Autoloot — Configurable Loot Filtering
 **Added:** 2026-03-31
@@ -35,6 +55,10 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 **Related:** `src/ui/player-tooltip/player-tooltip.ts`, etheos `CharacterMapInfo` serialization
 
 ## Completed
+
+### Boss Bar — GlowFilter Performance
+**Completed:** 2026-04-15
+**Context:** Cached GlowFilter instances per NPC index in MapRenderer. Filters are created once and reused, only updating properties (color, outerStrength) per frame. Caches cleared on map change.
 
 ### NPC Info Tooltips
 **Completed:** 2026-03-30
