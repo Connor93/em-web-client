@@ -902,6 +902,22 @@ export class Client {
     Managers.stand(this);
   }
 
+  /** Clears transient visual state (animations, bubbles, effects) without touching game state.
+   *  Used when resuming from a backgrounded tab so the next render starts fresh. */
+  clearStaleVisualState() {
+    this.characterAnimations.clear();
+    this.npcAnimations.clear();
+    this.characterChats.clear();
+    this.npcChats.clear();
+    this.queuedNpcChats.clear();
+    this.npcHealthBars.clear();
+    this.characterHealthBars.clear();
+    this.characterEmotes.clear();
+    this.effects = [];
+    this.cursorClickAnimation = undefined;
+    this.autoWalkPath = [];
+  }
+
   setState(state: GameState) {
     this.state = state;
 

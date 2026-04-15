@@ -656,6 +656,23 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Pause rendering while the tab is hidden; resume and resync when visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      client.app.ticker.stop();
+    } else {
+      accumulator = 0;
+      cachedCanvasRect = null;
+      client.app.ticker.start();
+
+      if (client.state === GameState.InGame) {
+        client.clearStaleVisualState();
+        client.refresh();
+        client.atlas.refresh();
+      }
+    }
+  });
+
   const response = await fetch('/maps/00005.emf');
   const map = await response.arrayBuffer();
   const reader = new EoReader(new Uint8Array(map));

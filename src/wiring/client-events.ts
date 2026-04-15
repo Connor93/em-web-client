@@ -326,6 +326,8 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     resetReconnectAttempts();
     deps.reconnectOverlay.classList.add('hidden');
     deps.bossBar.clear();
+    client.clearStaleVisualState();
+    client.refresh();
     console.log('Successfully reconnected to server');
   });
 
