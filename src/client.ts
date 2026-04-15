@@ -684,6 +684,7 @@ export class Client {
     if (this.map) {
       clearRectangles();
       this.mapRenderer.buildCaches();
+      this.minimapRenderer.buildCaches();
       this.loadDoors();
 
       if (this.map.type === MapType.Pk) {

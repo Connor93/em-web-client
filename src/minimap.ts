@@ -94,12 +94,36 @@ export class MinimapRenderer {
   private interpolation = 0;
   private spritePool: Sprite[] = [];
   private spriteHead = 0;
+  private tileSpecCache: (MapTileSpec | undefined)[][] = [];
+  private warpCache: boolean[][] = [];
   constructor(private client: Client) {}
+
+  buildCaches() {
+    const map = this.client.map;
+    if (!map) return;
+    const h = map.height;
+    const w = map.width;
+    this.tileSpecCache = Array.from({ length: h + 1 }, () =>
+      new Array<MapTileSpec | undefined>(w + 1).fill(undefined),
+    );
+    for (const row of map.tileSpecRows) {
+      for (const t of row.tiles) {
+        this.tileSpecCache[row.y][t.x] = t.tileSpec;
+      }
+    }
+    this.warpCache = Array.from({ length: h + 1 }, () =>
+      new Array<boolean>(w + 1).fill(false),
+    );
+    for (const row of map.warpRows) {
+      for (const t of row.tiles) {
+        this.warpCache[row.y][t.x] = true;
+      }
+    }
+  }
 
   private acquireSprite(): Sprite {
     if (this.spriteHead < this.spritePool.length) {
       const s = this.spritePool[this.spriteHead++];
-      s.alpha = 1;
       s.visible = true;
       return s;
     }
@@ -107,7 +131,14 @@ export class MinimapRenderer {
     s.eventMode = 'none';
     this.spritePool.push(s);
     this.spriteHead++;
+    this.client.minimapContainer.addChild(s);
     return s;
+  }
+
+  private hideUnusedSprites() {
+    for (let i = this.spriteHead; i < this.spritePool.length; i++) {
+      this.spritePool[i].visible = false;
+    }
   }
 
   private interpolateWalkOffset(frame: number, direction: Direction): Vector2 {
@@ -126,10 +157,10 @@ export class MinimapRenderer {
   }
 
   update(interpolation: number) {
-    this.client.minimapContainer.removeChildren();
     this.spriteHead = 0;
 
     if (!this.client.minimapEnabled) {
+      this.hideUnusedSprites();
       return;
     }
 
@@ -187,7 +218,6 @@ export class MinimapRenderer {
       sprite.texture = texture;
       sprite.position.set(screenX, screenY);
       sprite.alpha = alpha;
-      this.client.minimapContainer.addChild(sprite);
     };
 
     for (let y = player.y - RANGE; y <= player.y + RANGE; y++) {
@@ -201,17 +231,12 @@ export class MinimapRenderer {
           continue;
         }
 
-        const spec = this.client
-          .map!.tileSpecRows.find((r) => r.y === y)
-          ?.tiles.find((t) => t.x === x);
-
-        const hasWarp = this.client.map!.warpRows.some(
-          (r) => r.y === y && r.tiles.find((t) => t.x === x),
-        );
+        const tileSpec = this.tileSpecCache[y]?.[x];
+        const hasWarp = this.warpCache[y]?.[x] ?? false;
 
         const icon = hasWarp
           ? MiniMapIcon.Interactable
-          : getIconForTile(spec?.tileSpec);
+          : getIconForTile(tileSpec);
 
         if (icon === undefined) continue;
 
@@ -322,6 +347,8 @@ export class MinimapRenderer {
         dying ? 0.5 * (dyingTicks / DEATH_TICKS) : 0.5,
       );
     }
+
+    this.hideUnusedSprites();
   }
 }
 

@@ -94,7 +94,6 @@ export function tickSpellQueue(client: Client): void {
 }
 
 export function tickQueuedNpcChats(client: Client): void {
-  const emptyQueuedNpcChats: number[] = [];
   for (const [index, messages] of client.queuedNpcChats) {
     const existingChat = client.npcChats.get(index);
     if (existingChat) {
@@ -103,13 +102,13 @@ export function tickQueuedNpcChats(client: Client): void {
 
     const npc = client.getNpcByIndex(index);
     if (!npc) {
-      emptyQueuedNpcChats.push(index);
+      client.queuedNpcChats.delete(index);
       continue;
     }
 
     const record = client.getEnfRecordById(npc.id);
     if (!record) {
-      emptyQueuedNpcChats.push(index);
+      client.queuedNpcChats.delete(index);
       continue;
     }
 
@@ -118,11 +117,8 @@ export function tickQueuedNpcChats(client: Client): void {
     if (messages.length > 1) {
       messages.splice(0, 1);
     } else {
-      emptyQueuedNpcChats.push(index);
+      client.queuedNpcChats.delete(index);
     }
-  }
-  for (const index of emptyQueuedNpcChats) {
-    client.queuedNpcChats.delete(index);
   }
 }
 
@@ -137,7 +133,6 @@ export function tickCharacterAnimations(
   playerWalking: boolean;
   playerDying: boolean;
 } {
-  const endedCharacterAnimations: number[] = [];
   let playerWalking = false;
   let playerDying = false;
   for (const [id, animation] of client.characterAnimations) {
@@ -164,7 +159,7 @@ export function tickCharacterAnimations(
         );
       }
 
-      endedCharacterAnimations.push(id);
+      client.characterAnimations.delete(id);
       continue;
     }
     if (id === client.playerId && animation instanceof CharacterWalkAnimation) {
@@ -178,9 +173,6 @@ export function tickCharacterAnimations(
     }
     animation.tick();
   }
-  for (const id of endedCharacterAnimations) {
-    client.characterAnimations.delete(id);
-  }
 
   return { playerWalking, playerDying };
 }
@@ -189,16 +181,12 @@ export function tickCharacterEmotes(
   client: Client,
   activeCharIds: Set<number>,
 ): void {
-  const endedCharacterEmotes: number[] = [];
   for (const [id, emote] of client.characterEmotes) {
     if (!emote.ticks || !activeCharIds.has(id)) {
-      endedCharacterEmotes.push(id);
+      client.characterEmotes.delete(id);
       continue;
     }
     emote.tick();
-  }
-  for (const id of endedCharacterEmotes) {
-    client.characterEmotes.delete(id);
   }
 }
 
@@ -206,19 +194,15 @@ export function tickNpcAnimations(
   client: Client,
   activeNpcIds: Set<number>,
 ): void {
-  const endedNpcAnimations: number[] = [];
   for (const [id, animation] of client.npcAnimations) {
     if (!animation.ticks || !activeNpcIds.has(id)) {
-      endedNpcAnimations.push(id);
+      if (animation instanceof NpcDeathAnimation) {
+        client.nearby.npcs = client.nearby.npcs.filter((n) => n.index !== id);
+      }
+      client.npcAnimations.delete(id);
       continue;
     }
     animation.tick();
-  }
-  for (const id of endedNpcAnimations) {
-    if (client.npcAnimations.get(id) instanceof NpcDeathAnimation) {
-      client.nearby.npcs = client.nearby.npcs.filter((n) => n.index !== id);
-    }
-    client.npcAnimations.delete(id);
   }
 }
 
@@ -235,16 +219,12 @@ export function tickCharacterChatBubbles(
   client: Client,
   activeCharIds: Set<number>,
 ): void {
-  const endedCharacterChatBubbles: number[] = [];
   for (const [id, bubble] of client.characterChats) {
     if (!bubble.ticks || !activeCharIds.has(id)) {
-      endedCharacterChatBubbles.push(id);
+      client.characterChats.delete(id);
       continue;
     }
     bubble.tick();
-  }
-  for (const id of endedCharacterChatBubbles) {
-    client.characterChats.delete(id);
   }
 }
 
@@ -252,16 +232,12 @@ export function tickNpcChatBubbles(
   client: Client,
   activeNpcIds: Set<number>,
 ): void {
-  const endedNpcChatBubbles: number[] = [];
   for (const [id, bubble] of client.npcChats) {
     if (!bubble.ticks || !activeNpcIds.has(id)) {
-      endedNpcChatBubbles.push(id);
+      client.npcChats.delete(id);
       continue;
     }
     bubble.tick();
-  }
-  for (const id of endedNpcChatBubbles) {
-    client.npcChats.delete(id);
   }
 }
 
@@ -270,28 +246,20 @@ export function tickHealthBars(
   activeCharIds: Set<number>,
   activeNpcIds: Set<number>,
 ): void {
-  const endedNpcHealthBars: number[] = [];
   for (const [id, healthBar] of client.npcHealthBars) {
     if (!activeNpcIds.has(id) || healthBar.ticks <= 0) {
-      endedNpcHealthBars.push(id);
+      client.npcHealthBars.delete(id);
       continue;
     }
     healthBar.tick();
-  }
-  for (const id of endedNpcHealthBars) {
-    client.npcHealthBars.delete(id);
   }
 
-  const endedCharacterHealthBars: number[] = [];
   for (const [id, healthBar] of client.characterHealthBars) {
     if (!activeCharIds.has(id) || healthBar.ticks <= 0) {
-      endedCharacterHealthBars.push(id);
+      client.characterHealthBars.delete(id);
       continue;
     }
     healthBar.tick();
-  }
-  for (const id of endedCharacterHealthBars) {
-    client.characterHealthBars.delete(id);
   }
 }
 

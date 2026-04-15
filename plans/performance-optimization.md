@@ -35,13 +35,31 @@ Address performance bottlenecks causing poor experience on lower-end machines. F
 - Added cached `DOMRect` for canvas, invalidated on resize
 - Also applied cached rect to `touchmove` handler
 
-## Deferred (Phase 3+)
-- Tick manager temp array pooling (8 arrays × 120 ticks/sec = 960 allocs/sec)
-- Catch-up tick cap (currently allows 10 ticks/frame on lag)
+## Phase 3: Tier 1 — Constant per-frame/tick overhead
+
+### 7. Cap catch-up ticks to prevent stutter spiral
+- **File:** `src/main.ts:637`
+- **Problem:** When a frame drops, up to 10 ticks execute in one frame (MAX_ACCUMULATOR = TICK * 10), causing the next frame to also drop → death spiral
+- **Fix:** Cap the while loop to max 3 iterations per frame, clamp remaining accumulator
+
+### 8. Pool tick manager temporary arrays
+- **File:** `src/managers/tick-manager.ts`
+- **Problem:** 8 temporary `number[]` arrays allocated per tick × 120 ticks/sec = 960 allocs/sec
+- **Fix:** Replace per-tick array allocations with in-place deletion from Maps during iteration
+
+### 9. Fix minimap sprite pool — hide instead of remove
+- **File:** `src/minimap.ts:129`
+- **Problem:** `removeChildren()` every frame, then re-adds sprites — O(n) container churn
+- **Fix:** Reset spriteHead, hide unused sprites in a sweep at end of update
+
+### 10. Cache minimap tile lookups
+- **File:** `src/minimap.ts:204-210`
+- **Problem:** `.find()` on tileSpecRows and warpRows for each of ~1600 tiles per frame
+- **Fix:** Build 2D cache arrays (tileSpec + warp) on map load, index by [y][x] for O(1) lookup
+
+## Deferred (Phase 4+)
 - Atlas `getBmp()` linear search → Map (called 1000+ times during atlas refresh)
 - Atlas refresh batching (no debounce, 15+ handler call sites)
-- Minimap sprite pool fix (removeChildren every frame)
-- Minimap tile lookup via `.find()` → use MapRenderer's `tileSpecCache`
 - Inventory full DOM rebuild → incremental updates + event delegation
 - Online player list full rebuild → DocumentFragment + diffing
 - Canvas size thrashing in atlas `calculateFrameSizes()`

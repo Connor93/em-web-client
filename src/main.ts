@@ -187,7 +187,7 @@ window.addEventListener('resize', () => {
 
 let accumulator = 0;
 const TICK = 120;
-const MAX_ACCUMULATOR = TICK * 10;
+const MAX_TICKS_PER_FRAME = 3;
 
 // FPS counter
 let fpsFrameCount = 0;
@@ -633,11 +633,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   resizeCanvases();
 
   client.app.ticker.add((ticker) => {
-    accumulator = Math.min(accumulator + ticker.deltaMS, MAX_ACCUMULATOR);
-    while (accumulator >= TICK) {
+    accumulator += ticker.deltaMS;
+    let ticks = 0;
+    while (accumulator >= TICK && ticks < MAX_TICKS_PER_FRAME) {
       client.tick();
       accumulator -= TICK;
+      ticks++;
     }
+    if (accumulator >= TICK) accumulator = TICK - 1;
     const interpolation = accumulator / TICK;
     client.render(interpolation);
 
