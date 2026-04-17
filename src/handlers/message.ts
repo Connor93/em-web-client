@@ -222,6 +222,180 @@ function handleConfigReload(client: Client, message: string): void {
   }
 }
 
+function isClassAbilityMessage(message: string): boolean {
+  return (
+    message.startsWith('[SHIELD]') ||
+    message.startsWith('[COOLDOWN]') ||
+    message.startsWith('[COOLDOWN_START]') ||
+    message.startsWith('[SLOW]') ||
+    message.startsWith('[SNARE]') ||
+    message.startsWith('[HOT]')
+  );
+}
+
+function handleClassAbilityMessage(client: Client, message: string): void {
+  if (message.startsWith('[SHIELD]')) {
+    handleShieldMessage(client, message);
+  } else if (message.startsWith('[COOLDOWN_START]')) {
+    handleCooldownStartMessage(client, message);
+  } else if (message.startsWith('[COOLDOWN]')) {
+    handleCooldownBlockedMessage(client, message);
+  } else if (message.startsWith('[SLOW]')) {
+    handleSlowMessage(client, message);
+  } else if (message.startsWith('[SNARE]')) {
+    handleSnareMessage(client, message);
+  } else if (message.startsWith('[HOT]')) {
+    handleHotMessage(client, message);
+  }
+}
+
+function handleShieldMessage(client: Client, message: string): void {
+  const body = message.substring('[SHIELD] '.length);
+
+  // [SHIELD] PlayerID Damage Shield: X HP (Ys)
+  const castMatch = body.match(/^(\d+) Damage Shield: (\d+) HP \((\d+)s\)$/);
+  if (castMatch) {
+    const playerId = Number(castMatch[1]);
+    const max = Number(castMatch[2]);
+    const duration = Number(castMatch[3]);
+    client.characterShields.set(playerId, {
+      current: max,
+      max,
+      expireTime: Date.now() + duration * 1000,
+    });
+    client.emit('shieldUpdate', {
+      playerId,
+      type: 'cast',
+      current: max,
+      max,
+      duration,
+    });
+    return;
+  }
+
+  // [SHIELD] PlayerID Shield absorbed X (Y remaining)
+  const absorbMatch = body.match(
+    /^(\d+) Shield absorbed (\d+) \((\d+) remaining\)$/,
+  );
+  if (absorbMatch) {
+    const playerId = Number(absorbMatch[1]);
+    const remaining = Number(absorbMatch[3]);
+    const shield = client.characterShields.get(playerId);
+    if (shield) {
+      shield.current = remaining;
+    }
+    client.emit('shieldUpdate', {
+      playerId,
+      type: 'absorb',
+      current: remaining,
+    });
+    return;
+  }
+
+  // [SHIELD] PlayerID Shield broken! X damage absorbed
+  const brokenMatch = body.match(/^(\d+) Shield broken!/);
+  if (brokenMatch) {
+    const playerId = Number(brokenMatch[1]);
+    client.characterShields.delete(playerId);
+    client.emit('shieldUpdate', { playerId, type: 'broken' });
+    return;
+  }
+
+  // [SHIELD] PlayerID Damage Shield expired.
+  const expiredMatch = body.match(/^(\d+) Damage Shield expired/);
+  if (expiredMatch) {
+    const playerId = Number(expiredMatch[1]);
+    client.characterShields.delete(playerId);
+    client.emit('shieldUpdate', { playerId, type: 'expired' });
+    return;
+  }
+}
+
+function handleCooldownStartMessage(client: Client, message: string): void {
+  // [COOLDOWN_START] SpellID
+  const body = message.substring('[COOLDOWN_START] '.length);
+  const spellId = Number(body.trim());
+  if (!spellId) return;
+
+  const duration = client.spellCooldownTable.get(spellId);
+  if (duration) {
+    client.activeSpellCooldowns.set(spellId, {
+      endTime: Date.now() + duration * 1000,
+      duration,
+    });
+  }
+  client.emit('cooldownStart', { spellId });
+}
+
+function handleCooldownBlockedMessage(client: Client, message: string): void {
+  // [COOLDOWN] Spell on cooldown (Xs remaining)
+  const match = message.match(/\((\d+)s remaining\)/);
+  if (!match) return;
+
+  const remaining = Number(match[1]);
+  const spellId = client.queuedSpellId || client.selectedSpellId;
+  if (spellId) {
+    client.activeSpellCooldowns.set(spellId, {
+      endTime: Date.now() + remaining * 1000,
+      duration: client.spellCooldownTable.get(spellId) ?? remaining,
+    });
+    client.emit('cooldownBlocked', { spellId, remaining });
+  }
+}
+
+function handleSlowMessage(client: Client, message: string): void {
+  // [SLOW] NpcIndex Xs
+  const body = message.substring('[SLOW] '.length);
+  const match = body.match(/^(\d+) (\d+)s$/);
+  if (!match) return;
+
+  const npcIndex = Number(match[1]);
+  const duration = Number(match[2]);
+  client.npcDebuffs.set(npcIndex, {
+    type: 'slow',
+    expireTime: Date.now() + duration * 1000,
+  });
+  client.emit('npcSlowed', { npcIndex, duration });
+}
+
+function handleSnareMessage(client: Client, message: string): void {
+  // [SNARE] NpcIndex1,NpcIndex2,NpcIndex3 Xs
+  const body = message.substring('[SNARE] '.length);
+  const match = body.match(/^([\d,]+) (\d+)s$/);
+  if (!match) return;
+
+  const npcIndexes = match[1].split(',').map(Number);
+  const duration = Number(match[2]);
+  for (const npcIndex of npcIndexes) {
+    client.npcDebuffs.set(npcIndex, {
+      type: 'snare',
+      expireTime: Date.now() + duration * 1000,
+    });
+  }
+  client.emit('npcSnared', { npcIndexes, duration });
+}
+
+function handleHotMessage(client: Client, message: string): void {
+  // [HOT] PlayerID X HP/tick N ticks Ys
+  const body = message.substring('[HOT] '.length);
+  const match = body.match(/^(\d+) (\d+) HP\/tick (\d+) ticks (\d+)s$/);
+  if (!match) return;
+
+  const playerId = Number(match[1]);
+  const hpPerTick = Number(match[2]);
+  const ticks = Number(match[3]);
+  const duration = Number(match[4]);
+  const tickInterval = (duration / ticks) * 1000;
+
+  client.characterHots.set(playerId, {
+    hpPerTick,
+    ticksRemaining: ticks,
+    tickInterval,
+    nextTickTime: Date.now() + tickInterval,
+  });
+  client.emit('hotStarted', { playerId, hpPerTick, ticks, duration });
+}
+
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
 
@@ -239,6 +413,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
 
   if (isConfigReload(packet.message)) {
     handleConfigReload(client, packet.message);
+    return;
+  }
+
+  if (isClassAbilityMessage(packet.message)) {
+    handleClassAbilityMessage(client, packet.message);
     return;
   }
 
@@ -307,4 +486,22 @@ export function registerMessageHandlers(client: Client) {
     PacketAction.Close,
     (_reader) => handleMessageClose(client),
   );
+
+  // Generic scroll messages (non-guild) — display as chat lines
+  client.on('scrollMessageGeneric', ({ title, lines }) => {
+    client.emit('chat', {
+      tab: ChatTab.System,
+      icon: ChatIcon.Star,
+      message: `--- ${title} ---`,
+    });
+    for (const line of lines) {
+      if (line.trim()) {
+        client.emit('chat', {
+          tab: ChatTab.System,
+          icon: ChatIcon.None,
+          message: line,
+        });
+      }
+    }
+  });
 }
