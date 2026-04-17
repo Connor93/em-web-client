@@ -933,9 +933,18 @@ export class MapRenderer {
       sprite.alpha = 0.2;
     }
 
+    // Collision rectangles store coords by reference — copy to avoid sharing
+    // the reusable _coordsBuffer across all entries.
+    const copyCoords = () => {
+      const c = new Coords();
+      c.x = entity.x;
+      c.y = entity.y;
+      return c;
+    };
+
     if (this.client.getDoor(this._coordsBuffer)) {
       setDoorRectangle(
-        this._coordsBuffer,
+        copyCoords(),
         new Rectangle(
           { x: screenX, y: screenY + tile.h - DOOR_HEIGHT },
           tile.w,
@@ -944,12 +953,12 @@ export class MapRenderer {
       );
     } else if (this.getSign(entity.x, entity.y)) {
       setSignRectangle(
-        this._coordsBuffer,
+        copyCoords(),
         new Rectangle({ x: screenX, y: screenY }, tile.w, tile.h),
       );
     } else if (spec === MapTileSpec.BankVault) {
       setLockerRectangle(
-        this._coordsBuffer,
+        copyCoords(),
         new Rectangle({ x: screenX, y: screenY }, tile.w, tile.h),
       );
     } else if (
@@ -958,7 +967,7 @@ export class MapRenderer {
       spec <= MapTileSpec.Board8
     ) {
       setBoardRectangle(
-        this._coordsBuffer,
+        copyCoords(),
         new Rectangle({ x: screenX, y: screenY }, tile.w, tile.h),
       );
     }
@@ -1249,12 +1258,14 @@ export class MapRenderer {
           : undefined;
 
       const hasStatus = this.hasActiveStatusEffects(character.playerId);
+      const hasShield = this.client.characterShields.has(character.playerId);
       if (
         !bubble &&
         !healthBar &&
         !emote &&
         !partyMember &&
         !hasStatus &&
+        !hasShield &&
         (!(animation instanceof CharacterSpellChantAnimation) ||
           animation.animationFrame)
       ) {
@@ -1282,11 +1293,13 @@ export class MapRenderer {
           topCenter,
         );
       }
-      this.addHealthBarSprites(
-        `ui:char-health:${character.playerId}`,
-        healthBar!,
-        topCenter,
-      );
+      if (healthBar || hasShield) {
+        this.addHealthBarSprites(
+          `ui:char-health:${character.playerId}`,
+          healthBar ?? null,
+          topCenter,
+        );
+      }
       if (emote) {
         this.addEmoteSprite(
           `ui:char-emote:${character.playerId}`,
@@ -1616,6 +1629,14 @@ export class MapRenderer {
       sprite.filters = this._emptyFilters;
     }
 
+    // NPC debuff tint — applied independently of glow filters
+    const debuff = this.client.npcDebuffs.get(npc.index);
+    if (debuff) {
+      sprite.tint = debuff.type === 'slow' ? 0x6699ff : 0x88ccee;
+    } else {
+      sprite.tint = 0xffffff;
+    }
+
     for (const effect of effects) {
       const effectKeyBase = `npc-effect:${npc.index}:${effect.instanceId}`;
       this.addEffectTransparentSprite(effect, effectKeyBase);
@@ -1625,7 +1646,7 @@ export class MapRenderer {
     const bubble = this.client.npcChats.get(npc.index);
     const healthBar = this.client.npcHealthBars.get(npc.index);
 
-    if (!bubble && !healthBar) return;
+    if (!bubble && !healthBar && !debuff) return;
 
     const aboveCoords = { x: coords.x - 1, y: coords.y - 1 };
     const aboveCoordsX = (aboveCoords.x - aboveCoords.y) * HALF_TILE_WIDTH;
@@ -1657,6 +1678,45 @@ export class MapRenderer {
         healthBar,
         npcTopCenter,
       );
+    }
+    if (debuff) {
+      const iconY =
+        npcTopCenter.y -
+        (healthBar ? 20 : 10) +
+        Math.sin(this._frameTime / 400) * 2; // gentle bob
+
+      const iconGraphics = this.ensureUiGraphics(
+        `ui:npc-debuff-icon:${npc.index}`,
+        'ui:npc-debuff-icon',
+      );
+
+      if (debuff.type === 'slow') {
+        // Downward arrow icon — indicates slowed movement
+        const cx = npcTopCenter.x;
+        iconGraphics.moveTo(cx - 4, iconY - 4);
+        iconGraphics.lineTo(cx, iconY);
+        iconGraphics.lineTo(cx + 4, iconY - 4);
+        iconGraphics.stroke({ color: 0x6699ff, width: 1.5, alpha: 0.9 });
+        // Small horizontal line above
+        iconGraphics.moveTo(cx - 3, iconY - 6);
+        iconGraphics.lineTo(cx + 3, iconY - 6);
+        iconGraphics.stroke({ color: 0x6699ff, width: 1, alpha: 0.7 });
+      } else {
+        // Snowflake/asterisk icon — indicates frozen/snared
+        const cx = npcTopCenter.x;
+        const cy = iconY - 3;
+        const r = 4;
+        // 6-pointed asterisk
+        for (let a = 0; a < 6; a++) {
+          const angle = (a * Math.PI) / 3;
+          iconGraphics.moveTo(cx, cy);
+          iconGraphics.lineTo(
+            cx + Math.cos(angle) * r,
+            cy + Math.sin(angle) * r,
+          );
+        }
+        iconGraphics.stroke({ color: 0x88ccee, width: 1, alpha: 0.9 });
+      }
     }
   }
 
@@ -1808,8 +1868,14 @@ export class MapRenderer {
     healthBar: HealthBar | null,
     position: Vector2,
   ) {
-    if (!healthBar) return;
-    healthBar.renderedFirstFrame = true;
+    // Look up shield data from the nodeKey (format: ui:char-health:{playerId})
+    const playerIdMatch = nodeKey.match(/ui:char-health:(\d+)/);
+    const shield = playerIdMatch
+      ? this.client.characterShields.get(Number(playerIdMatch[1]))
+      : undefined;
+
+    if (!healthBar && !shield) return;
+    if (healthBar) healthBar.renderedFirstFrame = true;
 
     const barWidth = 44;
     const barHeight = 6;
@@ -1834,86 +1900,104 @@ export class MapRenderer {
     graphics.stroke({ color: 0xc8b48c, width: 0.5, alpha: 0.35 });
 
     // Fill — color based on HP percentage
-    const fillWidth = Math.floor(barWidth * (healthBar.percentage / 100));
-    if (fillWidth > 0) {
-      let fillColor: number;
-      if (healthBar.percentage < 25) {
-        fillColor = 0xe04040;
-      } else if (healthBar.percentage < 50) {
-        fillColor = 0xe0c040;
-      } else {
-        fillColor = 0x50c050;
-      }
-      graphics.roundRect(barX, barY, fillWidth, barHeight, radius);
-      graphics.fill({ color: fillColor });
+    if (healthBar) {
+      const fillWidth = Math.floor(barWidth * (healthBar.percentage / 100));
+      if (fillWidth > 0) {
+        let fillColor: number;
+        if (healthBar.percentage < 25) {
+          fillColor = 0xe04040;
+        } else if (healthBar.percentage < 50) {
+          fillColor = 0xe0c040;
+        } else {
+          fillColor = 0x50c050;
+        }
+        graphics.roundRect(barX, barY, fillWidth, barHeight, radius);
+        graphics.fill({ color: fillColor });
 
-      // Subtle shine highlight on top half
-      graphics.roundRect(
-        barX,
-        barY,
-        fillWidth,
-        Math.floor(barHeight / 2),
-        radius,
+        // Subtle shine highlight on top half
+        graphics.roundRect(
+          barX,
+          barY,
+          fillWidth,
+          Math.floor(barHeight / 2),
+          radius,
+        );
+        graphics.fill({ color: 0xffffff, alpha: 0.15 });
+      }
+    }
+
+    // Shield overlay — blue/cyan semi-transparent fill
+    if (shield) {
+      const shieldFillWidth = Math.floor(
+        barWidth * Math.min(shield.current / shield.max, 1),
       );
-      graphics.fill({ color: 0xffffff, alpha: 0.15 });
+      if (shieldFillWidth > 0) {
+        graphics.roundRect(barX, barY, shieldFillWidth, barHeight, radius);
+        graphics.fill({ color: 0x50b0e8, alpha: 0.55 });
+      }
     }
 
     // Damage / heal / miss numbers
-    const amount = healthBar.damage || healthBar.heal;
-    const numberY = position.y - 35 + healthBar.ticks;
+    if (healthBar) {
+      const amount = healthBar.damage || healthBar.heal;
+      const numberY = position.y - 35 + healthBar.ticks;
 
-    if (!amount) {
-      // Miss text
+      if (!amount) {
+        // Miss text
+        this.addAtlasTextSprites(
+          `${nodeKey}:miss`,
+          'MISS',
+          { x: position.x, y: numberY },
+          '#d0d0d0',
+        );
+        return;
+      }
+
+      // Build display text and pick color
+      let displayText: string;
+      let textColor: string;
+      if (healthBar.heal) {
+        displayText = `+${amount}`;
+        textColor = '#40e840';
+      } else if (healthBar.critical) {
+        displayText = `${amount}!`;
+        textColor = '#ffaa22';
+      } else if (!healthBar.localPlayer) {
+        displayText = amount.toString();
+        textColor = '#aaccff';
+      } else {
+        displayText = amount.toString();
+        textColor = '#ff6666';
+      }
+
+      // Critical hit glow — slightly larger semi-transparent orange background
+      if (healthBar.critical) {
+        const chars = displayText
+          .split('')
+          .map((char) => this.client.sans11.getCharacter(char.charCodeAt(0)));
+        const measured = this.client.sans11.measureTextChars(chars);
+        const glowPadding = 2;
+        const glowGraphics = this.ensureUiGraphics(
+          `${nodeKey}:crit-glow`,
+          'ui:healthbar-crit-glow',
+        );
+        glowGraphics.roundRect(
+          Math.floor(position.x - (measured.width >> 1) - glowPadding),
+          Math.floor(numberY - measured.height - glowPadding),
+          measured.width + glowPadding * 2,
+          measured.height + glowPadding * 2,
+          2,
+        );
+        glowGraphics.fill({ color: 0xffaa22, alpha: 0.25 });
+      }
+
       this.addAtlasTextSprites(
-        `${nodeKey}:miss`,
-        'MISS',
+        `${nodeKey}:number`,
+        displayText,
         { x: position.x, y: numberY },
-        '#d0d0d0',
+        textColor,
       );
-      return;
     }
-
-    // Build display text and pick color
-    let displayText: string;
-    let textColor: string;
-    if (healthBar.heal) {
-      displayText = `+${amount}`;
-      textColor = '#40e840';
-    } else if (healthBar.critical) {
-      displayText = `${amount}!`;
-      textColor = '#ffaa22';
-    } else {
-      displayText = amount.toString();
-      textColor = '#ff6666';
-    }
-
-    // Critical hit glow — slightly larger semi-transparent orange background
-    if (healthBar.critical) {
-      const chars = displayText
-        .split('')
-        .map((char) => this.client.sans11.getCharacter(char.charCodeAt(0)));
-      const measured = this.client.sans11.measureTextChars(chars);
-      const glowPadding = 2;
-      const glowGraphics = this.ensureUiGraphics(
-        `${nodeKey}:crit-glow`,
-        'ui:healthbar-crit-glow',
-      );
-      glowGraphics.roundRect(
-        Math.floor(position.x - (measured.width >> 1) - glowPadding),
-        Math.floor(numberY - measured.height - glowPadding),
-        measured.width + glowPadding * 2,
-        measured.height + glowPadding * 2,
-        2,
-      );
-      glowGraphics.fill({ color: 0xffaa22, alpha: 0.25 });
-    }
-
-    this.addAtlasTextSprites(
-      `${nodeKey}:number`,
-      displayText,
-      { x: position.x, y: numberY },
-      textColor,
-    );
   }
 
   private addPartyNameplateSprites(
