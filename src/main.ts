@@ -261,7 +261,7 @@ const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
 const expeditionTracker = new ExpeditionTracker(client);
-const buffBar = new BuffBar(client);
+const _buffBar = new BuffBar(client);
 const _partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
