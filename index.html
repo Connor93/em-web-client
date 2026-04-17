@@ -530,6 +530,7 @@
             <div class="stat"><span class="stat-label">CHA</span><span data-id="cha">0</span><button class="upgrade themed-btn sm hidden" data-target="cha" data-id="upgrade-stat">+</button></div>
             <div class="stat"><span class="stat-label">HP</span><span data-id="hp">0</span></div>
             <div class="stat"><span class="stat-label">TP</span><span data-id="tp">0</span></div>
+            <div class="stat"><span class="stat-label">SP</span><span data-id="sp">--</span></div>
             <div class="stat"><span class="stat-label">DMG</span><span data-id="dam">0</span></div>
             <div class="stat"><span class="stat-label">ACC</span><span data-id="acc">0</span></div>
             <div class="stat"><span class="stat-label">ARM</span><span data-id="arm">0</span></div>
@@ -546,6 +547,15 @@
             <div class="stat"><span class="stat-label">EXP</span><span data-id="exp">0</span></div>
             <div class="stat"><span class="stat-label">TNL</span><span data-id="tnl">0</span></div>
             <div class="stat"><span class="stat-label">Karma</span><span data-id="karma">0</span></div>
+          </div>
+          <div class="stats-computed hidden" data-id="computed-section">
+            <div class="stats-computed-header">Recovery</div>
+            <div class="stat"><span class="stat-label">HP Regen</span><span data-id="hp-regen">--</span></div>
+            <div class="stat"><span class="stat-label">TP Regen</span><span data-id="tp-regen">--</span></div>
+            <div class="stats-computed-header stats-caster-header hidden" data-id="caster-header">Caster</div>
+            <div class="stat stats-caster hidden" data-id="caster-spell"><span class="stat-label">Spell Pwr</span><span data-id="spell-power">--</span></div>
+            <div class="stat stats-caster hidden" data-id="caster-heal"><span class="stat-label">Heal Pwr</span><span data-id="healing-power">--</span></div>
+            <div class="stat stats-caster hidden" data-id="caster-mod"><span class="stat-label">Spell Mod</span><span data-id="spell-mod">--</span></div>
           </div>
           <button class="themed-btn" type="button" data-id="cancel">Cancel</button>
         </div>
@@ -873,6 +883,7 @@
           <span class="hud-bar-label">HP</span>
           <div class="hud-bar-track">
             <div class="hud-bar-fill hp"></div>
+            <div class="hud-bar-fill shield"></div>
             <span class="hud-bar-text">0/0</span>
           </div>
         </div>

@@ -81,6 +81,17 @@
   background: linear-gradient(to right, #c03030, #e05050);
 }
 
+#hud .hud-bar-fill.shield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(to right, #3080c0, #50b0e8);
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: width 0.3s ease;
+}
+
 #hud .hud-bar-fill.tp {
   background: linear-gradient(to right, #2090a0, #40c0d0);
 }

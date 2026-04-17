@@ -13,10 +13,13 @@ export class HUD extends Base {
     this.container.querySelector('.hud-level')!;
 
   private hpFill: HTMLDivElement = this.container.querySelector(
-    '.hud-bar-row[data-id="hp"] .hud-bar-fill',
+    '.hud-bar-row[data-id="hp"] .hud-bar-fill.hp',
   )!;
   private hpText: HTMLSpanElement = this.container.querySelector(
     '.hud-bar-row[data-id="hp"] .hud-bar-text',
+  )!;
+  private shieldFill: HTMLDivElement = this.container.querySelector(
+    '.hud-bar-row[data-id="hp"] .hud-bar-fill.shield',
   )!;
 
   private tpFill: HTMLDivElement = this.container.querySelector(
@@ -42,6 +45,17 @@ export class HUD extends Base {
     const hpPercent = client.maxHp > 0 ? (client.hp / client.maxHp) * 100 : 0;
     this.hpFill.style.width = `${hpPercent}%`;
     this.hpText.textContent = `${client.hp} / ${client.maxHp}`;
+
+    // Shield overlay on HP bar
+    const shield = client.characterShields.get(client.playerId);
+    if (shield && shield.max > 0) {
+      const shieldPercent =
+        (shield.current / (client.maxHp + shield.max)) * 100;
+      this.shieldFill.style.width = `${shieldPercent}%`;
+      this.hpText.textContent = `${client.hp} / ${client.maxHp} (+${shield.current})`;
+    } else {
+      this.shieldFill.style.width = '0%';
+    }
 
     // TP bar
     const tpPercent = client.maxTp > 0 ? (client.tp / client.maxTp) * 100 : 0;
