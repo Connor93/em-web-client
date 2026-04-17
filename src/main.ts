@@ -261,7 +261,7 @@ const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
 const expeditionTracker = new ExpeditionTracker(client);
-const _buffBar = new BuffBar(client);
+const buffBar = new BuffBar(client);
 const _partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
@@ -434,6 +434,7 @@ wireClientEvents({
   mobileToolbar,
   pmChatManager,
   autolootPanel,
+  buffBar,
   bossBar,
   expeditionTracker,
   reconnectOverlay,
@@ -666,6 +667,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (accumulator >= TICK) accumulator = TICK - 1;
     const interpolation = accumulator / TICK;
     client.render(interpolation);
+
+    // Per-frame UI updates for timers and cooldowns
+    buffBar.update();
+    hotbar.updateCooldowns();
 
     // FPS tracking
     if (client.showFps) {

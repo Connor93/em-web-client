@@ -50,7 +50,7 @@ export interface ClientEventDeps {
     isOpen(): boolean;
     clear(): void;
   };
-  hotbar: { show(): void; refresh(): void };
+  hotbar: { show(): void; refresh(): void; updateCooldowns(): void };
   inGameMenu: { show(): void };
   exitGame: { show(): void };
   playerContextMenu: {
@@ -143,6 +143,7 @@ export interface ClientEventDeps {
     sentMessage(targetName: string, message: string): void;
   };
   autolootPanel: { show(): void; hide(): void };
+  buffBar: { update(): void; clear(): void };
   bossBar: BossBar;
   expeditionTracker: ExpeditionTracker;
   reconnectOverlay: HTMLElement;
@@ -261,14 +262,15 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('enterGame', ({ news }) => {
     deps.mainMenu.hide();
-    deps.chat.clear();
+    if (!client.reconnecting) {
+      deps.chat.clear();
+      deps.mobileChat.clear();
+    }
     for (const line of news) {
       if (line) {
         deps.chat.addMessage(ChatTab.Local, line, ChatIcon.None);
       }
     }
-
-    deps.mobileChat.clear();
     deps.mobileToolbar.setPlayerInfo(
       client.name,
       client.level,
@@ -326,6 +328,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     resetReconnectAttempts();
     deps.reconnectOverlay.classList.add('hidden');
     deps.bossBar.clear();
+    deps.buffBar.clear();
     client.clearStaleVisualState();
     client.refresh();
     console.log('Successfully reconnected to server');
@@ -598,5 +601,19 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('walked', () => {
     expeditionTracker.onPlayerMoved();
+  });
+
+  // Class ability events
+  client.on('shieldUpdate', () => {
+    deps.hud.setStats(client);
+    deps.buffBar.update();
+  });
+
+  client.on('cooldownStart', () => {
+    deps.hotbar.updateCooldowns();
+  });
+
+  client.on('hotStarted', () => {
+    deps.buffBar.update();
   });
 }
