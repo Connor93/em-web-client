@@ -1,3 +1,4 @@
+import { TalkReportClientPacket } from 'eolib';
 import type { Client } from '../client';
 import { ChatTab } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
@@ -298,6 +299,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     // Seed quest progress cache for change detection
     cachedQuestProgress.clear();
     client.requestQuestProgressUpdate();
+
+    // Query spell cooldown durations from server
+    const cooldownQuery = new TalkReportClientPacket();
+    cooldownQuery.message = '#cooldowns';
+    client.bus.send(cooldownQuery);
   });
 
   client.on('passwordChanged', () => {

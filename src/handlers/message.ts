@@ -222,6 +222,26 @@ function handleConfigReload(client: Client, message: string): void {
   }
 }
 
+function isCooldownTableResponse(message: string): boolean {
+  // Cooldown table lines look like "123:18 105:12" (spellId:seconds pairs)
+  return /^\d+:\d+/.test(message.trim());
+}
+
+function handleCooldownTableResponse(client: Client, message: string): void {
+  const entries = message
+    .trim()
+    .split(/[\s\n]+/)
+    .filter((entry) => entry.includes(':'));
+  for (const entry of entries) {
+    const [idStr, durationStr] = entry.split(':');
+    const spellId = Number(idStr);
+    const duration = Number(durationStr);
+    if (spellId && duration) {
+      client.spellCooldownTable.set(spellId, duration);
+    }
+  }
+}
+
 function isClassAbilityMessage(message: string): boolean {
   return (
     message.startsWith('[SHIELD]') ||
@@ -413,6 +433,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
 
   if (isConfigReload(packet.message)) {
     handleConfigReload(client, packet.message);
+    return;
+  }
+
+  if (isCooldownTableResponse(packet.message)) {
+    handleCooldownTableResponse(client, packet.message);
     return;
   }
 
