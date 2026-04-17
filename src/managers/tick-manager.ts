@@ -274,6 +274,48 @@ export function tickEffects(client: Client): void {
   }
 }
 
+export function tickShieldExpiry(client: Client): void {
+  const now = Date.now();
+  for (const [playerId, shield] of client.characterShields) {
+    if (now >= shield.expireTime) {
+      client.characterShields.delete(playerId);
+      client.emit('shieldUpdate', { playerId, type: 'expired' });
+    }
+  }
+}
+
+export function tickHoT(client: Client): void {
+  const now = Date.now();
+  for (const [playerId, hot] of client.characterHots) {
+    if (now >= hot.nextTickTime) {
+      hot.ticksRemaining--;
+      if (hot.ticksRemaining <= 0) {
+        client.characterHots.delete(playerId);
+      } else {
+        hot.nextTickTime = now + hot.tickInterval;
+      }
+    }
+  }
+}
+
+export function tickNpcDebuffs(client: Client): void {
+  const now = Date.now();
+  for (const [npcIndex, debuff] of client.npcDebuffs) {
+    if (now >= debuff.expireTime) {
+      client.npcDebuffs.delete(npcIndex);
+    }
+  }
+}
+
+export function tickSpellCooldowns(client: Client): void {
+  const now = Date.now();
+  for (const [spellId, cooldown] of client.activeSpellCooldowns) {
+    if (now >= cooldown.endTime) {
+      client.activeSpellCooldowns.delete(spellId);
+    }
+  }
+}
+
 export function tickDoors(client: Client): void {
   for (const door of client.doors) {
     if (!door.open) {

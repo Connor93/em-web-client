@@ -656,6 +656,10 @@ export class Client {
       Managers.tickAutoWalk(this);
       Managers.tickAutoBattle(this);
       Managers.tickQuake(this);
+      Managers.tickShieldExpiry(this);
+      Managers.tickHoT(this);
+      Managers.tickNpcDebuffs(this);
+      Managers.tickSpellCooldowns(this);
     }
   }
 
