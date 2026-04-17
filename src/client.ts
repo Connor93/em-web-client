@@ -395,29 +395,10 @@ export class Client {
       this.config = config;
       const txtHost =
         document.querySelector<HTMLInputElement>('input[name="host"]')!;
-      const serverSelect = document.querySelector<HTMLSelectElement>(
-        'select[name="server-select"]',
-      )!;
-
-      if (config.servers && config.servers.length >= 2) {
-        // Show server dropdown, hide text input
-        serverSelect.innerHTML = '';
-        for (const server of config.servers) {
-          const option = document.createElement('option');
-          option.value = server.host;
-          option.textContent = server.name;
-          if (server.host === config.host) {
-            option.selected = true;
-          }
-          serverSelect.appendChild(option);
-        }
-        serverSelect.classList.remove('hidden');
-        txtHost.classList.add('hidden');
-      } else if (this.config.staticHost) {
-        txtHost.classList.add('hidden');
+      if (this.config.staticHost) {
+        txtHost!.classList.add('hidden');
       }
-
-      txtHost.value = config.host;
+      txtHost!.value = config.host;
       document.title = config.title;
 
       const mainMenuLogo =
