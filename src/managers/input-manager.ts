@@ -46,6 +46,7 @@ export function handleClick(client: Client, e: MouseEvent): void {
       const npcAt = getNpcIntersecting(client.mousePosition);
 
       if (spellRecord.type === SkillType.Heal) {
+        // Heal spells prioritize characters over NPCs
         if (characterAt) {
           const character = client.getCharacterById(characterAt.id);
           if (character) {
@@ -61,6 +62,7 @@ export function handleClick(client: Client, e: MouseEvent): void {
           }
         }
       } else {
+        // Attack spells prioritize NPCs over characters
         if (npcAt) {
           const npc = client.nearby.npcs.find((n) => n.index === npcAt.id);
           if (npc) {
@@ -72,6 +74,44 @@ export function handleClick(client: Client, e: MouseEvent): void {
           const character = client.getCharacterById(characterAt.id);
           if (character) {
             client.clickCharacter(character);
+            return;
+          }
+        }
+      }
+
+      // Tile-based fallback: pixel hit detection missed, but there may be
+      // a valid target on the clicked tile (e.g., hidden behind a tall NPC
+      // sprite or slightly offset from its hit rectangle).
+      if (client.mouseCoords) {
+        const tileX = client.mouseCoords.x;
+        const tileY = client.mouseCoords.y;
+
+        const characterOnTile = client.nearby.characters.find(
+          (c) =>
+            c.playerId !== client.playerId &&
+            c.coords.x === tileX &&
+            c.coords.y === tileY,
+        );
+        const npcOnTile = client.nearby.npcs.find(
+          (n) => n.coords.x === tileX && n.coords.y === tileY,
+        );
+
+        if (spellRecord.type === SkillType.Heal) {
+          if (characterOnTile) {
+            client.clickCharacter(characterOnTile);
+            return;
+          }
+          if (npcOnTile) {
+            client.clickNpc(npcOnTile);
+            return;
+          }
+        } else {
+          if (npcOnTile) {
+            client.clickNpc(npcOnTile);
+            return;
+          }
+          if (characterOnTile) {
+            client.clickCharacter(characterOnTile);
             return;
           }
         }
