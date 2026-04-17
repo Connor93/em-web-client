@@ -100,15 +100,21 @@ export class PartyHud {
     entry.appendChild(hpBar);
 
     entry.addEventListener('click', () => {
-      if (!this.client.selectedSpellId) return;
+      if (
+        !this.client.selectedSpellId ||
+        this.client.queuedSpellId > 0 ||
+        this.client.spellCooldownTicks > 0
+      ) {
+        return;
+      }
 
       // Same flow as clicking a player in-world (see npc-interaction-manager.ts)
       this.client.spellTarget = SpellTarget.Player;
       this.client.spellTargetId = member.playerId;
       this.client.queuedSpellId = this.client.selectedSpellId;
       this.client.selectedSpellId = 0;
+      this.client.spellCooldownTicks = 999;
       this.client.emit('spellQueued', undefined);
-      this.client.beginSpellChant();
     });
 
     if (this.client.selectedSpellId) {
