@@ -33,6 +33,16 @@ export class Hotbar extends Base {
       const slot = document.createElement('div');
       slot.classList.add('slot');
 
+      const cooldownOverlay = document.createElement('div');
+      cooldownOverlay.classList.add('cooldown-overlay');
+      cooldownOverlay.style.display = 'none';
+      slot.appendChild(cooldownOverlay);
+
+      const cooldownText = document.createElement('span');
+      cooldownText.classList.add('cooldown-text');
+      cooldownText.style.display = 'none';
+      slot.appendChild(cooldownText);
+
       slot.addEventListener('click', () => {
         this.client.useHotbarSlot(i);
       });
@@ -59,6 +69,42 @@ export class Hotbar extends Base {
     this.render();
   }
 
+  updateCooldowns() {
+    const now = Date.now();
+
+    for (const [index, slot] of this.client.hotbarSlots.entries()) {
+      const element = this.container.children[index] as HTMLDivElement;
+      const overlay = element.querySelector(
+        '.cooldown-overlay',
+      ) as HTMLDivElement;
+      const text = element.querySelector('.cooldown-text') as HTMLSpanElement;
+      if (!overlay || !text) continue;
+
+      if (slot.type !== SlotType.Skill) {
+        overlay.style.display = 'none';
+        text.style.display = 'none';
+        continue;
+      }
+
+      const cooldown = this.client.activeSpellCooldowns.get(slot.typeId);
+      if (!cooldown || now >= cooldown.endTime) {
+        overlay.style.display = 'none';
+        text.style.display = 'none';
+        continue;
+      }
+
+      const remaining = (cooldown.endTime - now) / 1000;
+      const fraction = remaining / cooldown.duration;
+      const degrees = Math.floor(fraction * 360);
+
+      overlay.style.display = '';
+      overlay.style.background = `conic-gradient(rgba(0,0,0,0.7) 0deg, rgba(0,0,0,0.7) ${degrees}deg, transparent ${degrees}deg)`;
+
+      text.style.display = '';
+      text.textContent = Math.ceil(remaining).toString();
+    }
+  }
+
   private render() {
     if (!this.client.hotbarSlots.length) {
       this.loadSlots();
@@ -70,7 +116,16 @@ export class Hotbar extends Base {
       }
 
       const element = this.container.children[index] as HTMLDivElement;
-      element.innerHTML = '';
+      // Remove content children but preserve cooldown overlay elements
+      for (let i = element.children.length - 1; i >= 0; i--) {
+        const child = element.children[i];
+        if (
+          !child.classList.contains('cooldown-overlay') &&
+          !child.classList.contains('cooldown-text')
+        ) {
+          child.remove();
+        }
+      }
 
       element.classList.toggle(
         'spell-active',
