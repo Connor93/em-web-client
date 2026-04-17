@@ -17,6 +17,8 @@ export class PartyHud {
     document.getElementById('ui')!.appendChild(this.container);
 
     client.on('partyUpdated', () => this.refresh());
+    client.on('shieldUpdate', () => this.refresh());
+    client.on('hotStarted', () => this.refresh());
   }
 
   refresh() {
@@ -71,6 +73,27 @@ export class PartyHud {
     }
     hpFill.style.width = `${member.hpPercentage}%`;
     hpBar.appendChild(hpFill);
+
+    // Shield overlay on HP bar
+    const shield = this.client.characterShields.get(member.playerId);
+    if (shield && shield.max > 0) {
+      const shieldFill = document.createElement('div');
+      shieldFill.className = 'party-hud-fill shield';
+      const shieldPercent = Math.min(
+        (shield.current / (100 + shield.max)) * 100,
+        100,
+      );
+      shieldFill.style.width = `${shieldPercent}%`;
+      hpBar.appendChild(shieldFill);
+    }
+
+    // HoT indicator
+    const hot = this.client.characterHots.get(member.playerId);
+    if (hot && hot.ticksRemaining > 0) {
+      const hotDot = document.createElement('div');
+      hotDot.className = 'party-hud-hot';
+      header.appendChild(hotDot);
+    }
 
     entry.appendChild(hpBar);
 

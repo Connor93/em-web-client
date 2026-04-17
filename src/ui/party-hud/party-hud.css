@@ -60,6 +60,7 @@ body.is-mobile #party-hud {
 }
 
 .party-hud-bar {
+  position: relative;
   height: 4px;
   background: rgba(20, 16, 12, 0.6);
   border: 1px solid
@@ -89,4 +90,24 @@ body.is-mobile #party-hud {
 
 .party-hud-fill.hp.critical {
   background: #c03030;
+}
+
+.party-hud-fill.shield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(to right, #3080c0, #50b0e8);
+  border-radius: 2px;
+  opacity: 0.6;
+  transition: width 0.3s ease;
+}
+
+.party-hud-hot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #40e040;
+  box-shadow: 0 0 4px rgba(64, 224, 64, 0.5);
+  flex-shrink: 0;
 }
