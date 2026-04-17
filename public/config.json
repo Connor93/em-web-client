@@ -4,5 +4,12 @@
   "title": "Endless Memories",
   "slogan": "Web Edition!",
   "creditsUrl": "https://github.com/sorokya/eoweb",
-  "dashboardUrl": ""
+  "dashboardUrl": "",
+  "servers": [
+    { "name": "Production", "host": "wss://client.calamity-online.cloud/ws" },
+    {
+      "name": "Test Server",
+      "host": "wss://client.calamity-online.cloud/ws-test"
+    }
+  ]
 }
