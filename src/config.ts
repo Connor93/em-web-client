@@ -1,5 +1,10 @@
 import { HOST } from './consts';
 
+type ServerEntry = {
+  name: string;
+  host: string;
+};
+
 type Config = {
   host: string;
   staticHost: boolean;
@@ -7,6 +12,7 @@ type Config = {
   slogan: string;
   creditsUrl: string;
   dashboardUrl?: string;
+  servers?: ServerEntry[];
   autoLogin?: {
     username: string;
     password: string;

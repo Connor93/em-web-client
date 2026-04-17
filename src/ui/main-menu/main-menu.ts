@@ -24,6 +24,9 @@ export class MainMenu extends Base {
   )!;
   private txtHost: HTMLInputElement =
     this.container.querySelector('input[name="host"]')!;
+  private serverSelect: HTMLSelectElement = this.container.querySelector(
+    'select[name="server-select"]',
+  )!;
   private emitter = mitt<Events>();
 
   constructor() {
@@ -42,6 +45,9 @@ export class MainMenu extends Base {
     });
     this.txtHost.addEventListener('change', () => {
       this.emitter.emit('host-change', this.txtHost.value);
+    });
+    this.serverSelect.addEventListener('change', () => {
+      this.emitter.emit('host-change', this.serverSelect.value);
     });
   }
 
