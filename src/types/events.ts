@@ -136,6 +136,8 @@ export type ClientEvents = {
   guildLeft: undefined;
   guildRankUpdated: { rank: number };
   scrollMessage: { title: string; body: string };
+  scrollMessageGeneric: { title: string; body: string; lines: string[] };
+  statsCommandResponse: { body: string };
   statusMessage: { message: string };
   bankOpened: undefined;
   bankUpdated: undefined;
@@ -236,4 +238,22 @@ export type ClientEvents = {
     clue: string;
   };
   expeditionTrackerToggle: { visible: boolean };
+  // Class ability events
+  shieldUpdate: {
+    playerId: number;
+    type: 'cast' | 'absorb' | 'broken' | 'expired';
+    current?: number;
+    max?: number;
+    duration?: number;
+  };
+  cooldownStart: { spellId: number };
+  cooldownBlocked: { spellId: number; remaining: number };
+  npcSlowed: { npcIndex: number; duration: number };
+  npcSnared: { npcIndexes: number[]; duration: number };
+  hotStarted: {
+    playerId: number;
+    hpPerTick: number;
+    ticks: number;
+    duration: number;
+  };
 };

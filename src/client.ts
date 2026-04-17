@@ -187,6 +187,29 @@ export class Client {
   npcChats: Map<number, ChatBubble> = new Map();
   queuedNpcChats: Map<number, string[]> = new Map();
   npcHealthBars: Map<number, HealthBar> = new Map();
+  /** Per-player shield state: current HP, max HP, expiry timestamp */
+  characterShields: Map<
+    number,
+    { current: number; max: number; expireTime: number }
+  > = new Map();
+  /** Per-player HoT state: ticking heal over time */
+  characterHots: Map<
+    number,
+    {
+      hpPerTick: number;
+      ticksRemaining: number;
+      tickInterval: number;
+      nextTickTime: number;
+    }
+  > = new Map();
+  /** Per-NPC debuff state: slow or snare with expiry */
+  npcDebuffs: Map<number, { type: 'slow' | 'snare'; expireTime: number }> =
+    new Map();
+  /** Spell ID → cooldown duration in seconds (populated from server query) */
+  spellCooldownTable: Map<number, number> = new Map();
+  /** Active spell cooldowns: spell ID → end timestamp and total duration */
+  activeSpellCooldowns: Map<number, { endTime: number; duration: number }> =
+    new Map();
   /** Tracks which NPC indices are awakened bosses and their status */
   awakenedBosses: Map<number, { enraged: boolean; shielded: boolean }> =
     new Map();
@@ -681,6 +704,10 @@ export class Client {
     this.npcHealthBars.clear();
     this.characterHealthBars.clear();
     this.itemProtectionTimers.clear();
+    this.characterShields.clear();
+    this.characterHots.clear();
+    this.npcDebuffs.clear();
+    this.activeSpellCooldowns.clear();
     if (this.map) {
       clearRectangles();
       this.mapRenderer.buildCaches();
@@ -936,6 +963,10 @@ export class Client {
     this.damageTracker.clear();
     this.characterEmotes.clear();
     this.effects = [];
+    this.characterShields.clear();
+    this.characterHots.clear();
+    this.npcDebuffs.clear();
+    this.activeSpellCooldowns.clear();
     this.autoWalkPath = [];
     this.spellTarget = null;
     this.downloadQueue = [];
