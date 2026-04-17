@@ -111,3 +111,16 @@ body.is-mobile #party-hud {
   box-shadow: 0 0 4px rgba(64, 224, 64, 0.5);
   flex-shrink: 0;
 }
+
+.party-hud-member--targetable {
+  border-color: rgba(100, 200, 255, 0.6);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.party-hud-member--targetable:hover {
+  border-color: rgba(100, 200, 255, 0.9);
+  box-shadow: 0 0 8px rgba(100, 200, 255, 0.3);
+}

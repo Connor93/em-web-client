@@ -1,5 +1,6 @@
 import type { PartyMember } from 'eolib';
 import type { Client } from '../../client';
+import { SpellTarget } from '../../types';
 import { capitalize } from '../../utils';
 
 import './party-hud.css';
@@ -19,6 +20,7 @@ export class PartyHud {
     client.on('partyUpdated', () => this.refresh());
     client.on('shieldUpdate', () => this.refresh());
     client.on('hotStarted', () => this.refresh());
+    client.on('spellQueued', () => this.refresh());
   }
 
   refresh() {
@@ -96,6 +98,22 @@ export class PartyHud {
     }
 
     entry.appendChild(hpBar);
+
+    entry.addEventListener('click', () => {
+      if (!this.client.selectedSpellId) return;
+
+      // Same flow as clicking a player in-world (see npc-interaction-manager.ts)
+      this.client.spellTarget = SpellTarget.Player;
+      this.client.spellTargetId = member.playerId;
+      this.client.queuedSpellId = this.client.selectedSpellId;
+      this.client.selectedSpellId = 0;
+      this.client.emit('spellQueued', undefined);
+      this.client.beginSpellChant();
+    });
+
+    if (this.client.selectedSpellId) {
+      entry.classList.add('party-hud-member--targetable');
+    }
 
     return entry;
   }
