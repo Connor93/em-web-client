@@ -85,6 +85,8 @@ export function useHotbarSlot(client: Client, index: number): void {
 export function beginSpellChant(client: Client): void {
   const record = client.getEsfRecordById(client.queuedSpellId);
   if (!record) {
+    client.queuedSpellId = 0;
+    client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
     return;
   }
 
@@ -94,6 +96,7 @@ export function beginSpellChant(client: Client): void {
       client.getResourceString(EOResourceID.ATTACK_YOU_ARE_EXHAUSTED_TP)!,
     );
     client.queuedSpellId = 0;
+    client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
     return;
   }
 
@@ -102,6 +105,7 @@ export function beginSpellChant(client: Client): void {
     client.spellTarget === SpellTarget.Npc
   ) {
     client.queuedSpellId = 0;
+    client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
     return;
   }
 
@@ -111,6 +115,7 @@ export function beginSpellChant(client: Client): void {
     client.map.type !== MapType.Pk
   ) {
     client.queuedSpellId = 0;
+    client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
     return;
   }
 
@@ -118,12 +123,14 @@ export function beginSpellChant(client: Client): void {
     const npc = client.getNpcByIndex(client.spellTargetId);
     if (!npc) {
       client.queuedSpellId = 0;
+      client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
       return;
     }
 
     const animation = client.npcAnimations.get(npc.index);
     if (animation instanceof NpcDeathAnimation) {
       client.queuedSpellId = 0;
+      client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
       return;
     }
   }
@@ -132,12 +139,14 @@ export function beginSpellChant(client: Client): void {
     const character = client.getCharacterById(client.spellTargetId);
     if (!character) {
       client.queuedSpellId = 0;
+      client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
       return;
     }
 
     const animation = client.characterAnimations.get(client.spellTargetId);
     if (animation instanceof CharacterDeathAnimation) {
       client.queuedSpellId = 0;
+      client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
       return;
     }
   }
