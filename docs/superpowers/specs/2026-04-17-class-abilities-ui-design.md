@@ -159,6 +159,34 @@ New events to add to `src/types/events.ts`:
 - `npcSnared: { npcIndexes: number[], duration: number }`
 - `hotStarted: { playerId: number, hpPerTick: number, ticks: number, duration: number }`
 
+## Feature 5: Party HUD Enhancements
+
+### Shield & HoT on Party Members
+
+The party HUD already shows HP bars for each party member. When a party member has an active shield or HoT:
+
+- **Shield overlay**: Blue/cyan fill within the party member's HP bar, same approach as the main HUD and in-world health bars. Uses `client.characterShields.get(member.playerId)` to check for active shield.
+- **HoT indicator**: Small green icon/dot next to the member's name or HP bar when HoT is active. Uses `client.characterHots.get(member.playerId)`.
+- Both update in real-time as shield absorbs damage or HoT ticks.
+
+### Click-to-Cast on Party Members
+
+When the player has a targeted spell selected (heal, shield, etc.), clicking a party member's entry in the party HUD casts the spell on that player. This is an **additional** targeting option — in-world click targeting still works.
+
+**Behavior:**
+- When a spell is active/selected (`client.selectedSpellId` is set and spell is a player-targeted heal/buff type), party member entries become clickable targets
+- Visual feedback: party member entries show a subtle highlight/border when a compatible spell is selected, indicating they are valid targets
+- Clicking a highlighted entry triggers the same cast flow as clicking the player in-world: calls `beginSpellChant()` with the party member's player ID as target
+- After casting, the spell selection clears as normal
+- If no spell is selected, clicking a party member does nothing (no accidental casts)
+- Works for: Heal spells, Shield spells, any player-targeted buff spell
+
+**Implementation:**
+- `PartyHud` listens for `client.selectedSpellId` changes to toggle the "targetable" visual state on entries
+- Each party member entry gets a click handler that checks if a compatible spell is selected
+- On click: sets `client.spellTarget` and `client.spellTargetId` to the party member, then calls the existing spell cast flow
+- CSS class `party-hud-member--targetable` adds the highlight border/glow when a spell is active
+
 ## Server Changes Summary
 
 | Change | Location | Description |
@@ -190,3 +218,5 @@ New events to add to `src/types/events.ts`:
 - `src/wiring/client-events.ts` — Wire new events to UI components
 - `src/main.ts` — Initialize buff bar, register moveable container
 - `src/managers/tick-manager.ts` — Tick down HoT, expire NPC debuffs, expire shield timer
+- `src/ui/party-hud/party-hud.ts` — Shield/HoT indicators on party members, click-to-cast targeting
+- `src/ui/party-hud/party-hud.css` — Shield overlay in party HP bars, targetable highlight styles
