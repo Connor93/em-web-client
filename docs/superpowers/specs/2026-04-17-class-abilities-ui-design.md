@@ -4,26 +4,30 @@
 
 Add client-side UI for four class ability systems introduced in the server's classV2 branch: Priest damage shields, spell cooldowns, Mage slow/snare NPC indicators, and a buff/debuff status row. The server sends prefixed StatusMsg messages (`[SHIELD]`, `[COOLDOWN]`, `[SLOW]`, `[SNARE]`, `[HOT]`) that the client intercepts and renders as dedicated UI elements instead of plain chat text.
 
-Small server changes are also required: a bulk cooldown query API, a `[COOLDOWN_START]` message on successful cast, and a `[HOT]` message when heal-over-time begins.
+**All prefixed messages are suppressed from the web client's chat log and game toast.** They are intercepted in the message handler and consumed by the UI — they never reach the `statusMessage` event or system chat.
+
+**Multiplayer visibility:** These effects must be visible to all nearby players, not just the caster/target. The server broadcasts prefixed StatusMsg messages to all players on the map. This is backwards compatible — the OG client displays them as harmless status text, while the web client intercepts and renders dedicated UI.
+
+Server changes are also required: broadcast prefixed messages to map, bulk cooldown query API, `[COOLDOWN_START]` message on successful cast, and `[HOT]` message when heal-over-time begins.
 
 ## Feature 1: Shield Bar
 
 ### Behavior
 
-The server sends `[SHIELD]` prefixed StatusMsg messages at four lifecycle points:
+The server broadcasts `[SHIELD]` prefixed StatusMsg messages to all players on the map at four lifecycle points. Messages include the target player ID so all clients can track shield state for any player:
 
 | Message | Action |
 |---------|--------|
-| `[SHIELD] Damage Shield: X HP (Ys)` | Create shield state: set max = X, current = X, start duration timer for Y seconds |
-| `[SHIELD] Shield absorbed X (Y remaining)` | Set current shield HP = Y |
-| `[SHIELD] Shield broken! X damage absorbed` | Remove shield state |
-| `[SHIELD] Damage Shield expired.` | Remove shield state |
+| `[SHIELD] PlayerID Damage Shield: X HP (Ys)` | Create shield state for player: set max = X, current = X, start duration timer for Y seconds |
+| `[SHIELD] PlayerID Shield absorbed X (Y remaining)` | Set current shield HP = Y for player |
+| `[SHIELD] PlayerID Shield broken! X damage absorbed` | Remove shield state for player |
+| `[SHIELD] PlayerID Damage Shield expired.` | Remove shield state for player |
 
 ### In-World Health Bar (PixiJS)
 
 - Blue/cyan semi-transparent fill overlaid within the existing health bar in `addHealthBarSprites()`
 - Shield fill is drawn on top of the green HP fill, using the ratio `shieldCurrent / shieldMax` to determine width, capped at the bar width
-- Only shown on the local player's character (shield is self-only)
+- Shown on any player character that has an active shield (not just local player)
 - Uses a separate Graphics draw call after the HP fill, before the shine effect
 
 ### HUD Panel (DOM)
@@ -36,9 +40,11 @@ The server sends `[SHIELD]` prefixed StatusMsg messages at four lifecycle points
 
 ### State Storage
 
-- `client.shield: { current: number, max: number, expireTime: number } | null`
+- `client.characterShields: Map<number, { current: number, max: number, expireTime: number }>` — keyed by player ID
 - Set on `[SHIELD] Damage Shield` message, updated on absorb, cleared on broken/expired
-- Cleared on death, logout, map change
+- Local player's shield is `client.characterShields.get(client.id)` — used by HUD and buff bar
+- Cleared per-player on broken/expired messages; all cleared on map change
+- Entries for players who leave the map are cleaned up on map change
 
 ## Feature 2: Spell Cooldown Timers
 
@@ -70,9 +76,9 @@ The server sends `[SHIELD]` prefixed StatusMsg messages at four lifecycle points
 
 ### Behavior
 
-The server sends:
-- `[SLOW] Target slowed for Xs` — single-target slow applied
-- `[SNARE] Frost Nova hit X enemies` — AoE snare applied
+The server broadcasts to all players on the map:
+- `[SLOW] NpcIndex Xs` — single-target slow applied, includes NPC index and duration
+- `[SNARE] NpcIndex1,NpcIndex2,NpcIndex3 Xs` — AoE snare applied, includes all affected NPC indexes and duration
 
 ### Sprite Tint
 
@@ -94,18 +100,9 @@ The server sends:
 ### State Storage
 
 - `client.npcDebuffs: Map<number, { type: 'slow' | 'snare', expireTime: number }>` — keyed by NPC index
-- Set when `[SLOW]` or `[SNARE]` message is received, with duration parsed from the message
+- Set when `[SLOW]` or `[SNARE]` message is received, with NPC index(es) and duration parsed from the message
 - Cleared when timer expires, NPC dies, or map changes
-- Note: `[SLOW]` message doesn't include NPC index — we'll need to infer the target (likely the NPC the player just cast on, from `client.spellTargetId`) or have the server include the NPC index in the message
-
-### NPC Target Identification
-
-The `[SLOW]` and `[SNARE]` messages don't include which NPC was affected. Two approaches:
-
-1. **Infer from context**: Use the player's last spell target (`client.spellTargetId`) for `[SLOW]`. For `[SNARE]` (AoE), apply to all NPCs within a radius of the player.
-2. **Server change**: Include NPC index(es) in the message, e.g., `[SLOW] npcIndex slowed for Xs` or `[SNARE] Frost Nova hit npcIndex1,npcIndex2,npcIndex3`.
-
-Option 2 is more reliable. This should be planned as a server change if feasible.
+- Multiple NPCs can be debuffed simultaneously (snare is AoE)
 
 ## Feature 4: Buff/Debuff Status Row
 
@@ -117,7 +114,7 @@ Two indicator types at launch:
 
 ### Server Change for HoT
 
-Server sends `[HOT] Healing over time: X HP/tick (N ticks, Ys)` when HoT begins on a player. Client parses HP per tick, tick count, and total duration.
+Server broadcasts `[HOT] PlayerID X HP/tick N ticks Ys` when HoT begins on a player. Broadcast to all players on the map so party members and nearby players can see HoT is active. Client parses player ID, HP per tick, tick count, and total duration.
 
 ### Placement & Container
 
@@ -138,38 +135,40 @@ Server sends `[HOT] Healing over time: X HP/tick (N ticks, Ys)` when HoT begins 
 
 ### State
 
-- Driven by existing state: `client.shield` for shield, new `client.healOverTime` for HoT
-- `client.healOverTime: { hpPerTick: number, ticksRemaining: number, tickInterval: number, nextTickTime: number } | null`
+- Shield state driven by `client.characterShields` map; local player's entry drives the buff bar shield icon
+- `client.characterHots: Map<number, { hpPerTick: number, ticksRemaining: number, tickInterval: number, nextTickTime: number }>` — keyed by player ID
+- Local player's HoT is `client.characterHots.get(client.id)` — drives the buff bar HoT icon
 - HoT ticks down locally (decrement ticksRemaining on each interval), removed when ticks reach 0
-- Cleared on death, logout, map change
+- Cleared per-player on expiry; all cleared on map change
 
 ## Message Interception
 
 All `[PREFIX]` messages are intercepted in `src/handlers/message.ts` inside `handleMessageOpen()`, before the general `statusMessage` emit. This follows the existing pattern for `[TREASURE_*]`, `[BOSS_*]`, and `[CONFIG_RELOAD]`.
 
 Each prefix handler:
-1. Parses the relevant data from the message string
+1. Parses the relevant data from the message string (including player/NPC IDs)
 2. Updates client state
 3. Emits a typed event (e.g., `shieldUpdate`, `cooldownStart`, `npcSlowed`, `hotStarted`)
-4. Returns early (suppresses from chat and game toast)
+4. **Returns early — suppresses from chat log and game toast entirely**
 
 New events to add to `src/types/events.ts`:
-- `shieldUpdate: { type: 'cast' | 'absorb' | 'broken' | 'expired', current?: number, max?: number, duration?: number }`
+- `shieldUpdate: { playerId: number, type: 'cast' | 'absorb' | 'broken' | 'expired', current?: number, max?: number, duration?: number }`
 - `cooldownStart: { spellId: number }`
 - `cooldownBlocked: { spellId: number, remaining: number }`
 - `npcSlowed: { npcIndex: number, duration: number }`
 - `npcSnared: { npcIndexes: number[], duration: number }`
-- `hotStarted: { hpPerTick: number, ticks: number, duration: number }`
+- `hotStarted: { playerId: number, hpPerTick: number, ticks: number, duration: number }`
 
 ## Server Changes Summary
 
 | Change | Location | Description |
 |--------|----------|-------------|
+| Broadcast `[SHIELD]` to map | `map.cpp` | Use `SendAll` instead of single-player `StatusMsg` for shield messages; include target player ID |
+| Broadcast `[SLOW]` to map | `map.cpp` SpellAttack | Send to all players on map with NPC index and duration |
+| Broadcast `[SNARE]` to map | `map.cpp` SpellSelf (AoE) | Send to all players on map with affected NPC indexes and duration |
+| Broadcast `[HOT]` to map | `map.cpp` SpellSelf/SpellGroup | Send to all players on map with target player ID, HP/tick, ticks, duration |
 | Bulk cooldown query | `Spell.cpp` or `Talk.cpp` | Respond to `#cooldowns` command with spell ID → duration pairs |
-| `[COOLDOWN_START]` | `map.cpp` (all 4 spell functions) | Send after setting cooldown on successful cast |
-| `[HOT]` message | `map.cpp` SpellSelf/SpellGroup | Send when HoT passive triggers, include HP/tick, ticks, duration |
-| NPC index in `[SLOW]` | `map.cpp` SpellAttack | Include NPC index in the slow message |
-| NPC indexes in `[SNARE]` | `map.cpp` SpellSelf (AoE) | Include affected NPC indexes in the snare message |
+| `[COOLDOWN_START]` | `map.cpp` (all 4 spell functions) | Send to caster only after setting cooldown on successful cast |
 
 ## Files to Create/Modify
 
