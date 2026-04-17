@@ -35,6 +35,7 @@ import { initDraggableDialogs } from './ui/base-ui';
 import { BoardDialog } from './ui/board-dialog';
 import { Book } from './ui/book/book';
 import { BossBar } from './ui/boss-bar';
+import { BuffBar } from './ui/buff-bar';
 import { ChangePasswordForm } from './ui/change-password';
 import { CharacterSelect } from './ui/character-select';
 import { Chat } from './ui/chat/chat';
@@ -260,6 +261,7 @@ const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
 const expeditionTracker = new ExpeditionTracker(client);
+const buffBar = new BuffBar(client);
 const _partyHud = new PartyHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
@@ -293,12 +295,20 @@ const hideAllUi = () => {
 // ── Socket / Reconnect ───────────────────────────────────────────────────
 
 const reconnectOverlay = document.getElementById('reconnect-overlay')!;
-const MAX_RECONNECT_ATTEMPTS = 5;
+const MAX_RECONNECT_ATTEMPTS = 20;
+const RECONNECT_OVERLAY_DELAY = 2000; // Only show overlay after 2s
 let _reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let _overlayTimer: ReturnType<typeof setTimeout> | null = null;
 
 const initializeSocket = (next: 'login' | 'create' | '' = '') => {
   const socket = new WebSocket(client.config.host);
   socket.addEventListener('open', () => {
+    // Cancel pending overlay if reconnect was fast enough
+    if (_overlayTimer) {
+      clearTimeout(_overlayTimer);
+      _overlayTimer = null;
+    }
+
     if (client.reconnecting) {
       // Reconnect handles login silently — don't show any UI
     } else if (next === 'create') {
@@ -336,9 +346,17 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
       const attempts = incrementReconnectAttempts();
       const delay = Math.min(1000 * 2 ** (attempts - 1), 8000);
 
-      reconnectOverlay.querySelector('.reconnect-text')!.textContent =
-        `Reconnecting... (${attempts}/${MAX_RECONNECT_ATTEMPTS})`;
-      reconnectOverlay.classList.remove('hidden');
+      // Delay showing the overlay — fast reconnects stay invisible
+      if (!_overlayTimer && reconnectOverlay.classList.contains('hidden')) {
+        _overlayTimer = setTimeout(() => {
+          _overlayTimer = null;
+          if (client.reconnecting) {
+            reconnectOverlay.querySelector('.reconnect-text')!.textContent =
+              'Reconnecting...';
+            reconnectOverlay.classList.remove('hidden');
+          }
+        }, RECONNECT_OVERLAY_DELAY);
+      }
 
       console.log(
         `WebSocket closed while in-game. Reconnect attempt ${attempts}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms`,
@@ -350,6 +368,10 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
     } else {
       client.reconnecting = false;
       resetReconnectAttempts();
+      if (_overlayTimer) {
+        clearTimeout(_overlayTimer);
+        _overlayTimer = null;
+      }
       reconnectOverlay.classList.add('hidden');
 
       hideAllUi();
@@ -491,6 +513,7 @@ initDraggableDialogs([
 // ── Movable UI elements (HUD, Chat) ─────────────────────────────────
 makeMovable(document.getElementById('hud')!);
 makeMovable(document.getElementById('chat')!);
+makeMovable(document.getElementById('buff-bar')!);
 if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }

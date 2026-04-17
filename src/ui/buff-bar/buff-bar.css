@@ -1,0 +1,58 @@
+/* ── Buff/Debuff Status Row ──────────────────────────────────────── */
+
+#buff-bar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 1019;
+  pointer-events: auto;
+}
+
+.buff-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+
+.buff-icon.shield {
+  border-color: rgba(80, 176, 232, 0.4);
+}
+
+.buff-icon.hot {
+  border-color: rgba(80, 200, 80, 0.4);
+}
+
+.buff-icon-symbol {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.buff-icon-value {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  position: absolute;
+  bottom: 1px;
+  white-space: nowrap;
+}
+
+.buff-icon.fading {
+  opacity: 0;
+}
