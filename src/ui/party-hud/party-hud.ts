@@ -18,26 +18,33 @@ export class PartyHud {
     document.getElementById('ui')!.appendChild(this.container);
 
     client.on('partyUpdated', () => this.refresh());
+    client.on('statsUpdate', () => this.refresh());
     client.on('shieldUpdate', () => this.refresh());
     client.on('hotStarted', () => this.refresh());
     client.on('spellQueued', () => this.refresh());
   }
 
   refresh() {
-    const members = this.client.partyMembers.filter(
-      (m) => m.playerId !== this.client.playerId,
-    );
-
-    if (!members.length) {
+    if (!this.client.partyMembers.length) {
       this.container.classList.add('hidden');
       this.container.innerHTML = '';
       return;
     }
 
+    // Keep the local player's HP percentage up to date
+    const localMember = this.client.partyMembers.find(
+      (m) => m.playerId === this.client.playerId,
+    );
+    if (localMember && this.client.maxHp > 0) {
+      localMember.hpPercentage = Math.round(
+        (this.client.hp / this.client.maxHp) * 100,
+      );
+    }
+
     this.container.classList.remove('hidden');
     this.container.innerHTML = '';
 
-    for (const member of members) {
+    for (const member of this.client.partyMembers) {
       this.container.appendChild(this.createMemberEntry(member));
     }
   }
@@ -108,9 +115,9 @@ export class PartyHud {
         return;
       }
 
-      // Same flow as clicking a player in-world (see npc-interaction-manager.ts)
-      this.client.spellTarget = SpellTarget.Player;
-      this.client.spellTargetId = member.playerId;
+      const isLocal = member.playerId === this.client.playerId;
+      this.client.spellTarget = isLocal ? SpellTarget.Self : SpellTarget.Player;
+      this.client.spellTargetId = isLocal ? 0 : member.playerId;
       this.client.queuedSpellId = this.client.selectedSpellId;
       this.client.selectedSpellId = 0;
       this.client.spellCooldownTicks = 999;
