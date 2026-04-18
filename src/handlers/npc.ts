@@ -73,6 +73,14 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
       new HealthBar(attack.hpPercentage, attack.damage),
     );
 
+    const partyMember = client.partyMembers.find(
+      (m) => m.playerId === attack.playerId,
+    );
+    if (partyMember) {
+      partyMember.hpPercentage = attack.hpPercentage;
+      client.emit('partyUpdated', undefined);
+    }
+
     if (attack.killed === PlayerKilledState.Killed) {
       client.setCharacterDeathAnimation(attack.playerId);
       someoneKilled = true;
@@ -306,10 +314,11 @@ function handleNpcReply(client: Client, reader: EoReader) {
   }
 
   const damage = packet.damage;
-  const isCritical = client.recordOutgoingDamage(damage);
+  const isLocal = packet.playerId === client.playerId;
+  const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
   client.npcHealthBars.set(
     npc.index,
-    new HealthBar(packet.hpPercentage, damage, 0, isCritical),
+    new HealthBar(packet.hpPercentage, damage, 0, isCritical, isLocal),
   );
 
   if (record.boss) {

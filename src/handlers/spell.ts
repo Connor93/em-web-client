@@ -13,6 +13,18 @@ import {
   HealthBar,
 } from '../render';
 
+function updatePartyMemberHp(
+  client: Client,
+  playerId: number,
+  hpPercentage: number,
+): void {
+  const member = client.partyMembers.find((m) => m.playerId === playerId);
+  if (member) {
+    member.hpPercentage = hpPercentage;
+    client.emit('partyUpdated', undefined);
+  }
+}
+
 function handleSpellRequest(client: Client, reader: EoReader) {
   const packet = SpellRequestServerPacket.deserialize(reader);
   const character = client.getCharacterById(packet.playerId);
@@ -39,16 +51,11 @@ function handleSpellRequest(client: Client, reader: EoReader) {
 
 function handleSpellTargetSelf(client: Client, reader: EoReader) {
   const packet = SpellTargetSelfServerPacket.deserialize(reader);
-  if (packet.hp) {
-    client.hp = packet.hp;
-  }
 
-  if (packet.tp) {
-    client.tp = packet.tp;
-  }
-
-  if (packet.hp || packet.tp) {
-    client.emit('statsUpdate', undefined);
+  if (packet.playerId === client.playerId) {
+    if (packet.hp) client.hp = packet.hp;
+    if (packet.tp) client.tp = packet.tp;
+    if (packet.hp || packet.tp) client.emit('statsUpdate', undefined);
   }
 
   const character = client.getCharacterById(packet.playerId);
@@ -63,6 +70,7 @@ function handleSpellTargetSelf(client: Client, reader: EoReader) {
     packet.playerId,
     new HealthBar(packet.hpPercentage, 0, packet.spellHealHp),
   );
+  updatePartyMemberHp(client, packet.playerId, packet.hpPercentage);
 
   client.playSpellEffect(
     packet.spellId,
@@ -108,6 +116,7 @@ function handleSpellTargetOther(client: Client, reader: EoReader) {
     victimId,
     new HealthBar(hpPercentage, 0, spellHealHp),
   );
+  updatePartyMemberHp(client, victimId, hpPercentage);
 
   client.playSpellEffect(spellId, new EffectTargetCharacter(victimId));
 }
@@ -139,6 +148,7 @@ function handleSpellTargetGroup(client: Client, reader: EoReader) {
       player.playerId,
       new HealthBar(player.hpPercentage, 0, packet.spellHealHp),
     );
+    updatePartyMemberHp(client, player.playerId, player.hpPercentage);
 
     client.playSpellEffect(
       packet.spellId,
