@@ -43,6 +43,14 @@ function handleRecoverAgree(client: Client, reader: EoReader) {
     packet.playerId,
     new HealthBar(packet.hpPercentage, 0, packet.healHp),
   );
+
+  const partyMember = client.partyMembers.find(
+    (m) => m.playerId === packet.playerId,
+  );
+  if (partyMember) {
+    partyMember.hpPercentage = packet.hpPercentage;
+    client.emit('partyUpdated', undefined);
+  }
 }
 
 function handleRecoverList(client: Client, reader: EoReader) {
