@@ -101,7 +101,7 @@ export class Hotbar extends Base {
       const text = element.querySelector('.cooldown-text') as HTMLSpanElement;
       if (!overlay || !text) continue;
 
-      if (slot.type !== SlotType.Skill) {
+      if (!slot || slot.type !== SlotType.Skill) {
         overlay.style.display = 'none';
         text.style.display = 'none';
         continue;
@@ -132,7 +132,7 @@ export class Hotbar extends Base {
     }
 
     for (const [index, slot] of this.client.hotbarSlots.entries()) {
-      if (slot.type === SlotType.Empty) {
+      if (!slot || slot.type === SlotType.Empty) {
         continue;
       }
 
@@ -190,14 +190,13 @@ export class Hotbar extends Base {
         this.client.hotbarSlots = JSON.parse(json);
       } catch {
         console.warn('[Hotbar] Failed to parse saved slots, resetting');
-        for (let i = 0; i < HOTBAR_SLOTS; ++i) {
-          this.client.hotbarSlots.push(new Slot(SlotType.Empty));
-        }
+        this.client.hotbarSlots = [];
       }
-    } else {
-      for (let i = 0; i < HOTBAR_SLOTS; ++i) {
-        this.client.hotbarSlots.push(new Slot(SlotType.Empty));
-      }
+    }
+
+    // Pad to HOTBAR_SLOTS if saved data has fewer entries (e.g., old 5-slot save)
+    while (this.client.hotbarSlots.length < HOTBAR_SLOTS) {
+      this.client.hotbarSlots.push(new Slot(SlotType.Empty));
     }
   }
 }
