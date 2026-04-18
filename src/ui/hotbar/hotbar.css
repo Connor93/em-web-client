@@ -13,7 +13,7 @@
 }
 
 #hotbar.two-rows {
-  max-width: calc(5 * (4em + 6px) + 4 * 4px);
+  max-width: calc(5 * (4em + 8px) + 4 * 4px);
 }
 
 #hotbar .slot {
