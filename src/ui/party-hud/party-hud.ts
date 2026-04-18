@@ -119,7 +119,6 @@ export class PartyHud {
       this.client.spellTarget = isLocal ? SpellTarget.Self : SpellTarget.Player;
       this.client.spellTargetId = isLocal ? 0 : member.playerId;
       this.client.queuedSpellId = this.client.selectedSpellId;
-      this.client.selectedSpellId = 0;
       this.client.spellCooldownTicks = 999;
       this.client.emit('spellQueued', undefined);
     });
