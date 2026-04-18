@@ -145,15 +145,16 @@ const LEFT_KEYS: (keyof GameSettings)[] = [
   'gameMusic',
   'privateMessage',
   'logChat',
+  'interactions',
+  'ghostNpcs',
 ];
 
 /** Right column settings, in display order. */
 const RIGHT_KEYS: (keyof GameSettings)[] = [
-  'interactions',
-  'ghostNpcs',
   'movementSmoothing',
   'wasdMovement',
   'weaponAuras',
+  'hotbarSlots',
   'uiScale',
   'fpsLimit',
 ];
