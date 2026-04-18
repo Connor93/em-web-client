@@ -94,6 +94,21 @@ export class MovementController {
     } else if (isOrWasInputHeld(Input.Hotbar5) && this.hotbarTicks === 0) {
       this.client.useHotbarSlot(4);
       this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
+    } else if (isOrWasInputHeld(Input.Hotbar6) && this.hotbarTicks === 0) {
+      this.client.useHotbarSlot(5);
+      this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
+    } else if (isOrWasInputHeld(Input.Hotbar7) && this.hotbarTicks === 0) {
+      this.client.useHotbarSlot(6);
+      this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
+    } else if (isOrWasInputHeld(Input.Hotbar8) && this.hotbarTicks === 0) {
+      this.client.useHotbarSlot(7);
+      this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
+    } else if (isOrWasInputHeld(Input.Hotbar9) && this.hotbarTicks === 0) {
+      this.client.useHotbarSlot(8);
+      this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
+    } else if (isOrWasInputHeld(Input.Hotbar10) && this.hotbarTicks === 0) {
+      this.client.useHotbarSlot(9);
+      this.hotbarTicks = HOTBAR_COOLDOWN_TICKS;
     }
 
     if (isOrWasInputHeld(Input.Tab) && this.minimapTicks === 0) {

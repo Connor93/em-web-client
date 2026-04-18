@@ -1,5 +1,6 @@
 import type { Client } from '../../client';
 import { HOTBAR_SLOTS } from '../../consts';
+import { settings } from '../../settings';
 import { getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
 
@@ -32,6 +33,7 @@ export class Hotbar extends Base {
     for (let i = 0; i < HOTBAR_SLOTS; ++i) {
       const slot = document.createElement('div');
       slot.classList.add('slot');
+      slot.dataset.label = ((i + 1) % 10).toString();
 
       const cooldownOverlay = document.createElement('div');
       cooldownOverlay.classList.add('cooldown-overlay');
@@ -48,6 +50,24 @@ export class Hotbar extends Base {
       });
 
       this.container.appendChild(slot);
+    }
+
+    this.updateVisibleSlots();
+    settings.on('change', ({ key }) => {
+      if (key === 'hotbarSlots') {
+        this.updateVisibleSlots();
+        this.render();
+      }
+    });
+  }
+
+  private updateVisibleSlots() {
+    const visibleCount = Number(settings.get('hotbarSlots'));
+    for (let i = 0; i < HOTBAR_SLOTS; i++) {
+      const slot = this.container.children[i] as HTMLDivElement;
+      if (slot) {
+        slot.style.display = i < visibleCount ? '' : 'none';
+      }
     }
   }
 

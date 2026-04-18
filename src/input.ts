@@ -24,8 +24,13 @@ export enum Input {
   Hotbar3 = 19,
   Hotbar4 = 20,
   Hotbar5 = 21,
-  Tab = 22,
-  Refresh = 23,
+  Hotbar6 = 22,
+  Hotbar7 = 23,
+  Hotbar8 = 24,
+  Hotbar9 = 25,
+  Hotbar10 = 26,
+  Tab = 27,
+  Refresh = 28,
   Unknown = -1,
 }
 
@@ -97,26 +102,30 @@ window.addEventListener('keydown', (e) => {
       active instanceof HTMLTextAreaElement) &&
     active.value.length > 0;
 
-  const wasd = settings.get('wasdMovement') === 'enabled';
+  const wasd = settings.get('wasdMovement') === 'enabled' && !e.shiftKey;
   switch (e.code) {
     case 'KeyW':
     case 'ArrowUp':
       if (e.code === 'KeyW' && (!wasd || inTextInput)) break;
+      if (e.code === 'KeyW') e.preventDefault();
       updateInputHeld(Input.Up, true);
       break;
     case 'KeyA':
     case 'ArrowLeft':
       if (e.code === 'KeyA' && (!wasd || inTextInput)) break;
+      if (e.code === 'KeyA') e.preventDefault();
       updateInputHeld(Input.Left, true);
       break;
     case 'KeyS':
     case 'ArrowDown':
       if (e.code === 'KeyS' && (!wasd || inTextInput)) break;
+      if (e.code === 'KeyS') e.preventDefault();
       updateInputHeld(Input.Down, true);
       break;
     case 'KeyD':
     case 'ArrowRight':
       if (e.code === 'KeyD' && (!wasd || inTextInput)) break;
+      if (e.code === 'KeyD') e.preventDefault();
       updateInputHeld(Input.Right, true);
       break;
     case 'KeyX':
@@ -204,31 +213,41 @@ window.addEventListener('keydown', (e) => {
       if (e.altKey) {
         e.preventDefault();
         updateInputHeld(Input.EmoteSurprised, true);
+        break;
       }
+      if (!inTextInput) updateInputHeld(Input.Hotbar6, true);
       break;
     case 'Digit7':
       if (e.altKey) {
         e.preventDefault();
         updateInputHeld(Input.EmoteHearts, true);
+        break;
       }
+      if (!inTextInput) updateInputHeld(Input.Hotbar7, true);
       break;
     case 'Digit8':
       if (e.altKey) {
         e.preventDefault();
         updateInputHeld(Input.EmoteMoon, true);
+        break;
       }
+      if (!inTextInput) updateInputHeld(Input.Hotbar8, true);
       break;
     case 'Digit9':
       if (e.altKey) {
         e.preventDefault();
         updateInputHeld(Input.EmoteSuicidal, true);
+        break;
       }
+      if (!inTextInput) updateInputHeld(Input.Hotbar9, true);
       break;
     case 'Digit0':
       if (e.altKey) {
         e.preventDefault();
         updateInputHeld(Input.EmotePlayful, true);
+        break;
       }
+      if (!inTextInput) updateInputHeld(Input.Hotbar10, true);
       break;
     case 'Tab':
       if (!inTextInput) {
@@ -326,18 +345,23 @@ window.addEventListener('keyup', (e) => {
       updateInputHeld(Input.EmoteConfused, false);
       break;
     case 'Digit6':
+      updateInputHeld(Input.Hotbar6, false);
       updateInputHeld(Input.EmoteSurprised, false);
       break;
     case 'Digit7':
+      updateInputHeld(Input.Hotbar7, false);
       updateInputHeld(Input.EmoteHearts, false);
       break;
     case 'Digit8':
+      updateInputHeld(Input.Hotbar8, false);
       updateInputHeld(Input.EmoteMoon, false);
       break;
     case 'Digit9':
+      updateInputHeld(Input.Hotbar9, false);
       updateInputHeld(Input.EmoteSuicidal, false);
       break;
     case 'Digit0':
+      updateInputHeld(Input.Hotbar10, false);
       updateInputHeld(Input.EmotePlayful, false);
       break;
     case 'Tab':

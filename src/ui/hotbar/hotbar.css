@@ -8,7 +8,6 @@
   display: flex;
   gap: 4px;
   z-index: 1020;
-  counter-reset: slot-counter;
 }
 
 #hotbar .slot {
@@ -28,7 +27,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  counter-increment: slot-counter;
   transition: border-color 0.15s;
 }
 
@@ -54,7 +52,7 @@
 #hotbar .slot::after {
   width: 14px;
   height: 14px;
-  content: counter(slot-counter);
+  content: attr(data-label);
   color: var(--theme-dim);
   font-size: 10px;
   top: 3px;

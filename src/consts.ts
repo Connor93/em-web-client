@@ -55,7 +55,7 @@ export const LOCKER_BASE_SIZE = 25;
 export const LOCKER_SIZE_STEP = 15;
 export const LOCKER_MAX_ITEM_AMOUNT = 999;
 
-export const HOTBAR_SLOTS = 5;
+export const HOTBAR_SLOTS = 10;
 export const HOTBAR_COOLDOWN_TICKS = 2;
 export const TICKS_PER_CAST_TIME = 4;
 export const SPELL_COOLDOWN_TICKS = 5;

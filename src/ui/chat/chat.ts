@@ -253,7 +253,20 @@ export class Chat extends Base {
       // When the chat input is empty, suppress hotkey characters so they
       // trigger game actions (sit, hotbar, refresh) instead of typing
       if (this.message.value.length === 0 && !e.ctrlKey) {
-        const hotkeys = ['x', '1', '2', '3', '4', '5', 'r'];
+        const hotkeys = [
+          'x',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '0',
+          'r',
+        ];
         if (hotkeys.includes(e.key.toLowerCase())) {
           e.preventDefault();
           return;

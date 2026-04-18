@@ -12,6 +12,7 @@ export interface GameSettings {
   fpsLimit: 'Unlimited' | '60' | '30' | '20';
   wasdMovement: 'enabled' | 'disabled';
   weaponAuras: 'enabled' | 'disabled';
+  hotbarSlots: '5' | '10';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -26,8 +27,9 @@ const DEFAULTS: GameSettings = {
   movementSmoothing: 'enabled',
   uiScale: '1x',
   fpsLimit: '30',
-  wasdMovement: 'enabled',
+  wasdMovement: 'disabled',
   weaponAuras: 'enabled',
+  hotbarSlots: '5',
 };
 
 export const SETTING_OPTIONS: {
@@ -44,6 +46,7 @@ export const SETTING_OPTIONS: {
   fpsLimit: ['Unlimited', '60', '30', '20'],
   wasdMovement: ['enabled', 'disabled'],
   weaponAuras: ['enabled', 'disabled'] as const,
+  hotbarSlots: ['5', '10'] as const,
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -58,6 +61,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   weaponAuras: 'Weapon Auras',
   uiScale: 'UI Scale',
   fpsLimit: 'FPS Limit',
+  hotbarSlots: 'Hotbar Slots',
 };
 
 type SettingsEvents = {
