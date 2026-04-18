@@ -69,6 +69,7 @@ export class Hotbar extends Base {
         slot.style.display = i < visibleCount ? '' : 'none';
       }
     }
+    this.container.classList.toggle('two-rows', visibleCount > 5);
   }
 
   refresh() {

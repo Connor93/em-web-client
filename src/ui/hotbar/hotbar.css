@@ -6,8 +6,14 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 4px;
   z-index: 1020;
+}
+
+#hotbar.two-rows {
+  max-width: calc(5 * (4em + 6px) + 4 * 4px);
 }
 
 #hotbar .slot {
