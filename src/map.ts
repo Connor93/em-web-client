@@ -1949,6 +1949,9 @@ export class MapRenderer {
           'MISS',
           { x: position.x, y: numberY },
           '#d0d0d0',
+          true,
+          true,
+          true,
         );
         return;
       }
@@ -1996,6 +1999,9 @@ export class MapRenderer {
         displayText,
         { x: position.x, y: numberY },
         textColor,
+        true,
+        true,
+        true,
       );
     }
   }
@@ -2540,6 +2546,7 @@ export class MapRenderer {
     color: string,
     alignHorizontal = true,
     alignVertical = true,
+    outline = false,
   ) {
     const chars = text
       .split('')
@@ -2555,6 +2562,39 @@ export class MapRenderer {
     }
     if (alignVertical) {
       y -= height;
+    }
+
+    // Shadow pass — dark outline behind text for readability
+    if (outline) {
+      const offsets = [
+        [-1, -1],
+        [0, -1],
+        [1, -1],
+        [-1, 0],
+        [1, 0],
+        [-1, 1],
+        [0, 1],
+        [1, 1],
+      ];
+      for (const [ox, oy] of offsets) {
+        let sx = x;
+        for (const [index, char] of chars.entries()) {
+          const texture = this.client.sans11.getCharacterTexture(char.id);
+          if (!texture) {
+            sx += char.width;
+            continue;
+          }
+          const sprite = this.ensureUiSprite(
+            `${nodeKey}:shadow:${ox}:${oy}:${index}`,
+            `ui:text-glyph-shadow char=${char.id}`,
+          );
+          sprite.texture = texture;
+          sprite.tint = 0x000000;
+          sprite.alpha = 0.8;
+          sprite.position.set(Math.floor(sx + ox), Math.floor(y + oy));
+          sx += char.width;
+        }
+      }
     }
 
     const tint = this.parseCssHexColor(color);
