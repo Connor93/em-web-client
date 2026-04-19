@@ -1,4 +1,4 @@
-import { ItemSpecial } from 'eolib';
+import { ItemSpecial, TalkReportClientPacket } from 'eolib';
 import type { Client } from '../client';
 import { ChatTab, GameState } from '../client';
 import {
@@ -381,6 +381,12 @@ export function wireUiEvents(deps: UiEventDeps): void {
       case 'guild':
         deps.guildPanel.toggle();
         break;
+      case 'inbox': {
+        const inboxPacket = new TalkReportClientPacket();
+        inboxPacket.message = '#inbox';
+        client.bus.send(inboxPacket);
+        break;
+      }
       case 'settings':
         deps.settingsDialog.toggle();
         break;

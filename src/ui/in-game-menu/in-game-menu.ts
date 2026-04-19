@@ -14,6 +14,7 @@ type Events = {
     | 'party'
     | 'quests'
     | 'encyclopedia'
+    | 'inbox'
     | 'settings';
 };
 
