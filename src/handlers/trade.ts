@@ -57,10 +57,18 @@ function handleTradeSpec(client: Client, reader: EoReader) {
 
 function handleTradeUse(client: Client, reader: EoReader) {
   const packet = TradeUseServerPacket.deserialize(reader);
-  // tradeData[0] contains items we receive from partner
-  // tradeData[1] contains items we gave to partner
-  const receivedItems = packet.tradeData[0];
-  const givenItems = packet.tradeData[1];
+
+  // The server sends the same packet to both players.
+  // Identify which trade data belongs to us (given) vs partner (received) by player ID.
+  let givenItems: (typeof packet.tradeData)[0] | undefined;
+  let receivedItems: (typeof packet.tradeData)[0] | undefined;
+  for (const data of packet.tradeData) {
+    if (data.playerId === client.playerId) {
+      givenItems = data;
+    } else {
+      receivedItems = data;
+    }
+  }
 
   // Remove items we gave away
   if (givenItems) {

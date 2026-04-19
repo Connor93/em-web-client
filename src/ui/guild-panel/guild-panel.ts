@@ -73,8 +73,31 @@ export class GuildPanel extends Base {
 
     // Listen for scroll messages from the server (MessageAcceptServerPacket)
     this.client.on('scrollMessage', ({ title, body }) => {
+      const lines = splitPaddedText(body);
+
+      // Check if this is a guild-related message
+      const isGuild =
+        title.includes('Guild Points') ||
+        title.includes('Bounties') ||
+        title.includes('Bounty') ||
+        title.includes('Info') ||
+        title.includes('Leaderboard') ||
+        title.includes('Top') ||
+        title.includes('Buff');
+
+      if (title.includes('Character Stats')) {
+        this.client.emit('statsCommandResponse', { body });
+        return;
+      }
+
+      if (!isGuild) {
+        // Non-guild scroll message — display in chat system tab
+        this.client.emit('scrollMessageGeneric', { title, body, lines });
+        return;
+      }
+
       this.cachedScrollTitle = title;
-      this.cachedScrollLines = splitPaddedText(body);
+      this.cachedScrollLines = lines;
 
       // Try to parse structured data
       if (title.includes('Guild Points')) {

@@ -114,6 +114,42 @@
   );
 }
 
+/* ── Computed stats section (recovery, caster) ──────────────────── */
+
+#stats .stats-computed {
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+}
+
+#stats .stats-computed-header {
+  grid-column: 1 / -1;
+  color: var(--theme-dim);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 6px 1px;
+}
+
+#stats .stats-computed-header:not(:first-child) {
+  margin-top: 2px;
+}
+
+#stats .stat-bonus {
+  color: var(--theme-accent);
+  font-size: 10px;
+  margin-left: 2px;
+}
+
 /* ── Close button ────────────────────────────────────────────────── */
 
 #stats button[data-id="cancel"] {
