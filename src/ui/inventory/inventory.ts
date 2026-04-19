@@ -252,7 +252,8 @@ export class Inventory extends Base {
       return;
     }
 
-    if (target === this.uiContainer) {
+    const canvas = document.getElementById('game');
+    if (target === this.uiContainer || target === canvas) {
       this.emitter.emit('dropItem', { at: 'cursor', itemId: item.id });
       return;
     }
