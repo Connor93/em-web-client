@@ -49,6 +49,11 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 **Context:** Autoloot currently picks up all items. Add a settings option to let players configure what to autoloot (whitelist/blacklist by item type — e.g., skip equipment, only loot gold, etc.).
 **Related:** `src/managers/autoloot-manager.ts`, `src/settings.ts`
 
+### Encyclopedia — Spell Config Data from Server
+**Added:** 2026-04-17
+**Context:** Spell details in the encyclopedia don't show cooldown, shield absorb, slow duration, snare radius, etc. These values live in server-side INI files (spell_cooldowns.ini, shields.ini, slows.ini, aoe_snares.ini). Could expose via dashboard API endpoints and fetch in the encyclopedia alongside existing spell data.
+**Related:** `src/ui/encyclopedia/encyclopedia.ts`, etheos `config/spell_cooldowns.ini`, `config/shields.ini`, `config/slows.ini`, `config/aoe_snares.ini`, dashboard API at `/api/`
+
 ### Player Tooltip — Admin Gold Names
 **Added:** 2026-03-30
 **Context:** Want admin characters (level > 1) to have gold-colored names in the tooltip. Blocked — `CharacterMapInfo` from eolib doesn't include admin level for other players. Would require a server change to send admin level, or could apply only to local player.
