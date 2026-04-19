@@ -1,6 +1,5 @@
 import {
   CastAcceptServerPacket,
-  CastReplyServerPacket,
   CastSpecServerPacket,
   Emote as EmoteType,
   type EoReader,
@@ -12,31 +11,65 @@ import { ChatTab, type Client } from '../client';
 import { ITEM_PROTECT_TICKS_NPC } from '../consts';
 import { EOResourceID } from '../edf';
 import { tryAutoloot } from '../managers';
-import { EffectTargetNpc, Emote, HealthBar } from '../render';
+import {
+  EffectTargetCharacter,
+  EffectTargetNpc,
+  Emote,
+  HealthBar,
+} from '../render';
 import { playSfxById, SfxId } from '../sfx';
 import { ChatIcon } from '../ui/chat/chat';
 
 function handleCastReply(client: Client, reader: EoReader) {
-  const packet = CastReplyServerPacket.deserialize(reader);
-  const npc = client.getNpcByIndex(packet.npcIndex);
-  if (!npc) {
-    client.requestNpcRange([packet.npcIndex]);
+  // Two different packets share Cast_Reply:
+  //   NPC cast visual (short): [spellId:2, targetPlayerId:2]
+  //   Player spell hit (long): [spellId:2, casterId:2, casterDir:1, npcIndex:2,
+  //                              damage:3, hpPct:2, casterTp:2]
+  // Disambiguate by checking available data length.
+  const spellId = reader.getShort();
+  const secondShort = reader.getShort();
+
+  if (reader.remaining === 0) {
+    // NPC cast visual — play effect on the target player, don't touch stats
+    client.playSpellEffect(spellId, new EffectTargetCharacter(secondShort));
     return;
   }
 
-  if (packet.casterTp) {
-    client.tp = packet.casterTp;
+  // Player spell hit on NPC
+  const _casterDirection = reader.getChar();
+  const npcIndex = reader.getShort();
+  const damage = reader.getThree();
+  const hpPercentage = reader.getShort();
+  const casterTp = reader.remaining >= 2 ? reader.getShort() : 0;
+
+  const npc = client.getNpcByIndex(npcIndex);
+  if (!npc) {
+    client.requestNpcRange([npcIndex]);
+    return;
+  }
+
+  if (casterTp && secondShort === client.playerId) {
+    client.tp = casterTp;
     client.emit('statsUpdate', undefined);
   }
 
-  const damage = packet.damage;
-  const isCritical = client.recordOutgoingDamage(damage);
+  const isLocal = secondShort === client.playerId;
+  const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
   client.npcHealthBars.set(
-    packet.npcIndex,
-    new HealthBar(packet.hpPercentage, damage, 0, isCritical),
+    npcIndex,
+    new HealthBar(hpPercentage, damage, 0, isCritical, isLocal),
   );
 
-  client.playSpellEffect(packet.spellId, new EffectTargetNpc(packet.npcIndex));
+  const record = client.getEnfRecordById(npc.id);
+  if (record?.boss) {
+    client.emit('bossHealthUpdate', {
+      npcIndex,
+      npcId: npc.id,
+      healthPercentage: hpPercentage,
+    });
+  }
+
+  client.playSpellEffect(spellId, new EffectTargetNpc(npcIndex));
 }
 
 function handleCastSpec(client: Client, reader: EoReader) {
@@ -47,16 +80,17 @@ function handleCastSpec(client: Client, reader: EoReader) {
     return;
   }
 
-  if (packet.casterTp) {
+  if (packet.casterTp && packet.npcKilledData.killerId === client.playerId) {
     client.tp = packet.casterTp;
     client.emit('statsUpdate', undefined);
   }
 
   const damage = packet.npcKilledData.damage;
-  const isCritical = client.recordOutgoingDamage(damage);
+  const isLocal = packet.npcKilledData.killerId === client.playerId;
+  const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
   client.npcHealthBars.set(
     packet.npcKilledData.npcIndex,
-    new HealthBar(0, damage, 0, isCritical),
+    new HealthBar(0, damage, 0, isCritical, isLocal),
   );
 
   client.playSpellEffect(
@@ -127,7 +161,7 @@ function handleCastAccept(client: Client, reader: EoReader) {
     return;
   }
 
-  if (packet.casterTp) {
+  if (packet.casterTp && packet.npcKilledData.killerId === client.playerId) {
     client.tp = packet.casterTp;
     client.emit('statsUpdate', undefined);
   }
