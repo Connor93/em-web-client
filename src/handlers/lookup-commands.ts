@@ -39,11 +39,15 @@ export function handleItemCommand(client: Client, parameter: string): boolean {
   }
 
   // Search by name (case-insensitive, partial match)
+  // Filter out upgrade variants (names ending with " +N") from search results
+  const upgradePattern = / \+\d+$/;
   const matches: { id: number; name: string }[] = [];
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (item?.name?.toLowerCase().includes(searchTerm.toLowerCase())) {
-      matches.push({ id: i + 1, name: item.name });
+      if (!upgradePattern.test(item.name)) {
+        matches.push({ id: i + 1, name: item.name });
+      }
     }
   }
 
@@ -147,8 +151,25 @@ function sendNpcSourceRequest(client: Client, npcId: number) {
 
 // ---------- Custom packet: handle source responses ----------
 
+export interface UpgradeTier {
+  variantId: number;
+  hp: number;
+  tp: number;
+  minDamage: number;
+  maxDamage: number;
+  accuracy: number;
+  evade: number;
+  armor: number;
+  str: number;
+  intl: number;
+  wis: number;
+  agi: number;
+  con: number;
+  cha: number;
+}
+
 function handleItemSourceResponse(client: Client, reader: EoReader) {
-  const _itemId = reader.getShort();
+  const itemId = reader.getShort();
   const numSources = reader.getChar();
 
   const drops: { npcName: string; dropRate: number }[] = [];
@@ -190,7 +211,38 @@ function handleItemSourceResponse(client: Client, reader: EoReader) {
     }
   }
 
-  client.emit('updateItemSources', { drops, shops, crafts });
+  // Parse upgrade tier data
+  const upgradeTiers: UpgradeTier[] = [];
+  if (reader.remaining > 0) {
+    const numTiers = reader.getChar();
+    for (let i = 0; i < numTiers; i++) {
+      if (reader.remaining < 20) break;
+      upgradeTiers.push({
+        variantId: reader.getShort(),
+        hp: reader.getShort(),
+        tp: reader.getShort(),
+        minDamage: reader.getShort(),
+        maxDamage: reader.getShort(),
+        accuracy: reader.getShort(),
+        evade: reader.getShort(),
+        armor: reader.getShort(),
+        str: reader.getChar(),
+        intl: reader.getChar(),
+        wis: reader.getChar(),
+        agi: reader.getChar(),
+        con: reader.getChar(),
+        cha: reader.getChar(),
+      });
+    }
+  }
+
+  client.emit('updateItemSources', {
+    itemId,
+    drops,
+    shops,
+    crafts,
+    upgradeTiers,
+  });
 }
 
 function handleNpcSourceResponse(client: Client, reader: EoReader) {

@@ -161,9 +161,26 @@ export type ClientEvents = {
     matches: { id: number; name: string }[];
   };
   updateItemSources: {
+    itemId?: number;
     drops: { npcName: string; dropRate: number }[];
     shops: { npcName: string; price: number }[];
     crafts: { npcName: string; ingredients: string }[];
+    upgradeTiers?: {
+      variantId: number;
+      hp: number;
+      tp: number;
+      minDamage: number;
+      maxDamage: number;
+      accuracy: number;
+      evade: number;
+      armor: number;
+      str: number;
+      intl: number;
+      wis: number;
+      agi: number;
+      con: number;
+      cha: number;
+    }[];
   };
   updateNpcSources: {
     drops: { itemName: string; amount: string; dropRate: number }[];
@@ -218,7 +235,23 @@ export type ClientEvents = {
   bossTimeout: { npcIndex: number };
   bossLoot: { items: string[] };
   bossExpGain: { amount: string };
+  bossDamageReport: {
+    bossName: string;
+    entries: {
+      name: string;
+      damage: number;
+      percent: number;
+      exp: number;
+      qualified: boolean;
+    }[];
+    minimumPercent: number | null;
+  };
   bossBarsReset: undefined;
+  damageDealt: { npcIndex: number; npcName: string; damage: number };
+  thornsHit: { damage: number };
+  toggleDamageTracker: undefined;
+  adminInventory: { name: string; items: unknown[] };
+  bossStatusReport: { title: string; body: string };
   walked: undefined;
   // Expedition events
   expeditionStarted: { tier: string; itemId: number; totalSteps: number };

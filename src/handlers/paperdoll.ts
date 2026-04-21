@@ -115,9 +115,16 @@ function handlePaperdollAgree(client: Client, reader: EoReader) {
 
   const equipment = client.getEquipmentArray();
   const slot = getEquipmentSlotForItemType(record.type, packet.subLoc);
-  if (slot === undefined || equipment[slot]) {
+  if (slot === undefined) {
     return;
   }
+
+  // If slot is already occupied with a different item, treat as an upgrade/swap
+  // (e.g., equipment awakening system upgrading an equipped item in-place)
+  const isUpgrade =
+    equipment[slot] !== undefined &&
+    equipment[slot] !== 0 &&
+    equipment[slot] !== packet.itemId;
 
   client.setEquipmentSlot(slot!, packet.itemId);
   client.emit('equipmentChanged', undefined);
@@ -142,6 +149,11 @@ function handlePaperdollAgree(client: Client, reader: EoReader) {
   client.hp = Math.min(client.hp, client.maxHp);
   client.tp = Math.min(client.tp, client.maxTp);
   client.emit('statsUpdate', undefined);
+
+  // For upgrades, the item wasn't taken from inventory — skip inventory update
+  if (isUpgrade) {
+    return;
+  }
 
   const item = client.items.find((i) => i.id === packet.itemId);
   if (!item) {
