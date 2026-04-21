@@ -23,7 +23,7 @@ import {
 } from 'eolib';
 import { Application, Assets, Sprite } from 'pixi.js';
 import type { Client } from '../../client';
-import { getItemGraphicPath } from '../../utils';
+import { formatDropRate, getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
 import { makeDraggable, restoreOrCenter } from '../utils/draggable';
 
@@ -184,11 +184,13 @@ export class Encyclopedia extends Base {
 
   private filterItems(term: string): { id: number; record: EifRecord }[] {
     if (!this.client.eif) return [];
+    const upgradePattern = / \+\d+$/;
     const results: { id: number; record: EifRecord }[] = [];
     for (let i = 0; i < this.client.eif.items.length; i++) {
       const record = this.client.eif.items[i];
       if (
         record?.name &&
+        !upgradePattern.test(record.name) &&
         (term === '' || record.name.toLowerCase().includes(term))
       ) {
         results.push({ id: i + 1, record });
@@ -1433,9 +1435,26 @@ export class Encyclopedia extends Base {
 
   private requestItemSources(itemId: number, loadingDiv: HTMLElement) {
     const handler = (data: {
+      itemId?: number;
       drops: { npcName: string; dropRate: number }[];
       shops: { npcName: string; price: number }[];
       crafts: { npcName: string; ingredients: string }[];
+      upgradeTiers?: {
+        variantId: number;
+        hp: number;
+        tp: number;
+        minDamage: number;
+        maxDamage: number;
+        accuracy: number;
+        evade: number;
+        armor: number;
+        str: number;
+        intl: number;
+        wis: number;
+        agi: number;
+        con: number;
+        cha: number;
+      }[];
     }) => {
       loadingDiv.remove();
 
@@ -1443,7 +1462,7 @@ export class Encyclopedia extends Base {
         data.drops.length > 0 ||
         data.shops.length > 0 ||
         data.crafts.length > 0;
-      if (!hasData) {
+      if (!hasData && (!data.upgradeTiers || data.upgradeTiers.length === 0)) {
         const row = document.createElement('div');
         row.className = 'enc-source-row';
         row.textContent = 'No source data available';
@@ -1461,7 +1480,7 @@ export class Encyclopedia extends Base {
               'npc',
               npcId,
               drop.npcName,
-              ` (${drop.dropRate.toFixed(1)}%)`,
+              ` (${formatDropRate(drop.dropRate)}%)`,
             );
           } else {
             const row = document.createElement('div');
@@ -1470,7 +1489,7 @@ export class Encyclopedia extends Base {
             nameSpan.textContent = drop.npcName;
             row.appendChild(nameSpan);
             row.appendChild(
-              document.createTextNode(` (${drop.dropRate.toFixed(1)}%)`),
+              document.createTextNode(` (${formatDropRate(drop.dropRate)}%)`),
             );
             this.detailPanel.appendChild(row);
           }
@@ -1520,6 +1539,39 @@ export class Encyclopedia extends Base {
             row.appendChild(document.createTextNode(` (${craft.ingredients})`));
             this.detailPanel.appendChild(row);
           }
+        }
+      }
+
+      if (data.upgradeTiers && data.upgradeTiers.length > 0) {
+        this.addSectionHeader('Upgrade Tiers');
+        for (let i = 0; i < data.upgradeTiers.length; i++) {
+          const tier = data.upgradeTiers[i];
+          const tierLabel = `+${i + 1}`;
+
+          const stats: string[] = [];
+          if (tier.minDamage > 0 || tier.maxDamage > 0) {
+            stats.push(`Dmg: ${tier.minDamage}-${tier.maxDamage}`);
+          }
+          if (tier.accuracy > 0) stats.push(`Acc: ${tier.accuracy}`);
+          if (tier.evade > 0) stats.push(`Eva: ${tier.evade}`);
+          if (tier.armor > 0) stats.push(`Arm: ${tier.armor}`);
+          if (tier.hp > 0) stats.push(`HP: ${tier.hp}`);
+          if (tier.tp > 0) stats.push(`TP: ${tier.tp}`);
+          if (tier.str > 0) stats.push(`STR: ${tier.str}`);
+          if (tier.intl > 0) stats.push(`INT: ${tier.intl}`);
+          if (tier.wis > 0) stats.push(`WIS: ${tier.wis}`);
+          if (tier.agi > 0) stats.push(`AGI: ${tier.agi}`);
+          if (tier.con > 0) stats.push(`CON: ${tier.con}`);
+          if (tier.cha > 0) stats.push(`CHA: ${tier.cha}`);
+
+          const row = document.createElement('div');
+          row.className = 'enc-source-row';
+          const label = document.createElement('span');
+          label.className = 'enc-upgrade-tier-label';
+          label.textContent = tierLabel;
+          row.appendChild(label);
+          row.appendChild(document.createTextNode(` ${stats.join(', ')}`));
+          this.detailPanel.appendChild(row);
         }
       }
     };
@@ -1618,7 +1670,7 @@ export class Encyclopedia extends Base {
               'item',
               itemId,
               drop.itemName,
-              ` x${drop.amount} (${drop.dropRate.toFixed(1)}%)`,
+              ` x${drop.amount} (${formatDropRate(drop.dropRate)}%)`,
             );
           } else {
             const row = document.createElement('div');
@@ -1628,7 +1680,7 @@ export class Encyclopedia extends Base {
             row.appendChild(nameSpan);
             row.appendChild(
               document.createTextNode(
-                ` x${drop.amount} (${drop.dropRate.toFixed(1)}%)`,
+                ` x${drop.amount} (${formatDropRate(drop.dropRate)}%)`,
               ),
             );
             this.detailPanel.appendChild(row);
@@ -1647,7 +1699,7 @@ export class Encyclopedia extends Base {
                 'item',
                 itemId,
                 drop.itemName,
-                ` x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+                ` x${drop.amount} (${formatDropRate(drop.dropRate)}%) (Awakened)`,
               );
             } else {
               const row = document.createElement('div');
@@ -1657,7 +1709,7 @@ export class Encyclopedia extends Base {
               row.appendChild(nameSpan);
               row.appendChild(
                 document.createTextNode(
-                  ` x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+                  ` x${drop.amount} (${formatDropRate(drop.dropRate)}%) (Awakened)`,
                 ),
               );
               this.detailPanel.appendChild(row);

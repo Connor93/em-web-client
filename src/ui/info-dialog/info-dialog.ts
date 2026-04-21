@@ -1,7 +1,7 @@
 import { type EifRecord, type EnfRecord, NpcType } from 'eolib';
 import type { Client } from '../../client';
 import { playSfxById, SfxId } from '../../sfx';
-import { getItemMeta } from '../../utils';
+import { formatDropRate, getItemMeta } from '../../utils';
 import { Base } from '../base-ui';
 import {
   addMobileCloseButton,
@@ -12,9 +12,26 @@ import {
 import './info-dialog.css';
 
 export interface ItemSourceInfo {
+  itemId?: number;
   drops: { npcName: string; dropRate: number }[];
   shops: { npcName: string; price: number }[];
   crafts: { npcName: string; ingredients: string }[];
+  upgradeTiers?: {
+    variantId: number;
+    hp: number;
+    tp: number;
+    minDamage: number;
+    maxDamage: number;
+    accuracy: number;
+    evade: number;
+    armor: number;
+    str: number;
+    intl: number;
+    wis: number;
+    agi: number;
+    con: number;
+    cha: number;
+  }[];
 }
 
 export interface NpcSourceInfo {
@@ -192,7 +209,8 @@ export class InfoDialog extends Base {
     const hasData =
       sources.drops.length > 0 ||
       sources.shops.length > 0 ||
-      sources.crafts.length > 0;
+      sources.crafts.length > 0 ||
+      (sources.upgradeTiers && sources.upgradeTiers.length > 0);
 
     if (!hasData) {
       this.addSection('Sources');
@@ -204,7 +222,7 @@ export class InfoDialog extends Base {
     if (sources.drops.length > 0) {
       this.addSection('Dropped By');
       for (const drop of sources.drops) {
-        this.addRow(`${drop.npcName} (${drop.dropRate.toFixed(1)}%)`);
+        this.addRow(`${drop.npcName} (${formatDropRate(drop.dropRate)}%)`);
       }
     }
 
@@ -219,6 +237,28 @@ export class InfoDialog extends Base {
       this.addSection('Craft At');
       for (const craft of sources.crafts) {
         this.addRow(`${craft.npcName} (${craft.ingredients})`);
+      }
+    }
+
+    if (sources.upgradeTiers && sources.upgradeTiers.length > 0) {
+      this.addSection('Upgrade Tiers');
+      for (let i = 0; i < sources.upgradeTiers.length; i++) {
+        const tier = sources.upgradeTiers[i];
+        const stats: string[] = [];
+        if (tier.minDamage > 0 || tier.maxDamage > 0)
+          stats.push(`Dmg: ${tier.minDamage}-${tier.maxDamage}`);
+        if (tier.accuracy > 0) stats.push(`Acc: ${tier.accuracy}`);
+        if (tier.evade > 0) stats.push(`Eva: ${tier.evade}`);
+        if (tier.armor > 0) stats.push(`Arm: ${tier.armor}`);
+        if (tier.hp > 0) stats.push(`HP: ${tier.hp}`);
+        if (tier.tp > 0) stats.push(`TP: ${tier.tp}`);
+        if (tier.str > 0) stats.push(`STR: ${tier.str}`);
+        if (tier.intl > 0) stats.push(`INT: ${tier.intl}`);
+        if (tier.wis > 0) stats.push(`WIS: ${tier.wis}`);
+        if (tier.agi > 0) stats.push(`AGI: ${tier.agi}`);
+        if (tier.con > 0) stats.push(`CON: ${tier.con}`);
+        if (tier.cha > 0) stats.push(`CHA: ${tier.cha}`);
+        this.addRow(`+${i + 1}: ${stats.join(', ')}`);
       }
     }
 
@@ -310,14 +350,14 @@ export class InfoDialog extends Base {
       this.addSection('Drops');
       for (const drop of sources.drops) {
         this.addRow(
-          `${drop.itemName} x${drop.amount} (${drop.dropRate.toFixed(1)}%)`,
+          `${drop.itemName} x${drop.amount} (${formatDropRate(drop.dropRate)}%)`,
         );
       }
       if (sources.awakened && sources.awakened.drops.length > 0) {
         if (sources.drops.length > 0) this.addDivider();
         for (const drop of sources.awakened.drops) {
           this.addRow(
-            `${drop.itemName} x${drop.amount} (${drop.dropRate.toFixed(1)}%) (Awakened)`,
+            `${drop.itemName} x${drop.amount} (${formatDropRate(drop.dropRate)}%) (Awakened)`,
           );
         }
       }
