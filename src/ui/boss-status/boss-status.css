@@ -1,0 +1,162 @@
+/* ── Boss Status Panel ───────────────────────────────────────────── */
+
+#boss-status-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1200;
+  width: 320px;
+  max-height: 400px;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: var(--theme-bg-dark, rgba(10, 10, 14, 0.94));
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r, 212),
+      var(--theme-accent-g, 184),
+      var(--theme-accent-b, 150),
+      0.25
+    );
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.boss-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r, 212),
+      var(--theme-accent-g, 184),
+      var(--theme-accent-b, 150),
+      0.15
+    );
+}
+
+.boss-status-title {
+  color: var(--theme-accent, #d4b896);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.boss-status-close {
+  background: none;
+  border: none;
+  color: var(--theme-dim, #9a8d7e);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.boss-status-close:hover {
+  color: var(--theme-text, #e0d6c8);
+}
+
+/* ── Body ───────────────────────────────────────────────────────── */
+
+.boss-status-body {
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Boss Entry ─────────────────────────────────────────────────── */
+
+.boss-status-entry {
+  padding: 8px 12px;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r, 212),
+      var(--theme-accent-g, 184),
+      var(--theme-accent-b, 150),
+      0.08
+    );
+}
+
+.boss-status-entry:last-child {
+  border-bottom: none;
+}
+
+.boss-status-name {
+  color: var(--theme-text, #e0d6c8);
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.boss-status-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 8px;
+}
+
+.boss-status-detail {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.boss-status-detail-label {
+  color: var(--theme-dim, #9a8d7e);
+  flex-shrink: 0;
+}
+
+.boss-status-detail-value {
+  color: var(--theme-text, #e0d6c8);
+}
+
+/* Status-specific colors */
+.boss-status-detail-value.status-active {
+  color: #e85050;
+  font-weight: 600;
+}
+
+.boss-status-detail-value.status-ready {
+  color: #7ec87e;
+}
+
+.boss-status-detail-value.status-cooldown {
+  color: var(--theme-dim, #9a8d7e);
+}
+
+/* ── Kill progress bar ──────────────────────────────────────────── */
+
+.boss-status-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.boss-status-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.boss-status-progress-fill {
+  height: 100%;
+  background: var(--theme-accent, #d4b896);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.boss-status-progress-text {
+  color: var(--theme-dim, #9a8d7e);
+  font-size: 10px;
+  flex-shrink: 0;
+}

@@ -90,6 +90,11 @@ export class GuildPanel extends Base {
         return;
       }
 
+      if (title.includes('Awakened Boss Status')) {
+        this.client.emit('bossStatusReport', { title, body });
+        return;
+      }
+
       if (!isGuild) {
         // Non-guild scroll message — display in chat system tab
         this.client.emit('scrollMessageGeneric', { title, body, lines });

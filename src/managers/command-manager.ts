@@ -104,6 +104,12 @@ export function handleCommand(client: Client, input: string): boolean {
       return handleNpcCommand(client, param);
     }
 
+    case '#dps': {
+      client.emit('toggleDamageTracker', undefined);
+      playSfxById(SfxId.TextBoxFocus);
+      return true;
+    }
+
     case '#guild': {
       const packet = new TalkReportClientPacket();
       packet.message = input;

@@ -149,7 +149,14 @@ function handleNpcSpec(client: Client, reader: EoReader) {
   const deadNpc = client.nearby.npcs.find((n) => n.index === deadNpcIndex);
   if (deadNpc) {
     const deadRecord = client.getEnfRecordById(deadNpc.id);
-    if (deadRecord?.boss) {
+    if (damage > 0 && deadRecord) {
+      client.emit('damageDealt', {
+        npcIndex: deadNpcIndex,
+        npcName: deadRecord.name,
+        damage,
+      });
+    }
+    if (deadRecord?.boss || client.awakenedBosses.has(deadNpcIndex)) {
       client.emit('bossDied', { npcIndex: deadNpcIndex });
       client.awakenedBosses.delete(deadNpcIndex);
     }
@@ -207,6 +214,20 @@ function handleNpcAccept(client: Client, reader: EoReader) {
     packet.npcKilledData.npcIndex,
     new HealthBar(0, damage, 0, isCritical),
   );
+  const deadNpc = client.nearby.npcs.find(
+    (n) => n.index === packet.npcKilledData.npcIndex,
+  );
+  if (damage > 0 && deadNpc) {
+    const deadRecord = client.getEnfRecordById(deadNpc.id);
+    if (deadRecord) {
+      client.emit('damageDealt', {
+        npcIndex: packet.npcKilledData.npcIndex,
+        npcName: deadRecord.name,
+        damage,
+      });
+    }
+  }
+
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
 
   if (packet.npcKilledData.dropIndex) {
@@ -321,7 +342,15 @@ function handleNpcReply(client: Client, reader: EoReader) {
     new HealthBar(packet.hpPercentage, damage, 0, isCritical, isLocal),
   );
 
-  if (record.boss) {
+  if (isLocal && damage > 0) {
+    client.emit('damageDealt', {
+      npcIndex: npc.index,
+      npcName: record.name,
+      damage,
+    });
+  }
+
+  if (record.boss || client.awakenedBosses.has(npc.index)) {
     client.emit('bossHealthUpdate', {
       npcIndex: npc.index,
       npcId: npc.id,

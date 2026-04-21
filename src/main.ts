@@ -26,6 +26,7 @@ import {
   isAutoBattleUnlocked,
   toggleAutoBattle,
 } from './managers/auto-battle-manager';
+import { settings } from './settings';
 import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { AutolootPanel } from './ui/autoloot-panel';
@@ -35,6 +36,8 @@ import { initDraggableDialogs } from './ui/base-ui';
 import { BoardDialog } from './ui/board-dialog';
 import { Book } from './ui/book/book';
 import { BossBar } from './ui/boss-bar';
+import { BossDamageReportPanel } from './ui/boss-damage-report';
+import { BossStatusPanel } from './ui/boss-status';
 import { BuffBar } from './ui/buff-bar';
 import { ChangePasswordForm } from './ui/change-password';
 import { CharacterSelect } from './ui/character-select';
@@ -44,6 +47,7 @@ import { CitizenDialog } from './ui/citizen-dialog/citizen-dialog';
 import { ControlEditor } from './ui/control-editor';
 import { CreateAccountForm } from './ui/create-account';
 import { CreateCharacterForm } from './ui/create-character';
+import { DamageTrackerPanel } from './ui/damage-tracker';
 import { Encyclopedia } from './ui/encyclopedia';
 import { ExitGame } from './ui/exit-game';
 import { ExpeditionTracker } from './ui/expedition-tracker/expedition-tracker';
@@ -159,7 +163,8 @@ function resizeCanvases() {
   }
 
   _isMobile =
-    viewportWidth < 940 || (_hasCoarsePointer && viewportWidth < 1200);
+    settings.get('displayMode') === 'auto' &&
+    (viewportWidth < 940 || (_hasCoarsePointer && viewportWidth < 1200));
   if (_isMobile) {
     document.body.classList.add('is-mobile');
     if (client.state === GameState.InGame) {
@@ -182,6 +187,9 @@ window.addEventListener('resize', () => {
   cachedCanvasRect = null;
   cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(resizeCanvases);
+});
+settings.on('change', ({ key }) => {
+  if (key === 'displayMode') resizeCanvases();
 });
 
 // ── Render Loop ──────────────────────────────────────────────────────────
@@ -260,6 +268,9 @@ const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
+const bossDamageReport = new BossDamageReportPanel();
+const bossStatusPanel = new BossStatusPanel();
+const damageTrackerPanel = new DamageTrackerPanel();
 const expeditionTracker = new ExpeditionTracker(client);
 const buffBar = new BuffBar(client);
 const _partyHud = new PartyHud(client);
@@ -436,6 +447,9 @@ wireClientEvents({
   autolootPanel,
   buffBar,
   bossBar,
+  bossDamageReport,
+  bossStatusPanel,
+  damageTracker: damageTrackerPanel,
   expeditionTracker,
   reconnectOverlay,
   initializeSocket,
@@ -514,7 +528,10 @@ initDraggableDialogs([
 // ── Movable UI elements (HUD, Chat) ─────────────────────────────────
 makeMovable(document.getElementById('hud')!);
 makeMovable(document.getElementById('chat')!);
+makeMovable(document.getElementById('hotbar')!);
+makeMovable(document.getElementById('in-game-menu')!);
 makeMovable(document.getElementById('buff-bar')!);
+makeMovable(document.getElementById('damage-tracker')!);
 if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }

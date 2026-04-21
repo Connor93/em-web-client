@@ -37,7 +37,71 @@ function isBossMessage(message: string): boolean {
   return message.startsWith('[BOSS_');
 }
 
+/** Accumulated [BOSS_DMG] lines — flushed after a short idle window. */
+let bossDmgLines: string[] = [];
+let bossDmgFlushTimer = 0;
+
+function flushBossDmgReport(client: Client): void {
+  const lines = bossDmgLines;
+  bossDmgLines = [];
+
+  // Header: "[BOSS_DMG] -- BossName Damage Report --"
+  const headerLine = lines.find((l) => l.includes(' Damage Report --'));
+  const bossName = headerLine
+    ? headerLine
+        .replace('[BOSS_DMG] -- ', '')
+        .replace(' Damage Report --', '')
+        .trim()
+    : 'Boss';
+
+  // Footer: "[BOSS_DMG] (*) = Below X% minimum, consolation exp only"
+  const footerLine = lines.find((l) => l.includes('minimum'));
+  let minimumPercent: number | null = null;
+  if (footerLine) {
+    const footerMatch = footerLine.match(/Below (\d+)%/);
+    if (footerMatch) minimumPercent = Number(footerMatch[1]);
+  }
+
+  // Entry lines: "[BOSS_DMG] PlayerName: 1234 dmg (45%) | +500 exp" optionally " (*)"
+  const entries: {
+    name: string;
+    damage: number;
+    percent: number;
+    exp: number;
+    qualified: boolean;
+  }[] = [];
+  for (const line of lines) {
+    const entryMatch = line.match(
+      /^\[BOSS_DMG\] (.+?):\s+(\d+)\s+dmg\s+\((\d+)%\)\s*(?:\|\s*\+(\d+)\s*exp\s*)?(\(\*\))?$/,
+    );
+    if (entryMatch) {
+      entries.push({
+        name: entryMatch[1],
+        damage: Number(entryMatch[2]),
+        percent: Number(entryMatch[3]),
+        exp: entryMatch[4] ? Number(entryMatch[4]) : 0,
+        qualified: !entryMatch[5],
+      });
+    }
+  }
+
+  if (entries.length > 0) {
+    client.emit('bossDamageReport', { bossName, entries, minimumPercent });
+  }
+}
+
 function handleBossMessage(client: Client, message: string): void {
+  // Accumulate [BOSS_DMG] lines and flush as a batch
+  if (message.startsWith('[BOSS_DMG]')) {
+    bossDmgLines.push(message);
+    window.clearTimeout(bossDmgFlushTimer);
+    bossDmgFlushTimer = window.setTimeout(
+      () => flushBossDmgReport(client),
+      200,
+    );
+    return;
+  }
+
   // Boss state changes are handled by the dedicated boss state packet.
   // Here we only handle loot/exp messages and suppress all [BOSS_*] from chat.
   if (message.startsWith('[BOSS_LOOT]')) {
@@ -416,6 +480,18 @@ function handleHotMessage(client: Client, message: string): void {
   client.emit('hotStarted', { playerId, hpPerTick, ticks, duration });
 }
 
+function handleThornsMessage(client: Client, message: string): void {
+  // [THORNS] PlayerID Damage dmg reflected
+  const match = message.match(/^\[THORNS\] (\d+) (\d+) dmg reflected$/);
+  if (!match) return;
+
+  const playerId = Number(match[1]);
+  const damage = Number(match[2]);
+  if (playerId === client.playerId && damage > 0) {
+    client.emit('thornsHit', { damage });
+  }
+}
+
 function handleMessageOpen(client: Client, reader: EoReader) {
   const packet = MessageOpenServerPacket.deserialize(reader);
 
@@ -443,6 +519,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
 
   if (isClassAbilityMessage(packet.message)) {
     handleClassAbilityMessage(client, packet.message);
+    return;
+  }
+
+  if (packet.message.startsWith('[THORNS]')) {
+    handleThornsMessage(client, packet.message);
     return;
   }
 

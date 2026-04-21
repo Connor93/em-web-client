@@ -102,7 +102,11 @@ export interface ClientEventDeps {
     show(): void;
   };
   boardDialog: { setData(posts: unknown): void; show(): void };
-  lockerDialog: { setItems(items: unknown): void; show(): void; hide(): void };
+  lockerDialog: {
+    setItems(items: unknown, title?: string): void;
+    show(): void;
+    hide(): void;
+  };
   skillMasterDialog: {
     setData(name: string, skills: unknown): void;
     show(): void;
@@ -146,6 +150,26 @@ export interface ClientEventDeps {
   autolootPanel: { show(): void; hide(): void };
   buffBar: { update(): void; clear(): void };
   bossBar: BossBar;
+  bossDamageReport: {
+    show(report: {
+      bossName: string;
+      entries: {
+        name: string;
+        damage: number;
+        percent: number;
+        exp: number;
+        qualified: boolean;
+      }[];
+      minimumPercent: number | null;
+    }): void;
+    setLocalPlayerName(name: string): void;
+  };
+  bossStatusPanel: { show(title: string, body: string): void };
+  damageTracker: {
+    recordHit(npcIndex: number, npcName: string, damage: number): void;
+    recordThorns(damage: number): void;
+    toggle(): void;
+  };
   expeditionTracker: ExpeditionTracker;
   reconnectOverlay: HTMLElement;
   initializeSocket: (next?: 'login' | 'create' | '') => void;
@@ -277,6 +301,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
       client.level,
       client.getEcfRecordById(client.classId)?.name ?? '',
     );
+    deps.bossDamageReport.setLocalPlayerName(client.name);
 
     deps.loginForm.hide();
     deps.characterSelect.hide();
@@ -483,6 +508,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     }
   });
 
+  client.on('adminInventory', ({ name, items }) => {
+    deps.lockerDialog.setItems(items, `${name}'s Inventory`);
+    deps.lockerDialog.show();
+  });
+
   client.on('lockerChanged', ({ items }) => {
     deps.lockerDialog.setItems(items);
   });
@@ -560,6 +590,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('bossDied', ({ npcIndex }) => {
     bossBar.removeBoss(npcIndex);
+    client.playerStatusEffects.clear();
   });
 
   client.on('bossAwakened', ({ npcIndex, name }) => {
@@ -586,6 +617,27 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('bossExpGain', ({ amount }) => {
     showGameToast(EOResourceID.STATUS_LABEL_TYPE_INFORMATION, amount, 'exp');
+  });
+
+  client.on('bossDamageReport', (report) => {
+    deps.bossDamageReport.show(report);
+  });
+
+  client.on('bossStatusReport', ({ title, body }) => {
+    deps.bossStatusPanel.show(title, body);
+  });
+
+  // Damage tracker
+  client.on('damageDealt', ({ npcIndex, npcName, damage }) => {
+    deps.damageTracker.recordHit(npcIndex, npcName, damage);
+  });
+
+  client.on('thornsHit', ({ damage }) => {
+    deps.damageTracker.recordThorns(damage);
+  });
+
+  client.on('toggleDamageTracker', () => {
+    deps.damageTracker.toggle();
   });
 
   // Expedition tracker

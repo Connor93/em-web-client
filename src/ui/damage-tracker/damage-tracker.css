@@ -1,0 +1,102 @@
+/* ── Damage Tracker Panel ────────────────────────────────────────── */
+
+#damage-tracker {
+  position: fixed;
+  bottom: 180px;
+  left: 16px;
+  z-index: 1050;
+  width: 180px;
+  font-family: inherit;
+  font-size: 11px;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: var(--theme-bg-dark, rgba(10, 10, 14, 0.94));
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r, 212),
+      var(--theme-accent-g, 184),
+      var(--theme-accent-b, 150),
+      0.2
+    );
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.dmg-tracker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r, 212),
+      var(--theme-accent-g, 184),
+      var(--theme-accent-b, 150),
+      0.12
+    );
+}
+
+.dmg-tracker-target {
+  color: var(--theme-accent, #d4b896);
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  margin-right: 4px;
+}
+
+.dmg-tracker-close {
+  background: none;
+  border: none;
+  color: var(--theme-dim, #9a8d7e);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dmg-tracker-close:hover {
+  color: var(--theme-text, #e0d6c8);
+}
+
+/* ── Stats Grid ─────────────────────────────────────────────────── */
+
+.dmg-tracker-body {
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dmg-tracker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.dmg-tracker-label {
+  color: var(--theme-dim, #9a8d7e);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dmg-tracker-value {
+  color: var(--theme-text, #e0d6c8);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dmg-tracker-value.dps {
+  color: var(--theme-accent, #d4b896);
+}
+
+.dmg-tracker-value.thorns {
+  color: #7ec87e;
+}

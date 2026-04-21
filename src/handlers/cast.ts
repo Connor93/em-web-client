@@ -61,7 +61,11 @@ function handleCastReply(client: Client, reader: EoReader) {
   );
 
   const record = client.getEnfRecordById(npc.id);
-  if (record?.boss) {
+  if (isLocal && damage > 0 && record) {
+    client.emit('damageDealt', { npcIndex, npcName: record.name, damage });
+  }
+
+  if (record?.boss || client.awakenedBosses.has(npcIndex)) {
     client.emit('bossHealthUpdate', {
       npcIndex,
       npcId: npc.id,
@@ -105,7 +109,17 @@ function handleCastSpec(client: Client, reader: EoReader) {
   );
   if (deadNpc) {
     const deadRecord = client.getEnfRecordById(deadNpc.id);
-    if (deadRecord?.boss) {
+    if (isLocal && damage > 0 && deadRecord) {
+      client.emit('damageDealt', {
+        npcIndex: packet.npcKilledData.npcIndex,
+        npcName: deadRecord.name,
+        damage,
+      });
+    }
+    if (
+      deadRecord?.boss ||
+      client.awakenedBosses.has(packet.npcKilledData.npcIndex)
+    ) {
       client.emit('bossDied', { npcIndex: packet.npcKilledData.npcIndex });
       client.awakenedBosses.delete(packet.npcKilledData.npcIndex);
     }
@@ -173,6 +187,15 @@ function handleCastAccept(client: Client, reader: EoReader) {
     new HealthBar(0, damage, 0, isCritical),
   );
 
+  const npcRecord = client.getEnfRecordById(npc.id);
+  if (damage > 0 && npcRecord) {
+    client.emit('damageDealt', {
+      npcIndex: packet.npcKilledData.npcIndex,
+      npcName: npcRecord.name,
+      damage,
+    });
+  }
+
   client.playSpellEffect(
     packet.spellId,
     new EffectTargetNpc(packet.npcKilledData.npcIndex),
@@ -185,7 +208,10 @@ function handleCastAccept(client: Client, reader: EoReader) {
   );
   if (deadNpc) {
     const deadRecord = client.getEnfRecordById(deadNpc.id);
-    if (deadRecord?.boss) {
+    if (
+      deadRecord?.boss ||
+      client.awakenedBosses.has(packet.npcKilledData.npcIndex)
+    ) {
       client.emit('bossDied', { npcIndex: packet.npcKilledData.npcIndex });
       client.awakenedBosses.delete(packet.npcKilledData.npcIndex);
     }

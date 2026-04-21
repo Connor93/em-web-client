@@ -2,6 +2,7 @@ export { bigCoordsToCoords } from './big-coords-to-coords';
 export { calculateTnl, getExpForLevel } from './calculate-tnl';
 export { capitalize } from './capitalize';
 export { clipHair } from './clip-hair';
+export { formatDropRate } from './format-drop-rate';
 export {
   EffectAnimationType,
   EffectMetadata,

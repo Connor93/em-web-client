@@ -1343,9 +1343,10 @@ export class MapRenderer {
   }
 
   private hasActiveStatusEffects(playerId: number): boolean {
-    // Clean up expired effects
+    // Clean up expired effects (expiresAt uses Date.now())
+    const now = Date.now();
     for (const [key, effect] of this.client.playerStatusEffects) {
-      if (effect.expiresAt <= this._frameTime) {
+      if (effect.expiresAt <= now) {
         this.client.playerStatusEffects.delete(key);
       }
     }
