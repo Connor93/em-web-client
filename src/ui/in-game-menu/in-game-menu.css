@@ -10,6 +10,11 @@
   padding: 0 6px;
 }
 
+#in-game-menu.ui-repositioned {
+  right: unset;
+  height: auto;
+}
+
 .menu-btn {
   display: flex;
   align-items: center;

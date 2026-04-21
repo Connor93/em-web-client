@@ -12,7 +12,11 @@ export interface GameSettings {
   fpsLimit: 'Unlimited' | '60' | '30' | '20';
   wasdMovement: 'enabled' | 'disabled';
   weaponAuras: 'enabled' | 'disabled';
-  hotbarSlots: '5' | '10';
+  hotbarSlots: '5' | '2x5' | '5x2' | '1x10' | '10x1';
+  displayMode: 'auto' | 'desktop';
+  chatWidth: 'default' | '50%' | '75%' | '100%';
+  chatHeight: 'default' | '200px' | '300px' | '400px' | '500px';
+  chatScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -30,6 +34,10 @@ const DEFAULTS: GameSettings = {
   wasdMovement: 'disabled',
   weaponAuras: 'enabled',
   hotbarSlots: '5',
+  displayMode: 'auto',
+  chatWidth: 'default',
+  chatHeight: 'default',
+  chatScale: '1x',
 };
 
 export const SETTING_OPTIONS: {
@@ -46,7 +54,11 @@ export const SETTING_OPTIONS: {
   fpsLimit: ['Unlimited', '60', '30', '20'],
   wasdMovement: ['enabled', 'disabled'],
   weaponAuras: ['enabled', 'disabled'] as const,
-  hotbarSlots: ['5', '10'] as const,
+  hotbarSlots: ['5', '2x5', '5x2', '1x10', '10x1'] as const,
+  displayMode: ['auto', 'desktop'] as const,
+  chatWidth: ['default', '50%', '75%', '100%'] as const,
+  chatHeight: ['default', '200px', '300px', '400px', '500px'] as const,
+  chatScale: ['1x', '1.25x', '1.5x', '1.75x', '2x'] as const,
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -61,7 +73,11 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   weaponAuras: 'Weapon Auras',
   uiScale: 'UI Scale',
   fpsLimit: 'FPS Limit',
-  hotbarSlots: 'Hotbar Slots',
+  hotbarSlots: 'Hotbar Layout',
+  displayMode: 'Display Mode',
+  chatWidth: 'Chat Width',
+  chatHeight: 'Chat Height',
+  chatScale: 'Chat Scale',
 };
 
 type SettingsEvents = {

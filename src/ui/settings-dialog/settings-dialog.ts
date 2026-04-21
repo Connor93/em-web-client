@@ -147,6 +147,9 @@ const LEFT_KEYS: (keyof GameSettings)[] = [
   'logChat',
   'interactions',
   'ghostNpcs',
+  'chatWidth',
+  'chatHeight',
+  'chatScale',
 ];
 
 /** Right column settings, in display order. */
@@ -157,6 +160,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'hotbarSlots',
   'uiScale',
   'fpsLimit',
+  'displayMode',
 ];
 
 export class SettingsDialog extends Base {

@@ -64,6 +64,8 @@
   display: flex;
   gap: 6px;
   padding: 10px 12px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 #settings-dialog .settings-column {

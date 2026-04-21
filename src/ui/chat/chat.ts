@@ -71,6 +71,8 @@ export class Chat extends Base {
   )!;
   private collapsed = false;
   private client: Client;
+  private unreadCounts = new Map<ChatTab, number>();
+  private badges = new Map<ChatTab, HTMLSpanElement>();
 
   setMessage(message: string) {
     this.message.value = message;
@@ -207,6 +209,10 @@ export class Chat extends Base {
 
     chatWindow.appendChild(li);
     chatWindow.scrollTo(0, chatWindow.scrollHeight);
+
+    if (tab !== ChatTab.System && chatWindow !== this.activeChat) {
+      this.incrementUnread(tab);
+    }
   }
 
   clear() {
@@ -214,6 +220,45 @@ export class Chat extends Base {
     this.globalChat.innerHTML = '';
     this.groupChat.innerHTML = '';
     this.systemChat.innerHTML = '';
+    this.unreadCounts.clear();
+    for (const badge of this.badges.values()) {
+      badge.classList.add('hidden');
+      badge.textContent = '';
+    }
+  }
+
+  private getActiveTab(): ChatTab {
+    if (this.activeChat === this.localChat) return ChatTab.Local;
+    if (this.activeChat === this.globalChat) return ChatTab.Global;
+    if (this.activeChat === this.groupChat) return ChatTab.Group;
+    return ChatTab.System;
+  }
+
+  private incrementUnread(tab: ChatTab) {
+    const count = (this.unreadCounts.get(tab) ?? 0) + 1;
+    this.unreadCounts.set(tab, count);
+    const badge = this.badges.get(tab);
+    if (badge) {
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.classList.remove('hidden');
+    }
+  }
+
+  private clearUnread(tab: ChatTab) {
+    this.unreadCounts.delete(tab);
+    const badge = this.badges.get(tab);
+    if (badge) {
+      badge.classList.add('hidden');
+      badge.textContent = '';
+    }
+  }
+
+  private createBadge(button: HTMLButtonElement, tab: ChatTab) {
+    const badge = document.createElement('span');
+    badge.className = 'chat-unread-badge hidden';
+    button.style.position = 'relative';
+    button.appendChild(badge);
+    this.badges.set(tab, badge);
   }
 
   override show() {
@@ -344,6 +389,11 @@ export class Chat extends Base {
       }
     });
 
+    // Create unread badges on tab buttons
+    this.createBadge(this.btnLocal, ChatTab.Local);
+    this.createBadge(this.btnGlobal, ChatTab.Global);
+    this.createBadge(this.btnGroup, ChatTab.Group);
+
     this.btnLocal.addEventListener('click', () => {
       this.localChat.classList.remove('hidden');
       this.globalChat.classList.add('hidden');
@@ -355,6 +405,7 @@ export class Chat extends Base {
       this.btnSystem.classList.remove('active');
       this.localChat.scrollTo(0, this.localChat.scrollHeight);
       this.activeChat = this.localChat;
+      this.clearUnread(ChatTab.Local);
       this.collapsed = false;
     });
 
@@ -369,6 +420,7 @@ export class Chat extends Base {
       this.btnSystem.classList.remove('active');
       this.globalChat.scrollTo(0, this.globalChat.scrollHeight);
       this.activeChat = this.globalChat;
+      this.clearUnread(ChatTab.Global);
     });
 
     this.btnGroup.addEventListener('click', () => {
@@ -382,6 +434,7 @@ export class Chat extends Base {
       this.btnSystem.classList.remove('active');
       this.groupChat.scrollTo(0, this.groupChat.scrollHeight);
       this.activeChat = this.groupChat;
+      this.clearUnread(ChatTab.Group);
       this.collapsed = false;
     });
 
@@ -398,6 +451,48 @@ export class Chat extends Base {
       this.activeChat = this.systemChat;
       this.collapsed = false;
     });
+
+    // Apply saved chat size
+    this.applyChatSize();
+    settings.on('change', ({ key }) => {
+      if (key === 'chatWidth' || key === 'chatHeight' || key === 'chatScale') {
+        this.applyChatSize();
+      }
+    });
+  }
+
+  private applyChatSize() {
+    const width = settings.get('chatWidth');
+    const height = settings.get('chatHeight');
+    const scale = settings.get('chatScale');
+
+    if (width === 'default') {
+      this.container.style.removeProperty('width');
+    } else {
+      this.container.style.setProperty('width', width, 'important');
+    }
+
+    const chatLists = this.container.querySelectorAll<HTMLUListElement>('ul');
+    if (height === 'default') {
+      for (const list of chatLists) {
+        list.style.removeProperty('height');
+      }
+    } else {
+      for (const list of chatLists) {
+        list.style.setProperty('height', height, 'important');
+      }
+    }
+
+    const scaleValue = Number.parseFloat(scale) || 1;
+    if (scaleValue === 1) {
+      this.container.style.removeProperty('font-size');
+    } else {
+      this.container.style.setProperty(
+        'font-size',
+        `${scaleValue * 100}%`,
+        'important',
+      );
+    }
   }
 
   on<Event extends keyof Events>(

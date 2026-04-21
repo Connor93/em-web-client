@@ -12,8 +12,21 @@
   z-index: 1020;
 }
 
+#hotbar.ui-repositioned {
+  bottom: unset;
+  transform: none;
+}
+
 #hotbar.two-rows {
   max-width: calc(5 * (4em + 8px) + 4 * 4px);
+}
+
+#hotbar.two-cols {
+  width: calc(2 * (4em + 8px) + 4px);
+}
+
+#hotbar.vertical {
+  flex-direction: column;
 }
 
 #hotbar .slot {

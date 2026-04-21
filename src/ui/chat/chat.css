@@ -169,6 +169,23 @@
   border-bottom-color: transparent;
 }
 
+.chat-unread-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  color: #fff;
+  background: #d43030;
+  border-radius: 7px;
+  pointer-events: none;
+}
+
 #chat ul {
   list-style: none;
   padding: 0;

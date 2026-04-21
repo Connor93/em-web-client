@@ -62,14 +62,22 @@ export class Hotbar extends Base {
   }
 
   private updateVisibleSlots() {
-    const visibleCount = Number(settings.get('hotbarSlots'));
+    const setting = settings.get('hotbarSlots');
+    const visibleCount = setting === '5' ? 5 : 10;
     for (let i = 0; i < HOTBAR_SLOTS; i++) {
       const slot = this.container.children[i] as HTMLDivElement;
       if (slot) {
         slot.style.display = i < visibleCount ? '' : 'none';
       }
     }
-    this.container.classList.toggle('two-rows', visibleCount > 5);
+    this.container.classList.remove('two-rows', 'two-cols', 'vertical');
+    if (setting === '2x5') {
+      this.container.classList.add('two-rows');
+    } else if (setting === '5x2') {
+      this.container.classList.add('two-cols');
+    } else if (setting === '10x1') {
+      this.container.classList.add('vertical');
+    }
   }
 
   refresh() {
