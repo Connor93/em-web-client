@@ -30,6 +30,7 @@ export class LockerDialog extends Base {
     this.container.querySelector<HTMLInputElement>('.dialog-search')!;
 
   private mobileActionBar: HTMLDivElement | null = null;
+  private customTitle: string | null = null;
 
   constructor(client: Client) {
     super();
@@ -92,8 +93,9 @@ export class LockerDialog extends Base {
     }
   }
 
-  setItems(items: ThreeItem[]) {
+  setItems(items: ThreeItem[], title?: string) {
     this.items = items;
+    this.customTitle = title ?? null;
     this.render();
   }
 
@@ -261,7 +263,9 @@ export class LockerDialog extends Base {
 
   private render() {
     this.grid.innerHTML = '';
-    this.title.innerText = `${capitalize(this.client.name)}'s ${this.client.getResourceString(EOResourceID.DIALOG_TITLE_PRIVATE_LOCKER)} [${this.items.length}]`;
+    this.title.innerText = this.customTitle
+      ? `${this.customTitle} [${this.items.length}]`
+      : `${capitalize(this.client.name)}'s ${this.client.getResourceString(EOResourceID.DIALOG_TITLE_PRIVATE_LOCKER)} [${this.items.length}]`;
 
     const searchTerm = this.searchInput.value.toLowerCase();
 
