@@ -266,3 +266,30 @@ export function resetMovablePositions(): void {
     clearPosition(element);
   }
 }
+
+/**
+ * Rescale all saved positions when the UI scale changes.
+ * Converts CSS-space coordinates from old scale to new scale
+ * so elements stay in the same visual screen position.
+ */
+export function rescaleMovablePositions(
+  oldScale: number,
+  newScale: number,
+): void {
+  if (oldScale === newScale || oldScale <= 0 || newScale <= 0) return;
+
+  const ratio = oldScale / newScale;
+
+  for (const element of registeredElements) {
+    if (!element.classList.contains('ui-repositioned')) continue;
+
+    const currentX = Number.parseFloat(element.style.left) || 0;
+    const currentY = Number.parseFloat(element.style.top) || 0;
+
+    const newX = currentX * ratio;
+    const newY = currentY * ratio;
+
+    applyPosition(element, newX, newY);
+    savePosition(element);
+  }
+}

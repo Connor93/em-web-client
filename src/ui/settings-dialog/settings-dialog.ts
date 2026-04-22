@@ -8,7 +8,11 @@ import {
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 import { addMobileCloseButton } from '../utils';
-import { resetMovablePositions, setMovableLocked } from '../utils/movable';
+import {
+  rescaleMovablePositions,
+  resetMovablePositions,
+  setMovableLocked,
+} from '../utils/movable';
 
 import './settings-dialog.css';
 
@@ -359,9 +363,16 @@ export class SettingsDialog extends Base {
     const uiElement = document.getElementById('ui');
     if (!uiElement) return;
 
+    // Get the old scale before applying the new one
+    const oldMatch = uiElement.style.transform.match(/scale\(([^)]+)\)/);
+    const oldScale = oldMatch ? Number.parseFloat(oldMatch[1]) : 1;
+
     uiElement.style.transform = `scale(${scale})`;
     uiElement.style.transformOrigin = 'top left';
     uiElement.style.width = `${100 / scale}%`;
     uiElement.style.height = `${100 / scale}%`;
+
+    // Rescale movable element positions so they stay in the same visual spot
+    rescaleMovablePositions(oldScale, scale);
   }
 }
