@@ -498,6 +498,7 @@ export class Inventory extends Base {
 
       this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr) ${DIVIDER_WIDTH}px repeat(${cols}, 1fr)`;
       this.grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+      this.grid.style.justifyContent = 'stretch';
     } else {
       // Tall mode: fixed 8×10, cells capped at reasonable size, centered
       this.activeCols = COLS;
@@ -517,6 +518,7 @@ export class Inventory extends Base {
         this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
       }
       this.grid.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
+      this.grid.style.justifyContent = 'start';
     }
 
     // Show/hide tab buttons
