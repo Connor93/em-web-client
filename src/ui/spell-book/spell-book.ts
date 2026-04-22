@@ -23,6 +23,10 @@ export class SpellBook extends BaseDialogMd<Events> {
     offsetY: number;
   } | null = null;
 
+  private boundOnPointerMove = this.onPointerMove.bind(this);
+  private boundOnPointerUp = this.onPointerUp.bind(this);
+  private boundOnPointerCancel = this.onPointerCancel.bind(this);
+
   private mobileActionBar: HTMLDivElement | null = null;
 
   constructor(client: Client) {
@@ -88,8 +92,6 @@ export class SpellBook extends BaseDialogMd<Events> {
       return;
     }
 
-    (e.target as Element).setPointerCapture(e.pointerId);
-
     const rect = el.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
@@ -122,13 +124,13 @@ export class SpellBook extends BaseDialogMd<Events> {
 
     playSfxById(SfxId.InventoryPickup);
 
-    window.addEventListener('pointermove', this.onPointerMove.bind(this), {
+    window.addEventListener('pointermove', this.boundOnPointerMove, {
       passive: false,
     });
-    window.addEventListener('pointerup', this.onPointerUp.bind(this), {
+    window.addEventListener('pointerup', this.boundOnPointerUp, {
       passive: false,
     });
-    window.addEventListener('pointercancel', this.onPointerCancel.bind(this), {
+    window.addEventListener('pointercancel', this.boundOnPointerCancel, {
       passive: false,
     });
   }
@@ -140,8 +142,9 @@ export class SpellBook extends BaseDialogMd<Events> {
     const { ghost, offsetX, offsetY } = this.dragging;
     ghost.style.transform = `translate(${e.clientX - offsetX}px, ${e.clientY - offsetY}px)`;
 
-    // prevent page scrolling while dragging on mobile
-    e.preventDefault();
+    // prevent page scrolling while dragging on mobile;
+    // only preventDefault on touch — on mouse it would suppress mousemove
+    if (e.pointerType === 'touch') e.preventDefault();
   }
 
   private onPointerUp(e: PointerEvent) {
@@ -187,9 +190,9 @@ export class SpellBook extends BaseDialogMd<Events> {
   }
 
   private teardownDragListeners() {
-    window.removeEventListener('pointermove', this.onPointerMove);
-    window.removeEventListener('pointerup', this.onPointerUp);
-    window.removeEventListener('pointercancel', this.onPointerCancel);
+    window.removeEventListener('pointermove', this.boundOnPointerMove);
+    window.removeEventListener('pointerup', this.boundOnPointerUp);
+    window.removeEventListener('pointercancel', this.boundOnPointerCancel);
   }
 
   /* ── Mobile Action Bar ─────────────────────────────────────────── */

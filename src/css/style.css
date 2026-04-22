@@ -928,13 +928,24 @@ div.icon[data-id="23"] {
   gap: 6px;
   overflow-y: auto;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    )
+    transparent;
   touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dialog-md .dialog-contents::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
+}
+
+.dialog-md .dialog-contents::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .dialog-md .dialog-contents::-webkit-scrollbar-thumb {
@@ -944,7 +955,7 @@ div.icon[data-id="23"] {
     var(--theme-accent-b),
     0.3
   );
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 .dialog-md .dialog-contents > div {

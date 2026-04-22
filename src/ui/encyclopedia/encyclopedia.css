@@ -201,6 +201,7 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(
       var(--theme-accent-r),
@@ -393,6 +394,7 @@
   overflow-y: auto;
   padding: 10px;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(
       var(--theme-accent-r),

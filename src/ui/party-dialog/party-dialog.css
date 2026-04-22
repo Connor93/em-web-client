@@ -48,13 +48,34 @@
   justify-content: space-evenly;
   gap: 8px;
   overflow-y: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    )
+    transparent;
   touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 #party .member-list::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+
+#party .member-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#party .member-list::-webkit-scrollbar-thumb {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.3
+  );
+  border-radius: 3px;
 }
 
 #party .member-list > div {
