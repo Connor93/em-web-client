@@ -85,6 +85,8 @@
   z-index: 1020;
   top: 30px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background: var(--theme-bg-dark);
   border: 1px solid
     rgba(
@@ -98,6 +100,13 @@
   color: var(--theme-text);
   padding: 5px;
   font-family: inherit;
+}
+
+#chat form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 #chat a {
@@ -210,7 +219,8 @@
 #chat ul {
   list-style: none;
   padding: 0;
-  height: 130px;
+  flex: 1;
+  min-height: 80px;
   overflow-y: scroll;
 }
 

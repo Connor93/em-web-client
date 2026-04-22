@@ -380,6 +380,8 @@ export class Chat extends Base {
     });
 
     this.btnToggle.addEventListener('click', () => {
+      const heightBefore = this.container.offsetHeight;
+
       if (this.collapsed) {
         this.activeChat.classList.remove('hidden');
         this.collapsed = false;
@@ -387,6 +389,16 @@ export class Chat extends Base {
         this.activeChat.classList.add('hidden');
         this.collapsed = true;
       }
+
+      // Adjust top by the height delta so the bottom edge stays in place
+      const delta = heightBefore - this.container.offsetHeight;
+      const currentTop =
+        Number.parseFloat(getComputedStyle(this.container).top) || 0;
+      this.container.style.setProperty(
+        'top',
+        `${currentTop + delta}px`,
+        'important',
+      );
     });
 
     // Create unread badges on tab buttons
@@ -472,15 +484,10 @@ export class Chat extends Base {
       this.container.style.setProperty('width', width, 'important');
     }
 
-    const chatLists = this.container.querySelectorAll<HTMLUListElement>('ul');
     if (height === 'default') {
-      for (const list of chatLists) {
-        list.style.removeProperty('height');
-      }
+      this.container.style.removeProperty('height');
     } else {
-      for (const list of chatLists) {
-        list.style.setProperty('height', height, 'important');
-      }
+      this.container.style.setProperty('height', height, 'important');
     }
 
     const scaleValue = Number.parseFloat(scale) || 1;
