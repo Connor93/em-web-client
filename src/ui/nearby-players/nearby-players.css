@@ -1,0 +1,84 @@
+#nearby-players .player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
+}
+
+#nearby-players .player-row:last-child {
+  border-bottom: none;
+}
+
+#nearby-players .player-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--theme-text);
+}
+
+#nearby-players .player-info {
+  font-size: 11px;
+  color: var(--theme-dim);
+  white-space: nowrap;
+}
+
+#nearby-players .invite-button {
+  padding: 2px 8px;
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
+  border-radius: 3px;
+  color: var(--theme-accent);
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+#nearby-players .invite-button:hover {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.25
+  );
+}
+
+#nearby-players .invite-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#nearby-players .invite-button:disabled:hover {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+}
+
+#nearby-players.dialog-md .dialog-contents {
+  display: flex;
+  flex-direction: column;
+}
