@@ -476,16 +476,15 @@ export class Inventory extends Base {
     const wasDualTab = this.dualTab;
 
     if (this.wideMode) {
-      // Wide mode: compute cols/rows dynamically to fill the container.
-      // Derive cell size from the height so rows fill vertically,
-      // then compute how many columns fit horizontally.
+      // Wide mode: always show both tabs side-by-side.
+      // Split available width in half (minus divider) for each tab.
+      this.dualTab = true;
+
+      const halfW = (contentW - DIVIDER_WIDTH) / 2;
       const cellFromH = (contentH - (ROWS - 1) * gap) / ROWS;
       const cellSize = Math.max(cellFromH, DEFAULT_CELL_SIZE);
 
-      let cols = Math.max(
-        COLS,
-        Math.floor((contentW + gap) / (cellSize + gap)),
-      );
+      let cols = Math.max(COLS, Math.floor((halfW + gap) / (cellSize + gap)));
       let rows = Math.ceil(TOTAL_CELLS / cols);
 
       // Ensure at least 4 rows so the grid doesn't look too flat
@@ -494,18 +493,10 @@ export class Inventory extends Base {
         cols = Math.ceil(TOTAL_CELLS / rows);
       }
 
-      // Dual-tab: can we fit 2× cols + divider?
-      const dualWidth = cols * 2 * (cellSize + gap) - gap + DIVIDER_WIDTH;
-      this.dualTab = contentW >= dualWidth;
-
       this.activeCols = cols;
       this.activeRows = rows;
 
-      if (this.dualTab) {
-        this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr) ${DIVIDER_WIDTH}px repeat(${cols}, 1fr)`;
-      } else {
-        this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      }
+      this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr) ${DIVIDER_WIDTH}px repeat(${cols}, 1fr)`;
       this.grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     } else {
       // Tall mode: fixed 8×10, cells capped at reasonable size, centered
