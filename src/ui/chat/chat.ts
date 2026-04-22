@@ -381,17 +381,17 @@ export class Chat extends Base {
 
     this.btnToggle.addEventListener('click', () => {
       const heightBefore = this.container.offsetHeight;
-      // Save and clear any fixed height so the container can shrink/grow
-      const savedHeight = this.container.style.getPropertyValue('height');
-      const savedPriority = this.container.style.getPropertyPriority('height');
-      this.container.style.removeProperty('height');
 
       if (this.collapsed) {
+        // Expanding: restore the fixed height first, then show content
+        this.applyChatSize();
         this.activeChat.classList.remove('hidden');
         this.collapsed = false;
       } else {
+        // Collapsing: hide content, then remove fixed height so container shrinks
         this.activeChat.classList.add('hidden');
         this.collapsed = true;
+        this.container.style.removeProperty('height');
       }
 
       const heightAfter = this.container.offsetHeight;
@@ -405,11 +405,6 @@ export class Chat extends Base {
         `${currentTop + delta}px`,
         'important',
       );
-
-      // Restore fixed height only when expanded
-      if (!this.collapsed && savedHeight) {
-        this.container.style.setProperty('height', savedHeight, savedPriority);
-      }
     });
 
     // Create unread badges on tab buttons
