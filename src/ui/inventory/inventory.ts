@@ -689,8 +689,10 @@ export class Inventory extends Base {
       }
     }
 
-    this.currentWeight.innerText = this.client.weight.current.toString();
-    this.maxWeight.innerText = this.client.weight.max.toString();
+    if (this.client.weight) {
+      this.currentWeight.innerText = this.client.weight.current.toString();
+      this.maxWeight.innerText = this.client.weight.max.toString();
+    }
 
     if (!this.client.items.length) {
       return;
