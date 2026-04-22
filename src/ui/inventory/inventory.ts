@@ -515,13 +515,55 @@ export class Inventory extends Base {
   private render() {
     this.grid.innerHTML = '';
 
-    // Fill the entire grid with empty cells so CSS grid-gap lines are visible
-    for (let i = 0; i < COLS * ROWS; i++) {
-      const cell = document.createElement('div');
-      cell.classList.add('cell');
-      cell.style.gridColumn = `${(i % COLS) + 1}`;
-      cell.style.gridRow = `${Math.floor(i / COLS) + 1}`;
-      this.grid.appendChild(cell);
+    // Fill the grid with empty cells
+    if (this.dualTab) {
+      // Tab 1 cells (columns 1-8)
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.style.gridColumn = `${col + 1}`;
+          cell.style.gridRow = `${row + 1}`;
+          this.grid.appendChild(cell);
+        }
+      }
+      // Divider column (column 9) — one cell spanning all rows
+      const divider = document.createElement('div');
+      divider.classList.add('grid-divider');
+      divider.style.gridColumn = `${COLS + 1}`;
+      divider.style.gridRow = `1 / span ${ROWS}`;
+      this.grid.appendChild(divider);
+      // Tab 2 cells (columns 10-17)
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.style.gridColumn = `${col + COLS + 2}`;
+          cell.style.gridRow = `${row + 1}`;
+          this.grid.appendChild(cell);
+        }
+      }
+      // Tab labels
+      const label1 = document.createElement('div');
+      label1.classList.add('tab-label');
+      label1.textContent = '1';
+      label1.style.gridColumn = '1';
+      label1.style.gridRow = '1';
+      this.grid.appendChild(label1);
+      const label2 = document.createElement('div');
+      label2.classList.add('tab-label');
+      label2.textContent = '2';
+      label2.style.gridColumn = `${COLS + 2}`;
+      label2.style.gridRow = '1';
+      this.grid.appendChild(label2);
+    } else {
+      for (let i = 0; i < COLS * ROWS; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.style.gridColumn = `${(i % COLS) + 1}`;
+        cell.style.gridRow = `${Math.floor(i / COLS) + 1}`;
+        this.grid.appendChild(cell);
+      }
     }
 
     this.currentWeight.innerText = this.client.weight.current.toString();
@@ -535,56 +577,63 @@ export class Inventory extends Base {
       this.loadPositions();
     }
 
-    for (const item of this.client.items) {
-      const position = this.getPosition(item.id);
-      if (!position || position.tab !== this.tab) {
-        continue;
-      }
+    // Determine which tabs to render
+    const tabsToRender = this.dualTab ? [0, 1] : [this.tab];
 
-      const record = this.client.getEifRecordById(item.id);
-      if (!record) {
-        continue;
-      }
-
-      const imgContainer = document.createElement('div');
-      imgContainer.classList.add('item');
-      const img = document.createElement('img');
-
-      img.src = `/gfx/gfx023/${100 + record.graphicId * 2}.png`;
-
-      const size = ITEM_SIZE[record.size];
-
-      imgContainer.style.gridColumn = `${position.x + 1} / span ${size.x}`;
-      imgContainer.style.gridRow = `${position.y + 1} / span ${size.y}`;
-
-      const tooltip = document.createElement('div');
-      tooltip.classList.add('tooltip');
-
-      const meta = getItemMeta(record);
-
-      if (item.id === 1) {
-        tooltip.innerText = `${item.amount} ${record.name}\n${meta.join('\n')}`;
-      } else {
-        if (item.amount > 1) {
-          tooltip.innerText = `${record.name} x${item.amount}\n${meta.join('\n')}`;
-        } else {
-          tooltip.innerText = `${record.name}\n${meta.join('\n')}`;
+    for (const tab of tabsToRender) {
+      for (const item of this.client.items) {
+        const position = this.getPosition(item.id);
+        if (!position || position.tab !== tab) {
+          continue;
         }
+
+        const record = this.client.getEifRecordById(item.id);
+        if (!record) {
+          continue;
+        }
+
+        const imgContainer = document.createElement('div');
+        imgContainer.classList.add('item');
+        const img = document.createElement('img');
+
+        img.src = `/gfx/gfx023/${100 + record.graphicId * 2}.png`;
+
+        const size = ITEM_SIZE[record.size];
+
+        // In dual-tab mode, tab 1 items offset by COLS + 1 (skip divider column)
+        const colOffset = this.dualTab && tab === 1 ? COLS + 1 : 0;
+        imgContainer.style.gridColumn = `${position.x + 1 + colOffset} / span ${size.x}`;
+        imgContainer.style.gridRow = `${position.y + 1} / span ${size.y}`;
+
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('tooltip');
+
+        const meta = getItemMeta(record);
+
+        if (item.id === 1) {
+          tooltip.innerText = `${item.amount} ${record.name}\n${meta.join('\n')}`;
+        } else {
+          if (item.amount > 1) {
+            tooltip.innerText = `${record.name} x${item.amount}\n${meta.join('\n')}`;
+          } else {
+            tooltip.innerText = `${record.name}\n${meta.join('\n')}`;
+          }
+        }
+
+        imgContainer.appendChild(tooltip);
+        imgContainer.appendChild(img);
+
+        imgContainer.addEventListener('pointerdown', (e) => {
+          this.onPointerDown(e, imgContainer, item);
+        });
+
+        imgContainer.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          this.emitter.emit('useItem', item.id);
+        });
+
+        this.grid.appendChild(imgContainer);
       }
-
-      imgContainer.appendChild(tooltip);
-      imgContainer.appendChild(img);
-
-      imgContainer.addEventListener('pointerdown', (e) => {
-        this.onPointerDown(e, imgContainer, item);
-      });
-
-      imgContainer.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        this.emitter.emit('useItem', item.id);
-      });
-
-      this.grid.appendChild(imgContainer);
     }
 
     // Recalculate square cell columns after grid content is in the DOM

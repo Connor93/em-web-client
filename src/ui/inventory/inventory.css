@@ -128,6 +128,26 @@
   background: rgba(10, 9, 7, 0.65);
 }
 
+#inventory .tab-label {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 9px;
+  color: var(--theme-very-dim);
+  pointer-events: none;
+  z-index: 1;
+}
+
+#inventory .grid-divider {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.25
+  );
+  border-radius: 1px;
+}
+
 #inventory .item {
   position: relative;
   display: flex;
