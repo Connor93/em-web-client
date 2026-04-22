@@ -107,11 +107,7 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-}
-
-#chat form > #btn-toggle-chat,
-#chat form > #chat-tab-bar {
-  flex-shrink: 0;
+  position: relative;
 }
 
 #chat form > #chat-message {
@@ -165,7 +161,10 @@
   border-radius: 4px;
   outline: none;
   user-select: none;
-  align-self: flex-end;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
   cursor: pointer;
   font-family: inherit;
   transition: color 0.15s;
