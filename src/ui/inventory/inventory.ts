@@ -266,47 +266,30 @@ export class Inventory extends Base {
       return;
     }
 
-    // Get UI scale (getBoundingClientRect is in screen-space,
-    // getComputedStyle is in CSS-space; multiply CSS values by scale)
-    const uiEl = document.getElementById('ui');
-    const scaleMatch = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
-    const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
+    // Read actual cell size from the DOM (cells use 1fr, rows match).
+    // getBoundingClientRect is in screen-space which matches pointer coords.
+    const firstCell = this.grid.querySelector('.cell') as HTMLElement | null;
+    if (!firstCell) return;
 
     const rect = this.grid.getBoundingClientRect();
     const style = getComputedStyle(this.grid);
+    const uiEl = document.getElementById('ui');
+    const scaleMatch = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
+    const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
     const padL = Number.parseFloat(style.paddingLeft) * scale;
     const padT = Number.parseFloat(style.paddingTop) * scale;
-    const padR = Number.parseFloat(style.paddingRight) * scale;
-    const padB = Number.parseFloat(style.paddingBottom) * scale;
     const gap = (Number.parseFloat(style.gap) || 1) * scale;
 
-    // Pointer position relative to the content area (inside padding)
+    const cellRect = firstCell.getBoundingClientRect();
+    const cellSize = cellRect.width; // Square — width === height
+
+    if (cellSize <= 0) return;
+
     const pointerX = e.clientX - rect.left - padL;
     const pointerY = e.clientY - rect.top - padT;
 
-    const contentW = rect.width - padL - padR;
-    const contentH = rect.height - padT - padB;
+    if (pointerX < 0 || pointerY < 0) return;
 
-    if (
-      pointerX < 0 ||
-      pointerY < 0 ||
-      pointerX > contentW ||
-      pointerY > contentH
-    ) {
-      return;
-    }
-
-    // Compute actual cell dimensions (all in screen space, square cells).
-    // Mirror the logic in updateGridColumns: size from min(width, height).
-    const cellFromH = (contentH - (ROWS - 1) * gap) / ROWS;
-    let cellSize: number;
-    if (this.dualTab) {
-      const cellFromW = (contentW - 15 * gap - DIVIDER_WIDTH * scale) / 16;
-      cellSize = Math.min(cellFromW, cellFromH);
-    } else {
-      const cellFromW = (contentW - (COLS - 1) * gap) / COLS;
-      cellSize = Math.min(cellFromW, cellFromH);
-    }
     const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellSize + gap)));
 
     if (this.dualTab) {
@@ -315,19 +298,16 @@ export class Inventory extends Base {
       const tab2Start = tab1Width + scaledDivider;
 
       if (pointerX < tab1Width) {
-        // Drop in tab 1
         const gridX = Math.min(
           COLS - 1,
           Math.floor(pointerX / (cellSize + gap)),
         );
         this.tryMoveItem(item.id, gridX, gridY, 0);
       } else if (pointerX >= tab2Start) {
-        // Drop in tab 2
         const localX = pointerX - tab2Start;
         const gridX = Math.min(COLS - 1, Math.floor(localX / (cellSize + gap)));
         this.tryMoveItem(item.id, gridX, gridY, 1);
       }
-      // If in divider zone, do nothing (item returns to original position)
     } else {
       const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellSize + gap)));
       this.tryMoveItem(item.id, gridX, gridY);
@@ -462,54 +442,44 @@ export class Inventory extends Base {
       return;
     }
 
-    // getBoundingClientRect returns screen-space; getComputedStyle returns
-    // CSS-space. Multiply CSS values by UI scale so everything is in screen-space.
-    const uiEl = document.getElementById('ui');
-    const scaleMatch = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
-    const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
-
     const gridRect = this.grid.getBoundingClientRect();
     const style = getComputedStyle(this.grid);
-    const padT = Number.parseFloat(style.paddingTop) * scale;
-    const padB = Number.parseFloat(style.paddingBottom) * scale;
-    const padL = Number.parseFloat(style.paddingLeft) * scale;
-    const padR = Number.parseFloat(style.paddingRight) * scale;
-    const gap = (Number.parseFloat(style.gap) || 1) * scale;
+    const gap = Number.parseFloat(style.gap) || 1;
+    const padL = Number.parseFloat(style.paddingLeft);
+    const padR = Number.parseFloat(style.paddingRight);
+    const contentW = gridRect.width / 1 - padL - padR;
 
-    const contentH = gridRect.height - padT - padB;
-    const contentW = gridRect.width - padL - padR;
+    if (contentW <= 0) return;
 
-    if (contentW <= 0 || contentH <= 0) return;
+    // Use 1fr columns so cells fill the width. Determine dual-tab by checking
+    // if 16 columns would each be at least as wide as they are tall (square).
+    // Step 1: set single-tab 1fr, measure the resulting cell width
+    this.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+    this.grid.style.removeProperty('grid-template-rows');
 
-    // Compute cell size from width (the dimension the user controls via settings).
-    // Try dual-tab first: does the width fit 16 columns + divider?
-    const dualCellFromWidth =
-      (contentW - 15 * gap - DIVIDER_WIDTH * scale) / 16;
-    const singleCellFromWidth = (contentW - (COLS - 1) * gap) / COLS;
-    const cellFromHeight = (contentH - (ROWS - 1) * gap) / ROWS;
+    // Measure a cell's actual rendered width to decide dual-tab
+    const firstCell = this.grid.querySelector('.cell') as HTMLElement | null;
+    if (!firstCell) return;
+    const singleCellW = firstCell.getBoundingClientRect().width;
 
+    // Would dual-tab cells be at least half the single-tab cell width?
+    // (i.e., the container is wide enough for 16 usable columns)
+    const estimatedDualCellW = (contentW - 15 * gap - DIVIDER_WIDTH) / 16;
     const wasDualTab = this.dualTab;
+    this.dualTab =
+      estimatedDualCellW >= singleCellW * 0.5 && estimatedDualCellW > 10;
 
-    // Use dual-tab if the width-derived cell is at least as large as the
-    // height-derived cell (meaning there's room for 16 columns without
-    // making cells smaller than the height would allow)
-    this.dualTab = dualCellFromWidth >= cellFromHeight && dualCellFromWidth > 0;
-
-    // Pick the smaller of width-derived and height-derived to keep cells square
-    // and ensure they fit in both dimensions
-    const cellSize = this.dualTab
-      ? Math.min(dualCellFromWidth, cellFromHeight)
-      : Math.min(singleCellFromWidth, cellFromHeight);
-
-    if (cellSize <= 0) return;
-
-    // Cell size in CSS-space (divide out the scale for grid-template values)
-    const cssCellSize = cellSize / scale;
-
+    // Apply the correct column template
     if (this.dualTab) {
-      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cssCellSize}px) ${DIVIDER_WIDTH}px repeat(${COLS}, ${cssCellSize}px)`;
-    } else {
-      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cssCellSize}px)`;
+      this.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr) ${DIVIDER_WIDTH}px repeat(${COLS}, 1fr)`;
+    }
+    // else: already set to repeat(8, 1fr) above
+
+    // Make rows match column width for square cells.
+    // Re-measure actual cell width after applying the final template.
+    const cellW = firstCell.getBoundingClientRect().width;
+    if (cellW > 0) {
+      this.grid.style.gridTemplateRows = `repeat(${ROWS}, ${cellW}px)`;
     }
 
     // Show/hide tab buttons
