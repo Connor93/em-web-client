@@ -1,84 +1,133 @@
-#nearby-players .player-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid
-    rgba(
-      var(--theme-accent-r),
-      var(--theme-accent-g),
-      var(--theme-accent-b),
-      0.1
-    );
-}
+/* ── Nearby Players Panel ────────────────────────────────────────── */
 
-#nearby-players .player-row:last-child {
-  border-bottom: none;
-}
-
-#nearby-players .player-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--theme-text);
-}
-
-#nearby-players .player-info {
-  font-size: 11px;
-  color: var(--theme-dim);
-  white-space: nowrap;
-}
-
-#nearby-players .invite-button {
-  padding: 2px 8px;
-  background: rgba(
-    var(--theme-accent-r),
-    var(--theme-accent-g),
-    var(--theme-accent-b),
-    0.12
-  );
+#nearby-players {
+  position: fixed;
+  top: 60px;
+  right: 130px;
+  z-index: 1040;
+  width: 160px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--theme-bg-dark);
   border: 1px solid
     rgba(
       var(--theme-accent-r),
       var(--theme-accent-g),
       var(--theme-accent-b),
-      0.25
+      0.2
     );
-  border-radius: 3px;
-  color: var(--theme-accent);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    )
+    transparent;
+}
+
+#nearby-players .nearby-header {
+  padding: 4px 8px;
   font-size: 10px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.15s;
+  font-weight: 600;
+  color: var(--theme-dim);
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.12
+    );
+  user-select: none;
+}
+
+#nearby-players .nearby-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.nearby-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.06
+    );
+}
+
+.nearby-entry:last-child {
+  border-bottom: none;
+}
+
+.nearby-entry-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.nearby-entry-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #88ccff;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-#nearby-players .invite-button:hover {
-  background: rgba(
+.nearby-entry-class {
+  font-size: 9px;
+  color: #a09880;
+}
+
+.nearby-invite {
+  padding: 1px 6px;
+  background: none;
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
+  border-radius: 3px;
+  color: var(--theme-dim);
+  font-size: 9px;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.nearby-invite:hover {
+  color: var(--theme-accent);
+  border-color: rgba(
     var(--theme-accent-r),
     var(--theme-accent-g),
     var(--theme-accent-b),
-    0.25
+    0.4
   );
 }
 
-#nearby-players .invite-button:disabled {
-  opacity: 0.4;
+.nearby-invite:disabled {
+  opacity: 0.3;
   cursor: default;
 }
 
-#nearby-players .invite-button:disabled:hover {
-  background: rgba(
+.nearby-invite:disabled:hover {
+  color: var(--theme-dim);
+  border-color: rgba(
     var(--theme-accent-r),
     var(--theme-accent-g),
     var(--theme-accent-b),
-    0.12
+    0.2
   );
-}
-
-#nearby-players.dialog-md .dialog-contents {
-  display: flex;
-  flex-direction: column;
 }

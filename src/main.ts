@@ -511,7 +511,6 @@ initDraggableDialogs([
   'stats',
   'spell-book',
   'online-list',
-  'nearby-players',
   'party',
   'paperdoll',
   'bank',
