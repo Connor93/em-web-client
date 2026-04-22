@@ -4,6 +4,7 @@
   position: absolute;
   right: 120px;
   width: 210px;
+  box-sizing: border-box;
   background: var(--theme-bg-dark);
   border: 1px solid
     rgba(
