@@ -68,8 +68,9 @@ import { MobileChat } from './ui/mobile-chat/mobile-chat';
 import { MobileControls } from './ui/mobile-controls/mobile-controls';
 import { MobileHUD } from './ui/mobile-hud/mobile-hud';
 import { MobileToolbar } from './ui/mobile-toolbar/mobile-toolbar';
-import { NpcTooltip } from './ui/npc-tooltip';
 //import { OffsetTweaker } from './ui/offset-tweaker';
+import { NearbyPlayers } from './ui/nearby-players';
+import { NpcTooltip } from './ui/npc-tooltip';
 import { OnlineList } from './ui/online-list';
 import { Paperdoll } from './ui/paperdoll';
 import { PartyDialog } from './ui/party-dialog';
@@ -238,6 +239,7 @@ const inGameMenu = new InGameMenu();
 const inventory = new Inventory(client);
 const stats = new Stats(client);
 const onlineList = new OnlineList(client);
+const nearbyPlayers = new NearbyPlayers(client);
 const paperdoll = new Paperdoll(client);
 const book = new Book(client);
 const hud = new HUD();
@@ -479,6 +481,7 @@ wireUiEvents({
   stats,
   spellBook,
   onlineList,
+  nearbyPlayers,
   inGameMenu,
   questDialog,
   shopDialog,
@@ -508,6 +511,7 @@ initDraggableDialogs([
   'stats',
   'spell-book',
   'online-list',
+  'nearby-players',
   'party',
   'paperdoll',
   'bank',
