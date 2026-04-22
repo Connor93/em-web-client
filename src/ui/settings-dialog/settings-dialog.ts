@@ -161,6 +161,9 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'uiScale',
   'fpsLimit',
   'displayMode',
+  'inventoryWidth',
+  'inventoryHeight',
+  'inventoryScale',
 ];
 
 export class SettingsDialog extends Base {
