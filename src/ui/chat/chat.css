@@ -109,6 +109,15 @@
   min-height: 0;
 }
 
+#chat form > #btn-toggle-chat,
+#chat form > #chat-tab-bar {
+  flex-shrink: 0;
+}
+
+#chat form > #chat-message {
+  flex-shrink: 0;
+}
+
 #chat a {
   color: var(--theme-accent);
 }
@@ -156,7 +165,7 @@
   border-radius: 4px;
   outline: none;
   user-select: none;
-  float: right;
+  align-self: flex-end;
   cursor: pointer;
   font-family: inherit;
   transition: color 0.15s;
@@ -167,7 +176,7 @@
 }
 
 #chat-tab-bar {
-  margin-top: -14px;
+  flex-shrink: 0;
 }
 
 #chat-tab-bar button {
