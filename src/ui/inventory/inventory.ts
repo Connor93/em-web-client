@@ -25,7 +25,9 @@ type ItemPosition = {
 const TABS = 2;
 const COLS = 8;
 const ROWS = 10;
+const TOTAL_CELLS = COLS * ROWS; // 80 cells per tab, always
 const DIVIDER_WIDTH = 3;
+const DEFAULT_CELL_SIZE = 26; // px — base cell size for wide mode
 
 const ITEM_SIZE = {
   [ItemSize.Size1x1]: { x: 1, y: 1 },
@@ -59,6 +61,9 @@ export class Inventory extends Base {
   private tab = 0;
   private dualTab = false;
   private updatingDualTab = false;
+  private wideMode = false;
+  private activeCols = COLS;
+  private activeRows = ROWS;
   private uiContainer = document.getElementById('ui')!;
   private pointerDownAt = 0;
 
@@ -290,26 +295,28 @@ export class Inventory extends Base {
 
     if (pointerX < 0 || pointerY < 0) return;
 
-    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellSize + gap)));
+    const cols = this.activeCols;
+    const rows = this.activeRows;
+    const gridY = Math.min(rows - 1, Math.floor(pointerY / (cellSize + gap)));
 
     if (this.dualTab) {
       const scaledDivider = DIVIDER_WIDTH * scale;
-      const tab1Width = COLS * (cellSize + gap);
+      const tab1Width = cols * (cellSize + gap);
       const tab2Start = tab1Width + scaledDivider;
 
       if (pointerX < tab1Width) {
         const gridX = Math.min(
-          COLS - 1,
+          cols - 1,
           Math.floor(pointerX / (cellSize + gap)),
         );
         this.tryMoveItem(item.id, gridX, gridY, 0);
       } else if (pointerX >= tab2Start) {
         const localX = pointerX - tab2Start;
-        const gridX = Math.min(COLS - 1, Math.floor(localX / (cellSize + gap)));
+        const gridX = Math.min(cols - 1, Math.floor(localX / (cellSize + gap)));
         this.tryMoveItem(item.id, gridX, gridY, 1);
       }
     } else {
-      const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellSize + gap)));
+      const gridX = Math.min(cols - 1, Math.floor(pointerX / (cellSize + gap)));
       this.tryMoveItem(item.id, gridX, gridY);
     }
   }
@@ -384,7 +391,8 @@ export class Inventory extends Base {
       if (
         key === 'inventoryWidth' ||
         key === 'inventoryHeight' ||
-        key === 'inventoryScale'
+        key === 'inventoryScale' ||
+        key === 'inventoryLayout'
       ) {
         this.applyInventorySize();
       }
@@ -403,9 +411,13 @@ export class Inventory extends Base {
   }
 
   private applyInventorySize() {
+    const layout = settings.get('inventoryLayout');
     const width = settings.get('inventoryWidth');
     const height = settings.get('inventoryHeight');
     const scale = settings.get('inventoryScale');
+
+    const wasWide = this.wideMode;
+    this.wideMode = layout === 'wide';
 
     // Width
     if (width === 'default') {
@@ -433,12 +445,19 @@ export class Inventory extends Base {
       );
     }
 
-    this.updateGridColumns();
+    this.updateGridLayout();
+
+    // Repack items when switching between tall and wide
+    if (wasWide !== this.wideMode) {
+      this.repackItems();
+    }
   }
 
-  private updateGridColumns() {
+  private updateGridLayout() {
     if (isMobile()) {
       this.dualTab = false;
+      this.activeCols = COLS;
+      this.activeRows = ROWS;
       return;
     }
 
@@ -447,39 +466,66 @@ export class Inventory extends Base {
     const gap = Number.parseFloat(style.gap) || 1;
     const padL = Number.parseFloat(style.paddingLeft);
     const padR = Number.parseFloat(style.paddingRight);
-    const contentW = gridRect.width / 1 - padL - padR;
+    const padT = Number.parseFloat(style.paddingTop);
+    const padB = Number.parseFloat(style.paddingBottom);
+    const contentW = gridRect.width - padL - padR;
+    const contentH = gridRect.height - padT - padB;
 
-    if (contentW <= 0) return;
+    if (contentW <= 0 || contentH <= 0) return;
 
-    // Use 1fr columns so cells fill the width. Determine dual-tab by checking
-    // if 16 columns would each be at least as wide as they are tall (square).
-    // Step 1: set single-tab 1fr, measure the resulting cell width
-    this.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-    this.grid.style.removeProperty('grid-template-rows');
-
-    // Measure a cell's actual rendered width to decide dual-tab
-    const firstCell = this.grid.querySelector('.cell') as HTMLElement | null;
-    if (!firstCell) return;
-    const singleCellW = firstCell.getBoundingClientRect().width;
-
-    // Would dual-tab cells be at least half the single-tab cell width?
-    // (i.e., the container is wide enough for 16 usable columns)
-    const estimatedDualCellW = (contentW - 15 * gap - DIVIDER_WIDTH) / 16;
     const wasDualTab = this.dualTab;
-    this.dualTab =
-      estimatedDualCellW >= singleCellW * 0.5 && estimatedDualCellW > 10;
 
-    // Apply the correct column template
-    if (this.dualTab) {
-      this.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr) ${DIVIDER_WIDTH}px repeat(${COLS}, 1fr)`;
-    }
-    // else: already set to repeat(8, 1fr) above
+    if (this.wideMode) {
+      // Wide mode: compute cols/rows dynamically to fill the container.
+      // Derive cell size from the height so rows fill vertically,
+      // then compute how many columns fit horizontally.
+      const cellFromH = (contentH - (ROWS - 1) * gap) / ROWS;
+      const cellSize = Math.max(cellFromH, DEFAULT_CELL_SIZE);
 
-    // Make rows match column width for square cells.
-    // Re-measure actual cell width after applying the final template.
-    const cellW = firstCell.getBoundingClientRect().width;
-    if (cellW > 0) {
-      this.grid.style.gridTemplateRows = `repeat(${ROWS}, ${cellW}px)`;
+      let cols = Math.max(
+        COLS,
+        Math.floor((contentW + gap) / (cellSize + gap)),
+      );
+      let rows = Math.ceil(TOTAL_CELLS / cols);
+
+      // Ensure at least 4 rows so the grid doesn't look too flat
+      if (rows < 4) {
+        rows = 4;
+        cols = Math.ceil(TOTAL_CELLS / rows);
+      }
+
+      // Dual-tab: can we fit 2× cols + divider?
+      const dualWidth = cols * 2 * (cellSize + gap) - gap + DIVIDER_WIDTH;
+      this.dualTab = contentW >= dualWidth;
+
+      this.activeCols = cols;
+      this.activeRows = rows;
+
+      if (this.dualTab) {
+        this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr) ${DIVIDER_WIDTH}px repeat(${cols}, 1fr)`;
+      } else {
+        this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      }
+      this.grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    } else {
+      // Tall mode: fixed 8×10, cells capped at reasonable size, centered
+      this.activeCols = COLS;
+      this.activeRows = ROWS;
+
+      const cellFromW = (contentW - (COLS - 1) * gap) / COLS;
+      const cellFromH = (contentH - (ROWS - 1) * gap) / ROWS;
+      const cellSize = Math.min(cellFromW, cellFromH, DEFAULT_CELL_SIZE * 1.5);
+
+      // Dual-tab: can we fit 16 columns + divider at this cell size?
+      const dualWidth = 16 * (cellSize + gap) - gap + DIVIDER_WIDTH;
+      this.dualTab = contentW >= dualWidth;
+
+      if (this.dualTab) {
+        this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px) ${DIVIDER_WIDTH}px repeat(${COLS}, ${cellSize}px)`;
+      } else {
+        this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
+      }
+      this.grid.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
     }
 
     // Show/hide tab buttons
@@ -494,6 +540,44 @@ export class Inventory extends Base {
       this.render();
       this.updatingDualTab = false;
     }
+  }
+
+  /** Repack all items into the current grid dimensions. */
+  private repackItems() {
+    const oldPositions = [...this.positions];
+    this.positions = [];
+
+    // Sort by old position so repack order is predictable
+    oldPositions.sort((a, b) => a.tab - b.tab || a.y - b.y || a.x - b.x);
+
+    for (const old of oldPositions) {
+      const record = this.client.getEifRecordById(old.id);
+      if (!record) continue;
+
+      const size = ITEM_SIZE[record.size];
+      const position = this.getNextAvailablePositionInTab(
+        old.id,
+        size,
+        old.tab,
+      );
+      if (position) {
+        this.positions.push(position);
+      } else {
+        // Try the other tab
+        const otherTab = old.tab === 0 ? 1 : 0;
+        const fallback = this.getNextAvailablePositionInTab(
+          old.id,
+          size,
+          otherTab,
+        );
+        if (fallback) {
+          this.positions.push(fallback);
+        }
+      }
+    }
+
+    this.savePositions();
+    this.render();
   }
 
   on<Event extends keyof Events>(
@@ -558,11 +642,14 @@ export class Inventory extends Base {
   private render() {
     this.grid.innerHTML = '';
 
+    const cols = this.activeCols;
+    const rows = this.activeRows;
+
     // Fill the grid with empty cells
     if (this.dualTab) {
-      // Tab 1 cells (columns 1-8)
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
+      // Tab 1 cells
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
           const cell = document.createElement('div');
           cell.classList.add('cell');
           cell.style.gridColumn = `${col + 1}`;
@@ -570,18 +657,18 @@ export class Inventory extends Base {
           this.grid.appendChild(cell);
         }
       }
-      // Divider column (column 9) — one cell spanning all rows
+      // Divider column
       const divider = document.createElement('div');
       divider.classList.add('grid-divider');
-      divider.style.gridColumn = `${COLS + 1}`;
-      divider.style.gridRow = `1 / span ${ROWS}`;
+      divider.style.gridColumn = `${cols + 1}`;
+      divider.style.gridRow = `1 / span ${rows}`;
       this.grid.appendChild(divider);
-      // Tab 2 cells (columns 10-17)
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
+      // Tab 2 cells
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
           const cell = document.createElement('div');
           cell.classList.add('cell');
-          cell.style.gridColumn = `${col + COLS + 2}`;
+          cell.style.gridColumn = `${col + cols + 2}`;
           cell.style.gridRow = `${row + 1}`;
           this.grid.appendChild(cell);
         }
@@ -596,15 +683,15 @@ export class Inventory extends Base {
       const label2 = document.createElement('div');
       label2.classList.add('tab-label');
       label2.textContent = '2';
-      label2.style.gridColumn = `${COLS + 2}`;
+      label2.style.gridColumn = `${cols + 2}`;
       label2.style.gridRow = '1';
       this.grid.appendChild(label2);
     } else {
-      for (let i = 0; i < COLS * ROWS; i++) {
+      for (let i = 0; i < cols * rows; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
-        cell.style.gridColumn = `${(i % COLS) + 1}`;
-        cell.style.gridRow = `${Math.floor(i / COLS) + 1}`;
+        cell.style.gridColumn = `${(i % cols) + 1}`;
+        cell.style.gridRow = `${Math.floor(i / cols) + 1}`;
         this.grid.appendChild(cell);
       }
     }
@@ -643,8 +730,8 @@ export class Inventory extends Base {
 
         const size = ITEM_SIZE[record.size];
 
-        // In dual-tab mode, tab 1 items offset by COLS + 1 (skip divider column)
-        const colOffset = this.dualTab && tab === 1 ? COLS + 1 : 0;
+        // In dual-tab mode, tab 1 items offset by activeCols + 1 (skip divider column)
+        const colOffset = this.dualTab && tab === 1 ? this.activeCols + 1 : 0;
         imgContainer.style.gridColumn = `${position.x + 1 + colOffset} / span ${size.x}`;
         imgContainer.style.gridRow = `${position.y + 1} / span ${size.y}`;
 
@@ -679,8 +766,8 @@ export class Inventory extends Base {
       }
     }
 
-    // Recalculate square cell columns after grid content is in the DOM
-    requestAnimationFrame(() => this.updateGridColumns());
+    // Recalculate grid layout after grid content is in the DOM
+    requestAnimationFrame(() => this.updateGridLayout());
   }
 
   private getPosition(id: number): ItemPosition | undefined {
@@ -784,8 +871,8 @@ export class Inventory extends Base {
     size: Vector2,
     tab: number,
   ): ItemPosition | null {
-    for (let y = 0; y < ROWS; ++y) {
-      for (let x = 0; x < COLS; ++x) {
+    for (let y = 0; y < this.activeRows; ++y) {
+      for (let x = 0; x < this.activeCols; ++x) {
         if (this.doesItemFitAt(tab, x, y, size)) {
           return { x, y, tab, id };
         }
@@ -813,7 +900,11 @@ export class Inventory extends Base {
       const overlapX = x < pos.x + existingSize.x && x + size.x > pos.x;
       const overlapY = y < pos.y + existingSize.y && y + size.y > pos.y;
 
-      if ((overlapX && overlapY) || x + size.x > COLS || y + size.y > ROWS) {
+      if (
+        (overlapX && overlapY) ||
+        x + size.x > this.activeCols ||
+        y + size.y > this.activeRows
+      ) {
         return false;
       }
     }

@@ -17,6 +17,7 @@ export interface GameSettings {
   chatWidth: 'default' | '50%' | '75%' | '100%';
   chatHeight: 'default' | '200px' | '300px' | '400px' | '500px';
   chatScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x';
+  inventoryLayout: 'tall' | 'wide';
   inventoryWidth: 'default' | '25%' | '50%' | '75%' | '100%';
   inventoryHeight: 'default' | '200px' | '300px' | '400px' | '500px';
   inventoryScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x';
@@ -41,6 +42,7 @@ const DEFAULTS: GameSettings = {
   chatWidth: 'default',
   chatHeight: 'default',
   chatScale: '1x',
+  inventoryLayout: 'tall',
   inventoryWidth: 'default',
   inventoryHeight: 'default',
   inventoryScale: '1x',
@@ -65,6 +67,7 @@ export const SETTING_OPTIONS: {
   chatWidth: ['default', '50%', '75%', '100%'] as const,
   chatHeight: ['default', '200px', '300px', '400px', '500px'] as const,
   chatScale: ['1x', '1.25x', '1.5x', '1.75x', '2x'] as const,
+  inventoryLayout: ['tall', 'wide'] as const,
   inventoryWidth: ['default', '25%', '50%', '75%', '100%'] as const,
   inventoryHeight: ['default', '200px', '300px', '400px', '500px'] as const,
   inventoryScale: ['1x', '1.25x', '1.5x', '1.75x', '2x'] as const,
@@ -87,6 +90,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   chatWidth: 'Chat Width',
   chatHeight: 'Chat Height',
   chatScale: 'Chat Scale',
+  inventoryLayout: 'Inventory Layout',
   inventoryWidth: 'Inventory Width',
   inventoryHeight: 'Inventory Height',
   inventoryScale: 'Inventory Scale',

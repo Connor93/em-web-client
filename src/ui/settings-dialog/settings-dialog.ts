@@ -161,6 +161,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'uiScale',
   'fpsLimit',
   'displayMode',
+  'inventoryLayout',
   'inventoryWidth',
   'inventoryHeight',
   'inventoryScale',
