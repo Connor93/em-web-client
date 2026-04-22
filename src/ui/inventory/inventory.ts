@@ -6,6 +6,7 @@ import {
   getEquipmentSlotFromString,
 } from '../../client';
 import { isMobile } from '../../main';
+import { settings } from '../../settings';
 import { playSfxById, SfxId } from '../../sfx';
 import { getItemMeta } from '../../utils';
 import type { Vector2 } from '../../vector';
@@ -55,6 +56,7 @@ export class Inventory extends Base {
   private grid: HTMLDivElement = this.container.querySelector('.grid')!;
   private positions: ItemPosition[] = [];
   private tab = 0;
+  private dualTab = false;
   private uiContainer = document.getElementById('ui')!;
   private pointerDownAt = 0;
 
@@ -365,6 +367,92 @@ export class Inventory extends Base {
         this.emitter.emit('junkItem', this.lastItemSelected);
       }
     });
+
+    // Apply saved inventory size and listen for changes
+    this.applyInventorySize();
+    settings.on('change', ({ key }) => {
+      if (
+        key === 'inventoryWidth' ||
+        key === 'inventoryHeight' ||
+        key === 'inventoryScale'
+      ) {
+        this.applyInventorySize();
+      }
+    });
+  }
+
+  private applyInventorySize() {
+    const width = settings.get('inventoryWidth');
+    const height = settings.get('inventoryHeight');
+    const scale = settings.get('inventoryScale');
+
+    // Width
+    if (width === 'default') {
+      this.container.style.removeProperty('width');
+    } else {
+      this.container.style.setProperty('width', width, 'important');
+    }
+
+    // Height (applied to the grid, not the container)
+    if (height === 'default') {
+      this.grid.style.removeProperty('height');
+    } else {
+      this.grid.style.setProperty('height', height, 'important');
+    }
+
+    // Scale (font-size percentage, same as chat)
+    const scaleValue = Number.parseFloat(scale) || 1;
+    if (scaleValue === 1) {
+      this.container.style.removeProperty('font-size');
+    } else {
+      this.container.style.setProperty(
+        'font-size',
+        `${scaleValue * 100}%`,
+        'important',
+      );
+    }
+
+    this.updateGridColumns();
+  }
+
+  private updateGridColumns() {
+    // Read the actual rendered row height to make columns square
+    const gridRect = this.grid.getBoundingClientRect();
+    const style = getComputedStyle(this.grid);
+    const padT = Number.parseFloat(style.paddingTop);
+    const padB = Number.parseFloat(style.paddingBottom);
+    const gap = Number.parseFloat(style.gap) || 1;
+
+    const contentH = gridRect.height - padT - padB;
+    const cellSize = (contentH - (ROWS - 1) * gap) / ROWS;
+
+    if (cellSize <= 0) return;
+
+    const padL = Number.parseFloat(style.paddingLeft);
+    const padR = Number.parseFloat(style.paddingRight);
+    const contentW = gridRect.width - padL - padR;
+    const dividerWidth = 3;
+
+    // Check if dual-tab fits: 16 cells + 15 gaps + 1 divider
+    const dualTabWidth = 16 * cellSize + 15 * gap + dividerWidth;
+    const wasDualTab = this.dualTab;
+    this.dualTab = contentW >= dualTabWidth;
+
+    if (this.dualTab) {
+      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px) ${dividerWidth}px repeat(${COLS}, ${cellSize}px)`;
+    } else {
+      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
+    }
+
+    // Show/hide tab buttons
+    const tabContainer = this.container.querySelector('.tabs') as HTMLElement;
+    if (tabContainer) {
+      tabContainer.style.display = this.dualTab ? 'none' : '';
+    }
+
+    if (wasDualTab !== this.dualTab) {
+      this.render();
+    }
   }
 
   on<Event extends keyof Events>(
@@ -498,6 +586,9 @@ export class Inventory extends Base {
 
       this.grid.appendChild(imgContainer);
     }
+
+    // Recalculate square cell columns after grid content is in the DOM
+    requestAnimationFrame(() => this.updateGridColumns());
   }
 
   private getPosition(id: number): ItemPosition | undefined {

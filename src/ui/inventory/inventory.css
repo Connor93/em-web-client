@@ -109,7 +109,7 @@
   cursor: default;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(10, 23px);
+  grid-template-rows: repeat(10, 1fr);
   padding: 4px;
   box-sizing: border-box;
   gap: 1px;
@@ -120,6 +120,7 @@
     var(--theme-accent-b),
     0.15
   );
+  justify-content: start;
 }
 
 /* Empty placeholder cells that make the grid visible */
