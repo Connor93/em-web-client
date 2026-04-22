@@ -396,6 +396,17 @@ export class Inventory extends Base {
         this.applyInventorySize();
       }
     });
+
+    // Recalculate grid columns on window resize (debounced)
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!this.container.classList.contains('hidden')) {
+          this.applyInventorySize();
+        }
+      }, 150);
+    });
   }
 
   private applyInventorySize() {
@@ -433,6 +444,11 @@ export class Inventory extends Base {
   }
 
   private updateGridColumns() {
+    if (isMobile()) {
+      this.dualTab = false;
+      return;
+    }
+
     // Read the actual rendered row height to make columns square
     const gridRect = this.grid.getBoundingClientRect();
     const style = getComputedStyle(this.grid);
@@ -1036,11 +1052,12 @@ export class Inventory extends Base {
     this.render();
   }
 
-  show() {
+  override show() {
     this.render();
-    this.container.classList.remove('hidden');
+    super.show();
     this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     addMobileCloseButton(this.container, () => this.hide());
+    requestAnimationFrame(() => this.applyInventorySize());
   }
 
   hide() {
