@@ -532,6 +532,7 @@ makeMovable(document.getElementById('hotbar')!);
 makeMovable(document.getElementById('in-game-menu')!);
 makeMovable(document.getElementById('buff-bar')!);
 makeMovable(document.getElementById('damage-tracker')!);
+makeMovable(document.getElementById('inventory')!);
 if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }

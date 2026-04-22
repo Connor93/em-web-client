@@ -22,6 +22,10 @@
   font-family: inherit;
 }
 
+#inventory.ui-repositioned {
+  right: unset;
+}
+
 /* ── Top Bar ─────────────────────────────────────────────────────── */
 
 #inventory .top {
@@ -109,6 +113,7 @@
   padding: 4px;
   box-sizing: border-box;
   gap: 1px;
+  overflow: hidden;
   background: rgba(
     var(--theme-accent-r),
     var(--theme-accent-g),

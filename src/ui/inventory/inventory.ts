@@ -67,6 +67,10 @@ export class Inventory extends Base {
     offsetY: number;
   } | null = null;
 
+  private boundOnPointerMove = this.onPointerMove.bind(this);
+  private boundOnPointerUp = this.onPointerUp.bind(this);
+  private boundOnPointerCancel = this.onPointerCancel.bind(this);
+
   private currentWeight: HTMLSpanElement =
     this.container.querySelector('.weight .current')!;
   private maxWeight: HTMLSpanElement =
@@ -111,8 +115,6 @@ export class Inventory extends Base {
       this.pointerDownAt = now.getTime();
     }
 
-    (e.target as Element).setPointerCapture(e.pointerId);
-
     const rect = el.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
@@ -144,13 +146,13 @@ export class Inventory extends Base {
 
     playSfxById(SfxId.InventoryPickup);
 
-    window.addEventListener('pointermove', this.onPointerMove.bind(this), {
+    window.addEventListener('pointermove', this.boundOnPointerMove, {
       passive: false,
     });
-    window.addEventListener('pointerup', this.onPointerUp.bind(this), {
+    window.addEventListener('pointerup', this.boundOnPointerUp, {
       passive: false,
     });
-    window.addEventListener('pointercancel', this.onPointerCancel.bind(this), {
+    window.addEventListener('pointercancel', this.boundOnPointerCancel, {
       passive: false,
     });
   }
@@ -162,8 +164,10 @@ export class Inventory extends Base {
     const { ghost, offsetX, offsetY } = this.dragging;
     ghost.style.transform = `translate(${e.clientX - offsetX}px, ${e.clientY - offsetY}px)`;
 
-    // prevent page scrolling while dragging on mobile
-    e.preventDefault();
+    // prevent page scrolling while dragging on mobile;
+    // only preventDefault on touch — on mouse it would suppress mousemove,
+    // which the game needs to keep mouseCoords updated for drop targeting
+    if (e.pointerType === 'touch') e.preventDefault();
   }
 
   private onPointerUp(e: PointerEvent) {
@@ -309,9 +313,9 @@ export class Inventory extends Base {
   }
 
   private teardownDragListeners() {
-    window.removeEventListener('pointermove', this.onPointerMove);
-    window.removeEventListener('pointerup', this.onPointerUp);
-    window.removeEventListener('pointercancel', this.onPointerCancel);
+    window.removeEventListener('pointermove', this.boundOnPointerMove);
+    window.removeEventListener('pointerup', this.boundOnPointerUp);
+    window.removeEventListener('pointercancel', this.boundOnPointerCancel);
   }
 
   constructor(client: Client) {
@@ -360,10 +364,6 @@ export class Inventory extends Base {
       if (this.lastItemSelected) {
         this.emitter.emit('junkItem', this.lastItemSelected);
       }
-    });
-
-    window.addEventListener('resize', () => {
-      this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     });
   }
 
