@@ -7,6 +7,14 @@
 import { isMobile } from '../../main';
 
 const STORAGE_PREFIX = 'ui-pos-';
+const BASE_Z_INDEX = 1050;
+let topZIndex = BASE_Z_INDEX;
+
+/** Bring a dialog element to the front of the stacking order. */
+export function bringToFront(element: HTMLElement): void {
+  topZIndex += 1;
+  element.style.zIndex = `${topZIndex}`;
+}
 
 function getUiScale(): number {
   const ui = document.getElementById('ui');
@@ -112,6 +120,9 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   handle.addEventListener('pointerdown', onPointerDown);
   handle.addEventListener('pointermove', onPointerMove);
   handle.addEventListener('pointerup', onPointerUp);
+
+  // Bring to front on any click anywhere in the dialog
+  element.addEventListener('pointerdown', () => bringToFront(element));
 }
 
 /** All registered draggable element IDs, for bulk operations. */
@@ -161,6 +172,8 @@ export function restoreOrCenter(element: HTMLElement) {
   if (isMobile()) return; // Mobile uses CSS-driven positioning
   const id = element.id;
   if (!id) return;
+
+  bringToFront(element);
 
   const scale = getUiScale();
   const uiEl = document.getElementById('ui');
