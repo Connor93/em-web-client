@@ -113,7 +113,7 @@
   padding: 4px;
   box-sizing: border-box;
   gap: 1px;
-  overflow: hidden;
+  overflow: visible;
   background: rgba(
     var(--theme-accent-r),
     var(--theme-accent-g),

@@ -296,29 +296,40 @@ export class Inventory extends Base {
       return;
     }
 
-    // Compute actual cell dimensions (all in screen space)
-    const cellH = (contentH - (ROWS - 1) * gap) / ROWS;
-    const cellW = cellH; // Square cells
-    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
+    // Compute actual cell dimensions (all in screen space, square cells).
+    // Mirror the logic in updateGridColumns: size from min(width, height).
+    const cellFromH = (contentH - (ROWS - 1) * gap) / ROWS;
+    let cellSize: number;
+    if (this.dualTab) {
+      const cellFromW = (contentW - 15 * gap - DIVIDER_WIDTH * scale) / 16;
+      cellSize = Math.min(cellFromW, cellFromH);
+    } else {
+      const cellFromW = (contentW - (COLS - 1) * gap) / COLS;
+      cellSize = Math.min(cellFromW, cellFromH);
+    }
+    const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellSize + gap)));
 
     if (this.dualTab) {
       const scaledDivider = DIVIDER_WIDTH * scale;
-      const tab1Width = COLS * (cellW + gap);
+      const tab1Width = COLS * (cellSize + gap);
       const tab2Start = tab1Width + scaledDivider;
 
       if (pointerX < tab1Width) {
         // Drop in tab 1
-        const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+        const gridX = Math.min(
+          COLS - 1,
+          Math.floor(pointerX / (cellSize + gap)),
+        );
         this.tryMoveItem(item.id, gridX, gridY, 0);
       } else if (pointerX >= tab2Start) {
         // Drop in tab 2
         const localX = pointerX - tab2Start;
-        const gridX = Math.min(COLS - 1, Math.floor(localX / (cellW + gap)));
+        const gridX = Math.min(COLS - 1, Math.floor(localX / (cellSize + gap)));
         this.tryMoveItem(item.id, gridX, gridY, 1);
       }
       // If in divider zone, do nothing (item returns to original position)
     } else {
-      const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+      const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellSize + gap)));
       this.tryMoveItem(item.id, gridX, gridY);
     }
   }
@@ -466,16 +477,31 @@ export class Inventory extends Base {
     const gap = (Number.parseFloat(style.gap) || 1) * scale;
 
     const contentH = gridRect.height - padT - padB;
-    const cellSize = (contentH - (ROWS - 1) * gap) / ROWS;
-
-    if (cellSize <= 0) return;
-
     const contentW = gridRect.width - padL - padR;
 
-    // Check if dual-tab fits: 16 cells + 15 gaps + 1 divider
-    const dualTabWidth = 16 * cellSize + 15 * gap + DIVIDER_WIDTH * scale;
+    if (contentW <= 0 || contentH <= 0) return;
+
+    // Compute cell size from width (the dimension the user controls via settings).
+    // Try dual-tab first: does the width fit 16 columns + divider?
+    const dualCellFromWidth =
+      (contentW - 15 * gap - DIVIDER_WIDTH * scale) / 16;
+    const singleCellFromWidth = (contentW - (COLS - 1) * gap) / COLS;
+    const cellFromHeight = (contentH - (ROWS - 1) * gap) / ROWS;
+
     const wasDualTab = this.dualTab;
-    this.dualTab = contentW >= dualTabWidth;
+
+    // Use dual-tab if the width-derived cell is at least as large as the
+    // height-derived cell (meaning there's room for 16 columns without
+    // making cells smaller than the height would allow)
+    this.dualTab = dualCellFromWidth >= cellFromHeight && dualCellFromWidth > 0;
+
+    // Pick the smaller of width-derived and height-derived to keep cells square
+    // and ensure they fit in both dimensions
+    const cellSize = this.dualTab
+      ? Math.min(dualCellFromWidth, cellFromHeight)
+      : Math.min(singleCellFromWidth, cellFromHeight);
+
+    if (cellSize <= 0) return;
 
     // Cell size in CSS-space (divide out the scale for grid-template values)
     const cssCellSize = cellSize / scale;
