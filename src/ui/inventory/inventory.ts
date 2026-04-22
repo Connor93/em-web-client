@@ -390,11 +390,11 @@ export class Inventory extends Base {
       this.container.style.setProperty('width', width, 'important');
     }
 
-    // Height (applied to the grid, not the container)
+    // Height (applied to the container; grid fills remaining space via flex)
     if (height === 'default') {
-      this.grid.style.removeProperty('height');
+      this.container.style.removeProperty('height');
     } else {
-      this.grid.style.setProperty('height', height, 'important');
+      this.container.style.setProperty('height', height, 'important');
     }
 
     // Scale (font-size percentage, same as chat)

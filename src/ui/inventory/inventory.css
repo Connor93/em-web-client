@@ -5,6 +5,8 @@
   right: 120px;
   width: 210px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background: var(--theme-bg-dark);
   border: 1px solid
     rgba(
@@ -105,7 +107,8 @@
 /* ── Item Grid ──────────────────────────────────────────────────── */
 
 #inventory .grid {
-  height: 230px;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   cursor: default;
   display: grid;
