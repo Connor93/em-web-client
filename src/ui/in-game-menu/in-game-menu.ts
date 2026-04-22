@@ -11,6 +11,7 @@ type Events = {
     | 'spells'
     | 'stats'
     | 'online'
+    | 'nearby'
     | 'party'
     | 'quests'
     | 'encyclopedia'
