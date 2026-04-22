@@ -12,6 +12,15 @@
   width: 140px;
 }
 
+#party-hud.ui-repositioned {
+  top: unset;
+  left: unset;
+}
+
+#party-hud.ui-unlocked {
+  pointer-events: auto;
+}
+
 body.is-mobile #party-hud {
   display: none;
 }

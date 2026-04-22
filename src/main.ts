@@ -526,6 +526,7 @@ initDraggableDialogs([
   'quest-progress',
   'info-dialog',
   'guild-panel',
+  'nearby-players',
 ]);
 
 // ── Movable UI elements (HUD, Chat) ─────────────────────────────────
@@ -535,6 +536,7 @@ makeMovable(document.getElementById('hotbar')!);
 makeMovable(document.getElementById('in-game-menu')!);
 makeMovable(document.getElementById('buff-bar')!);
 makeMovable(document.getElementById('damage-tracker')!);
+makeMovable(document.getElementById('party-hud')!);
 if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }
