@@ -25,6 +25,7 @@ type ItemPosition = {
 const TABS = 2;
 const COLS = 8;
 const ROWS = 10;
+const DIVIDER_WIDTH = 3;
 
 const ITEM_SIZE = {
   [ItemSize.Size1x1]: { x: 1, y: 1 },
@@ -57,6 +58,7 @@ export class Inventory extends Base {
   private positions: ItemPosition[] = [];
   private tab = 0;
   private dualTab = false;
+  private updatingDualTab = false;
   private uiContainer = document.getElementById('ui')!;
   private pointerDownAt = 0;
 
@@ -300,9 +302,9 @@ export class Inventory extends Base {
     const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
 
     if (this.dualTab) {
-      const dividerWidth = 3 * scale;
+      const scaledDivider = DIVIDER_WIDTH * scale;
       const tab1Width = COLS * (cellW + gap);
-      const tab2Start = tab1Width + dividerWidth;
+      const tab2Start = tab1Width + scaledDivider;
 
       if (pointerX < tab1Width) {
         // Drop in tab 1
@@ -449,32 +451,39 @@ export class Inventory extends Base {
       return;
     }
 
-    // Read the actual rendered row height to make columns square
+    // getBoundingClientRect returns screen-space; getComputedStyle returns
+    // CSS-space. Multiply CSS values by UI scale so everything is in screen-space.
+    const uiEl = document.getElementById('ui');
+    const scaleMatch = uiEl?.style.transform.match(/scale\(([^)]+)\)/);
+    const scale = scaleMatch ? Number.parseFloat(scaleMatch[1]) : 1;
+
     const gridRect = this.grid.getBoundingClientRect();
     const style = getComputedStyle(this.grid);
-    const padT = Number.parseFloat(style.paddingTop);
-    const padB = Number.parseFloat(style.paddingBottom);
-    const gap = Number.parseFloat(style.gap) || 1;
+    const padT = Number.parseFloat(style.paddingTop) * scale;
+    const padB = Number.parseFloat(style.paddingBottom) * scale;
+    const padL = Number.parseFloat(style.paddingLeft) * scale;
+    const padR = Number.parseFloat(style.paddingRight) * scale;
+    const gap = (Number.parseFloat(style.gap) || 1) * scale;
 
     const contentH = gridRect.height - padT - padB;
     const cellSize = (contentH - (ROWS - 1) * gap) / ROWS;
 
     if (cellSize <= 0) return;
 
-    const padL = Number.parseFloat(style.paddingLeft);
-    const padR = Number.parseFloat(style.paddingRight);
     const contentW = gridRect.width - padL - padR;
-    const dividerWidth = 3;
 
     // Check if dual-tab fits: 16 cells + 15 gaps + 1 divider
-    const dualTabWidth = 16 * cellSize + 15 * gap + dividerWidth;
+    const dualTabWidth = 16 * cellSize + 15 * gap + DIVIDER_WIDTH * scale;
     const wasDualTab = this.dualTab;
     this.dualTab = contentW >= dualTabWidth;
 
+    // Cell size in CSS-space (divide out the scale for grid-template values)
+    const cssCellSize = cellSize / scale;
+
     if (this.dualTab) {
-      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px) ${dividerWidth}px repeat(${COLS}, ${cellSize}px)`;
+      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cssCellSize}px) ${DIVIDER_WIDTH}px repeat(${COLS}, ${cssCellSize}px)`;
     } else {
-      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
+      this.grid.style.gridTemplateColumns = `repeat(${COLS}, ${cssCellSize}px)`;
     }
 
     // Show/hide tab buttons
@@ -483,8 +492,11 @@ export class Inventory extends Base {
       tabContainer.style.display = this.dualTab ? 'none' : '';
     }
 
-    if (wasDualTab !== this.dualTab) {
+    // Re-render if dual-tab state changed, but guard against oscillation
+    if (wasDualTab !== this.dualTab && !this.updatingDualTab) {
+      this.updatingDualTab = true;
       this.render();
+      this.updatingDualTab = false;
     }
   }
 
@@ -1055,7 +1067,9 @@ export class Inventory extends Base {
   override show() {
     this.render();
     super.show();
-    this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
+    if (!this.container.classList.contains('ui-repositioned')) {
+      this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
+    }
     addMobileCloseButton(this.container, () => this.hide());
     requestAnimationFrame(() => this.applyInventorySize());
   }
