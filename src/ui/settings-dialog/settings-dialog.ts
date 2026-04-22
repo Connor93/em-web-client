@@ -8,6 +8,7 @@ import {
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 import { addMobileCloseButton } from '../utils';
+import { rescaleDraggablePositions } from '../utils/draggable';
 import {
   rescaleMovablePositions,
   resetMovablePositions,
@@ -372,7 +373,8 @@ export class SettingsDialog extends Base {
     uiElement.style.width = `${100 / scale}%`;
     uiElement.style.height = `${100 / scale}%`;
 
-    // Rescale movable element positions so they stay in the same visual spot
+    // Rescale all positioned elements so they stay in the same visual spot
     rescaleMovablePositions(oldScale, scale);
+    rescaleDraggablePositions(oldScale, scale);
   }
 }

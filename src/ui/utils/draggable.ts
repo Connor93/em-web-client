@@ -21,6 +21,10 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   const id = element.id;
   if (!id) return;
 
+  if (!registeredIds.includes(id)) {
+    registeredIds.push(id);
+  }
+
   const handle = handleSelector
     ? element.querySelector<HTMLElement>(handleSelector)
     : element;
@@ -108,6 +112,45 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   handle.addEventListener('pointerdown', onPointerDown);
   handle.addEventListener('pointermove', onPointerMove);
   handle.addEventListener('pointerup', onPointerUp);
+}
+
+/** All registered draggable element IDs, for bulk operations. */
+const registeredIds: string[] = [];
+
+/**
+ * Rescale all saved draggable positions when the UI scale changes.
+ * Converts CSS-space coordinates from old scale to new scale
+ * so dialogs stay in the same visual screen position.
+ */
+export function rescaleDraggablePositions(
+  oldScale: number,
+  newScale: number,
+): void {
+  if (oldScale === newScale || oldScale <= 0 || newScale <= 0) return;
+
+  const ratio = oldScale / newScale;
+
+  for (const id of registeredIds) {
+    const key = STORAGE_PREFIX + id;
+    const saved = localStorage.getItem(key);
+    if (!saved) continue;
+
+    try {
+      const { x, y } = JSON.parse(saved);
+      const newX = x * ratio;
+      const newY = y * ratio;
+      localStorage.setItem(key, JSON.stringify({ x: newX, y: newY }));
+
+      // If the element is currently visible, update its position
+      const element = document.getElementById(id);
+      if (element && element.style.position === 'fixed') {
+        element.style.left = `${newX}px`;
+        element.style.top = `${newY}px`;
+      }
+    } catch {
+      // ignore bad data
+    }
+  }
 }
 
 /**
