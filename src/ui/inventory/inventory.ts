@@ -1039,13 +1039,14 @@ export class Inventory extends Base {
   }
 
   override show() {
-    this.render();
     super.show();
     if (!this.container.classList.contains('ui-repositioned')) {
       this.container.style.top = `${Math.floor(window.innerHeight / 2 - this.container.clientHeight / 2)}px`;
     }
     addMobileCloseButton(this.container, () => this.hide());
-    requestAnimationFrame(() => this.applyInventorySize());
+    // Apply size first (needs visible container for dimensions), then render
+    this.applyInventorySize();
+    this.render();
   }
 
   hide() {
