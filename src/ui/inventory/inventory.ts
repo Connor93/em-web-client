@@ -295,13 +295,30 @@ export class Inventory extends Base {
     }
 
     // Compute actual cell dimensions (all in screen space)
-    const cellW = (contentW - (COLS - 1) * gap) / COLS;
     const cellH = (contentH - (ROWS - 1) * gap) / ROWS;
-
-    const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+    const cellW = cellH; // Square cells
     const gridY = Math.min(ROWS - 1, Math.floor(pointerY / (cellH + gap)));
 
-    this.tryMoveItem(item.id, gridX, gridY);
+    if (this.dualTab) {
+      const dividerWidth = 3 * scale;
+      const tab1Width = COLS * (cellW + gap);
+      const tab2Start = tab1Width + dividerWidth;
+
+      if (pointerX < tab1Width) {
+        // Drop in tab 1
+        const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+        this.tryMoveItem(item.id, gridX, gridY, 0);
+      } else if (pointerX >= tab2Start) {
+        // Drop in tab 2
+        const localX = pointerX - tab2Start;
+        const gridX = Math.min(COLS - 1, Math.floor(localX / (cellW + gap)));
+        this.tryMoveItem(item.id, gridX, gridY, 1);
+      }
+      // If in divider zone, do nothing (item returns to original position)
+    } else {
+      const gridX = Math.min(COLS - 1, Math.floor(pointerX / (cellW + gap)));
+      this.tryMoveItem(item.id, gridX, gridY);
+    }
   }
 
   private onPointerCancel() {
@@ -487,7 +504,7 @@ export class Inventory extends Base {
     }
   }
 
-  private tryMoveItem(itemId: number, x: number, y: number) {
+  private tryMoveItem(itemId: number, x: number, y: number, tab?: number) {
     const position = this.getPosition(itemId);
     if (!position) return;
 
@@ -495,15 +512,17 @@ export class Inventory extends Base {
     if (!record) return;
 
     const size = ITEM_SIZE[record.size];
+    const targetTab = tab ?? position.tab;
 
     // Temporarily remove this item from the positions array to avoid false overlap
     const otherPositions = this.positions.filter((p) => p.id !== itemId);
 
-    // Reuse your `doesItemFitAt` function but pass in the reduced list
-    const fits = this.doesItemFitAt(position.tab, x, y, size, otherPositions);
+    // Reuse doesItemFitAt with the target tab
+    const fits = this.doesItemFitAt(targetTab, x, y, size, otherPositions);
     if (!fits) return;
 
-    // Update position
+    // Update position (including tab if changed)
+    position.tab = targetTab;
     position.x = x;
     position.y = y;
 
