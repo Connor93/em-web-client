@@ -609,6 +609,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     bossBar.revertBoss(npcIndex);
   });
 
+  // Update boss bar debuff tags when NPC debuffs change
+  client.on('npcSlowed', () => bossBar.updateDebuffs(client.npcDebuffs));
+  client.on('npcSnared', () => bossBar.updateDebuffs(client.npcDebuffs));
+
   client.on('bossLoot', ({ items }) => {
     for (const item of items) {
       showGameToast(EOResourceID.STATUS_LABEL_TYPE_ITEM, item, 'boss-loot');

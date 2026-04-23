@@ -141,7 +141,18 @@ export class BossBar {
     this.container.classList.add('hidden');
   }
 
-  private updateTags(entry: BossBarEntry): void {
+  updateDebuffs(
+    npcDebuffs: Map<number, { type: string; expireTime: number }>,
+  ): void {
+    for (const entry of this.entries.values()) {
+      this.updateTags(entry, npcDebuffs);
+    }
+  }
+
+  private updateTags(
+    entry: BossBarEntry,
+    npcDebuffs?: Map<number, { type: string; expireTime: number }>,
+  ): void {
     entry.tagsElement.replaceChildren();
     if (entry.enraged) {
       const tag = document.createElement('span');
@@ -154,6 +165,27 @@ export class BossBar {
       tag.classList.add('boss-bar__tag', 'boss-bar__tag--shielded');
       tag.textContent = 'SHIELDED';
       entry.tagsElement.appendChild(tag);
+    }
+
+    // NPC debuff tags
+    if (npcDebuffs) {
+      const debuff = npcDebuffs.get(entry.npcIndex);
+      if (debuff) {
+        const debuffLabels: Record<string, string> = {
+          slow: 'SLOWED',
+          snare: 'SNARED',
+          weaken: 'WEAKENED',
+          hunters_mark: 'MARKED',
+          amplify: 'AMPLIFIED',
+        };
+        const label = debuffLabels[debuff.type];
+        if (label) {
+          const tag = document.createElement('span');
+          tag.classList.add('boss-bar__tag', `boss-bar__tag--${debuff.type}`);
+          tag.textContent = label;
+          entry.tagsElement.appendChild(tag);
+        }
+      }
     }
   }
 

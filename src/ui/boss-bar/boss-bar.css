@@ -125,6 +125,36 @@
   border: 1px solid rgba(80, 140, 255, 0.4);
 }
 
+.boss-bar__tag--slow {
+  color: #6699ff;
+  background: rgba(100, 150, 255, 0.15);
+  border: 1px solid rgba(100, 150, 255, 0.4);
+}
+
+.boss-bar__tag--snare {
+  color: #88ccee;
+  background: rgba(130, 200, 230, 0.15);
+  border: 1px solid rgba(130, 200, 230, 0.4);
+}
+
+.boss-bar__tag--weaken {
+  color: #bb88ee;
+  background: rgba(150, 100, 200, 0.15);
+  border: 1px solid rgba(150, 100, 200, 0.4);
+}
+
+.boss-bar__tag--hunters_mark {
+  color: #ee6666;
+  background: rgba(200, 70, 70, 0.15);
+  border: 1px solid rgba(200, 70, 70, 0.4);
+}
+
+.boss-bar__tag--amplify {
+  color: #dd66dd;
+  background: rgba(200, 70, 200, 0.15);
+  border: 1px solid rgba(200, 70, 200, 0.4);
+}
+
 @media (max-width: 768px) {
   #boss-bars {
     top: auto;

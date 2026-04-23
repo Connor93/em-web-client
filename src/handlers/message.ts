@@ -434,6 +434,8 @@ function handleNpcDebuffApplyMessage(
     type,
     expireTime: Date.now() + duration * 1000,
   });
+
+  client.emit('npcSlowed', { npcIndex, duration });
 }
 
 function handleNpcDebuffEndMessage(
@@ -447,6 +449,8 @@ function handleNpcDebuffEndMessage(
 
   const npcIndex = Number(match[1]);
   client.npcDebuffs.delete(npcIndex);
+
+  client.emit('npcSlowed', { npcIndex, duration: 0 });
 }
 
 function isClassAbilityMessage(message: string): boolean {
