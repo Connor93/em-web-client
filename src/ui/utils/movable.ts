@@ -268,6 +268,21 @@ export function resetMovablePositions(): void {
 }
 
 /**
+ * Re-clamp all movable positions to stay within the current container bounds.
+ * Call this on window resize so elements don't go off-screen.
+ */
+export function reclampMovablePositions(): void {
+  for (const element of registeredElements) {
+    if (!element.classList.contains('ui-repositioned')) continue;
+
+    const currentX = Number.parseFloat(element.style.left) || 0;
+    const currentY = Number.parseFloat(element.style.top) || 0;
+
+    applyPosition(element, currentX, currentY);
+  }
+}
+
+/**
  * Rescale all saved positions when the UI scale changes.
  * Converts CSS-space coordinates from old scale to new scale
  * so elements stay in the same visual screen position.

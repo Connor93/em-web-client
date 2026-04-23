@@ -89,7 +89,8 @@ import { SmallConfirm } from './ui/small-confirm';
 import { SpellBook } from './ui/spell-book';
 import { Stats } from './ui/stats/stats';
 import { TradeDialog } from './ui/trade-dialog/trade-dialog';
-import { makeMovable } from './ui/utils/movable';
+import { reclampDraggablePositions } from './ui/utils/draggable';
+import { makeMovable, reclampMovablePositions } from './ui/utils/movable';
 import { randomRange } from './utils';
 import {
   getReconnectAttempts,
@@ -540,6 +541,16 @@ makeMovable(document.getElementById('party-hud')!);
 if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }
+
+// Re-clamp all positioned elements when window shrinks
+let reclampTimer: ReturnType<typeof setTimeout>;
+window.addEventListener('resize', () => {
+  clearTimeout(reclampTimer);
+  reclampTimer = setTimeout(() => {
+    reclampMovablePositions();
+    reclampDraggablePositions();
+  }, 150);
+});
 
 // Helper to get the PixiJS canvas element
 function getCanvas(): HTMLCanvasElement {

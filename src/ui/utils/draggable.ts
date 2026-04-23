@@ -129,6 +129,38 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
 const registeredIds: string[] = [];
 
 /**
+ * Re-clamp all draggable dialog positions to stay within container bounds.
+ * Call this on window resize so dialogs don't go off-screen.
+ */
+export function reclampDraggablePositions(): void {
+  const scale = getUiScale();
+  const uiEl = document.getElementById('ui');
+  const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
+  const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
+
+  for (const id of registeredIds) {
+    const element = document.getElementById(id);
+    if (!element || element.style.position !== 'fixed') continue;
+
+    const currentX = Number.parseFloat(element.style.left) || 0;
+    const currentY = Number.parseFloat(element.style.top) || 0;
+
+    const clampedX = Math.max(0, Math.min(currentX, containerW - 50));
+    const clampedY = Math.max(0, Math.min(currentY, containerH - 50));
+
+    if (clampedX !== currentX || clampedY !== currentY) {
+      element.style.left = `${clampedX}px`;
+      element.style.top = `${clampedY}px`;
+
+      localStorage.setItem(
+        STORAGE_PREFIX + id,
+        JSON.stringify({ x: clampedX, y: clampedY }),
+      );
+    }
+  }
+}
+
+/**
  * Rescale all saved draggable positions when the UI scale changes.
  * Converts CSS-space coordinates from old scale to new scale
  * so dialogs stay in the same visual screen position.
