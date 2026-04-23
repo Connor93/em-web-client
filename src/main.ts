@@ -22,6 +22,7 @@ import { MAX_CHALLENGE } from './consts';
 import { DialogResourceID } from './edf';
 import { setGameSize, setZoom, ZOOM } from './game-state';
 import { handleItemCommand, handleNpcCommand } from './handlers';
+import { stopFriendPolling } from './managers';
 import {
   isAutoBattleUnlocked,
   toggleAutoBattle,
@@ -354,6 +355,7 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
       getReconnectAttempts() < MAX_RECONNECT_ATTEMPTS;
 
     client.clearBus();
+    stopFriendPolling();
 
     if (canReconnect) {
       client.reconnecting = true;

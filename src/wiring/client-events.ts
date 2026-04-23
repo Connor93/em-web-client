@@ -4,12 +4,15 @@ import { ChatTab } from '../client';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { isMobile } from '../main';
 import { loadAutolootSettings } from '../managers/autoloot-manager';
+import { startFriendPolling } from '../managers/social-manager';
 import { playSfxById, SfxId } from '../sfx';
+import { socialStore } from '../social-store';
 import type { BossBar } from '../ui/boss-bar';
 import { ChatIcon } from '../ui/chat/chat';
 import type { ExpeditionTracker } from '../ui/expedition-tracker/expedition-tracker';
 import { showGameToast } from '../ui/game-toast/game-toast';
 import { createMobileSplitView } from '../ui/utils';
+import { capitalize } from '../utils';
 
 export interface ClientEventDeps {
   client: Client;
@@ -329,6 +332,10 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     const cooldownQuery = new TalkReportClientPacket();
     cooldownQuery.message = '#cooldowns';
     client.bus.send(cooldownQuery);
+
+    // Start friend online status polling
+    socialStore.resetOnlineStatus();
+    startFriendPolling(client);
   });
 
   client.on('passwordChanged', () => {
@@ -677,5 +684,15 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('hotStarted', () => {
     deps.buffBar.update();
+  });
+
+  // Friend online toast notifications
+  socialStore.on('friendStatusChanged', ({ name, online }) => {
+    if (online) {
+      showGameToast(
+        EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+        `${capitalize(name)} is now online`,
+      );
+    }
   });
 }
