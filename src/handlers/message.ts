@@ -306,6 +306,149 @@ function handleCooldownTableResponse(client: Client, message: string): void {
   }
 }
 
+/** Known buff tags and their type keys. */
+const BUFF_TAGS: [string, string][] = [
+  ['[WARCRY]', 'warcry'],
+  ['[FORTIFY]', 'fortify'],
+  ['[BLOODLUST]', 'bloodlust'],
+  ['[EVASION]', 'evasion'],
+  ['[DIVINE_PROT]', 'divine_prot'],
+  ['[MANA_SHIELD]', 'mana_shield'],
+  ['[ARCANE_INT]', 'arcane_int'],
+  ['[BLESS_STR]', 'bless_str'],
+  ['[BLESS_WIS]', 'bless_wis'],
+  ['[BLESS_AGI]', 'bless_agi'],
+  ['[DIVINE_INSP]', 'divine_insp'],
+];
+
+const BUFF_END_TAGS: [string, string][] = [
+  ['[WARCRY_END]', 'warcry'],
+  ['[FORTIFY_END]', 'fortify'],
+  ['[BLOODLUST_END]', 'bloodlust'],
+  ['[EVASION_END]', 'evasion'],
+  ['[DIVINE_PROT_END]', 'divine_prot'],
+  ['[MANA_SHIELD_END]', 'mana_shield'],
+  ['[ARCANE_INT_END]', 'arcane_int'],
+  ['[BLESS_STR_END]', 'bless_str'],
+  ['[BLESS_WIS_END]', 'bless_wis'],
+  ['[BLESS_AGI_END]', 'bless_agi'],
+  ['[DIVINE_INSP_END]', 'divine_insp'],
+  ['[BUFF_END]', 'buff_end'],
+];
+
+const NPC_DEBUFF_TAGS: [string, 'weaken' | 'hunters_mark' | 'amplify'][] = [
+  ['[WEAKEN]', 'weaken'],
+  ['[HUNTERS_MARK]', 'hunters_mark'],
+  ['[AMPLIFY]', 'amplify'],
+];
+
+const NPC_DEBUFF_END_TAGS: [string, string][] = [
+  ['[WEAKEN_END]', 'weaken'],
+  ['[HUNTERS_MARK_END]', 'hunters_mark'],
+  ['[AMPLIFY_END]', 'amplify'],
+];
+
+function handleBuffApplyMessage(
+  client: Client,
+  message: string,
+  tag: string,
+  type: string,
+): void {
+  const body = message.substring(tag.length + 1);
+  // Format: "{playerId} {name}: {description} ({duration}s)"
+  const match = body.match(/^(\d+)\s+.+?:\s+(.+?)\s+\((\d+)s\)$/);
+  if (!match) return;
+
+  const playerId = Number(match[1]);
+  const description = match[2];
+  const duration = Number(match[3]);
+
+  const key = `${playerId}:${type}`;
+  client.characterBuffs.set(key, {
+    playerId,
+    type,
+    description,
+    expireTime: Date.now() + duration * 1000,
+  });
+
+  client.emit('buffApplied', { playerId, type, duration, description });
+}
+
+function handleBuffEndMessage(
+  client: Client,
+  message: string,
+  tag: string,
+  type: string,
+): void {
+  const body = message.substring(tag.length + 1);
+  const match = body.match(/^(\d+)/);
+  if (!match) return;
+
+  const playerId = Number(match[1]);
+
+  if (type === 'buff_end') {
+    // Generic buff end — clear all stat buffs for this player
+    for (const [key] of client.characterBuffs) {
+      if (key.startsWith(`${playerId}:`)) {
+        const buffType = key.split(':')[1];
+        if (
+          [
+            'warcry',
+            'fortify',
+            'evasion',
+            'arcane_int',
+            'bless_str',
+            'bless_wis',
+            'bless_agi',
+          ].includes(buffType)
+        ) {
+          client.characterBuffs.delete(key);
+          client.emit('buffExpired', { playerId, type: buffType });
+        }
+      }
+    }
+  } else {
+    const key = `${playerId}:${type}`;
+    if (client.characterBuffs.has(key)) {
+      client.characterBuffs.delete(key);
+      client.emit('buffExpired', { playerId, type });
+    }
+  }
+}
+
+function handleNpcDebuffApplyMessage(
+  client: Client,
+  message: string,
+  tag: string,
+  type: 'weaken' | 'hunters_mark' | 'amplify',
+): void {
+  const body = message.substring(tag.length + 1);
+  // Format: "{npcIndex} {npcName}: {description} ({duration}s)"
+  const match = body.match(/^(\d+)\s+.+?:\s+.+?\s+\((\d+)s\)$/);
+  if (!match) return;
+
+  const npcIndex = Number(match[1]);
+  const duration = Number(match[2]);
+
+  client.npcDebuffs.set(npcIndex, {
+    type,
+    expireTime: Date.now() + duration * 1000,
+  });
+}
+
+function handleNpcDebuffEndMessage(
+  client: Client,
+  message: string,
+  tag: string,
+): void {
+  const body = message.substring(tag.length + 1);
+  const match = body.match(/^(\d+)/);
+  if (!match) return;
+
+  const npcIndex = Number(match[1]);
+  client.npcDebuffs.delete(npcIndex);
+}
+
 function isClassAbilityMessage(message: string): boolean {
   return (
     message.startsWith('[SHIELD]') ||
@@ -313,7 +456,22 @@ function isClassAbilityMessage(message: string): boolean {
     message.startsWith('[COOLDOWN_START]') ||
     message.startsWith('[SLOW]') ||
     message.startsWith('[SNARE]') ||
-    message.startsWith('[HOT]')
+    message.startsWith('[HOT]') ||
+    message.startsWith('[WARCRY]') ||
+    message.startsWith('[FORTIFY]') ||
+    message.startsWith('[BLOODLUST]') ||
+    message.startsWith('[EVASION]') ||
+    message.startsWith('[DIVINE_PROT]') ||
+    message.startsWith('[MANA_SHIELD]') ||
+    message.startsWith('[ARCANE_INT]') ||
+    message.startsWith('[BLESS_STR]') ||
+    message.startsWith('[BLESS_WIS]') ||
+    message.startsWith('[BLESS_AGI]') ||
+    message.startsWith('[DIVINE_INSP]') ||
+    message.startsWith('[BUFF_END]') ||
+    message.startsWith('[WEAKEN]') ||
+    message.startsWith('[HUNTERS_MARK]') ||
+    message.startsWith('[AMPLIFY]')
   );
 }
 
@@ -330,6 +488,35 @@ function handleClassAbilityMessage(client: Client, message: string): void {
     handleSnareMessage(client, message);
   } else if (message.startsWith('[HOT]')) {
     handleHotMessage(client, message);
+  } else {
+    // Check buff apply tags
+    for (const [tag, type] of BUFF_TAGS) {
+      if (message.startsWith(tag)) {
+        handleBuffApplyMessage(client, message, tag, type);
+        return;
+      }
+    }
+    // Check buff end tags
+    for (const [tag, type] of BUFF_END_TAGS) {
+      if (message.startsWith(tag)) {
+        handleBuffEndMessage(client, message, tag, type);
+        return;
+      }
+    }
+    // Check NPC debuff apply tags
+    for (const [tag, type] of NPC_DEBUFF_TAGS) {
+      if (message.startsWith(tag)) {
+        handleNpcDebuffApplyMessage(client, message, tag, type);
+        return;
+      }
+    }
+    // Check NPC debuff end tags
+    for (const [tag] of NPC_DEBUFF_END_TAGS) {
+      if (message.startsWith(tag)) {
+        handleNpcDebuffEndMessage(client, message, tag);
+        return;
+      }
+    }
   }
 }
 
