@@ -29,29 +29,36 @@ function getStorageKey(element: HTMLElement): string {
   return STORAGE_PREFIX + prefix + element.id;
 }
 
+function getContainerSize(): { width: number; height: number } {
+  const scale = getUiScale();
+  const uiElement = document.getElementById('ui');
+  return {
+    width: uiElement ? uiElement.offsetWidth : window.innerWidth / scale,
+    height: uiElement ? uiElement.offsetHeight : window.innerHeight / scale,
+  };
+}
+
 function savePosition(element: HTMLElement): void {
   const key = getStorageKey(element);
+  const { width, height } = getContainerSize();
+
+  const pixelX = Number.parseFloat(element.style.left) || 0;
+  const pixelY = Number.parseFloat(element.style.top) || 0;
+
   localStorage.setItem(
     key,
     JSON.stringify({
-      x: Number.parseFloat(element.style.left) || 0,
-      y: Number.parseFloat(element.style.top) || 0,
+      ratioX: width > 0 ? pixelX / width : 0,
+      ratioY: height > 0 ? pixelY / height : 0,
     }),
   );
 }
 
 function applyPosition(element: HTMLElement, x: number, y: number): void {
-  const scale = getUiScale();
-  const uiElement = document.getElementById('ui');
-  const containerWidth = uiElement
-    ? uiElement.offsetWidth
-    : window.innerWidth / scale;
-  const containerHeight = uiElement
-    ? uiElement.offsetHeight
-    : window.innerHeight / scale;
+  const { width, height } = getContainerSize();
 
-  const clampedX = Math.max(0, Math.min(x, containerWidth - 50));
-  const clampedY = Math.max(0, Math.min(y, containerHeight - 50));
+  const clampedX = Math.max(0, Math.min(x, width - 50));
+  const clampedY = Math.max(0, Math.min(y, height - 50));
 
   // Use class + setProperty('important') to override !important CSS rules
   // (e.g. #chat has left/top with !important in media queries)
@@ -66,8 +73,27 @@ function restorePosition(element: HTMLElement): void {
   if (!saved) return;
 
   try {
-    const { x, y } = JSON.parse(saved);
-    applyPosition(element, x, y);
+    const data = JSON.parse(saved);
+    const { width, height } = getContainerSize();
+
+    let ratioX: number;
+    let ratioY: number;
+
+    if ('ratioX' in data) {
+      // New format
+      ratioX = data.ratioX;
+      ratioY = data.ratioY;
+    } else {
+      // Legacy format: convert absolute pixels to ratios
+      ratioX = width > 0 ? data.x / width : 0;
+      ratioY = height > 0 ? data.y / height : 0;
+      // Re-save in new format
+      localStorage.setItem(key, JSON.stringify({ ratioX, ratioY }));
+    }
+
+    const pixelX = ratioX * width;
+    const pixelY = ratioY * height;
+    applyPosition(element, pixelX, pixelY);
   } catch {
     // Ignore bad data
   }
@@ -268,43 +294,27 @@ export function resetMovablePositions(): void {
 }
 
 /**
- * Re-clamp all movable positions to stay within the current container bounds.
- * Call this on window resize so elements don't go off-screen.
+ * Re-derive all movable positions from stored ratios and the current container size.
+ * Call this on window resize or scale change so elements stay proportionally positioned.
  */
 export function reclampMovablePositions(): void {
   for (const element of registeredElements) {
     if (!element.classList.contains('ui-repositioned')) continue;
 
-    const currentX = Number.parseFloat(element.style.left) || 0;
-    const currentY = Number.parseFloat(element.style.top) || 0;
+    const key = getStorageKey(element);
+    const saved = localStorage.getItem(key);
+    if (!saved) continue;
 
-    applyPosition(element, currentX, currentY);
-  }
-}
+    try {
+      const data = JSON.parse(saved);
+      if (!('ratioX' in data)) continue;
 
-/**
- * Rescale all saved positions when the UI scale changes.
- * Converts CSS-space coordinates from old scale to new scale
- * so elements stay in the same visual screen position.
- */
-export function rescaleMovablePositions(
-  oldScale: number,
-  newScale: number,
-): void {
-  if (oldScale === newScale || oldScale <= 0 || newScale <= 0) return;
-
-  const ratio = oldScale / newScale;
-
-  for (const element of registeredElements) {
-    if (!element.classList.contains('ui-repositioned')) continue;
-
-    const currentX = Number.parseFloat(element.style.left) || 0;
-    const currentY = Number.parseFloat(element.style.top) || 0;
-
-    const newX = currentX * ratio;
-    const newY = currentY * ratio;
-
-    applyPosition(element, newX, newY);
-    savePosition(element);
+      const { width, height } = getContainerSize();
+      const pixelX = data.ratioX * width;
+      const pixelY = data.ratioY * height;
+      applyPosition(element, pixelX, pixelY);
+    } catch {
+      // Ignore bad data
+    }
   }
 }
