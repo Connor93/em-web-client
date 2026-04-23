@@ -1633,7 +1633,14 @@ export class MapRenderer {
     // NPC debuff tint — applied independently of glow filters
     const debuff = this.client.npcDebuffs.get(npc.index);
     if (debuff) {
-      sprite.tint = debuff.type === 'slow' ? 0x6699ff : 0x88ccee;
+      const tintColors: Record<string, number> = {
+        slow: 0x6699ff,
+        snare: 0x88ccee,
+        weaken: 0x9966cc,
+        hunters_mark: 0xcc4444,
+        amplify: 0xcc44cc,
+      };
+      sprite.tint = tintColors[debuff.type] ?? 0x6699ff;
     } else {
       sprite.tint = 0xffffff;
     }
@@ -1702,7 +1709,7 @@ export class MapRenderer {
         iconGraphics.moveTo(cx - 3, iconY - 6);
         iconGraphics.lineTo(cx + 3, iconY - 6);
         iconGraphics.stroke({ color: 0x6699ff, width: 1, alpha: 0.7 });
-      } else {
+      } else if (debuff.type === 'snare') {
         // Snowflake/asterisk icon — indicates frozen/snared
         const cx = npcTopCenter.x;
         const cy = iconY - 3;
@@ -1717,6 +1724,45 @@ export class MapRenderer {
           );
         }
         iconGraphics.stroke({ color: 0x88ccee, width: 1, alpha: 0.9 });
+      } else if (debuff.type === 'weaken') {
+        // Double down arrow — indicates weakened damage
+        const cx = npcTopCenter.x;
+        iconGraphics.moveTo(cx - 4, iconY - 6);
+        iconGraphics.lineTo(cx, iconY);
+        iconGraphics.lineTo(cx + 4, iconY - 6);
+        iconGraphics.stroke({ color: 0x9966cc, width: 1.5, alpha: 0.9 });
+        iconGraphics.moveTo(cx - 4, iconY - 9);
+        iconGraphics.lineTo(cx, iconY - 3);
+        iconGraphics.lineTo(cx + 4, iconY - 9);
+        iconGraphics.stroke({ color: 0x9966cc, width: 1, alpha: 0.6 });
+      } else if (debuff.type === 'hunters_mark') {
+        // Crosshair — indicates vulnerability
+        const cx = npcTopCenter.x;
+        const cy = iconY - 4;
+        iconGraphics.circle(cx, cy, 4);
+        iconGraphics.stroke({ color: 0xcc4444, width: 1, alpha: 0.9 });
+        iconGraphics.moveTo(cx, cy - 5);
+        iconGraphics.lineTo(cx, cy + 5);
+        iconGraphics.stroke({ color: 0xcc4444, width: 1, alpha: 0.7 });
+        iconGraphics.moveTo(cx - 5, cy);
+        iconGraphics.lineTo(cx + 5, cy);
+        iconGraphics.stroke({ color: 0xcc4444, width: 1, alpha: 0.7 });
+      } else if (debuff.type === 'amplify') {
+        // 4-pointed star — indicates spell vulnerability
+        const cx = npcTopCenter.x;
+        const cy = iconY - 3;
+        const r = 4;
+        for (let a = 0; a < 4; a++) {
+          const angle = (a * Math.PI) / 2 + Math.PI / 4;
+          iconGraphics.moveTo(cx, cy);
+          iconGraphics.lineTo(
+            cx + Math.cos(angle) * r,
+            cy + Math.sin(angle) * r,
+          );
+        }
+        iconGraphics.stroke({ color: 0xcc44cc, width: 1.5, alpha: 0.9 });
+        iconGraphics.circle(cx, cy, 1.5);
+        iconGraphics.fill({ color: 0xcc44cc, alpha: 0.8 });
       }
     }
   }
