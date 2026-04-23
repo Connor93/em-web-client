@@ -4,6 +4,10 @@ import { Base } from '../base-ui';
 
 import './in-game-menu.css';
 
+const STORAGE_KEY = 'ui-menu-collapsed';
+const HAMBURGER = '\u2630'; // ☰
+const CLOSE_ICON = '\u00D7'; // ×
+
 type Events = {
   toggle:
     | 'inventory'
@@ -21,6 +25,7 @@ type Events = {
 
 export class InGameMenu extends Base {
   private emitter = mitt<Events>();
+  private collapsed = false;
 
   constructor() {
     super();
@@ -36,6 +41,35 @@ export class InGameMenu extends Base {
         playSfxById(SfxId.ButtonClick);
         this.emitter.emit('toggle', target);
       });
+    }
+
+    const toggleButton = document.getElementById('menu-toggle')!;
+    this.collapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+    if (this.collapsed) {
+      this.container.classList.add('menu-collapsed');
+      toggleButton.textContent = HAMBURGER;
+    } else {
+      toggleButton.textContent = CLOSE_ICON;
+    }
+
+    toggleButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.collapsed = !this.collapsed;
+      if (this.collapsed) {
+        this.container.classList.add('menu-collapsed');
+        toggleButton.textContent = HAMBURGER;
+      } else {
+        this.container.classList.remove('menu-collapsed');
+        toggleButton.textContent = CLOSE_ICON;
+      }
+      localStorage.setItem(STORAGE_KEY, String(this.collapsed));
+    });
+  }
+
+  show() {
+    super.show();
+    if (this.collapsed) {
+      this.container.classList.add('menu-collapsed');
     }
   }
 
