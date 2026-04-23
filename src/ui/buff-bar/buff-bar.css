@@ -1,20 +1,24 @@
 /* ── Buff/Debuff Status Row ──────────────────────────────────────── */
 
 #buff-bar {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  gap: 4px;
-  z-index: 1019;
-  pointer-events: auto;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding-top: 6px;
+  margin-top: 4px;
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
 }
 
 .buff-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--theme-bg-dark);
+  width: 28px;
+  height: 28px;
+  background: rgba(10, 9, 7, 0.6);
   border: 1px solid
     rgba(
       var(--theme-accent-r),
@@ -28,31 +32,64 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: opacity 0.3s ease;
 }
 
 .buff-icon.shield {
-  border-color: rgba(80, 176, 232, 0.4);
+  border-color: rgba(80, 176, 232, 0.5);
 }
-
 .buff-icon.hot {
-  border-color: rgba(80, 200, 80, 0.4);
+  border-color: rgba(80, 200, 80, 0.5);
+}
+.buff-icon.warcry {
+  border-color: rgba(220, 60, 60, 0.5);
+}
+.buff-icon.fortify {
+  border-color: rgba(100, 140, 180, 0.5);
+}
+.buff-icon.bloodlust {
+  border-color: rgba(180, 40, 40, 0.5);
+}
+.buff-icon.evasion {
+  border-color: rgba(60, 180, 60, 0.5);
+}
+.buff-icon.divine_prot {
+  border-color: rgba(220, 180, 50, 0.5);
+}
+.buff-icon.mana_shield {
+  border-color: rgba(160, 80, 220, 0.5);
+}
+.buff-icon.arcane_int {
+  border-color: rgba(80, 120, 220, 0.5);
+}
+.buff-icon.bless_str {
+  border-color: rgba(220, 140, 40, 0.5);
+}
+.buff-icon.bless_wis {
+  border-color: rgba(60, 180, 200, 0.5);
+}
+.buff-icon.bless_agi {
+  border-color: rgba(100, 200, 80, 0.5);
+}
+.buff-icon.divine_insp {
+  border-color: rgba(240, 200, 40, 0.5);
+}
+.buff-icon.healblock {
+  border-color: rgba(220, 50, 50, 0.5);
+}
+.buff-icon.root {
+  border-color: rgba(60, 100, 220, 0.5);
 }
 
 .buff-icon-symbol {
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
 }
 
 .buff-icon-value {
-  font-size: 8px;
+  font-size: 7px;
   color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   position: absolute;
   bottom: 1px;
   white-space: nowrap;
-}
-
-.buff-icon.fading {
-  opacity: 0;
 }
