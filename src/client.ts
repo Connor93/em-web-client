@@ -369,6 +369,13 @@ export class Client {
       if (key === 'movementSmoothing') {
         this.smoothMovement = value === 'enabled';
       }
+      if (key === 'gameMusic') {
+        if (value === 'disabled') {
+          AudioManager.stopAmbientSound(this);
+        } else if (this.map?.ambientSoundId) {
+          AudioManager.startAmbientSound(this);
+        }
+      }
     });
     // Start loading weapon metadata JSON immediately
     startLoadingWeaponMetadata();
@@ -759,7 +766,7 @@ export class Client {
 
       AudioManager.stopAmbientSound(this);
 
-      if (this.map.ambientSoundId) {
+      if (this.map.ambientSoundId && settings.get('gameMusic') === 'enabled') {
         AudioManager.startAmbientSound(this);
       }
 

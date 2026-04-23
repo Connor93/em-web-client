@@ -397,14 +397,18 @@ export class Chat extends Base {
       const heightAfter = this.container.offsetHeight;
       const delta = heightBefore - heightAfter;
 
-      // Adjust top so the bottom edge stays in place
-      const currentTop =
-        Number.parseFloat(getComputedStyle(this.container).top) || 0;
-      this.container.style.setProperty(
-        'top',
-        `${currentTop + delta}px`,
-        'important',
-      );
+      // Adjust top so the bottom edge stays in place.
+      // Skip when bottom-anchored (wide screens) — bottom:0 already pins the edge.
+      const style = getComputedStyle(this.container);
+      const isBottomAnchored = style.bottom === '0px';
+      if (!isBottomAnchored) {
+        const currentTop = Number.parseFloat(style.top) || 0;
+        this.container.style.setProperty(
+          'top',
+          `${currentTop + delta}px`,
+          'important',
+        );
+      }
     });
 
     // Create unread badges on tab buttons

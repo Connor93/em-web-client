@@ -173,9 +173,16 @@ export class Inventory extends Base {
   private onPointerUp(e: PointerEvent) {
     if (!this.dragging || e.pointerId !== this.dragging.pointerId) return;
 
-    // Prevent click-to-move from firing after a drag-and-drop
-    e.preventDefault();
-    e.stopPropagation();
+    // Suppress the synthesized click event that follows pointerup — preventDefault
+    // on pointerup alone does not reliably prevent click synthesis in all browsers
+    window.addEventListener(
+      'click',
+      (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+      },
+      { capture: true, once: true },
+    );
 
     const { el, ghost, item } = this.dragging;
 

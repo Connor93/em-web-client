@@ -51,10 +51,14 @@ export function useHotbarSlot(client: Client, index: number): void {
       return;
     }
 
+    // Allow group spells solo (buffs self when not in party)
     if (
       record.targetType === SkillTargetType.Group &&
       !client.partyMembers.length
     ) {
+      client.spellTarget = SpellTarget.Self;
+      client.spellTargetId = 0;
+      client.queuedSpellId = slot.typeId;
       return;
     }
 
