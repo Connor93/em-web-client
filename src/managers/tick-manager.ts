@@ -300,10 +300,15 @@ export function tickHoT(client: Client): void {
 
 export function tickNpcDebuffs(client: Client): void {
   const now = Date.now();
+  let changed = false;
   for (const [npcIndex, debuff] of client.npcDebuffs) {
     if (now >= debuff.expireTime) {
       client.npcDebuffs.delete(npcIndex);
+      changed = true;
     }
+  }
+  if (changed) {
+    client.emit('npcSlowed', { npcIndex: 0, duration: 0 });
   }
 }
 
