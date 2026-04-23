@@ -694,6 +694,7 @@ export class Client {
       Managers.tickHoT(this);
       Managers.tickNpcDebuffs(this);
       Managers.tickSpellCooldowns(this);
+      Managers.tickCharacterBuffs(this);
     }
   }
 

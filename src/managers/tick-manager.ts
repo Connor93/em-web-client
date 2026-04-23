@@ -316,6 +316,19 @@ export function tickSpellCooldowns(client: Client): void {
   }
 }
 
+export function tickCharacterBuffs(client: Client): void {
+  const now = Date.now();
+  for (const [key, buff] of client.characterBuffs) {
+    if (now >= buff.expireTime) {
+      client.characterBuffs.delete(key);
+      client.emit('buffExpired', {
+        playerId: buff.playerId,
+        type: buff.type,
+      });
+    }
+  }
+}
+
 export function tickDoors(client: Client): void {
   for (const door of client.doors) {
     if (!door.open) {

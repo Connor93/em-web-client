@@ -69,6 +69,7 @@ export {
 export {
   tickAutoWalk,
   tickCharacterAnimations,
+  tickCharacterBuffs,
   tickCharacterChatBubbles,
   tickCharacterEmotes,
   tickCursorClick,
