@@ -65,6 +65,8 @@ export {
   requestQuestList,
   requestToJoinParty,
   requestTrade,
+  startFriendPolling,
+  stopFriendPolling,
 } from './social-manager';
 export {
   tickAutoWalk,

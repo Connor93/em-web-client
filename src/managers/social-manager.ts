@@ -8,6 +8,7 @@ import {
   PartyRequestClientPacket,
   PartyRequestType,
   PartyTakeClientPacket,
+  PlayersListClientPacket,
   QuestListClientPacket,
   type QuestPage,
   TradeRequestClientPacket,
@@ -86,4 +87,23 @@ export function requestQuestList(client: Client, page: QuestPage): void {
   const packet = new QuestListClientPacket();
   packet.page = page;
   client.bus.send(packet);
+}
+
+const FRIEND_POLL_INTERVAL = 5000;
+let friendPollTimer: ReturnType<typeof setInterval> | null = null;
+
+export function startFriendPolling(client: Client): void {
+  stopFriendPolling();
+  friendPollTimer = setInterval(() => {
+    client.bus.send(new PlayersListClientPacket());
+  }, FRIEND_POLL_INTERVAL);
+  // Immediate first poll
+  client.bus.send(new PlayersListClientPacket());
+}
+
+export function stopFriendPolling(): void {
+  if (friendPollTimer !== null) {
+    clearInterval(friendPollTimer);
+    friendPollTimer = null;
+  }
 }

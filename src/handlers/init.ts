@@ -20,6 +20,7 @@ import { ChatTab, type Client, GameState } from '../client';
 import { saveEcf, saveEif, saveEmf, saveEnf, saveEsf } from '../db';
 import { DialogResourceID, EOResourceID } from '../edf';
 import { playSfxById, SfxId } from '../sfx';
+import { socialStore } from '../social-store';
 import { ChatIcon } from '../ui/chat/chat';
 import {
   getWeaponMetaData,
@@ -86,6 +87,12 @@ function handleInitInit(client: Client, reader: EoReader) {
       handleInitPlayersList(
         client,
         packet.replyCodeData as InitInitServerPacket.ReplyCodeDataPlayersList,
+      );
+      break;
+    case InitReply.PlayersListFriends:
+      handleInitFriendsList(
+        client,
+        packet.replyCodeData as InitInitServerPacket.ReplyCodeDataPlayersListFriends,
       );
       break;
     case InitReply.Banned:
@@ -192,6 +199,13 @@ function handleInitPlayersList(
 ) {
   data.playersList.players.sort((a, b) => a.name.localeCompare(b.name));
   client.emit('playersListUpdated', data.playersList.players);
+}
+
+function handleInitFriendsList(
+  _client: Client,
+  data: InitInitServerPacket.ReplyCodeDataPlayersListFriends,
+) {
+  socialStore.updateOnlineStatus(data.playersList.players);
 }
 
 function handleInitOutOfDate(
