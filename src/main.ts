@@ -87,6 +87,7 @@ import { SkillMasterDialog } from './ui/skill-master-dialog';
 import { SmallAlertLargeHeader } from './ui/small-alert-large-header';
 import { SmallAlertSmallHeader } from './ui/small-alert-small-header';
 import { SmallConfirm } from './ui/small-confirm';
+import { SocialPanel } from './ui/social-panel';
 import { SpellBook } from './ui/spell-book';
 import { Stats } from './ui/stats/stats';
 import { TradeDialog } from './ui/trade-dialog/trade-dialog';
@@ -242,6 +243,7 @@ const inventory = new Inventory(client);
 const stats = new Stats(client);
 const onlineList = new OnlineList(client);
 const nearbyPlayers = new NearbyPlayers(client);
+const socialPanel = new SocialPanel(client);
 const paperdoll = new Paperdoll(client);
 const book = new Book(client);
 const hud = new HUD();
@@ -485,6 +487,7 @@ wireUiEvents({
   spellBook,
   onlineList,
   nearbyPlayers,
+  socialPanel,
   inGameMenu,
   questDialog,
   shopDialog,
@@ -530,6 +533,7 @@ initDraggableDialogs([
   'info-dialog',
   'guild-panel',
   'nearby-players',
+  'social-panel',
 ]);
 
 // ── Movable UI elements (HUD, Chat) ─────────────────────────────────

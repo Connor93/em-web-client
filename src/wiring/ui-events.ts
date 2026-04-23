@@ -100,6 +100,7 @@ export interface UiEventDeps {
   };
   onlineList: { toggle(): void };
   nearbyPlayers: { toggle(): void };
+  socialPanel: { toggle(): void };
   inGameMenu: { on(event: string, cb: (...args: any[]) => void): void };
   questDialog: { on(event: string, cb: (...args: any[]) => void): void };
   shopDialog: { on(event: string, cb: (...args: any[]) => void): void };
@@ -381,6 +382,9 @@ export function wireUiEvents(deps: UiEventDeps): void {
         break;
       case 'nearby':
         deps.nearbyPlayers.toggle();
+        break;
+      case 'social':
+        deps.socialPanel.toggle();
         break;
       case 'guild':
         deps.guildPanel.toggle();
