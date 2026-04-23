@@ -173,6 +173,10 @@ export class Inventory extends Base {
   private onPointerUp(e: PointerEvent) {
     if (!this.dragging || e.pointerId !== this.dragging.pointerId) return;
 
+    // Prevent click-to-move from firing after a drag-and-drop
+    e.preventDefault();
+    e.stopPropagation();
+
     const { el, ghost, item } = this.dragging;
 
     playSfxById(SfxId.InventoryPlace);

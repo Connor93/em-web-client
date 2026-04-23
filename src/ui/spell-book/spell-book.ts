@@ -150,6 +150,10 @@ export class SpellBook extends BaseDialogMd<Events> {
   private onPointerUp(e: PointerEvent) {
     if (!this.dragging || e.pointerId !== this.dragging.pointerId) return;
 
+    // Prevent click-to-move from firing after a drag-and-drop
+    e.preventDefault();
+    e.stopPropagation();
+
     const { el, ghost, spellId } = this.dragging;
 
     playSfxById(SfxId.InventoryPlace);
