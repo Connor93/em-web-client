@@ -136,3 +136,57 @@ body.is-mobile #party-hud {
   border-color: rgba(100, 200, 255, 0.9);
   box-shadow: 0 0 8px rgba(100, 200, 255, 0.3);
 }
+
+.party-hud-buffs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.party-hud-buff {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.party-hud-buff.shield {
+  background: rgba(80, 176, 232, 0.7);
+}
+.party-hud-buff.hot {
+  background: rgba(80, 200, 80, 0.7);
+}
+.party-hud-buff.warcry {
+  background: rgba(220, 60, 60, 0.7);
+}
+.party-hud-buff.fortify {
+  background: rgba(100, 140, 180, 0.7);
+}
+.party-hud-buff.bloodlust {
+  background: rgba(180, 40, 40, 0.7);
+}
+.party-hud-buff.evasion {
+  background: rgba(60, 180, 60, 0.7);
+}
+.party-hud-buff.divine_prot {
+  background: rgba(220, 180, 50, 0.7);
+}
+.party-hud-buff.mana_shield {
+  background: rgba(160, 80, 220, 0.7);
+}
+.party-hud-buff.arcane_int {
+  background: rgba(80, 120, 220, 0.7);
+}
+.party-hud-buff.bless_str {
+  background: rgba(220, 140, 40, 0.7);
+}
+.party-hud-buff.bless_wis {
+  background: rgba(60, 180, 200, 0.7);
+}
+.party-hud-buff.bless_agi {
+  background: rgba(100, 200, 80, 0.7);
+}
+.party-hud-buff.divine_insp {
+  background: rgba(240, 200, 40, 0.7);
+}

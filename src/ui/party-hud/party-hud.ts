@@ -22,6 +22,8 @@ export class PartyHud {
     client.on('shieldUpdate', () => this.refresh());
     client.on('hotStarted', () => this.refresh());
     client.on('spellQueued', () => this.refresh());
+    client.on('buffApplied', () => this.refresh());
+    client.on('buffExpired', () => this.refresh());
   }
 
   refresh() {
@@ -105,6 +107,40 @@ export class PartyHud {
     }
 
     entry.appendChild(hpBar);
+
+    // Buff icons
+    const buffRow = document.createElement('div');
+    buffRow.className = 'party-hud-buffs';
+
+    for (const [, buff] of this.client.characterBuffs) {
+      if (buff.playerId !== member.playerId) continue;
+      const remaining = Math.ceil((buff.expireTime - Date.now()) / 1000);
+      if (remaining <= 0) continue;
+      const dot = document.createElement('span');
+      dot.className = `party-hud-buff ${buff.type}`;
+      dot.title = buff.type.replace(/_/g, ' ');
+      buffRow.appendChild(dot);
+    }
+
+    // Shield indicator
+    if (shield && shield.current > 0) {
+      const dot = document.createElement('span');
+      dot.className = 'party-hud-buff shield';
+      dot.title = 'Shield';
+      buffRow.appendChild(dot);
+    }
+
+    // HoT indicator
+    if (hot && hot.ticksRemaining > 0) {
+      const dot = document.createElement('span');
+      dot.className = 'party-hud-buff hot';
+      dot.title = 'HoT';
+      buffRow.appendChild(dot);
+    }
+
+    if (buffRow.children.length > 0) {
+      entry.appendChild(buffRow);
+    }
 
     entry.addEventListener('click', () => {
       if (
