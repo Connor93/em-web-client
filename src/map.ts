@@ -1257,14 +1257,12 @@ export class MapRenderer {
             )
           : undefined;
 
-      const hasStatus = this.hasActiveStatusEffects(character.playerId);
       const hasShield = this.client.characterShields.has(character.playerId);
       if (
         !bubble &&
         !healthBar &&
         !emote &&
         !partyMember &&
-        !hasStatus &&
         !hasShield &&
         (!(animation instanceof CharacterSpellChantAnimation) ||
           animation.animationFrame)
@@ -1314,11 +1312,6 @@ export class MapRenderer {
           topCenter,
         );
       }
-
-      // Status effect floating icons
-      if (hasStatus) {
-        this.addStatusEffectIcons(character.playerId, topCenter);
-      }
     }
   }
 
@@ -1340,75 +1333,6 @@ export class MapRenderer {
       array[0] = filter;
     }
     return array;
-  }
-
-  private hasActiveStatusEffects(playerId: number): boolean {
-    // Clean up expired effects (expiresAt uses Date.now())
-    const now = Date.now();
-    for (const [key, effect] of this.client.playerStatusEffects) {
-      if (effect.expiresAt <= now) {
-        this.client.playerStatusEffects.delete(key);
-      }
-    }
-    return (
-      this.client.playerStatusEffects.has(`healblock:${playerId}`) ||
-      this.client.playerStatusEffects.has(`root:${playerId}`)
-    );
-  }
-
-  private addStatusEffectIcons(playerId: number, topCenter: Vector2) {
-    const activeEffects: string[] = [];
-
-    if (this.client.playerStatusEffects.has(`healblock:${playerId}`)) {
-      activeEffects.push('healblock');
-    }
-    if (this.client.playerStatusEffects.has(`root:${playerId}`)) {
-      activeEffects.push('root');
-    }
-
-    const iconSize = 12;
-    const iconGap = 3;
-    const totalWidth =
-      activeEffects.length * iconSize + (activeEffects.length - 1) * iconGap;
-    const startX = Math.floor(topCenter.x - totalWidth / 2);
-    const iconY = Math.floor(topCenter.y - 30);
-
-    for (let i = 0; i < activeEffects.length; i++) {
-      const effectType = activeEffects[i];
-      const centerX = startX + i * (iconSize + iconGap) + iconSize / 2;
-      const centerY = iconY + iconSize / 2;
-      const pulse = 0.7 + 0.3 * Math.sin(this._frameTime / 350 + i);
-      const radius = iconSize / 2;
-
-      const graphics = this.ensureUiGraphics(
-        `ui:status-icon:${playerId}:${effectType}`,
-        `ui:status-icon ${effectType}`,
-      );
-
-      if (effectType === 'healblock') {
-        // Red "no" symbol — circle with diagonal slash
-        graphics.circle(centerX, centerY, radius);
-        graphics.fill({ color: 0x880000, alpha: 0.8 * pulse });
-        graphics.stroke({ color: 0xff3333, width: 1.5, alpha: pulse });
-        // Diagonal slash
-        const slashOffset = radius * 0.6;
-        graphics.moveTo(centerX - slashOffset, centerY - slashOffset);
-        graphics.lineTo(centerX + slashOffset, centerY + slashOffset);
-        graphics.stroke({ color: 0xff5555, width: 1.5, alpha: pulse });
-      } else if (effectType === 'root') {
-        // Blue diamond — chain/lock symbol
-        graphics.moveTo(centerX, centerY - radius);
-        graphics.lineTo(centerX + radius, centerY);
-        graphics.lineTo(centerX, centerY + radius);
-        graphics.lineTo(centerX - radius, centerY);
-        graphics.closePath();
-        graphics.fill({ color: 0x002288, alpha: 0.8 * pulse });
-        graphics.stroke({ color: 0x4488ff, width: 1.5, alpha: pulse });
-        // Inner dot
-        graphics.circle(centerX, centerY, 2);
-        graphics.fill({ color: 0x88bbff, alpha: pulse });
-      }
-    }
   }
 
   private addNpcSprites(entity: Entity, playerScreen: Vector2) {

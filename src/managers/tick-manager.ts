@@ -327,6 +327,13 @@ export function tickCharacterBuffs(client: Client): void {
       });
     }
   }
+
+  // Clean up expired player status effects (healblock, root)
+  for (const [key, effect] of client.playerStatusEffects) {
+    if (now >= effect.expiresAt) {
+      client.playerStatusEffects.delete(key);
+    }
+  }
 }
 
 export function tickDoors(client: Client): void {
