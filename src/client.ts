@@ -203,8 +203,13 @@ export class Client {
     }
   > = new Map();
   /** Per-NPC debuff state: slow or snare with expiry */
-  npcDebuffs: Map<number, { type: 'slow' | 'snare'; expireTime: number }> =
-    new Map();
+  npcDebuffs: Map<
+    number,
+    {
+      type: 'slow' | 'snare' | 'weaken' | 'hunters_mark' | 'amplify';
+      expireTime: number;
+    }
+  > = new Map();
   /** Spell ID → cooldown duration in seconds (populated from server query) */
   spellCooldownTable: Map<number, number> = new Map();
   /** Active spell cooldowns: spell ID → end timestamp and total duration */
@@ -217,6 +222,16 @@ export class Client {
   bossAdds: Set<number> = new Set();
   /** Tracks NPC indices that are expedition combat encounters (for glow effect) */
   expeditionCombatNpcs: Set<number> = new Set();
+  /** Active buffs per player, keyed by "{playerId}:{type}". */
+  characterBuffs: Map<
+    string,
+    {
+      playerId: number;
+      type: string;
+      description: string;
+      expireTime: number;
+    }
+  > = new Map();
   /** Active status effects on players (heal block, root) with expiry times */
   playerStatusEffects: Map<
     string,

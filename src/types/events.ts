@@ -289,4 +289,11 @@ export type ClientEvents = {
     ticks: number;
     duration: number;
   };
+  buffApplied: {
+    playerId: number;
+    type: string;
+    duration: number;
+    description: string;
+  };
+  buffExpired: { playerId: number; type: string };
 };
