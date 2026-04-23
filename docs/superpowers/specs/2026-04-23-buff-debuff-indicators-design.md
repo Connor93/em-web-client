@@ -130,6 +130,14 @@ Extend the existing `src/ui/buff-bar/` component:
 | Blessing of Agility | 🏃 | Light green |
 | Divine Inspiration | ✨ | Bright gold |
 
+## Client: Party HUD Buff Icons
+
+Show active buffs for each party member in the party HUD overlay (`src/ui/party-hud/`). Since buff messages are broadcast to all map players, `characterBuffs` already tracks buffs for all visible players — the party HUD just reads from the same Map.
+
+For each party member entry, render a row of small buff icons below the HP bar. Use the same symbols and colors as the self-buff bar, but smaller (e.g., 12px). Only show the icon — no countdown text (too small). The icons appear/disappear in real time as buffs are applied and expire.
+
+The party HUD already listens to `shieldUpdate` and `hotStarted` events. Add `buffApplied` and `buffExpired` to trigger a refresh.
+
 ## Client: NPC Debuff Rendering
 
 Extend the existing NPC debuff rendering in `src/map.ts` (which already handles slow and snare with tinted sprites and floating icons):
@@ -171,3 +179,5 @@ Same rendering pattern as slow/snare: tinted NPC sprite + floating icon above th
 | `src/ui/buff-bar/buff-bar.css` | Styles for new buff type colors |
 | `src/map.ts` | Add NPC debuff rendering for weaken/hunters_mark/amplify |
 | `src/managers/tick-manager.ts` | Add `tickCharacterBuffs()` for fallback expiry |
+| `src/ui/party-hud/party-hud.ts` | Render buff icons per party member |
+| `src/ui/party-hud/party-hud.css` | Styles for small buff icons in party entries |
