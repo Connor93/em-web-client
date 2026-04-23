@@ -105,6 +105,8 @@ buffExpired: { playerId: number; type: string };
 
 ## Client: Buff Bar UI
 
+Move the buff bar from its current bottom-center floating position to inside the player HUD panel (`#hud`). The `#buff-bar` div moves inside `#hud` after the EXP bar row, so it naturally sits at the bottom of the HUD with no absolute positioning needed.
+
 Extend the existing `src/ui/buff-bar/` component:
 
 - Currently shows shield and HoT icons only
@@ -113,6 +115,7 @@ Extend the existing `src/ui/buff-bar/` component:
 - Icons appear when a buff is active, disappear on expiry or `_END` message
 - Only show buffs for the local player (self-buffs and received blessings)
 - A ticker cleans up expired buffs as a fallback (in case the `_END` message is missed)
+- CSS updated: remove fixed positioning, use flex-wrap so icons wrap to multiple rows if many buffs are active
 
 ### Buff Icon Symbols and Colors
 
@@ -176,7 +179,8 @@ Same rendering pattern as slow/snare: tinted NPC sprite + floating icon above th
 | `src/client.ts` | Add `characterBuffs` Map, extend `npcDebuffs` type |
 | `src/types/events.ts` | Add `buffApplied`, `buffExpired` events |
 | `src/ui/buff-bar/buff-bar.ts` | Render new buff type icons with timers |
-| `src/ui/buff-bar/buff-bar.css` | Styles for new buff type colors |
+| `src/ui/buff-bar/buff-bar.css` | Restyle: remove fixed positioning, flex-wrap, new buff type colors |
+| `index.html` | Move `#buff-bar` inside `#hud` after EXP bar row |
 | `src/map.ts` | Add NPC debuff rendering for weaken/hunters_mark/amplify |
 | `src/managers/tick-manager.ts` | Add `tickCharacterBuffs()` for fallback expiry |
 | `src/ui/party-hud/party-hud.ts` | Render buff icons per party member |

@@ -54,6 +54,11 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 **Context:** Spell details in the encyclopedia don't show cooldown, shield absorb, slow duration, snare radius, etc. These values live in server-side INI files (spell_cooldowns.ini, shields.ini, slows.ini, aoe_snares.ini). Could expose via dashboard API endpoints and fetch in the encyclopedia alongside existing spell data.
 **Related:** `src/ui/encyclopedia/encyclopedia.ts`, etheos `config/spell_cooldowns.ini`, `config/shields.ini`, `config/slows.ini`, `config/aoe_snares.ini`, dashboard API at `/api/`
 
+### Buff Icons — PixiJS Upgrade
+**Added:** 2026-04-23
+**Context:** Buff/debuff icons are currently DOM-based (divs with emoji symbols). Could upgrade to PixiJS-rendered sprites with pixi-filters effects (GlowFilter for pulsing borders, OutlineFilter for type coloring, AdjustmentFilter for expired state) and a custom Graphics.arc() cooldown sweep overlay (WoW-style wedge). `@pixi/ui` CircularProgressBar is another option for cooldown rings. pixi-filters is already installed. Pre-render discrete arc steps to avoid rebuilding Graphics every frame.
+**Related:** `src/ui/buff-bar/`, `pixi-filters@^6.1.5` (already installed), `@pixi/ui@^2.2.7` (not installed), `src/map.ts` (NPC debuff rendering already uses Graphics shapes)
+
 ### Player Tooltip — Admin Gold Names
 **Added:** 2026-03-30
 **Context:** Want admin characters (level > 1) to have gold-colored names in the tooltip. Blocked — `CharacterMapInfo` from eolib doesn't include admin level for other players. Would require a server change to send admin level, or could apply only to local player.
