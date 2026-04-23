@@ -19,6 +19,7 @@ import { DialogResourceID, EOResourceID } from '../edf';
 import { Emote } from '../render';
 import { settings } from '../settings';
 import { playSfxById, SfxId } from '../sfx';
+import { socialStore } from '../social-store';
 import { ChatIcon } from '../ui/chat/chat';
 import { capitalize } from '../utils';
 
@@ -79,6 +80,7 @@ function handlePartyReply(client: Client, reader: EoReader) {
 function handlePartyRequest(client: Client, reader: EoReader) {
   if (settings.get('interactions') === 'disabled') return;
   const packet = PartyRequestServerPacket.deserialize(reader);
+  if (socialStore.isIgnored(packet.playerName)) return;
   const inviter = client.getCharacterById(packet.inviterPlayerId);
   if (!inviter) {
     client.requestCharacterRange([packet.inviterPlayerId]);

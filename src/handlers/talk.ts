@@ -20,6 +20,7 @@ import { COLORS } from '../consts';
 import { EOResourceID } from '../edf';
 import { settings } from '../settings';
 import { playSfxById, SfxId } from '../sfx';
+import { socialStore } from '../social-store';
 import { ChatIcon } from '../ui/chat/chat';
 import { capitalize } from '../utils';
 
@@ -75,6 +76,7 @@ function handleTalkAdmin(client: Client, reader: EoReader) {
 function handleTalkTell(client: Client, reader: EoReader) {
   if (settings.get('privateMessage') === 'disabled') return;
   const packet = TalkTellServerPacket.deserialize(reader);
+  if (socialStore.isIgnored(packet.playerName)) return;
   client.emit('chat', {
     icon: ChatIcon.Note,
     name: `${capitalize(packet.playerName)}->${capitalize(client.name)}`,

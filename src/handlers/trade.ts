@@ -13,9 +13,11 @@ import {
 } from 'eolib';
 import type { Client } from '../client';
 import { playSfxById, SfxId } from '../sfx';
+import { socialStore } from '../social-store';
 
 function handleTradeRequest(client: Client, reader: EoReader) {
   const packet = TradeRequestServerPacket.deserialize(reader);
+  if (socialStore.isIgnored(packet.partnerPlayerName)) return;
   client.emit('tradeRequested', {
     playerId: packet.partnerPlayerId,
     playerName: packet.partnerPlayerName,
