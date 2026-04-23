@@ -132,6 +132,8 @@ Extend the existing `src/ui/buff-bar/` component:
 | Blessing of Wisdom | 🧠 | Cyan |
 | Blessing of Agility | 🏃 | Light green |
 | Divine Inspiration | ✨ | Bright gold |
+| Heal Block (debuff) | 🚫 | Red |
+| Root (debuff) | ⛓ | Blue |
 
 ## Client: Party HUD Buff Icons
 
@@ -153,12 +155,18 @@ Extend the existing NPC debuff rendering in `src/map.ts` (which already handles 
 
 Same rendering pattern as slow/snare: tinted NPC sprite + floating icon above the health bar with bob animation.
 
+## Client: Remove Player-Head Buff Rendering
+
+Currently `map.ts` renders heal block and root icons above player heads (lines ~1359-1406). These should be removed — all player buff/debuff indicators now live in the HUD buff bar (for the local player) and party HUD (for party members). The `playerStatusEffects` Map and its data tracking stay (the HUD buff bar will read from it), but the map renderer stops drawing icons above player sprites.
+
+NPC debuff rendering (slow, snare, weaken, hunter's mark, amplify) remains — those icons still render above the NPC.
+
 ## What Doesn't Change
 
-- `[SHIELD]`, `[HOT]`, `[SLOW]`, `[SNARE]` — already implemented
+- `[SHIELD]`, `[HOT]`, `[SLOW]`, `[SNARE]` — message handling already implemented
 - Ice Barrier — uses existing `[SHIELD]` system
 - Poison Arrow DoT — uses existing DoT system
-- Heal block / Root — uses existing PACKET_BOSS binary system
+- Heal block / Root — data tracking stays, but above-head rendering is removed (moved to HUD buff bar)
 - Spell cooldowns — already tracked via `[COOLDOWN_START]`/`[COOLDOWN]`
 
 ## Files Modified
