@@ -1,13 +1,17 @@
 #social-panel.dialog-md {
-  width: 220px;
+  width: 280px;
   min-height: 200px;
+}
+
+#social-panel .dialog-header {
+  display: none;
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────── */
 
 .social-tabs {
   display: flex;
-  padding: 0 10px;
+  padding: 8px 10px 0;
   gap: 4px;
 }
 
@@ -104,27 +108,29 @@
 #social-panel .dialog-contents {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 4px 10px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  padding: 0 10px;
 }
 
-.social-entry {
+#social-panel .dialog-contents > div {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  padding: 3px 4px;
-  border-radius: 3px;
+  gap: 8px;
+  padding: 5px 4px;
   font-size: 11px;
-  transition: background 0.1s;
+  border-bottom: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
 }
 
-.social-entry:hover {
-  background: rgba(
-    var(--theme-accent-r),
-    var(--theme-accent-g),
-    var(--theme-accent-b),
-    0.08
-  );
+#social-panel .dialog-contents > div:last-child {
+  border-bottom: none;
 }
 
 .social-entry .status-dot {
@@ -145,7 +151,6 @@
 }
 
 .social-entry .entry-name {
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -157,6 +162,10 @@
 .social-entry .entry-status {
   font-size: 9px;
   flex-shrink: 0;
+}
+
+.social-entry .entry-remove {
+  margin-left: auto;
 }
 
 .social-entry .entry-status.online {
