@@ -542,7 +542,7 @@ if (_isMobile) {
   makeMovable(document.getElementById('mobile-hud')!);
 }
 
-// Re-clamp all positioned elements when window shrinks
+// Reposition all elements proportionally when window resizes
 let reclampTimer: ReturnType<typeof setTimeout>;
 window.addEventListener('resize', () => {
   clearTimeout(reclampTimer);
