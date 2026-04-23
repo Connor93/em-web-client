@@ -430,10 +430,11 @@ function handleNpcDebuffApplyMessage(
   const npcIndex = Number(match[1]);
   const duration = Number(match[2]);
 
-  client.npcDebuffs.set(npcIndex, {
-    type,
-    expireTime: Date.now() + duration * 1000,
-  });
+  const existing = client.npcDebuffs.get(npcIndex) ?? [];
+  // Replace existing debuff of same type, or add new
+  const filtered = existing.filter((d) => d.type !== type);
+  filtered.push({ type, expireTime: Date.now() + duration * 1000 });
+  client.npcDebuffs.set(npcIndex, filtered);
 
   client.emit('npcSlowed', { npcIndex, duration });
 }
@@ -448,7 +449,20 @@ function handleNpcDebuffEndMessage(
   if (!match) return;
 
   const npcIndex = Number(match[1]);
-  client.npcDebuffs.delete(npcIndex);
+  // Find which type this end tag corresponds to
+  const tagToType: Record<string, string> = {
+    '[WEAKEN_END]': 'weaken',
+    '[HUNTERS_MARK_END]': 'hunters_mark',
+    '[AMPLIFY_END]': 'amplify',
+  };
+  const debuffType = tagToType[tag];
+  const existing = client.npcDebuffs.get(npcIndex) ?? [];
+  const filtered = existing.filter((d) => d.type !== debuffType);
+  if (filtered.length > 0) {
+    client.npcDebuffs.set(npcIndex, filtered);
+  } else {
+    client.npcDebuffs.delete(npcIndex);
+  }
 
   client.emit('npcSlowed', { npcIndex, duration: 0 });
 }
@@ -626,10 +640,10 @@ function handleSlowMessage(client: Client, message: string): void {
 
   const npcIndex = Number(match[1]);
   const duration = Number(match[2]);
-  client.npcDebuffs.set(npcIndex, {
-    type: 'slow',
-    expireTime: Date.now() + duration * 1000,
-  });
+  const existing = client.npcDebuffs.get(npcIndex) ?? [];
+  const filtered = existing.filter((d) => d.type !== 'slow');
+  filtered.push({ type: 'slow', expireTime: Date.now() + duration * 1000 });
+  client.npcDebuffs.set(npcIndex, filtered);
   client.emit('npcSlowed', { npcIndex, duration });
 }
 
@@ -642,10 +656,13 @@ function handleSnareMessage(client: Client, message: string): void {
   const npcIndexes = match[1].split(',').map(Number);
   const duration = Number(match[2]);
   for (const npcIndex of npcIndexes) {
-    client.npcDebuffs.set(npcIndex, {
+    const existingDebuffs = client.npcDebuffs.get(npcIndex) ?? [];
+    const filteredDebuffs = existingDebuffs.filter((d) => d.type !== 'snare');
+    filteredDebuffs.push({
       type: 'snare',
       expireTime: Date.now() + duration * 1000,
     });
+    client.npcDebuffs.set(npcIndex, filteredDebuffs);
   }
   client.emit('npcSnared', { npcIndexes, duration });
 }

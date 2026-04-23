@@ -301,10 +301,15 @@ export function tickHoT(client: Client): void {
 export function tickNpcDebuffs(client: Client): void {
   const now = Date.now();
   let changed = false;
-  for (const [npcIndex, debuff] of client.npcDebuffs) {
-    if (now >= debuff.expireTime) {
-      client.npcDebuffs.delete(npcIndex);
+  for (const [npcIndex, debuffs] of client.npcDebuffs) {
+    const remaining = debuffs.filter((d) => now < d.expireTime);
+    if (remaining.length !== debuffs.length) {
       changed = true;
+      if (remaining.length > 0) {
+        client.npcDebuffs.set(npcIndex, remaining);
+      } else {
+        client.npcDebuffs.delete(npcIndex);
+      }
     }
   }
   if (changed) {

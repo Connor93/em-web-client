@@ -208,7 +208,7 @@ export class Client {
     {
       type: 'slow' | 'snare' | 'weaken' | 'hunters_mark' | 'amplify';
       expireTime: number;
-    }
+    }[]
   > = new Map();
   /** Spell ID → cooldown duration in seconds (populated from server query) */
   spellCooldownTable: Map<number, number> = new Map();

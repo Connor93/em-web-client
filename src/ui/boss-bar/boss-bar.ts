@@ -142,7 +142,7 @@ export class BossBar {
   }
 
   updateDebuffs(
-    npcDebuffs: Map<number, { type: string; expireTime: number }>,
+    npcDebuffs: Map<number, { type: string; expireTime: number }[]>,
   ): void {
     for (const entry of this.entries.values()) {
       this.updateTags(entry, npcDebuffs);
@@ -151,7 +151,7 @@ export class BossBar {
 
   private updateTags(
     entry: BossBarEntry,
-    npcDebuffs?: Map<number, { type: string; expireTime: number }>,
+    npcDebuffs?: Map<number, { type: string; expireTime: number }[]>,
   ): void {
     entry.tagsElement.replaceChildren();
     if (entry.enraged) {
@@ -169,8 +169,8 @@ export class BossBar {
 
     // NPC debuff tags
     if (npcDebuffs) {
-      const debuff = npcDebuffs.get(entry.npcIndex);
-      if (debuff) {
+      const debuffList = npcDebuffs.get(entry.npcIndex);
+      if (debuffList) {
         const debuffLabels: Record<string, string> = {
           slow: 'SLOWED',
           snare: 'SNARED',
@@ -178,12 +178,14 @@ export class BossBar {
           hunters_mark: 'MARKED',
           amplify: 'AMPLIFIED',
         };
-        const label = debuffLabels[debuff.type];
-        if (label) {
-          const tag = document.createElement('span');
-          tag.classList.add('boss-bar__tag', `boss-bar__tag--${debuff.type}`);
-          tag.textContent = label;
-          entry.tagsElement.appendChild(tag);
+        for (const debuff of debuffList) {
+          const label = debuffLabels[debuff.type];
+          if (label) {
+            const tag = document.createElement('span');
+            tag.classList.add('boss-bar__tag', `boss-bar__tag--${debuff.type}`);
+            tag.textContent = label;
+            entry.tagsElement.appendChild(tag);
+          }
         }
       }
     }
