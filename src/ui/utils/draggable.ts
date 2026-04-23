@@ -24,6 +24,15 @@ function getUiScale(): number {
   return match ? Number.parseFloat(match[1]) : 1;
 }
 
+function getContainerSize(): { width: number; height: number } {
+  const scale = getUiScale();
+  const uiElement = document.getElementById('ui');
+  return {
+    width: uiElement ? uiElement.offsetWidth : window.innerWidth / scale,
+    height: uiElement ? uiElement.offsetHeight : window.innerHeight / scale,
+  };
+}
+
 export function makeDraggable(element: HTMLElement, handleSelector?: string) {
   if (isMobile()) return; // Mobile uses CSS-driven positioning
   const id = element.id;
@@ -107,12 +116,15 @@ export function makeDraggable(element: HTMLElement, handleSelector?: string) {
     isDragging = false;
     handle.releasePointerCapture(event.pointerId);
 
-    // Save position
+    // Save position as ratios
+    const { width, height } = getContainerSize();
+    const pixelX = Number.parseFloat(element.style.left) || 0;
+    const pixelY = Number.parseFloat(element.style.top) || 0;
     localStorage.setItem(
       STORAGE_PREFIX + id,
       JSON.stringify({
-        x: Number.parseFloat(element.style.left),
-        y: Number.parseFloat(element.style.top),
+        ratioX: width > 0 ? pixelX / width : 0,
+        ratioY: height > 0 ? pixelY / height : 0,
       }),
     );
   };
@@ -133,63 +145,26 @@ const registeredIds: string[] = [];
  * Call this on window resize so dialogs don't go off-screen.
  */
 export function reclampDraggablePositions(): void {
-  const scale = getUiScale();
-  const uiEl = document.getElementById('ui');
-  const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
-  const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
-
   for (const id of registeredIds) {
     const element = document.getElementById(id);
     if (!element || element.style.position !== 'fixed') continue;
 
-    const currentX = Number.parseFloat(element.style.left) || 0;
-    const currentY = Number.parseFloat(element.style.top) || 0;
-
-    const clampedX = Math.max(0, Math.min(currentX, containerW - 50));
-    const clampedY = Math.max(0, Math.min(currentY, containerH - 50));
-
-    if (clampedX !== currentX || clampedY !== currentY) {
-      element.style.left = `${clampedX}px`;
-      element.style.top = `${clampedY}px`;
-
-      localStorage.setItem(
-        STORAGE_PREFIX + id,
-        JSON.stringify({ x: clampedX, y: clampedY }),
-      );
-    }
-  }
-}
-
-/**
- * Rescale all saved draggable positions when the UI scale changes.
- * Converts CSS-space coordinates from old scale to new scale
- * so dialogs stay in the same visual screen position.
- */
-export function rescaleDraggablePositions(
-  oldScale: number,
-  newScale: number,
-): void {
-  if (oldScale === newScale || oldScale <= 0 || newScale <= 0) return;
-
-  const ratio = oldScale / newScale;
-
-  for (const id of registeredIds) {
-    const key = STORAGE_PREFIX + id;
-    const saved = localStorage.getItem(key);
+    const saved = localStorage.getItem(STORAGE_PREFIX + id);
     if (!saved) continue;
 
     try {
-      const { x, y } = JSON.parse(saved);
-      const newX = x * ratio;
-      const newY = y * ratio;
-      localStorage.setItem(key, JSON.stringify({ x: newX, y: newY }));
+      const data = JSON.parse(saved);
+      if (!('ratioX' in data)) continue;
 
-      // If the element is currently visible, update its position
-      const element = document.getElementById(id);
-      if (element && element.style.position === 'fixed') {
-        element.style.left = `${newX}px`;
-        element.style.top = `${newY}px`;
-      }
+      const { width: containerW, height: containerH } = getContainerSize();
+      const pixelX = data.ratioX * containerW;
+      const pixelY = data.ratioY * containerH;
+
+      const clampedX = Math.max(0, Math.min(pixelX, containerW - 50));
+      const clampedY = Math.max(0, Math.min(pixelY, containerH - 50));
+
+      element.style.left = `${clampedX}px`;
+      element.style.top = `${clampedY}px`;
     } catch {
       // ignore bad data
     }
@@ -207,21 +182,36 @@ export function restoreOrCenter(element: HTMLElement) {
 
   bringToFront(element);
 
-  const scale = getUiScale();
-  const uiEl = document.getElementById('ui');
-  // Use the #ui container dimensions (CSS-space, before transform)
-  const containerW = uiEl ? uiEl.offsetWidth : window.innerWidth / scale;
-  const containerH = uiEl ? uiEl.offsetHeight : window.innerHeight / scale;
-
   const saved = localStorage.getItem(STORAGE_PREFIX + id);
   if (saved) {
     try {
-      const { x, y } = JSON.parse(saved);
+      const data = JSON.parse(saved);
+      const { width: containerW, height: containerH } = getContainerSize();
+
+      let ratioX: number;
+      let ratioY: number;
+
+      if ('ratioX' in data) {
+        ratioX = data.ratioX;
+        ratioY = data.ratioY;
+      } else {
+        // Legacy migration
+        ratioX = containerW > 0 ? data.x / containerW : 0;
+        ratioY = containerH > 0 ? data.y / containerH : 0;
+        localStorage.setItem(
+          STORAGE_PREFIX + id,
+          JSON.stringify({ ratioX, ratioY }),
+        );
+      }
+
+      const pixelX = ratioX * containerW;
+      const pixelY = ratioY * containerH;
       const maxX = containerW - 50;
       const maxY = containerH - 50;
+
       element.style.position = 'fixed';
-      element.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-      element.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
+      element.style.left = `${Math.max(0, Math.min(pixelX, maxX))}px`;
+      element.style.top = `${Math.max(0, Math.min(pixelY, maxY))}px`;
       element.style.right = 'auto';
       element.style.bottom = 'auto';
       element.style.margin = '0';
@@ -232,6 +222,7 @@ export function restoreOrCenter(element: HTMLElement) {
   }
 
   // Center in the #ui container (in CSS-space coordinates)
+  const { width: containerW, height: containerH } = getContainerSize();
   const elW = element.offsetWidth;
   const elH = element.offsetHeight;
 
