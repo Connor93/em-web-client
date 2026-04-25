@@ -151,6 +151,20 @@ Deferred work, improvements, and ideas are tracked in `docs/followups.md`. This 
 - **Proactively check**: At the start of feature work, check `docs/followups.md` for related open items that could be bundled in
 - **User can ask anytime**: If the user asks about outstanding work, deferred items, or follow-ups, read and summarize `docs/followups.md`
 
+## Daily Patch Notes
+
+Maintain a daily patch notes file at `docs/patch-notes-YYYY-MM-DD.md` (today's absolute date) so the user can grab and post it at any time.
+
+- **When to update**: After completing a feature, finishing a fix, OR when the user signals "we're done with X" — whichever comes first. Don't wait until end of session.
+- **When to create**: If today's file doesn't exist when the first completed change of the day lands, create it.
+- **Format**: Match the existing template in `docs/patch-notes-2026-04-23.md`:
+  - Title: `# Patch Notes — Month D, YYYY`
+  - Sections in this order: `## New Features`, `## Improvements`, `## Bug Fixes` (omit any section with no entries)
+  - Group related changes under a `### Subheading` inside the relevant section, then bullets describing what the user sees
+- **Voice**: Write for players, not developers. Describe the user-facing change ("Added a Social panel..."), not the implementation ("Refactored handler X to..."). No file paths, function names, or commit-style prefixes.
+- **Granularity**: One entry per feature/fix, not per commit. If a feature lands across multiple steps, append to the existing entry rather than adding a new one.
+- **Check at session start**: When picking up work, read today's patch notes file (if it exists) so you know what's already been logged.
+
 ## Project Memory Bank
 
 Proactively save memories during every working session. Don't wait to be asked — capture knowledge as it emerges. The memory index lives at `.claude/projects/.../memory/MEMORY.md`.
