@@ -89,6 +89,7 @@ import { SmallAlertSmallHeader } from './ui/small-alert-small-header';
 import { SmallConfirm } from './ui/small-confirm';
 import { SocialPanel } from './ui/social-panel';
 import { SpellBook } from './ui/spell-book';
+import { SpellTooltip } from './ui/spell-tooltip';
 import { Stats } from './ui/stats/stats';
 import { TradeDialog } from './ui/trade-dialog/trade-dialog';
 import { reclampDraggablePositions } from './ui/utils/draggable';
@@ -109,6 +110,7 @@ const playerTooltip = new PlayerTooltip(document.getElementById('ui')!);
 client.mapRenderer.playerTooltip = playerTooltip;
 const npcTooltip = new NpcTooltip(document.getElementById('ui')!);
 client.mapRenderer.npcTooltip = npcTooltip;
+const spellTooltip = new SpellTooltip(document.getElementById('ui')!);
 const mobileControls = new MobileControls();
 const mobileToolbar = new MobileToolbar(client);
 const mobileHud = new MobileHUD();
@@ -409,6 +411,10 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
     console.error('Websocket Error', e);
   });
 };
+
+// ── Tooltip Wiring ───────────────────────────────────────────────────────
+
+spellBook.setSpellTooltip(spellTooltip);
 
 // ── Wire Events ──────────────────────────────────────────────────────────
 
