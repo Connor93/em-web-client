@@ -95,10 +95,9 @@ function handleStatSkillTake(client: Client, reader: EoReader) {
 function handleStatSkillRemove(client: Client, reader: EoReader) {
   const packet = StatSkillRemoveServerPacket.deserialize(reader);
   client.spells = client.spells.filter((s) => s.id !== packet.spellId);
-  const strings = client.getDialogStrings(
-    DialogResourceID.SKILL_FORGET_SUCCESS,
-  );
-  client.showError(strings![1]!, strings![0]!);
+  // The spell visually disappears from the spell book — an extra confirmation
+  // dialog is redundant, and a class change emits this packet once per known
+  // spell, which would otherwise flood the player with dialogs.
   client.emit('skillsChanged', undefined);
 }
 

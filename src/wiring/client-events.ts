@@ -566,6 +566,12 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.spellBook.render();
   });
 
+  client.on('classChanged', () => {
+    // Hotbar is keyed per class — re-render to swap to the new class's layout.
+    deps.hotbar.refresh();
+    deps.spellBook.render();
+  });
+
   client.on('spellQueued', () => {
     deps.hotbar.refresh();
     deps.mobileToolbar.refresh();

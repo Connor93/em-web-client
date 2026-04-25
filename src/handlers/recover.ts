@@ -69,11 +69,18 @@ function handleRecoverList(client: Client, reader: EoReader) {
   client.maxHp = packet.stats.maxHp;
   client.maxTp = packet.stats.maxTp;
   client.maxSp = packet.stats.maxSp;
+  const previousClassId = client.classId;
   client.classId = packet.classId;
   client.weight.max = packet.stats.maxWeight;
   client.hp = Math.min(client.hp, client.maxHp);
   client.tp = Math.min(client.tp, client.maxTp);
   client.emit('statsUpdate', undefined);
+  if (previousClassId !== packet.classId) {
+    client.emit('classChanged', {
+      previousClassId,
+      newClassId: packet.classId,
+    });
+  }
 }
 
 function handleRecoverReply(client: Client, reader: EoReader) {

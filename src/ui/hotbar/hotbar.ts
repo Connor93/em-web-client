@@ -28,6 +28,7 @@ export class Hotbar extends Base {
   private client: Client;
   private spellTooltip: SpellTooltip | null = null;
   private tooltipTimer: ReturnType<typeof setTimeout> | null = null;
+  private loadedClassId: number | null = null;
 
   setSpellTooltip(tooltip: SpellTooltip): void {
     this.spellTooltip = tooltip;
@@ -127,10 +128,14 @@ export class Hotbar extends Base {
   setSlot(slotIndex: number, type: SlotType, typeId: number) {
     this.client.hotbarSlots[slotIndex] = new Slot(type, typeId);
     localStorage.setItem(
-      `${this.client.name}-hotbar`,
+      this.storageKey(),
       JSON.stringify(this.client.hotbarSlots),
     );
     this.render();
+  }
+
+  private storageKey(): string {
+    return `${this.client.name}-class-${this.client.classId}-hotbar`;
   }
 
   updateCooldowns() {
@@ -170,8 +175,9 @@ export class Hotbar extends Base {
   }
 
   private render() {
-    if (!this.client.hotbarSlots.length) {
+    if (this.loadedClassId !== this.client.classId) {
       this.loadSlots();
+      this.loadedClassId = this.client.classId;
     }
 
     for (const [index, slot] of this.client.hotbarSlots.entries()) {
@@ -227,7 +233,24 @@ export class Hotbar extends Base {
   }
 
   private loadSlots() {
-    const json = localStorage.getItem(`${this.client.name}-hotbar`);
+    this.client.hotbarSlots = [];
+
+    const key = this.storageKey();
+    let json = localStorage.getItem(key);
+
+    // One-time migration from the pre-per-class hotbar key. Only runs once
+    // per character: after migrating we move the value under the new key
+    // and delete the legacy entry so future class changes don't re-import.
+    if (!json) {
+      const legacyKey = `${this.client.name}-hotbar`;
+      const legacy = localStorage.getItem(legacyKey);
+      if (legacy) {
+        json = legacy;
+        localStorage.setItem(key, legacy);
+        localStorage.removeItem(legacyKey);
+      }
+    }
+
     if (json) {
       try {
         this.client.hotbarSlots = JSON.parse(json);
