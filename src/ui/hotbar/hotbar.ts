@@ -3,6 +3,7 @@ import { HOTBAR_SLOTS } from '../../consts';
 import { settings } from '../../settings';
 import { getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
+import type { SpellTooltip } from '../spell-tooltip';
 
 import './hotbar.css';
 
@@ -25,6 +26,12 @@ export class Slot {
 export class Hotbar extends Base {
   protected container: HTMLDivElement = document.querySelector('#hotbar')!;
   private client: Client;
+  private spellTooltip: SpellTooltip | null = null;
+  private tooltipTimer: ReturnType<typeof setTimeout> | null = null;
+
+  setSpellTooltip(tooltip: SpellTooltip): void {
+    this.spellTooltip = tooltip;
+  }
 
   constructor(client: Client) {
     super();
@@ -47,6 +54,34 @@ export class Hotbar extends Base {
 
       slot.addEventListener('click', () => {
         this.client.useHotbarSlot(i);
+      });
+
+      slot.addEventListener('mouseenter', (e: MouseEvent) => {
+        if (!this.spellTooltip) return;
+        const hotbarSlot = this.client.hotbarSlots[i];
+        if (!hotbarSlot || hotbarSlot.type !== SlotType.Skill) return;
+        const record = this.client.getEsfRecordById(hotbarSlot.typeId);
+        if (!record) return;
+        this.tooltipTimer = setTimeout(() => {
+          this.spellTooltip!.show(
+            record,
+            this.client.getSpellDescription(hotbarSlot.typeId),
+            e.clientX,
+            e.clientY,
+          );
+        }, 200);
+      });
+
+      slot.addEventListener('mouseleave', () => {
+        if (this.tooltipTimer) {
+          clearTimeout(this.tooltipTimer);
+          this.tooltipTimer = null;
+        }
+        this.spellTooltip?.hide();
+      });
+
+      slot.addEventListener('mousemove', (e: MouseEvent) => {
+        this.spellTooltip?.reposition(e.clientX, e.clientY);
       });
 
       this.container.appendChild(slot);

@@ -415,6 +415,7 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
 // ── Tooltip Wiring ───────────────────────────────────────────────────────
 
 spellBook.setSpellTooltip(spellTooltip);
+hotbar.setSpellTooltip(spellTooltip);
 
 // ── Wire Events ──────────────────────────────────────────────────────────
 
