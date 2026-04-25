@@ -5,6 +5,7 @@ import { DialogResourceID, EOResourceID } from '../../edf';
 import { playSfxById, SfxId } from '../../sfx';
 import { Base } from '../base-ui';
 import { DialogIcon } from '../dialog-icon';
+import type { SpellTooltip } from '../spell-tooltip';
 import {
   createIconMenuItem,
   createSkillMenuItem,
@@ -49,6 +50,11 @@ export class SkillMasterDialog extends Base {
   private state = [State.Initial];
   private skillId = 0;
   private open = false;
+  private spellTooltip: SpellTooltip | null = null;
+
+  setSpellTooltip(tooltip: SpellTooltip): void {
+    this.spellTooltip = tooltip;
+  }
 
   constructor(client: Client) {
     super();
@@ -149,6 +155,7 @@ export class SkillMasterDialog extends Base {
   }
 
   hide() {
+    this.spellTooltip?.hide();
     this.cover.classList.add('hidden');
     this.container.classList.add('hidden');
 
@@ -273,6 +280,38 @@ export class SkillMasterDialog extends Base {
           this.changeState(State.Requirements);
         },
       );
+      // Spell tooltip on hover
+      if (this.spellTooltip) {
+        let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+        const tooltip = this.spellTooltip;
+        const spellId = skill.id;
+
+        item.addEventListener('mouseenter', (e: MouseEvent) => {
+          hoverTimer = setTimeout(() => {
+            const rec = this.client.getEsfRecordById(spellId);
+            if (!rec) return;
+            tooltip.show(
+              rec,
+              this.client.getSpellDescription(spellId),
+              e.clientX,
+              e.clientY,
+            );
+          }, 200);
+        });
+
+        item.addEventListener('mouseleave', () => {
+          if (hoverTimer) {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+          }
+          tooltip.hide();
+        });
+
+        item.addEventListener('mousemove', (e: MouseEvent) => {
+          tooltip.reposition(e.clientX, e.clientY);
+        });
+      }
+
       const click = () => {
         if (
           learn.classRequirement &&
@@ -358,6 +397,38 @@ export class SkillMasterDialog extends Base {
       }
 
       const item = createSkillMenuItem(record, record.name, '');
+
+      // Spell tooltip on hover
+      if (this.spellTooltip) {
+        let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+        const tooltip = this.spellTooltip;
+        const spellId = skill.id;
+
+        item.addEventListener('mouseenter', (e: MouseEvent) => {
+          hoverTimer = setTimeout(() => {
+            const rec = this.client.getEsfRecordById(spellId);
+            if (!rec) return;
+            tooltip.show(
+              rec,
+              this.client.getSpellDescription(spellId),
+              e.clientX,
+              e.clientY,
+            );
+          }, 200);
+        });
+
+        item.addEventListener('mouseleave', () => {
+          if (hoverTimer) {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+          }
+          tooltip.hide();
+        });
+
+        item.addEventListener('mousemove', (e: MouseEvent) => {
+          tooltip.reposition(e.clientX, e.clientY);
+        });
+      }
 
       const click = () => {
         const strings = this.client.getDialogStrings(
@@ -457,6 +528,15 @@ export class SkillMasterDialog extends Base {
     this.itemList.appendChild(
       createTextMenuItem(`${record.name} ${classRequirement}`),
     );
+
+    // Add spell description if available
+    const spellDescription = this.client.getSpellDescription(this.skillId);
+    if (spellDescription) {
+      const descriptionItem = createTextMenuItem(spellDescription);
+      descriptionItem.style.opacity = '0.7';
+      descriptionItem.style.fontSize = '11px';
+      this.itemList.appendChild(descriptionItem);
+    }
 
     this.itemList.appendChild(createTextMenuItem());
 
