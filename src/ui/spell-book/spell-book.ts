@@ -2,6 +2,7 @@ import type { Client } from '../../client';
 import { isMobile } from '../../main';
 import { playSfxById, SfxId } from '../../sfx';
 import { BaseDialogMd } from '../base-dialog-md';
+import type { SpellTooltip } from '../spell-tooltip';
 
 import './spell-book.css';
 
@@ -28,6 +29,11 @@ export class SpellBook extends BaseDialogMd<Events> {
   private boundOnPointerCancel = this.onPointerCancel.bind(this);
 
   private mobileActionBar: HTMLDivElement | null = null;
+  private spellTooltip: SpellTooltip | null = null;
+
+  setSpellTooltip(tooltip: SpellTooltip): void {
+    this.spellTooltip = tooltip;
+  }
 
   constructor(client: Client) {
     super(client, document.querySelector('#spell-book')!, 'Spell Book');
@@ -75,6 +81,38 @@ export class SpellBook extends BaseDialogMd<Events> {
         btnLevelUp.textContent = 'Level Up';
         btnLevelUp.addEventListener('click', click);
         spellElement.appendChild(btnLevelUp);
+      }
+
+      // Spell tooltip on hover
+      if (this.spellTooltip) {
+        let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+        const tooltip = this.spellTooltip;
+        const spellId = spell.id;
+
+        spellElement.addEventListener('mouseenter', (e: MouseEvent) => {
+          hoverTimer = setTimeout(() => {
+            const rec = this.client.getEsfRecordById(spellId);
+            if (!rec) return;
+            tooltip.show(
+              rec,
+              this.client.getSpellDescription(spellId),
+              e.clientX,
+              e.clientY,
+            );
+          }, 200);
+        });
+
+        spellElement.addEventListener('mouseleave', () => {
+          if (hoverTimer) {
+            clearTimeout(hoverTimer);
+            hoverTimer = null;
+          }
+          tooltip.hide();
+        });
+
+        spellElement.addEventListener('mousemove', (e: MouseEvent) => {
+          tooltip.reposition(e.clientX, e.clientY);
+        });
       }
 
       this.spellGrid.appendChild(spellElement);
@@ -442,6 +480,7 @@ export class SpellBook extends BaseDialogMd<Events> {
   }
 
   override hide() {
+    this.spellTooltip?.hide();
     this.hideMobileActionBar();
     super.hide();
   }
