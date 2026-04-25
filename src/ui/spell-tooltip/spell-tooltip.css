@@ -1,0 +1,90 @@
+.spell-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.92);
+  color: #e0e0e0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  z-index: 1080;
+  display: none;
+  width: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.spell-tooltip.visible {
+  display: block;
+}
+
+.spell-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.spell-tooltip-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.spell-tooltip-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.spell-tooltip-name {
+  font-weight: bold;
+  font-size: 12px;
+  color: #fff;
+}
+
+.spell-tooltip-type {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.spell-tooltip-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 5px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+  font-size: 10px;
+}
+
+.spell-tooltip-stats.hidden {
+  display: none;
+}
+
+.spell-tooltip-stat {
+  white-space: nowrap;
+}
+
+.spell-tooltip-stat-label {
+  opacity: 0.6;
+}
+
+.spell-tooltip-stat-value {
+  color: #fff;
+  margin-left: 3px;
+}
+
+.spell-tooltip-description {
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.8;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+body.is-mobile .spell-tooltip {
+  display: none !important;
+}
