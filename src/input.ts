@@ -175,7 +175,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteHappy, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar1, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar1, true);
       break;
     case 'Digit2':
       if (e.altKey) {
@@ -183,7 +183,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteDepressed, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar2, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar2, true);
       break;
     case 'Digit3':
       if (e.altKey) {
@@ -191,7 +191,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteSad, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar3, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar3, true);
       break;
     case 'Digit4':
       if (e.altKey) {
@@ -199,7 +199,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteAngry, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar4, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar4, true);
       break;
     case 'Digit5':
       if (e.altKey) {
@@ -207,7 +207,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteConfused, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar5, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar5, true);
       break;
     case 'Digit6':
       if (e.altKey) {
@@ -215,7 +215,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteSurprised, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar6, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar6, true);
       break;
     case 'Digit7':
       if (e.altKey) {
@@ -223,7 +223,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteHearts, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar7, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar7, true);
       break;
     case 'Digit8':
       if (e.altKey) {
@@ -231,7 +231,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteMoon, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar8, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar8, true);
       break;
     case 'Digit9':
       if (e.altKey) {
@@ -239,7 +239,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmoteSuicidal, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar9, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar9, true);
       break;
     case 'Digit0':
       if (e.altKey) {
@@ -247,7 +247,7 @@ window.addEventListener('keydown', (e) => {
         updateInputHeld(Input.EmotePlayful, true);
         break;
       }
-      if (!inTextInput) updateInputHeld(Input.Hotbar10, true);
+      if (!inTextInput && !e.shiftKey) updateInputHeld(Input.Hotbar10, true);
       break;
     case 'Tab':
       if (!inTextInput) {
