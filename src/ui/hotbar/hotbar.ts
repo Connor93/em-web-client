@@ -181,12 +181,10 @@ export class Hotbar extends Base {
     }
 
     for (const [index, slot] of this.client.hotbarSlots.entries()) {
-      if (!slot || slot.type === SlotType.Empty) {
-        continue;
-      }
-
       const element = this.container.children[index] as HTMLDivElement;
-      // Remove content children but preserve cooldown overlay elements
+
+      // Always clear non-cooldown content first so a slot that went from
+      // populated to empty (e.g., class change) actually empties visually.
       for (let i = element.children.length - 1; i >= 0; i--) {
         const child = element.children[i];
         if (
@@ -195,6 +193,11 @@ export class Hotbar extends Base {
         ) {
           child.remove();
         }
+      }
+
+      if (!slot || slot.type === SlotType.Empty) {
+        element.classList.remove('spell-active');
+        continue;
       }
 
       element.classList.toggle(
