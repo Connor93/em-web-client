@@ -869,3 +869,11 @@ body.is-mobile #encyclopedia .enc-mobile-hidden {
   border-radius: 2px;
   flex-shrink: 0;
 }
+
+.enc-spell-description {
+  padding: 6px 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--theme-dim);
+  font-style: italic;
+}

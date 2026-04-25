@@ -832,6 +832,15 @@ export class Encyclopedia extends Base {
       `#${spellId} \u2022 ${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}`,
     );
 
+    // Description
+    const spellDescription = this.client.getSpellDescription(spellId);
+    if (spellDescription) {
+      const descriptionElement = document.createElement('div');
+      descriptionElement.className = 'enc-spell-description';
+      descriptionElement.textContent = spellDescription;
+      this.detailPanel.appendChild(descriptionElement);
+    }
+
     // Costs
     const costs: [string, string][] = [];
     if (record.tpCost > 0) costs.push(['TP Cost', `${record.tpCost}`]);
