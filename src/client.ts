@@ -175,6 +175,7 @@ export class Client {
   ecf!: Ecf;
   enf!: Enf;
   esf!: Esf;
+  spellDescriptions: Map<number, string> = new Map();
   map!: Emf;
   mapRenderer: MapRenderer;
   ambientSound: AudioBufferSourceNode | null = null;
@@ -397,6 +398,14 @@ export class Client {
     getEsf().then((esf) => {
       this.esf = esf!;
     });
+    fetch('/spell-descriptions.json')
+      .then((response) => response.json())
+      .then((data: Record<string, string>) => {
+        for (const [id, description] of Object.entries(data)) {
+          this.spellDescriptions.set(Number(id), description);
+        }
+      })
+      .catch(() => {});
     getEdf(4).then((edf) => {
       this.edfs.jukebox = edf;
     });
@@ -566,6 +575,10 @@ export class Client {
     }
 
     return this.esf.skills[id - 1];
+  }
+
+  getSpellDescription(id: number): string | undefined {
+    return this.spellDescriptions.get(id);
   }
 
   getResourceString(id: EOResourceID): string | undefined {
