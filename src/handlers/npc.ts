@@ -55,7 +55,15 @@ function handleNpcPlayer(client: Client, reader: EoReader) {
   let someoneKilled = false;
   for (const attack of packet.attacks) {
     if (attack.playerId === client.playerId) {
-      client.hp = Math.max(client.hp - attack.damage, 0);
+      // Use server-authoritative HP/TP if present (reflects mana shield, etc.)
+      if (packet.hp != null) {
+        client.hp = packet.hp;
+      } else {
+        client.hp = Math.max(client.hp - attack.damage, 0);
+      }
+      if (packet.tp != null) {
+        client.tp = packet.tp;
+      }
       client.emit('statsUpdate', undefined);
     }
 
