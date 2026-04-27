@@ -11,3 +11,7 @@
 - Walking through other players is now instant. The previous short delay before you could phase through someone standing on your path is gone — bump them and you're through.
 - Items on the ground that are drop-protected for someone else now glow **red** instead of the usual gold so you can tell at a glance what you can and can't pick up.
 - Clicking a drop-protected item now pops a toast saying it's protected (with the owner's name when available). The toast is rate-limited to once per second so it won't spam if you click rapidly.
+
+## Bug Fixes
+
+- Awakened bosses no longer lose their awakened glow and boss-bar decoration when they walk out of view and back in. The client was treating the server's "this NPC left your view" notice as a real death, so the awakened state was being thrown away every time the boss left range.

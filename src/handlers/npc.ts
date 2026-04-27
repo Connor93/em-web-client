@@ -154,6 +154,16 @@ function handleNpcSpec(client: Client, reader: EoReader) {
   );
 
   const deadNpcIndex = packet.npcKilledData.npcIndex;
+  // The server reuses NPC_SPEC for "this NPC walked out of your view"
+  // (etheos NPC::RemoveFromView). Those packets carry no killer, no damage,
+  // and no drop. Treat them as a soft remove so awakened/adds state survives
+  // until the NPC walks back into view — otherwise the boss visually loses
+  // its awakened decoration on every range cycle.
+  const isRemoveFromView =
+    packet.npcKilledData.killerId === 0 &&
+    damage === 0 &&
+    !packet.npcKilledData.dropIndex;
+
   const deadNpc = client.nearby.npcs.find((n) => n.index === deadNpcIndex);
   if (deadNpc) {
     const deadRecord = client.getEnfRecordById(deadNpc.id);
@@ -164,11 +174,16 @@ function handleNpcSpec(client: Client, reader: EoReader) {
         damage,
       });
     }
-    if (deadRecord?.boss || client.awakenedBosses.has(deadNpcIndex)) {
+    if (
+      !isRemoveFromView &&
+      (deadRecord?.boss || client.awakenedBosses.has(deadNpcIndex))
+    ) {
       client.emit('bossDied', { npcIndex: deadNpcIndex });
       client.awakenedBosses.delete(deadNpcIndex);
     }
-    client.bossAdds.delete(deadNpcIndex);
+    if (!isRemoveFromView) {
+      client.bossAdds.delete(deadNpcIndex);
+    }
   }
 
   client.setNpcDeathAnimation(deadNpcIndex);
