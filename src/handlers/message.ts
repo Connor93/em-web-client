@@ -306,6 +306,23 @@ function handleCooldownTableResponse(client: Client, message: string): void {
   }
 }
 
+function isPassiveTableResponse(message: string): boolean {
+  return message.startsWith('PASSIVES:');
+}
+
+function handlePassiveTableResponse(client: Client, message: string): void {
+  client.passiveSpellIds.clear();
+  const ids = message
+    .replace(/^PASSIVES:/, '')
+    .trim()
+    .split(/\s+/);
+  for (const idStr of ids) {
+    const id = Number(idStr);
+    if (id) client.passiveSpellIds.add(id);
+  }
+  client.emit('passivesLoaded', undefined);
+}
+
 /** Known buff tags and their type keys. */
 const BUFF_TAGS: [string, string][] = [
   ['[WARCRY]', 'warcry'],
@@ -717,6 +734,11 @@ function handleMessageOpen(client: Client, reader: EoReader) {
 
   if (isConfigReload(packet.message)) {
     handleConfigReload(client, packet.message);
+    return;
+  }
+
+  if (isPassiveTableResponse(packet.message)) {
+    handlePassiveTableResponse(client, packet.message);
     return;
   }
 

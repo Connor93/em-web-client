@@ -1,5 +1,9 @@
 /* ── Skill Master ────────────────────────────────────────────────── */
 
+#skill-master .menu-item.passive {
+  border-left: 3px solid rgba(150, 200, 255, 0.6);
+}
+
 #skill-master {
   user-select: none;
   box-sizing: border-box;

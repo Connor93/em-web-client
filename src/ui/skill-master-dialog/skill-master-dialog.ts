@@ -281,6 +281,9 @@ export class SkillMasterDialog extends Base {
           this.changeState(State.Requirements);
         },
       );
+      if (this.client.isPassiveSpell(skill.id)) {
+        item.classList.add('passive');
+      }
       // Spell tooltip on hover
       if (this.spellTooltip) {
         let hoverTimer: ReturnType<typeof setTimeout> | null = null;
@@ -296,6 +299,7 @@ export class SkillMasterDialog extends Base {
               this.client.getSpellDescription(spellId),
               e.clientX,
               e.clientY,
+              this.client.isPassiveSpell(spellId),
             );
           }, 200);
         });
@@ -398,6 +402,9 @@ export class SkillMasterDialog extends Base {
       }
 
       const item = createSkillMenuItem(record, record.name, '');
+      if (this.client.isPassiveSpell(skill.id)) {
+        item.classList.add('passive');
+      }
 
       // Spell tooltip on hover
       if (this.spellTooltip) {
@@ -414,6 +421,7 @@ export class SkillMasterDialog extends Base {
               this.client.getSpellDescription(spellId),
               e.clientX,
               e.clientY,
+              this.client.isPassiveSpell(spellId),
             );
           }, 200);
         });

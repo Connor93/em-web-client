@@ -828,8 +828,11 @@ export class Encyclopedia extends Base {
     // Graphic (spell icon)
     this.addDetailGraphic(this.getSpellIconPath(record));
     this.addDetailName(record.name);
+    const passiveSuffix = this.client.isPassiveSpell(spellId)
+      ? ' \u2022 Passive'
+      : '';
     this.addDetailType(
-      `#${spellId} \u2022 ${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}`,
+      `#${spellId} \u2022 ${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}${passiveSuffix}`,
     );
 
     // Description

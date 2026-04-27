@@ -18,6 +18,10 @@ export class SpellBook extends BaseDialogMd<Events> {
   private btnReset: HTMLButtonElement = this.container.querySelector(
     'button[data-id="reset-spells"]',
   )!;
+  private tabButtons = Array.from(
+    this.container.querySelectorAll<HTMLButtonElement>('.spell-tab'),
+  );
+  private activeTab: 'active' | 'passive' = 'active';
 
   private dragging: {
     spellId: number;
@@ -46,6 +50,22 @@ export class SpellBook extends BaseDialogMd<Events> {
       playSfxById(SfxId.ButtonClick);
       this.emitter.emit('requestSpellReset', undefined);
     });
+
+    for (const button of this.tabButtons) {
+      button.addEventListener('click', () => {
+        const tab = button.dataset.tab as 'active' | 'passive';
+        if (tab === this.activeTab) return;
+        playSfxById(SfxId.TextBoxFocus);
+        this.activeTab = tab;
+        for (const tabButton of this.tabButtons) {
+          tabButton.classList.toggle(
+            'active',
+            tabButton.dataset.tab === this.activeTab,
+          );
+        }
+        this.render();
+      });
+    }
   }
 
   public render() {
@@ -57,18 +77,30 @@ export class SpellBook extends BaseDialogMd<Events> {
 
     this.btnReset.disabled = !this.client.spells.some((s) => s.level > 1);
 
-    for (const spell of this.client.spells) {
+    const visibleSpells = this.client.spells.filter((s) => {
+      const passive = this.client.isPassiveSpell(s.id);
+      return this.activeTab === 'passive' ? passive : !passive;
+    });
+
+    for (const spell of visibleSpells) {
       const record = this.client.getEsfRecordById(spell.id);
       if (!record) continue;
 
       const spellElement = document.createElement('div');
+      if (this.activeTab === 'passive') {
+        spellElement.classList.add('passive');
+      }
       const icon = document.createElement('div');
       icon.classList.add('spell-icon');
       icon.style.backgroundImage = `url('/gfx/gfx025/${record.iconId + 100}.png')`;
 
-      icon.addEventListener('pointerdown', (e) => {
-        this.onPointerDown(e, icon, spell.id);
-      });
+      // Passive cells are not draggable (the spell can't be cast, so no
+      // sense binding it to a hotbar slot).
+      if (this.activeTab !== 'passive') {
+        icon.addEventListener('pointerdown', (e) => {
+          this.onPointerDown(e, icon, spell.id);
+        });
+      }
 
       spellElement.appendChild(icon);
 
@@ -109,6 +141,7 @@ export class SpellBook extends BaseDialogMd<Events> {
               this.client.getSpellDescription(spellId),
               e.clientX,
               e.clientY,
+              this.client.isPassiveSpell(spellId),
             );
           }, 200);
         });

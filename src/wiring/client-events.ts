@@ -333,6 +333,12 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     cooldownQuery.message = '#cooldowns';
     client.bus.send(cooldownQuery);
 
+    // Query passive spell list so the Spell Book / Skill Master / Encyclopedia
+    // can split passives from active spells.
+    const passiveQuery = new TalkReportClientPacket();
+    passiveQuery.message = '#passives';
+    client.bus.send(passiveQuery);
+
     // Start friend online status polling
     socialStore.resetOnlineStatus();
     startFriendPolling(client);
@@ -564,6 +570,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('skillsChanged', () => {
     deps.skillMasterDialog.refresh();
     deps.spellBook.render();
+  });
+
+  client.on('passivesLoaded', () => {
+    deps.spellBook.render();
+    deps.skillMasterDialog.refresh();
   });
 
   client.on('classChanged', () => {

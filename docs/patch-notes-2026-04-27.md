@@ -3,6 +3,7 @@
 ## New Features
 
 - Added a **Reset Spell Levels** button to the Spell Book. Pressing it asks for confirmation, then drops every spell above level 1 back to level 1 and refunds the skill points you spent on them. The button is greyed out when there's nothing to reset.
+- The Spell Book now has **Active** and **Passive** tabs. Passive spells (the ones that grant stats or effects just for being learned and don't do anything when cast) are pulled out of the main list onto their own tab so they're easier to find and don't clutter the spells you actually use. Skill Master windows mark passive spells with a small accent border, and the Encyclopedia adds a "Passive" label on their detail page. Spell tooltips also call out passive spells in their type line. Passive spells aren't draggable to the hotbar.
 
 ## Improvements
 

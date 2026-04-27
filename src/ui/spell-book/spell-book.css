@@ -1,5 +1,52 @@
 /* Spell book inherits from .dialog-md in style.css */
 
+/* ── Active / Passive tab strip above the spell grid ───────── */
+#spell-book .spell-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 12px 0;
+}
+
+#spell-book .spell-tab {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #a09880;
+  background: var(--theme-bg-medium);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+#spell-book .spell-tab:hover {
+  color: var(--theme-text);
+  background: rgba(42, 36, 28, 0.8);
+}
+
+#spell-book .spell-tab.active {
+  color: var(--theme-accent);
+  background: rgba(50, 42, 32, 0.9);
+  border-bottom-color: transparent;
+}
+
+/* Passive cells get a faint blue accent border so they read
+   distinctly even when the Passive tab isn't focused. */
+#spell-book .spell-grid > div.passive {
+  border-left: 2px solid rgba(150, 200, 255, 0.45);
+  padding-left: 6px;
+  cursor: default;
+}
+
 /* Two-button footer: stop the default flex stretch from inflating the
    reset button taller than the cancel button (which is content-sized
    via the global .dialog-md button[data-id="cancel"] margin override). */

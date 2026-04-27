@@ -150,6 +150,7 @@ export type ClientEvents = {
     skills: SkillLearn[];
   };
   skillsChanged: undefined;
+  passivesLoaded: undefined;
   classChanged: { previousClassId: number; newClassId: number };
   spellQueued: undefined;
   setChat: string;

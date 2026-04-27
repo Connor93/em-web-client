@@ -213,6 +213,8 @@ export class Client {
   > = new Map();
   /** Spell ID → cooldown duration in seconds (populated from server query) */
   spellCooldownTable: Map<number, number> = new Map();
+  /** Spell IDs flagged as passive on the server (populated from #passives query) */
+  passiveSpellIds: Set<number> = new Set();
   /** Active spell cooldowns: spell ID → end timestamp and total duration */
   activeSpellCooldowns: Map<number, { endTime: number; duration: number }> =
     new Map();
@@ -576,6 +578,10 @@ export class Client {
 
   getSpellDescription(id: number): string | undefined {
     return this.spellDescriptions.get(id);
+  }
+
+  isPassiveSpell(spellId: number): boolean {
+    return this.passiveSpellIds.has(spellId);
   }
 
   getResourceString(id: EOResourceID): string | undefined {

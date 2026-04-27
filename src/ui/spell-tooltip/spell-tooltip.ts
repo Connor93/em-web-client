@@ -55,10 +55,13 @@ export class SpellTooltip {
     description: string | undefined,
     x: number,
     y: number,
+    isPassive = false,
   ): void {
     this.iconElement.style.backgroundImage = `url('/gfx/gfx025/${record.iconId + 100}.png')`;
     this.nameElement.textContent = record.name;
-    this.typeElement.textContent = this.getTypeLine(record);
+    this.typeElement.textContent = isPassive
+      ? `Passive \u2022 ${this.getTypeLine(record)}`
+      : this.getTypeLine(record);
 
     // Build stats
     this.statsContainer.innerHTML = '';
