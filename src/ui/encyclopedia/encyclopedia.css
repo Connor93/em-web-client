@@ -304,6 +304,21 @@
   object-fit: contain;
 }
 
+/* Passive spell rows: ring around the icon to match Spell Book / Skill Master */
+#encyclopedia .enc-row.passive .enc-row-icon {
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px rgba(150, 200, 255, 0.65),
+    0 0 6px rgba(150, 200, 255, 0.45);
+}
+
+#encyclopedia .enc-detail-graphic.passive {
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 2px rgba(150, 200, 255, 0.65),
+    0 0 8px rgba(150, 200, 255, 0.45);
+}
+
 #encyclopedia .enc-row-info {
   display: flex;
   flex-direction: column;

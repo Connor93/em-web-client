@@ -279,6 +279,7 @@ export class Encyclopedia extends Base {
       subtitle: string;
       badge: string;
       icon: string | null;
+      passive?: boolean;
     };
     const allEntries: Entry[] = [];
 
@@ -317,6 +318,7 @@ export class Encyclopedia extends Base {
           subtitle: this.getSpellSubtitle(spell.record, spell.id),
           badge: this.getSpellBadge(spell.record),
           icon: this.getSpellIconPath(spell.record),
+          passive: this.client.isPassiveSpell(spell.id),
         });
       }
     }
@@ -379,6 +381,7 @@ export class Encyclopedia extends Base {
         entry.subtitle,
         entry.badge,
         entry.icon,
+        entry.passive,
       );
     }
 
@@ -415,6 +418,7 @@ export class Encyclopedia extends Base {
     subtitle: string,
     badge: string,
     iconPath: string | null,
+    passive = false,
   ) {
     const row = document.createElement('div');
     row.className = 'enc-row';
@@ -422,6 +426,9 @@ export class Encyclopedia extends Base {
     row.dataset.id = String(id);
     if (this.selectedType === type && this.selectedId === id) {
       row.classList.add('selected');
+    }
+    if (passive) {
+      row.classList.add('passive');
     }
 
     const iconContainer = document.createElement('div');
@@ -826,11 +833,10 @@ export class Encyclopedia extends Base {
     if (!record) return;
 
     // Graphic (spell icon)
-    this.addDetailGraphic(this.getSpellIconPath(record));
+    const isPassive = this.client.isPassiveSpell(spellId);
+    this.addDetailGraphic(this.getSpellIconPath(record), isPassive);
     this.addDetailName(record.name);
-    const passiveSuffix = this.client.isPassiveSpell(spellId)
-      ? ' \u2022 Passive'
-      : '';
+    const passiveSuffix = isPassive ? ' \u2022 Passive' : '';
     this.addDetailType(
       `#${spellId} \u2022 ${getSkillNatureName(record.nature)} \u2022 ${getSkillTypeName(record.type)}${passiveSuffix}`,
     );
@@ -1831,9 +1837,12 @@ export class Encyclopedia extends Base {
 
   // ── Detail DOM helpers ──
 
-  private addDetailGraphic(iconPath: string | null) {
+  private addDetailGraphic(iconPath: string | null, passive = false) {
     const container = document.createElement('div');
     container.className = 'enc-detail-graphic';
+    if (passive) {
+      container.classList.add('passive');
+    }
     if (iconPath) {
       const image = document.createElement('img');
       image.src = iconPath;

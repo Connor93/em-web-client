@@ -39,12 +39,17 @@
   border-bottom-color: transparent;
 }
 
-/* Passive cells get a faint blue accent border so they read
-   distinctly even when the Passive tab isn't focused. */
+/* Passive spells: ring + soft glow around the icon so they read as
+   distinctly different from castable spells. */
 #spell-book .spell-grid > div.passive {
-  border-left: 2px solid rgba(150, 200, 255, 0.45);
-  padding-left: 6px;
   cursor: default;
+}
+
+#spell-book .spell-grid > div.passive .spell-icon {
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 2px rgba(150, 200, 255, 0.65),
+    0 0 6px rgba(150, 200, 255, 0.45);
 }
 
 /* Two-button footer: stop the default flex stretch from inflating the
