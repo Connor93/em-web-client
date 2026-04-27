@@ -190,6 +190,7 @@ export class SkillMasterDialog extends Base {
   }
 
   private changeState(state: State) {
+    this.spellTooltip?.hide();
     this.state.push(state);
     this.render();
   }

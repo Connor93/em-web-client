@@ -1,4 +1,5 @@
 import { type EsfRecord, SkillType } from 'eolib';
+import { settings } from '../../settings';
 
 import './spell-tooltip.css';
 
@@ -81,21 +82,7 @@ export class SpellTooltip {
       this.descriptionElement.style.display = 'none';
     }
 
-    // Position: offset below-right of cursor, clamp to viewport
-    const tooltipWidth = 260;
-    const margin = 12;
-    let left = x + margin;
-    let top = y + margin;
-
-    if (left + tooltipWidth > window.innerWidth - margin) {
-      left = x - tooltipWidth - margin;
-    }
-    if (top + 200 > window.innerHeight - margin) {
-      top = y - 200 - margin;
-    }
-
-    this.element.style.left = `${left}px`;
-    this.element.style.top = `${top}px`;
+    this.setPosition(x, y);
     this.element.classList.add('visible');
   }
 
@@ -105,17 +92,26 @@ export class SpellTooltip {
 
   reposition(x: number, y: number): void {
     if (!this.element.classList.contains('visible')) return;
+    this.setPosition(x, y);
+  }
 
+  private setPosition(x: number, y: number): void {
+    const scale = settings.getUiScale();
+    const scaledX = x / scale;
+    const scaledY = y / scale;
     const tooltipWidth = 260;
     const margin = 12;
-    let left = x + margin;
-    let top = y + margin;
+    let left = scaledX + margin;
+    let top = scaledY + margin;
 
-    if (left + tooltipWidth > window.innerWidth - margin) {
-      left = x - tooltipWidth - margin;
+    const viewWidth = window.innerWidth / scale;
+    const viewHeight = window.innerHeight / scale;
+
+    if (left + tooltipWidth > viewWidth - margin) {
+      left = scaledX - tooltipWidth - margin;
     }
-    if (top + 200 > window.innerHeight - margin) {
-      top = y - 200 - margin;
+    if (top + 200 > viewHeight - margin) {
+      top = scaledY - 200 - margin;
     }
 
     this.element.style.left = `${left}px`;
