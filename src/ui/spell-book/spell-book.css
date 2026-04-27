@@ -1,4 +1,16 @@
 /* Spell book inherits from .dialog-md in style.css */
+
+/* Two-button footer: stop the default flex stretch from inflating the
+   reset button taller than the cancel button (which is content-sized
+   via the global .dialog-md button[data-id="cancel"] margin override). */
+#spell-book .dialog-footer {
+  align-items: center;
+}
+
+#spell-book .dialog-footer button[data-id="cancel"] {
+  margin: 0;
+}
+
 #spell-book .dialog-footer .themed-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
