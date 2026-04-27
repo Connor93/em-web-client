@@ -175,6 +175,35 @@
   color: var(--theme-accent);
 }
 
+#btn-chat-scroll-lock {
+  padding: 4px 7px;
+  background: rgba(30, 25, 18, 0.85);
+  color: var(--theme-dim);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
+  border-radius: 4px;
+  outline: none;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  right: 58px;
+  z-index: 1;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+#btn-chat-scroll-lock:hover {
+  color: var(--theme-accent);
+}
+
 #chat-tab-bar {
   flex-shrink: 0;
 }

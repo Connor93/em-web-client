@@ -69,7 +69,11 @@ export class Chat extends Base {
   private btnSystem: HTMLButtonElement = this.container.querySelector(
     '#btn-chat-tab-system',
   )!;
+  private btnScrollLock: HTMLButtonElement = this.container.querySelector(
+    '#btn-chat-scroll-lock',
+  )!;
   private collapsed = false;
+  private autoScroll = true;
   private client: Client;
   private unreadCounts = new Map<ChatTab, number>();
   private badges = new Map<ChatTab, HTMLSpanElement>();
@@ -208,7 +212,9 @@ export class Chat extends Base {
     }
 
     chatWindow.appendChild(li);
-    chatWindow.scrollTo(0, chatWindow.scrollHeight);
+    if (this.autoScroll) {
+      chatWindow.scrollTo(0, chatWindow.scrollHeight);
+    }
 
     if (tab !== ChatTab.System && chatWindow !== this.activeChat) {
       this.incrementUnread(tab);
@@ -297,7 +303,7 @@ export class Chat extends Base {
     this.message.addEventListener('keydown', (e) => {
       // When the chat input is empty, suppress hotkey characters so they
       // trigger game actions (sit, hotbar, refresh) instead of typing
-      if (this.message.value.length === 0 && !e.ctrlKey) {
+      if (this.message.value.length === 0) {
         const hotkeys = [
           'x',
           '1',
@@ -408,6 +414,16 @@ export class Chat extends Base {
           `${currentTop + delta}px`,
           'important',
         );
+      }
+    });
+
+    this.btnScrollLock.addEventListener('click', () => {
+      this.autoScroll = !this.autoScroll;
+      this.btnScrollLock.textContent = this.autoScroll
+        ? '\u{1F513}'
+        : '\u{1F512}';
+      if (this.autoScroll) {
+        this.activeChat.scrollTo(0, this.activeChat.scrollHeight);
       }
     });
 
