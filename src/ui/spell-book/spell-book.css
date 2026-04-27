@@ -1,4 +1,9 @@
 /* Spell book inherits from .dialog-md in style.css */
+#spell-book .dialog-footer .themed-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 #spell-book.dialog-md {
   background-color: var(--theme-bg-dark);
   background-image: none;

@@ -221,7 +221,7 @@
           <ul id="global-chat" class="hidden"></ul>
           <ul id="group-chat" class="hidden"></ul>
           <ul id="system-chat" class="hidden"></ul>
-          <input type="text" id="chat-message" />
+          <input type="text" id="chat-message" maxlength="128" />
           <input type="submit" class="hidden" />
         </form>
       </div>
@@ -581,6 +581,7 @@
           <div class="dialog-header"><span class="label"></span></div>
           <div class="spell-grid dialog-contents"></div>
           <div class="dialog-footer">
+            <button class="themed-btn danger" type="button" data-id="reset-spells">Reset Spell Levels</button>
             <button class="themed-btn" type="button" data-id="cancel">Cancel</button>
           </div>
         </div>

@@ -1742,7 +1742,12 @@ export class MapRenderer {
         );
         highlight.texture = highlightTexture;
         highlight.position.set(tileX, tileY);
-        highlight.tint = 0xd4b896;
+        const protection = this.client.itemProtectionTimers.get(item.uid);
+        const protectedForOther =
+          protection &&
+          protection.ticks > 0 &&
+          protection.ownerId !== this.client.playerId;
+        highlight.tint = protectedForOther ? 0xe57373 : 0xd4b896;
         const pulse = Math.sin(this._frameTime / 400) * 0.15 + 0.35;
         highlight.alpha = pulse;
       }

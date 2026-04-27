@@ -8,12 +8,16 @@ import './spell-book.css';
 
 type Events = {
   assignToSlot: { spellId: number; slotIndex: number };
+  requestSpellReset: undefined;
 };
 
 export class SpellBook extends BaseDialogMd<Events> {
   protected container: HTMLDivElement = document.querySelector('#spell-book')!;
   private spellGrid: HTMLDivElement =
     this.container.querySelector('.spell-grid')!;
+  private btnReset: HTMLButtonElement = this.container.querySelector(
+    'button[data-id="reset-spells"]',
+  )!;
 
   private dragging: {
     spellId: number;
@@ -37,6 +41,11 @@ export class SpellBook extends BaseDialogMd<Events> {
 
   constructor(client: Client) {
     super(client, document.querySelector('#spell-book')!, 'Spell Book');
+
+    this.btnReset.addEventListener('click', () => {
+      playSfxById(SfxId.ButtonClick);
+      this.emitter.emit('requestSpellReset', undefined);
+    });
   }
 
   public render() {
@@ -45,6 +54,8 @@ export class SpellBook extends BaseDialogMd<Events> {
     this.updateLabelText(
       `Spell Book (${this.client.spells.length}) Points (${this.client.skillPoints})`,
     );
+
+    this.btnReset.disabled = !this.client.spells.some((s) => s.level > 1);
 
     for (const spell of this.client.spells) {
       const record = this.client.getEsfRecordById(spell.id);

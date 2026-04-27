@@ -505,6 +505,20 @@ export function wireUiEvents(deps: UiEventDeps): void {
     },
   );
 
+  deps.spellBook.on('requestSpellReset', () => {
+    deps.smallConfirm.setContent(
+      'This will reset every spell above level 1 back to level 1 and refund the skill points you spent on them. Continue?',
+      'Reset Spell Levels',
+    );
+    deps.smallConfirm.setCallback(() => {
+      if (!client.bus) return;
+      const packet = new TalkReportClientPacket();
+      packet.message = '#resetsp';
+      client.bus.send(packet);
+    });
+    deps.smallConfirm.show();
+  });
+
   // Inventory assign to slot
   deps.inventory.on(
     'assignToSlot',

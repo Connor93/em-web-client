@@ -17,7 +17,10 @@ import {
 import { EOResourceID } from '../edf';
 import { CursorClickAnimation } from '../render';
 import { GameState } from '../types';
+import { showGameToast } from '../ui/game-toast/game-toast';
 import { capitalize } from '../utils';
+
+let lastProtectedToastAt = 0;
 
 export function handleClick(client: Client, e: MouseEvent): void {
   const ui = document.getElementById('ui')!;
@@ -170,6 +173,12 @@ export function handleClick(client: Client, e: MouseEvent): void {
           EOResourceID.STATUS_LABEL_TYPE_WARNING,
           message ?? '',
         );
+
+        const now = Date.now();
+        if (message && now - lastProtectedToastAt > 1000) {
+          lastProtectedToastAt = now;
+          showGameToast(EOResourceID.STATUS_LABEL_TYPE_WARNING, message);
+        }
         return;
       }
     }

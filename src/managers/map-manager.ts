@@ -381,31 +381,7 @@ export function canWalk(
     return false;
   }
 
-  if (
-    client.nearby.characters.some(
-      (c) => c.coords.x === coords.x && c.coords.y === coords.y,
-    )
-  ) {
-    // Ghost through players after holding direction for ~5 seconds
-    const GHOST_THRESHOLD = 10;
-    if (
-      client.ghostBlockedCoords &&
-      client.ghostBlockedCoords.x === coords.x &&
-      client.ghostBlockedCoords.y === coords.y
-    ) {
-      client.ghostBlockedTicks++;
-      if (client.ghostBlockedTicks >= GHOST_THRESHOLD) {
-        // Allow pass-through and reset
-        client.ghostBlockedTicks = 0;
-        client.ghostBlockedCoords = null;
-        return true;
-      }
-    } else {
-      client.ghostBlockedCoords = { x: coords.x, y: coords.y };
-      client.ghostBlockedTicks = 1;
-    }
-    return false;
-  }
+  // Players don't block — server allows instant ghost-through (GhostTimer = 0).
 
   const spec = client.map.tileSpecRows
     .find((r) => r.y === coords.y)
