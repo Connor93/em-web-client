@@ -148,7 +148,7 @@ function handleNpcSpec(client: Client, reader: EoReader) {
   const packet = NpcSpecServerPacket.deserialize(reader);
   const damage = packet.npcKilledData.damage;
   const isCritical = client.recordOutgoingDamage(damage);
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, damage, 0, isCritical),
   );
@@ -233,7 +233,7 @@ function handleNpcAccept(client: Client, reader: EoReader) {
   const packet = NpcAcceptServerPacket.deserialize(reader);
   const damage = packet.npcKilledData.damage;
   const isCritical = client.recordOutgoingDamage(damage);
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, damage, 0, isCritical),
   );
@@ -320,7 +320,7 @@ function handleNpcJunk(client: Client, reader: EoReader) {
     .filter((n) => n.id === packet.npcId)
     .map((n) => n.index)
     .forEach((npcIndex) => {
-      client.npcHealthBars.set(npcIndex, new HealthBar(0, 1));
+      client.setNpcHealthBar(npcIndex, new HealthBar(0, 1));
       client.setNpcDeathAnimation(npcIndex);
     });
 }
@@ -360,7 +360,7 @@ function handleNpcReply(client: Client, reader: EoReader) {
   const damage = packet.damage;
   const isLocal = packet.playerId === client.playerId;
   const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     npc.index,
     new HealthBar(packet.hpPercentage, damage, 0, isCritical, isLocal),
   );

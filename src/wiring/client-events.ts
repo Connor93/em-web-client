@@ -637,6 +637,11 @@ export function wireClientEvents(deps: ClientEventDeps): void {
   client.on('npcSlowed', () => bossBar.updateDebuffs(client.npcDebuffs));
   client.on('npcSnared', () => bossBar.updateDebuffs(client.npcDebuffs));
 
+  // Mirror keyboard target state onto the boss bar
+  client.on('npcTargetChanged', () => {
+    bossBar.setTargeted(client.targetedNpcIndex);
+  });
+
   client.on('bossLoot', ({ items }) => {
     for (const item of items) {
       showGameToast(EOResourceID.STATUS_LABEL_TYPE_ITEM, item, 'boss-loot');

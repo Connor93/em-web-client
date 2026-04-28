@@ -55,7 +55,7 @@ function handleCastReply(client: Client, reader: EoReader) {
 
   const isLocal = secondShort === client.playerId;
   const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     npcIndex,
     new HealthBar(hpPercentage, damage, 0, isCritical, isLocal),
   );
@@ -92,7 +92,7 @@ function handleCastSpec(client: Client, reader: EoReader) {
   const damage = packet.npcKilledData.damage;
   const isLocal = packet.npcKilledData.killerId === client.playerId;
   const isCritical = isLocal ? client.recordOutgoingDamage(damage) : false;
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, damage, 0, isCritical, isLocal),
   );
@@ -182,7 +182,7 @@ function handleCastAccept(client: Client, reader: EoReader) {
 
   const damage = packet.npcKilledData.damage;
   const isCritical = client.recordOutgoingDamage(damage);
-  client.npcHealthBars.set(
+  client.setNpcHealthBar(
     packet.npcKilledData.npcIndex,
     new HealthBar(0, damage, 0, isCritical),
   );

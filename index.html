@@ -49,6 +49,16 @@
     <div id="ui">
       <div id="pm-bubbles"></div>
       <div id="boss-bars" class="hidden"></div>
+      <div id="target-hud" class="hidden">
+        <div class="target-hud__header">
+          <span class="target-hud__name"></span>
+          <span class="target-hud__hp-text"></span>
+        </div>
+        <div class="target-hud__bar">
+          <div class="target-hud__fill"></div>
+        </div>
+        <div class="target-hud__buffs"></div>
+      </div>
       <div id="boss-damage-report"></div>
       <div id="boss-status-panel" class="hidden"></div>
       <div id="expedition-tracker" class="hidden"></div>
@@ -466,8 +476,10 @@
         </div>
 
         <div id="quest-dialog" class="hidden">
-          <span class="title"></span>
-          <button class="themed-btn sm hidden" type="button" data-id="quest-select">▶</button>
+          <div class="title">
+            <span class="title-text"></span>
+            <button class="quest-select-btn" type="button" data-id="quest-select" aria-label="Switch quest">▶</button>
+          </div>
           <ul class="entries">
           </ul>
           <div class="quest-buttons">

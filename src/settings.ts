@@ -12,6 +12,7 @@ export interface GameSettings {
   fpsLimit: 'Unlimited' | '60' | '30' | '20';
   wasdMovement: 'enabled' | 'disabled';
   weaponAuras: 'enabled' | 'disabled';
+  playerAuras: 'enabled' | 'disabled';
   hotbarSlots: '5' | '2x5' | '5x2' | '1x10' | '10x1';
   displayMode: 'auto' | 'desktop';
   chatWidth: 'default' | '50%' | '75%' | '100%';
@@ -36,6 +37,7 @@ const DEFAULTS: GameSettings = {
   fpsLimit: '30',
   wasdMovement: 'disabled',
   weaponAuras: 'enabled',
+  playerAuras: 'enabled',
   hotbarSlots: '5',
   displayMode: 'auto',
   chatWidth: 'default',
@@ -60,6 +62,7 @@ export const SETTING_OPTIONS: {
   fpsLimit: ['Unlimited', '60', '30', '20'],
   wasdMovement: ['enabled', 'disabled'],
   weaponAuras: ['enabled', 'disabled'] as const,
+  playerAuras: ['enabled', 'disabled'] as const,
   hotbarSlots: ['5', '2x5', '5x2', '1x10', '10x1'] as const,
   displayMode: ['auto', 'desktop'] as const,
   chatWidth: ['default', '50%', '75%', '100%'] as const,
@@ -80,6 +83,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   movementSmoothing: 'Movement',
   wasdMovement: 'WASD Keys',
   weaponAuras: 'Weapon Auras',
+  playerAuras: 'Player Auras',
   uiScale: 'UI Scale',
   fpsLimit: 'FPS Limit',
   hotbarSlots: 'Hotbar Layout',

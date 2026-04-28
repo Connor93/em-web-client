@@ -1,0 +1,122 @@
+#target-hud {
+  position: fixed;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1041;
+  width: 240px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.25
+    );
+  border-radius: 4px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#target-hud.ui-repositioned {
+  top: unset;
+  left: unset;
+  transform: none;
+}
+
+#target-hud.ui-unlocked {
+  pointer-events: auto;
+}
+
+.target-hud__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.target-hud__name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffd068;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target-hud__hp-text {
+  font-size: 10px;
+  color: #c8c0a8;
+  flex-shrink: 0;
+}
+
+.target-hud__bar {
+  position: relative;
+  height: 6px;
+  background: rgba(20, 16, 12, 0.6);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.15
+    );
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.target-hud__fill {
+  height: 100%;
+  width: 100%;
+  background: #c03030;
+  transition: width 0.2s ease;
+}
+
+.target-hud__fill.low {
+  background: #c06030;
+}
+
+.target-hud__fill.critical {
+  background: #804040;
+}
+
+.target-hud__buffs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 8px;
+}
+
+.target-hud__buff {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.target-hud__buff.slow {
+  background: rgba(102, 153, 255, 0.7);
+}
+
+.target-hud__buff.snare {
+  background: rgba(136, 204, 238, 0.7);
+}
+
+.target-hud__buff.weaken {
+  background: rgba(153, 102, 204, 0.7);
+}
+
+.target-hud__buff.hunters_mark {
+  background: rgba(204, 68, 68, 0.7);
+}
+
+.target-hud__buff.amplify {
+  background: rgba(204, 68, 204, 0.7);
+}
+
+body.is-mobile #target-hud {
+  width: 200px;
+}

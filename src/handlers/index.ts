@@ -30,6 +30,7 @@ import { registerMusicHandlers } from './music';
 import { registerNpcHandlers } from './npc';
 import { registerPaperdollHandlers } from './paperdoll';
 import { registerPartyHandlers } from './party';
+import { registerPlayerAuraHandlers } from './player-aura';
 import { registerPlayersHandlers } from './players';
 import { registerQuestHandlers } from './quest';
 import { registerRangeHandlers } from './range';
@@ -78,6 +79,7 @@ export {
   registerNpcHandlers,
   registerPaperdollHandlers,
   registerPartyHandlers,
+  registerPlayerAuraHandlers,
   registerPlayersHandlers,
   registerQuestHandlers,
   registerRangeHandlers,
@@ -142,4 +144,5 @@ export function registerAllHandlers(client: Client): void {
   registerGuildHandlers(client);
   registerLookupCommandHandlers(client);
   registerWeaponInfoHandlers(client);
+  registerPlayerAuraHandlers(client);
 }

@@ -91,6 +91,7 @@ import { SocialPanel } from './ui/social-panel';
 import { SpellBook } from './ui/spell-book';
 import { SpellTooltip } from './ui/spell-tooltip';
 import { Stats } from './ui/stats/stats';
+import { TargetHud } from './ui/target-hud';
 import { TradeDialog } from './ui/trade-dialog/trade-dialog';
 import { reclampDraggablePositions } from './ui/utils/draggable';
 import { makeMovable, reclampMovablePositions } from './ui/utils/movable';
@@ -282,6 +283,7 @@ const damageTrackerPanel = new DamageTrackerPanel();
 const expeditionTracker = new ExpeditionTracker(client);
 const buffBar = new BuffBar(client);
 const _partyHud = new PartyHud(client);
+const _targetHud = new TargetHud(client);
 autoBattleDialog.setClient(client);
 autoBattleHud.setClient(client);
 

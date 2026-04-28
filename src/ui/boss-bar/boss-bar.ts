@@ -133,6 +133,16 @@ export class BossBar {
     this.updateVisibility();
   }
 
+  setTargeted(npcIndex: number | null): void {
+    for (const [index, entry] of this.entries) {
+      if (index === npcIndex) {
+        entry.element.classList.add('boss-bar--targeted');
+      } else {
+        entry.element.classList.remove('boss-bar--targeted');
+      }
+    }
+  }
+
   clear(): void {
     for (const entry of this.entries.values()) {
       entry.element.remove();

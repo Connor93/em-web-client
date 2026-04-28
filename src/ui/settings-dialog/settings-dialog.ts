@@ -162,6 +162,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'movementSmoothing',
   'wasdMovement',
   'weaponAuras',
+  'playerAuras',
   'hotbarSlots',
   'uiScale',
   'fpsLimit',

@@ -168,6 +168,7 @@ export class Client {
   warpQueued = false;
   state = GameState.Initial;
   sessionId = 0;
+  questNpcIndex = 0;
   serverSettings: ServerSettings | null = null;
   motd = '';
   nearby: NearbyInfo;
@@ -264,6 +265,7 @@ export class Client {
   movementController: MovementController;
   npcMetadata = getNpcMetaData();
   weaponItemIds = new Map<number, number>();
+  playerAuraIds = new Map<number, number>();
   weaponMetadata: Map<number, IWeaponMetadata> = new Map();
   shieldMetadata = getShieldMetaData();
   effectMetadata = getEffectMetaData();
@@ -325,6 +327,10 @@ export class Client {
   spellTarget: SpellTarget | null = null;
   spellTargetId = 0;
   spellCooldownTicks = 0;
+  targetedNpcIndex: number | null = null;
+  targetCycleStamp = 0;
+  /** NPC indexes flagged by the server as player-summoned pets (untargetable). */
+  petNpcIndexes: Set<number> = new Set();
   menuPlayerId = 0;
   partyMembers: PartyMember[] = [];
   minimapEnabled = false;
@@ -457,6 +463,7 @@ export class Client {
       if (config.dashboardUrl !== undefined) {
         this.auraManager = new AuraManager(config.dashboardUrl);
         this.auraManager.fetch();
+        this.auraManager.fetchPlayerAuras();
       }
     });
     this.atlas = new Atlas(this);
@@ -689,6 +696,7 @@ export class Client {
       Managers.tickItemProtection(this);
       Managers.tickDrunk(this);
       Managers.tickOutOfRange(this);
+      Managers.tickTarget(this);
       Managers.tickSpellQueue(this);
       Managers.tickQueuedNpcChats(this);
 
@@ -1038,6 +1046,9 @@ export class Client {
     this.selectedSpellId = 0;
     this.queuedSpellId = 0;
     this.spellCooldownTicks = 0;
+    this.targetedNpcIndex = null;
+    this.targetCycleStamp = 0;
+    this.petNpcIndexes.clear();
     this.menuPlayerId = 0;
     this.onlinePlayers = [];
     this.equipmentSwap = null;
@@ -1224,6 +1235,18 @@ export class Client {
 
     const current = this.npcAnimations.get(index);
     this.npcAnimations.set(index, new NpcDeathAnimation(current));
+
+    if (this.targetedNpcIndex === index) {
+      this.clearTarget();
+    }
+  }
+
+  setNpcHealthBar(index: number, healthBar: HealthBar) {
+    this.npcHealthBars.set(index, healthBar);
+    this.emit('npcHealthChanged', {
+      npcIndex: index,
+      percentage: healthBar.percentage,
+    });
   }
 
   setCharacterDeathAnimation(playerId: number) {
@@ -1278,6 +1301,18 @@ export class Client {
 
   playSpellEffect(spellId: number, target: EffectTarget) {
     Managers.playSpellEffect(this, spellId, target);
+  }
+
+  cycleTarget() {
+    Managers.cycleTarget(this);
+  }
+
+  clearTarget() {
+    Managers.clearTarget(this);
+  }
+
+  autoCastOnTarget() {
+    Managers.autoCastOnTarget(this);
   }
 
   requestBook(playerId: number) {

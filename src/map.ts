@@ -1220,6 +1220,51 @@ export class MapRenderer {
       }
     }
 
+    const renderPlayerAura = (mode: 'front' | 'back') => {
+      if (justCharacter) return;
+      if (settings.get('playerAuras') !== 'enabled') return;
+      if (!this.client.auraManager) return;
+      const auraId = this.client.playerAuraIds.get(character.playerId);
+      if (!auraId) return;
+      const aura = this.client.auraManager.getPlayerAura(
+        auraId,
+        character.playerId,
+      );
+      if (!aura) return;
+      if (aura.config.renderMode !== mode) return;
+      const bodyTexture = this.client.atlas.getCharacterTextureWithoutWeapon(
+        character.playerId,
+        characterFrame,
+      );
+      if (!bodyTexture) return;
+
+      const bodySprite = this.ensureWorldSprite(
+        `character:${character.playerId}:player-aura`,
+        `map:character-player-aura id=${character.playerId}`,
+      );
+      bodySprite.texture = bodyTexture;
+      const fullCanvasYOffset = -100 + 32 - 8;
+      if (mirrored) {
+        bodySprite.scale.x = -1;
+        bodySprite.x = Math.floor(screenX - 50 + 100);
+      } else {
+        bodySprite.scale.x = 1;
+        bodySprite.x = Math.floor(screenX - 50);
+      }
+      bodySprite.y = screenY - frame.yOffset + fullCanvasYOffset;
+      bodySprite.alpha = alpha;
+
+      for (const effect of aura.effects) {
+        if (effect.update) effect.update(this._frameTime);
+      }
+      if (aura.floatEffect) {
+        bodySprite.y += aura.floatEffect.getYOffset(this._frameTime);
+      }
+      bodySprite.filters = aura.effects.map((e) => e.filter);
+    };
+
+    renderPlayerAura('back');
+
     {
       const sprite = this.ensureWorldSprite(
         `character:${character.playerId}:${justCharacter ? 'ghost' : 'main'}`,
@@ -1236,6 +1281,8 @@ export class MapRenderer {
       sprite.alpha = alpha;
       sprite.filters = [];
     }
+
+    renderPlayerAura('front');
 
     for (const effect of effects) {
       const effectKeyBase = `char-effect:${character.playerId}:${effect.instanceId}`;
@@ -1552,6 +1599,27 @@ export class MapRenderer {
       sprite.filters = this.getNpcGlowArray(npc.index, filter);
     } else {
       sprite.filters = this._emptyFilters;
+    }
+
+    if (this.client.targetedNpcIndex === npc.index && !dying) {
+      const ring = this.ensureUiGraphics(
+        `target-ring:${npc.index}`,
+        `ui:target-ring index=${npc.index}`,
+      );
+      const footX = Math.floor(
+        screenCoordsX - playerScreen.x + this._halfGameWidth + walkOffset.x,
+      );
+      const footY = Math.floor(
+        screenCoordsY - playerScreen.y + this._halfGameHeight + walkOffset.y,
+      );
+      const pulse = 0.55 + 0.4 * (0.5 + 0.5 * Math.sin(this._frameTime / 160));
+      const sinceCycle = performance.now() - this.client.targetCycleStamp;
+      const cycleBoost = sinceCycle < 250 ? 1 - sinceCycle / 250 : 0;
+      ring.position.set(footX, footY);
+      ring.ellipse(0, 0, 28, 14);
+      ring.stroke({ color: 0x22d3ee, alpha: pulse, width: 3 + cycleBoost * 3 });
+      ring.ellipse(0, 0, 24, 11);
+      ring.stroke({ color: 0xfde047, alpha: pulse * 0.9, width: 1.5 });
     }
 
     // NPC debuff tint — applied independently of glow filters

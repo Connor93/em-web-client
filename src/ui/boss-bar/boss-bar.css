@@ -19,6 +19,32 @@
 .boss-bar {
   width: 340px;
   text-align: center;
+  padding: 2px 6px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: border-color 0.15s ease;
+}
+
+.boss-bar.boss-bar--targeted {
+  border-color: rgba(34, 211, 238, 0.95);
+  box-shadow:
+    0 0 12px rgba(34, 211, 238, 0.6),
+    inset 0 0 6px rgba(253, 224, 71, 0.35);
+  animation: boss-bar-target-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes boss-bar-target-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(34, 211, 238, 0.45),
+      inset 0 0 4px rgba(253, 224, 71, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(34, 211, 238, 0.85),
+      inset 0 0 8px rgba(253, 224, 71, 0.5);
+  }
 }
 
 .boss-bar__name {

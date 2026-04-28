@@ -14,6 +14,7 @@ import {
 } from 'eolib';
 import type { Client } from '../client';
 import { SpellTarget } from '../types';
+import { setTarget } from './target-manager';
 
 export function clickNpc(client: Client, npc: NpcMapInfo): void {
   const record = client.getEnfRecordById(npc.id);
@@ -27,6 +28,7 @@ export function clickNpc(client: Client, npc: NpcMapInfo): void {
       const packet = new QuestUseClientPacket();
       packet.npcIndex = npc.index;
       packet.questId = 0;
+      client.questNpcIndex = npc.index;
       client.bus.send(packet);
       break;
     }
@@ -34,6 +36,7 @@ export function clickNpc(client: Client, npc: NpcMapInfo): void {
       const packet = new QuestUseClientPacket();
       packet.npcIndex = npc.index;
       packet.questId = 0;
+      client.questNpcIndex = npc.index;
       client.bus.send(packet);
       break;
     }
@@ -87,6 +90,7 @@ export function clickNpc(client: Client, npc: NpcMapInfo): void {
     }
     case NpcType.Aggressive:
     case NpcType.Passive: {
+      setTarget(client, npc.index);
       if (
         !client.selectedSpellId ||
         client.queuedSpellId > 0 ||

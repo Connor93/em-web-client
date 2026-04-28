@@ -31,6 +31,9 @@ export enum Input {
   Hotbar10 = 26,
   Tab = 27,
   Refresh = 28,
+  TargetCycle = 29,
+  TargetCast = 30,
+  TargetClear = 31,
   Unknown = -1,
 }
 
@@ -258,6 +261,21 @@ window.addEventListener('keydown', (e) => {
     case 'KeyR':
       if (!inTextInput) updateInputHeld(Input.Refresh, true);
       break;
+    case 'KeyQ':
+      if (!inTextInput) {
+        updateInputHeld(Input.TargetCycle, true);
+        e.preventDefault();
+      }
+      break;
+    case 'KeyF':
+      if (!inTextInput) {
+        updateInputHeld(Input.TargetCast, true);
+        e.preventDefault();
+      }
+      break;
+    case 'Escape':
+      if (!inTextInput) updateInputHeld(Input.TargetClear, true);
+      break;
   }
 });
 
@@ -369,6 +387,15 @@ window.addEventListener('keyup', (e) => {
       break;
     case 'KeyR':
       updateInputHeld(Input.Refresh, false);
+      break;
+    case 'KeyQ':
+      updateInputHeld(Input.TargetCycle, false);
+      break;
+    case 'KeyF':
+      updateInputHeld(Input.TargetCast, false);
+      break;
+    case 'Escape':
+      updateInputHeld(Input.TargetClear, false);
       break;
   }
 });

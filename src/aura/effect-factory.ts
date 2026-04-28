@@ -10,6 +10,7 @@ import type {
   AuraEffect,
   AuraEffectName,
   FloatEffect,
+  PlayerAuraConfig,
 } from './types';
 
 function parseColor(color: string): number {
@@ -51,19 +52,21 @@ const DEFAULTS = {
   colorshiftRate: 4.0,
 };
 
+type AuraEffectParams = AuraConfig | PlayerAuraConfig;
+
 function val<K extends keyof typeof DEFAULTS>(
-  config: AuraConfig,
+  config: AuraEffectParams,
   key: K,
 ): number {
-  const v = config[key as keyof AuraConfig];
+  const v = config[key as keyof AuraEffectParams];
   return (typeof v === 'number' ? v : DEFAULTS[key]) as number;
 }
 
-type EffectBuilder = (config: AuraConfig) => AuraEffect;
-type FloatBuilder = (config: AuraConfig) => FloatEffect;
+type EffectBuilder = (config: AuraEffectParams) => AuraEffect;
+type FloatBuilder = (config: AuraEffectParams) => FloatEffect;
 
 const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
-  glow(config: AuraConfig): AuraEffect {
+  glow(config: AuraEffectParams): AuraEffect {
     const filter = new GlowFilter({
       color: parseColor(config.color),
       outerStrength: val(config, 'glowOuterStrength'),
@@ -76,7 +79,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     return { filter };
   },
 
-  pulse(config: AuraConfig): AuraEffect {
+  pulse(config: AuraEffectParams): AuraEffect {
     const min = val(config, 'pulseMinStrength');
     const max = val(config, 'pulseMaxStrength');
     const rate = val(config, 'pulseRate') * 1000;
@@ -99,7 +102,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  flame(config: AuraConfig): AuraEffect {
+  flame(config: AuraEffectParams): AuraEffect {
     const intensity = val(config, 'flameIntensity');
     const flickerRate = val(config, 'flameFlickerRate') * 1000;
     const speed = val(config, 'speed');
@@ -127,7 +130,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  frost(config: AuraConfig): AuraEffect {
+  frost(config: AuraEffectParams): AuraEffect {
     const rate = val(config, 'frostRate') * 1000;
     const speed = val(config, 'speed');
     const brightness = val(config, 'frostBrightness');
@@ -151,7 +154,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  shadow(config: AuraConfig): AuraEffect {
+  shadow(config: AuraEffectParams): AuraEffect {
     const rate = val(config, 'shadowRate') * 1000;
     const speed = val(config, 'speed');
 
@@ -172,7 +175,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  holy(config: AuraConfig): AuraEffect {
+  holy(config: AuraEffectParams): AuraEffect {
     const rate = val(config, 'holyRate') * 1000;
     const speed = val(config, 'speed');
 
@@ -193,7 +196,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  outline(config: AuraConfig): AuraEffect {
+  outline(config: AuraEffectParams): AuraEffect {
     const outlineColorStr = config.outlineColor || config.color;
     const filter = new OutlineFilter({
       thickness: val(config, 'outlineThickness'),
@@ -204,7 +207,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     return { filter };
   },
 
-  bloom(config: AuraConfig): AuraEffect {
+  bloom(config: AuraEffectParams): AuraEffect {
     const filter = new AdvancedBloomFilter({
       threshold: val(config, 'bloomThreshold'),
       bloomScale: val(config, 'bloomScale'),
@@ -214,7 +217,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     return { filter };
   },
 
-  godray(config: AuraConfig): AuraEffect {
+  godray(config: AuraEffectParams): AuraEffect {
     const godraySpeed = val(config, 'godraySpeed');
     const speed = val(config, 'speed');
 
@@ -234,7 +237,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  glitch(config: AuraConfig): AuraEffect {
+  glitch(config: AuraEffectParams): AuraEffect {
     const interval = val(config, 'glitchInterval') * 1000;
     const duration = val(config, 'glitchDuration') * 1000;
     const speed = val(config, 'speed');
@@ -258,7 +261,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  float(config: AuraConfig): FloatEffect {
+  float(config: AuraEffectParams): FloatEffect {
     const height = val(config, 'floatHeight');
     const rate = val(config, 'floatRate') * 1000;
     const speed = val(config, 'speed');
@@ -273,7 +276,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
     };
   },
 
-  colorshift(config: AuraConfig): AuraEffect {
+  colorshift(config: AuraEffectParams): AuraEffect {
     const rate = val(config, 'colorshiftRate') * 1000;
     const speed = val(config, 'speed');
 
@@ -320,7 +323,7 @@ const builders: Record<AuraEffectName, EffectBuilder | FloatBuilder> = {
   },
 };
 
-export function buildEffects(config: AuraConfig): {
+export function buildEffects(config: AuraConfig | PlayerAuraConfig): {
   filters: AuraEffect[];
   floatEffect?: FloatEffect;
 } {

@@ -50,6 +50,9 @@ export class MovementController {
   hotbarTicks = HOTBAR_COOLDOWN_TICKS;
   minimapTicks = WALK_TICKS;
   refreshTicks = WALK_TICKS;
+  targetCycleTicks = 0;
+  targetCastTicks = 0;
+  targetClearTicks = 0;
   freeze = false;
 
   constructor(client: Client) {
@@ -64,6 +67,9 @@ export class MovementController {
     this.hotbarTicks = Math.max(this.hotbarTicks - 1, 0);
     this.minimapTicks = Math.max(this.minimapTicks - 1, 0);
     this.refreshTicks = Math.max(this.refreshTicks - 1, 0);
+    this.targetCycleTicks = Math.max(this.targetCycleTicks - 1, 0);
+    this.targetCastTicks = Math.max(this.targetCastTicks - 1, 0);
+    this.targetClearTicks = Math.max(this.targetClearTicks - 1, 0);
 
     if (
       this.freeze ||
@@ -120,6 +126,21 @@ export class MovementController {
     if (isOrWasInputHeld(Input.Refresh) && this.refreshTicks === 0) {
       this.client.refresh();
       this.refreshTicks = WALK_TICKS;
+    }
+
+    if (isOrWasInputHeld(Input.TargetCycle) && this.targetCycleTicks === 0) {
+      this.client.cycleTarget();
+      this.targetCycleTicks = WALK_TICKS;
+    }
+
+    if (isOrWasInputHeld(Input.TargetCast) && this.targetCastTicks === 0) {
+      this.client.autoCastOnTarget();
+      this.targetCastTicks = WALK_TICKS;
+    }
+
+    if (isOrWasInputHeld(Input.TargetClear) && this.targetClearTicks === 0) {
+      this.client.clearTarget();
+      this.targetClearTicks = WALK_TICKS;
     }
 
     const animation = this.client.characterAnimations.get(character.playerId);

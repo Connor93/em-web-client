@@ -298,4 +298,6 @@ export type ClientEvents = {
     description: string;
   };
   buffExpired: { playerId: number; type: string };
+  npcTargetChanged: undefined;
+  npcHealthChanged: { npcIndex: number; percentage: number };
 };

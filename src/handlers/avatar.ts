@@ -61,6 +61,8 @@ function handleAvatarRemove(client: Client, reader: EoReader) {
     (c) => c.playerId !== packet.playerId,
   );
   client.weaponItemIds.delete(packet.playerId);
+  client.playerAuraIds.delete(packet.playerId);
+  client.auraManager?.clearCharacter(packet.playerId);
 }
 
 const AVATAR_CHANGE_TYPE_SKIN = 4;

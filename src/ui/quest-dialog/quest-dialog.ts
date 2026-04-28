@@ -2,6 +2,7 @@ import {
   type DialogEntry,
   DialogEntryType,
   type DialogQuestEntry,
+  QuestUseClientPacket,
 } from 'eolib';
 import mitt from 'mitt';
 import type { Client } from '../../client';
@@ -25,7 +26,8 @@ export class QuestDialog extends Base {
   private emitter = mitt<Events>();
   private cover: HTMLDivElement = document.querySelector('#cover')!;
   private dialogs = document.getElementById('dialogs')!;
-  private txtTitle: HTMLSpanElement = this.container.querySelector('.title')!;
+  private txtTitle: HTMLSpanElement =
+    this.container.querySelector('.title-text')!;
   private btnQuestSelect: HTMLButtonElement = this.container.querySelector(
     'button[data-id="quest-select"]',
   )!;
@@ -72,12 +74,11 @@ export class QuestDialog extends Base {
     this.quests = quests;
     this.dialog = dialog;
     this.dialogIndex = 0;
+    this.state = 'dialog';
     this.updateQuestTitle();
 
-    this.btnQuestSelect.classList.add('hidden');
-    if (this.quests.length > 1) {
-      this.btnQuestSelect.classList.remove('hidden');
-    }
+    this.btnQuestSelect.classList.remove('hidden');
+    this.btnQuestSelect.disabled = this.quests.length <= 1;
 
     this.render();
   }
@@ -173,8 +174,30 @@ export class QuestDialog extends Base {
   }
 
   private renderQuestPicker() {
-    this.txtTitle.innerText = 'Select a quest';
+    this.txtTitle.innerText = `${this.name} - Select a quest`;
     this.btnCancel.classList.remove('hidden');
+
+    for (const quest of this.quests) {
+      const li = document.createElement('li');
+      li.innerText = quest.questName;
+
+      if (quest.questId === this.questId) {
+        li.classList.add('current');
+      } else {
+        li.classList.add('link');
+        li.addEventListener('click', () => {
+          playSfxById(SfxId.ButtonClick);
+          const packet = new QuestUseClientPacket();
+          packet.npcIndex = this.client.questNpcIndex;
+          packet.questId = quest.questId;
+          this.client.bus.send(packet);
+          this.hide();
+          this.cover.classList.add('hidden');
+        });
+      }
+
+      this.entries.appendChild(li);
+    }
   }
 
   show(): void {
@@ -229,6 +252,12 @@ export class QuestDialog extends Base {
         action: null,
         questName: this.questName,
       });
+    });
+
+    this.btnQuestSelect.addEventListener('click', () => {
+      playSfxById(SfxId.ButtonClick);
+      this.state = this.state === 'dialog' ? 'quest-picker' : 'dialog';
+      this.render();
     });
   }
 }

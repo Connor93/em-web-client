@@ -283,6 +283,8 @@ function handleConfigReload(client: Client, message: string): void {
   const target = message.replace('[CONFIG_RELOAD]', '');
   if (target === 'weapon_auras' && client.auraManager) {
     client.auraManager.fetch();
+  } else if (target === 'player_auras' && client.auraManager) {
+    client.auraManager.fetchPlayerAuras();
   }
 }
 
@@ -705,6 +707,34 @@ function handleHotMessage(client: Client, message: string): void {
   client.emit('hotStarted', { playerId, hpPerTick, ticks, duration });
 }
 
+function handleClassResetMessage(client: Client, message: string): void {
+  const match = message.match(/^\[CLASS_RESET\]\s+(\d+)\s+(\d+)$/);
+  if (!match) return;
+  const statPoints = Number(match[1]);
+  const skillPoints = Number(match[2]);
+  if (Number.isNaN(statPoints) || Number.isNaN(skillPoints)) return;
+  client.statPoints = statPoints;
+  client.skillPoints = skillPoints;
+  client.emit('statsUpdate', undefined);
+}
+
+function handlePetStateMessage(client: Client, message: string): void {
+  const onMatch = message.match(/^\[PET_ON\]\s+(\d+)$/);
+  if (onMatch) {
+    const index = Number(onMatch[1]);
+    if (!Number.isNaN(index)) {
+      client.petNpcIndexes.add(index);
+      if (client.targetedNpcIndex === index) client.clearTarget();
+    }
+    return;
+  }
+  const offMatch = message.match(/^\[PET_OFF\]\s+(\d+)$/);
+  if (offMatch) {
+    const index = Number(offMatch[1]);
+    if (!Number.isNaN(index)) client.petNpcIndexes.delete(index);
+  }
+}
+
 function handleThornsMessage(client: Client, message: string): void {
   // [THORNS] PlayerID Damage dmg reflected
   const match = message.match(/^\[THORNS\] (\d+) (\d+) dmg reflected$/);
@@ -749,6 +779,19 @@ function handleMessageOpen(client: Client, reader: EoReader) {
 
   if (isClassAbilityMessage(packet.message)) {
     handleClassAbilityMessage(client, packet.message);
+    return;
+  }
+
+  if (
+    packet.message.startsWith('[PET_ON]') ||
+    packet.message.startsWith('[PET_OFF]')
+  ) {
+    handlePetStateMessage(client, packet.message);
+    return;
+  }
+
+  if (packet.message.startsWith('[CLASS_RESET]')) {
+    handleClassResetMessage(client, packet.message);
     return;
   }
 

@@ -413,10 +413,14 @@ export class Atlas {
   private temporaryCharacterFrames: CharacterFrameImg[] = [];
   private temporaryWeaponFrames: CharacterFrameImg[] = [];
   private weaponTextures = new Map<string, Texture>();
+  private temporaryBodyFrames: CharacterFrameImg[] = [];
+  private bodyTextures = new Map<string, Texture>();
   private tmpBehindCanvas: HTMLCanvasElement;
   private tmpBehindCtx: CanvasRenderingContext2D;
   private tmpWeaponCanvas: HTMLCanvasElement;
   private tmpWeaponCtx: CanvasRenderingContext2D;
+  private tmpBodyCanvas: HTMLCanvasElement;
+  private tmpBodyCtx: CanvasRenderingContext2D;
   private tmpCanvas: HTMLCanvasElement;
   private tmpCtx: CanvasRenderingContext2D;
 
@@ -449,6 +453,13 @@ export class Atlas {
     this.tmpWeaponCanvas.width = CHARACTER_FRAME_SIZE;
     this.tmpWeaponCanvas.height = CHARACTER_FRAME_SIZE;
     this.tmpWeaponCtx = this.tmpWeaponCanvas.getContext('2d', {
+      willReadFrequently: true,
+    })!;
+
+    this.tmpBodyCanvas = document.createElement('canvas');
+    this.tmpBodyCanvas.width = CHARACTER_FRAME_SIZE;
+    this.tmpBodyCanvas.height = CHARACTER_FRAME_SIZE;
+    this.tmpBodyCtx = this.tmpBodyCanvas.getContext('2d', {
       willReadFrequently: true,
     })!;
   }
@@ -1003,6 +1014,11 @@ export class Atlas {
     }
     this.weaponTextures.clear();
 
+    for (const [_key, tex] of this.bodyTextures) {
+      tex.destroy(true);
+    }
+    this.bodyTextures.clear();
+
     for (const atlas of this.atlases) {
       const ctx = atlas.getContext();
       atlas.skyline = [{ x: 0, y: 0, w: ATLAS_SIZE }];
@@ -1488,6 +1504,12 @@ export class Atlas {
             this.weaponTextures.delete(key);
           }
         }
+        for (const [key, tex] of this.bodyTextures) {
+          if (key.startsWith(`${character.playerId}:`)) {
+            tex.destroy(true);
+            this.bodyTextures.delete(key);
+          }
+        }
         this.characters.splice(i, 1);
       }
     }
@@ -1623,6 +1645,17 @@ export class Atlas {
       this.weaponTextures.set(key, Texture.from(wf.img));
     }
     this.temporaryWeaponFrames = [];
+
+    for (const bf of this.temporaryBodyFrames) {
+      if (!bf.img) continue;
+      const key = `${bf.playerId}:${bf.frameIndex}`;
+      const existing = this.bodyTextures.get(key);
+      if (existing) {
+        existing.destroy(true);
+      }
+      this.bodyTextures.set(key, Texture.from(bf.img));
+    }
+    this.temporaryBodyFrames = [];
 
     // Swap pending frames → active now that compositing is complete
     for (const character of this.characters) {
@@ -2088,6 +2121,7 @@ export class Atlas {
   private preRenderCharacterFrames() {
     this.temporaryCharacterFrames = [];
     this.temporaryWeaponFrames = [];
+    this.temporaryBodyFrames = [];
     this.tmpCanvas.width = CHARACTER_FRAME_SIZE;
     this.tmpCanvas.height = CHARACTER_FRAME_SIZE;
 
@@ -2110,6 +2144,12 @@ export class Atlas {
           CHARACTER_FRAME_SIZE,
         );
         this.tmpWeaponCtx.clearRect(
+          0,
+          0,
+          CHARACTER_FRAME_SIZE,
+          CHARACTER_FRAME_SIZE,
+        );
+        this.tmpBodyCtx.clearRect(
           0,
           0,
           CHARACTER_FRAME_SIZE,
@@ -2252,6 +2292,19 @@ export class Atlas {
           }
         }
 
+        // Layer body parts (in tmpCtx) on top of any forward-facing back items
+        // (wings/capes) already drawn into tmpBodyCtx earlier. Weapon-behind
+        // never reaches tmpBodyCtx, and weapon-front is drawn below this point.
+        // Result: a clean body texture for the player-aura overlay.
+        this.tmpBodyCtx.drawImage(this.tmpCanvas, 0, 0);
+        clipHair(
+          this.tmpBodyCtx,
+          0,
+          0,
+          CHARACTER_FRAME_SIZE,
+          CHARACTER_FRAME_SIZE,
+        );
+
         if (
           character.equipment.weapon &&
           index === CharacterFrame.MeleeAttackDownRight2
@@ -2275,6 +2328,15 @@ export class Atlas {
             const destY =
               HALF_CHARACTER_FRAME_SIZE - (bmp.height >> 1) + offset.y;
             this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+            // Mirror to the weapon-only canvas so the body-only texture
+            // (full character minus weapon) excludes this swing pose too.
+            this.tmpWeaponCtx.drawImage(
+              bmp,
+              destX,
+              destY,
+              bmp.width,
+              bmp.height,
+            );
           }
         }
 
@@ -2374,6 +2436,22 @@ export class Atlas {
           );
           this.temporaryWeaponFrames.push(weaponFrameImg);
         }
+
+        // Capture the body-only canvas built earlier (before the weapon-front draw).
+        // Used by the player-aura overlay so the filter never touches the weapon.
+        const bodyFrameImg: CharacterFrameImg = {
+          playerId: character.playerId,
+          frameIndex: index,
+          img: null,
+          loaded: false,
+        };
+        this.pendingCharacterFramePromises.push(
+          createImageBitmap(this.tmpBodyCanvas).then((bm) => {
+            bodyFrameImg.img = bm;
+            bodyFrameImg.loaded = true;
+          }),
+        );
+        this.temporaryBodyFrames.push(bodyFrameImg);
       }
     }
   }
@@ -2960,6 +3038,13 @@ export class Atlas {
     return this.weaponTextures.get(`${playerId}:${frame}`);
   }
 
+  getCharacterTextureWithoutWeapon(
+    playerId: number,
+    frame: CharacterFrame,
+  ): Texture | undefined {
+    return this.bodyTextures.get(`${playerId}:${frame}`);
+  }
+
   private renderCharacterBack(
     gender: Gender,
     back: number,
@@ -2989,6 +3074,9 @@ export class Atlas {
 
     if (behind) {
       this.tmpBehindCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
+      // Forward-facing back items (wings/capes) belong to the body silhouette
+      // for player-aura purposes, so mirror the draw into the body canvas.
+      this.tmpBodyCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
     } else {
       this.tmpCtx.drawImage(bmp, destX, destY, bmp.width, bmp.height);
     }

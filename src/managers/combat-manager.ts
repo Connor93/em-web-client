@@ -16,6 +16,7 @@ import { getTimestamp } from '../movement-controller';
 import {
   CharacterDeathAnimation,
   CharacterSpellChantAnimation,
+  CharacterWalkAnimation,
   EffectAnimation,
   type EffectTarget,
   NpcDeathAnimation,
@@ -42,7 +43,7 @@ export function useHotbarSlot(client: Client, index: number): void {
     }
 
     const animation = client.characterAnimations.get(client.playerId);
-    if (animation) {
+    if (animation && !(animation instanceof CharacterWalkAnimation)) {
       return;
     }
 

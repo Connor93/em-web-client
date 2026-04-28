@@ -69,6 +69,13 @@ export {
   stopFriendPolling,
 } from './social-manager';
 export {
+  autoCastOnTarget,
+  clearTarget,
+  cycleTarget,
+  setTarget,
+  tickTarget,
+} from './target-manager';
+export {
   tickAutoWalk,
   tickCharacterAnimations,
   tickCharacterBuffs,

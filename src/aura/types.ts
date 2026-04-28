@@ -12,6 +12,8 @@ export type AuraEffectName =
   | 'float'
   | 'colorshift';
 
+export type AuraRenderMode = 'front' | 'back';
+
 export interface AuraConfig {
   itemId: number;
   graphicId: number;
@@ -80,6 +82,64 @@ export interface AuraConfig {
 
 export interface AuraResponse {
   auras: AuraConfig[];
+}
+
+export interface PlayerAuraConfig {
+  auraId: number;
+  name?: string;
+  renderMode: AuraRenderMode;
+  effects: AuraEffectName[];
+  color: string;
+
+  alpha?: number;
+  speed?: number;
+
+  glowOuterStrength?: number;
+  glowInnerStrength?: number;
+  glowDistance?: number;
+  glowQuality?: number;
+
+  pulseMinStrength?: number;
+  pulseMaxStrength?: number;
+  pulseRate?: number;
+
+  flameIntensity?: number;
+  flameFlickerRate?: number;
+
+  frostRate?: number;
+  frostBrightness?: number;
+
+  shadowRate?: number;
+
+  holyRate?: number;
+
+  outlineThickness?: number;
+  outlineColor?: string;
+  outlineAlpha?: number;
+
+  bloomThreshold?: number;
+  bloomScale?: number;
+  bloomBrightness?: number;
+  bloomBlur?: number;
+
+  godrayAngle?: number;
+  godrayGain?: number;
+  godrayLacunarity?: number;
+  godraySpeed?: number;
+
+  glitchSlices?: number;
+  glitchOffset?: number;
+  glitchInterval?: number;
+  glitchDuration?: number;
+
+  floatHeight?: number;
+  floatRate?: number;
+
+  colorshiftRate?: number;
+}
+
+export interface PlayerAuraResponse {
+  auras: PlayerAuraConfig[];
 }
 
 /** Return value from the effect factory — a filter plus an optional per-frame updater. */
