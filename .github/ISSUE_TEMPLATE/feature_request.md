@@ -2,8 +2,8 @@
 name: Feature request
 about: Suggest an idea for this project
 title: "[Feature] - Short feature title"
-labels: ''
-assignees: ''
+labels: enhancement
+assignees: Connor93
 
 ---
 

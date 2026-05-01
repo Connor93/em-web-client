@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a bug report
 title: "[Bug] - Short title for bug"
-labels: ''
+labels: bug
 assignees: Connor93
 
 ---
