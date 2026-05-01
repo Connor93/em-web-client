@@ -7,7 +7,7 @@ import {
   NpcType,
   SitState,
 } from 'eolib';
-import { Graphics, Sprite, type Texture } from 'pixi.js';
+import { type Container, Graphics, Sprite, type Texture } from 'pixi.js';
 import { GlowFilter } from 'pixi-filters';
 import {
   CHARACTER_FRAME_OFFSETS,
@@ -15,6 +15,7 @@ import {
   NpcFrame,
   StaticAtlasEntryType,
 } from './atlas';
+import type { OverlayEffect, ParticleEffect } from './aura/types';
 import { type Client, GameState } from './client';
 import {
   getCharacterIntersecting,
@@ -238,13 +239,19 @@ export class MapRenderer {
   private readonly _worldSprites = new Map<string, Sprite>();
   private readonly _uiSprites = new Map<string, Sprite>();
   private readonly _uiGraphics = new Map<string, Graphics>();
+  private readonly _worldGraphics = new Map<string, Graphics>();
   private readonly _seenWorldSprites = new Set<string>();
   private readonly _seenUiSprites = new Set<string>();
   private readonly _seenUiGraphics = new Set<string>();
+  private readonly _seenWorldGraphics = new Set<string>();
   private _worldOrder = 0;
   private _uiOrder = 0;
   /** Cached once per frame in beginFrame() — avoids repeated performance.now()/Date.now() calls */
   private _frameTime = 0;
+  /** Seconds elapsed since the previous frame, capped to 0.1s to absorb pauses. */
+  private _deltaSec = 0;
+  /** Particle containers reparented this frame — used to hide unseen ones in endFrame(). */
+  private readonly _seenParticleContainers = new Set<Container>();
   /** Reusable GlowFilter instances keyed by NPC index — avoids per-frame filter allocation */
   private readonly _npcGlowFilters = new Map<number, GlowFilter>();
   private readonly _npcGlowArrays = new Map<number, GlowFilter[]>();
@@ -264,10 +271,19 @@ export class MapRenderer {
   }
 
   private beginFrame() {
-    this._frameTime = performance.now();
+    const newTime = performance.now();
+    // Cap delta to absorb tab-switch / pause spikes that would otherwise
+    // teleport particles across the screen on the first post-pause frame.
+    this._deltaSec =
+      this._frameTime > 0
+        ? Math.min(0.1, (newTime - this._frameTime) / 1000)
+        : 0;
+    this._frameTime = newTime;
     this._seenWorldSprites.clear();
     this._seenUiSprites.clear();
     this._seenUiGraphics.clear();
+    this._seenWorldGraphics.clear();
+    this._seenParticleContainers.clear();
     this._worldOrder = 0;
     this._uiOrder = 0;
   }
@@ -288,6 +304,21 @@ export class MapRenderer {
       this._seenUiGraphics,
       this.client.uiContainer,
     );
+    this.sweepGraphics(
+      this._worldGraphics,
+      this._seenWorldGraphics,
+      this.client.worldContainer,
+    );
+    // Sweep particle containers — hide any that weren't reparented this frame
+    // (character is off-screen, map-changed, etc.). Containers stay alive so
+    // they re-appear when the character is rendered again.
+    if (this.client.auraManager) {
+      this.client.auraManager.forEachParticleEffect((effect) => {
+        if (!this._seenParticleContainers.has(effect.container)) {
+          effect.container.visible = false;
+        }
+      });
+    }
   }
 
   private clearSceneNodes() {
@@ -303,12 +334,31 @@ export class MapRenderer {
       this.client.uiContainer.removeChild(graphics);
       graphics.destroy();
     }
+    for (const graphics of this._worldGraphics.values()) {
+      this.client.worldContainer.removeChild(graphics);
+      graphics.destroy();
+    }
+    // Particle containers are owned by AuraManager (lifecycle tied to the
+    // CachedAura), so we don't destroy them here — but we do remove them
+    // from the worldContainer so they don't leak references. They'll be
+    // re-attached on the next render frame if the character is rendered.
+    if (this.client.auraManager) {
+      this.client.auraManager.forEachParticleEffect((effect) => {
+        if (effect.container.parent === this.client.worldContainer) {
+          this.client.worldContainer.removeChild(effect.container);
+        }
+        effect.container.visible = false;
+      });
+    }
     this._worldSprites.clear();
     this._uiSprites.clear();
     this._uiGraphics.clear();
+    this._worldGraphics.clear();
     this._seenWorldSprites.clear();
     this._seenUiSprites.clear();
     this._seenUiGraphics.clear();
+    this._seenWorldGraphics.clear();
+    this._seenParticleContainers.clear();
   }
 
   private markPersistentWorldNodes() {
@@ -403,11 +453,83 @@ export class MapRenderer {
     return graphics;
   }
 
+  private ensureWorldGraphics(key: string, label: string): Graphics {
+    this._seenWorldGraphics.add(key);
+    let graphics = this._worldGraphics.get(key);
+    if (!graphics) {
+      graphics = new Graphics();
+      graphics.eventMode = 'none';
+      this._worldGraphics.set(key, graphics);
+      this.client.worldContainer.addChild(graphics);
+    }
+    graphics.alpha = 1;
+    graphics.scale.set(1);
+    graphics.visible = true;
+    graphics.zIndex = this._worldOrder++;
+    this.labelGraphics(graphics, label);
+    return graphics;
+  }
+
   private getEffectNodeKey(
     effectKeyBase: string,
     layer: 'behind' | 'transparent' | 'front',
   ): string {
     return `${effectKeyBase}:${layer}`;
+  }
+
+  private renderWeaponAuraOverlays(
+    ctx: {
+      overlays: OverlayEffect[];
+      baseX: number;
+      baseY: number;
+      mirrored: boolean;
+      alpha: number;
+      playerId: number;
+    },
+    layer: 'front' | 'back',
+  ): void {
+    for (const overlay of ctx.overlays) {
+      if (overlay.layer !== layer) continue;
+      const graphicsKey = `character:${ctx.playerId}:weapon-aura-overlay:${layer}`;
+      const overlayGraphics = this.ensureWorldGraphics(
+        graphicsKey,
+        `map:character-weapon-aura-overlay id=${ctx.playerId} layer=${layer}`,
+      );
+      overlayGraphics.scale.x = ctx.mirrored ? -1 : 1;
+      overlayGraphics.position.set(ctx.baseX, ctx.baseY);
+      overlayGraphics.alpha = ctx.alpha;
+      overlay.draw(overlayGraphics, this._frameTime, {
+        width: 100,
+        height: 100,
+      });
+    }
+  }
+
+  /**
+   * Render a list of particle effects belonging to a single character. The
+   * Container is reparented into the world container the first time we see
+   * it, then repositioned and updated each frame.
+   */
+  private renderParticleEffects(
+    effects: ParticleEffect[],
+    layer: 'front' | 'back',
+    ctx: { baseX: number; baseY: number; mirrored: boolean; alpha: number },
+  ): void {
+    for (const effect of effects) {
+      if (effect.layer !== layer) continue;
+      const container = effect.container;
+      if (container.parent !== this.client.worldContainer) {
+        container.parent?.removeChild(container);
+        this.client.worldContainer.addChild(container);
+      }
+      container.scale.x = ctx.mirrored ? -1 : 1;
+      container.position.set(ctx.baseX, ctx.baseY);
+      container.alpha = ctx.alpha;
+      container.zIndex = this._worldOrder++;
+      container.visible = true;
+      effect.update(this._deltaSec, { width: 100, height: 100 });
+      this._seenParticleContainers.add(container);
+    }
   }
 
   constructor(client: Client) {
@@ -1162,6 +1284,24 @@ export class MapRenderer {
       alpha = Math.min(alpha, 0.4);
     }
 
+    // Weapon-aura overlay rendering is split front/back like player auras —
+    // captured here, rendered at the right z-order alongside the body.
+    let weaponAuraOverlayCtx: {
+      overlays: OverlayEffect[];
+      baseX: number;
+      baseY: number;
+      mirrored: boolean;
+      alpha: number;
+      playerId: number;
+    } | null = null;
+    let weaponAuraParticleCtx: {
+      particles: ParticleEffect[];
+      baseX: number;
+      baseY: number;
+      mirrored: boolean;
+      alpha: number;
+    } | null = null;
+
     // Weapon aura sprite renders BEFORE the character so it appears behind.
     // Skip for ghost trail (justCharacter = true) to avoid double-rendering.
     if (
@@ -1212,6 +1352,33 @@ export class MapRenderer {
           weaponSprite.y += aura.floatEffect.getYOffset(this._frameTime);
         }
         weaponSprite.filters = aura.effects.map((e) => e.filter);
+
+        if (aura.overlayEffects.length > 0) {
+          weaponAuraOverlayCtx = {
+            overlays: aura.overlayEffects,
+            baseX: weaponSprite.x,
+            baseY: weaponSprite.y,
+            mirrored,
+            alpha,
+            playerId: character.playerId,
+          };
+          this.renderWeaponAuraOverlays(weaponAuraOverlayCtx, 'back');
+        }
+
+        if (aura.particleEffects.length > 0) {
+          weaponAuraParticleCtx = {
+            particles: aura.particleEffects,
+            baseX: weaponSprite.x,
+            baseY: weaponSprite.y,
+            mirrored,
+            alpha,
+          };
+          this.renderParticleEffects(
+            weaponAuraParticleCtx.particles,
+            'back',
+            weaponAuraParticleCtx,
+          );
+        }
       } else if (aura) {
         for (const effect of aura.effects) {
           if (effect.update) effect.update(this._frameTime);
@@ -1231,36 +1398,71 @@ export class MapRenderer {
         character.playerId,
       );
       if (!aura) return;
-      if (aura.config.renderMode !== mode) return;
-      const bodyTexture = this.client.atlas.getCharacterTextureWithoutWeapon(
-        character.playerId,
-        characterFrame,
-      );
-      if (!bodyTexture) return;
 
-      const bodySprite = this.ensureWorldSprite(
-        `character:${character.playerId}:player-aura`,
-        `map:character-player-aura id=${character.playerId}`,
-      );
-      bodySprite.texture = bodyTexture;
       const fullCanvasYOffset = -100 + 32 - 8;
-      if (mirrored) {
-        bodySprite.scale.x = -1;
-        bodySprite.x = Math.floor(screenX - 50 + 100);
-      } else {
-        bodySprite.scale.x = 1;
-        bodySprite.x = Math.floor(screenX - 50);
-      }
-      bodySprite.y = screenY - frame.yOffset + fullCanvasYOffset;
-      bodySprite.alpha = alpha;
-
-      for (const effect of aura.effects) {
-        if (effect.update) effect.update(this._frameTime);
-      }
+      const baseX = mirrored
+        ? Math.floor(screenX - 50 + 100)
+        : Math.floor(screenX - 50);
+      const baseY = screenY - frame.yOffset + fullCanvasYOffset;
+      let floatYOffset = 0;
       if (aura.floatEffect) {
-        bodySprite.y += aura.floatEffect.getYOffset(this._frameTime);
+        floatYOffset = aura.floatEffect.getYOffset(this._frameTime);
       }
-      bodySprite.filters = aura.effects.map((e) => e.filter);
+
+      // Body sprite — renders only on the renderMode pass that matches.
+      if (aura.config.renderMode === mode) {
+        const bodyTexture = this.client.atlas.getCharacterTextureWithoutWeapon(
+          character.playerId,
+          characterFrame,
+        );
+        if (bodyTexture) {
+          const bodySprite = this.ensureWorldSprite(
+            `character:${character.playerId}:player-aura`,
+            `map:character-player-aura id=${character.playerId}`,
+          );
+          bodySprite.texture = bodyTexture;
+          bodySprite.scale.x = mirrored ? -1 : 1;
+          bodySprite.x = baseX;
+          bodySprite.y = baseY + floatYOffset;
+          bodySprite.alpha = alpha;
+          for (const effect of aura.effects) {
+            if (effect.update) effect.update(this._frameTime);
+          }
+          bodySprite.filters = aura.effects.map((e) => e.filter);
+        }
+      }
+
+      // Overlay effects (e.g. lightning) — render based on their own layer
+      // field, independent of the body renderMode. The Graphics is
+      // positioned at the same coords as the body sprite would be, then the
+      // overlay's draw() paints into it in sprite-local coords.
+      if (aura.overlayEffects.length > 0) {
+        for (const overlay of aura.overlayEffects) {
+          if (overlay.layer !== mode) continue;
+          const graphicsKey = `character:${character.playerId}:player-aura-overlay:${mode}`;
+          const overlayGraphics = this.ensureWorldGraphics(
+            graphicsKey,
+            `map:character-player-aura-overlay id=${character.playerId} layer=${mode}`,
+          );
+          overlayGraphics.scale.x = mirrored ? -1 : 1;
+          overlayGraphics.position.set(baseX, baseY + floatYOffset);
+          overlayGraphics.alpha = alpha;
+          overlay.draw(overlayGraphics, this._frameTime, {
+            width: 100,
+            height: 100,
+          });
+        }
+      }
+
+      // Particle effects — same front/back layer split as overlays.
+      if (aura.particleEffects.length > 0) {
+        this.renderParticleEffects(aura.particleEffects, mode, {
+          baseX,
+          baseY: baseY + floatYOffset,
+          mirrored,
+          alpha,
+        });
+      }
     };
 
     renderPlayerAura('back');
@@ -1283,6 +1485,17 @@ export class MapRenderer {
     }
 
     renderPlayerAura('front');
+
+    if (weaponAuraOverlayCtx) {
+      this.renderWeaponAuraOverlays(weaponAuraOverlayCtx, 'front');
+    }
+    if (weaponAuraParticleCtx) {
+      this.renderParticleEffects(
+        weaponAuraParticleCtx.particles,
+        'front',
+        weaponAuraParticleCtx,
+      );
+    }
 
     for (const effect of effects) {
       const effectKeyBase = `char-effect:${character.playerId}:${effect.instanceId}`;

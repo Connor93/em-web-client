@@ -21,7 +21,7 @@ import {
   SkillType,
   TalkReportClientPacket,
 } from 'eolib';
-import { Application, Assets, Sprite } from 'pixi.js';
+import { Application, Assets, Graphics, Sprite } from 'pixi.js';
 import type { Client } from '../../client';
 import { formatDropRate, getItemGraphicPath } from '../../utils';
 import { Base } from '../base-ui';
@@ -61,6 +61,8 @@ export class Encyclopedia extends Base {
   private pageInfoElement: HTMLSpanElement;
   private auraPreviewApp: Application | null = null;
   private auraTickerCallback: (() => void) | null = null;
+  private auraPreviewParticles: import('../../aura/types').ParticleEffect[] =
+    [];
 
   constructor(client: Client) {
     super();
@@ -1931,12 +1933,49 @@ export class Encyclopedia extends Base {
       sprite.filters = aura.effects.map((e) => e.filter);
       app.stage.addChild(sprite);
 
-      const hasAnimated = aura.effects.some((e) => e.update);
+      // Overlay effects (e.g. lightning) — render into a Graphics anchored
+      // at the sprite's top-left. Bolts that extend past the 64×64 preview
+      // cell clip at the canvas border, which reads fine as an icon hint.
+      const overlayGraphics =
+        aura.overlayEffects.length > 0 ? new Graphics() : null;
+      if (overlayGraphics) {
+        overlayGraphics.position.set(0, 0);
+        app.stage.addChild(overlayGraphics);
+      }
+
+      // Particle effects — reparent each effect's Container into the preview
+      // app's stage at sprite-coords. Track the list so clearAuraPreview()
+      // can destroy them when the user navigates away.
+      this.auraPreviewParticles = aura.particleEffects;
+      for (const particle of aura.particleEffects) {
+        particle.container.position.set(0, 0);
+        app.stage.addChild(particle.container);
+        particle.container.visible = true;
+      }
+
+      const hasAnimated =
+        aura.effects.some((e) => e.update) ||
+        overlayGraphics !== null ||
+        aura.particleEffects.length > 0;
+      let lastTickerTime = 0;
       if (hasAnimated) {
         const callback = () => {
           const now = performance.now();
+          const dt =
+            lastTickerTime > 0
+              ? Math.min(0.1, (now - lastTickerTime) / 1000)
+              : 1 / 60;
+          lastTickerTime = now;
           for (const effect of aura.effects) {
             effect.update?.(now);
+          }
+          if (overlayGraphics) {
+            for (const overlay of aura.overlayEffects) {
+              overlay.draw(overlayGraphics, now, { width: 64, height: 64 });
+            }
+          }
+          for (const particle of aura.particleEffects) {
+            particle.update(dt, { width: 64, height: 64 });
           }
         };
         this.auraTickerCallback = callback;
@@ -1953,6 +1992,13 @@ export class Encyclopedia extends Base {
         this.auraTickerCallback = null;
       }
     }
+    // Destroy particle systems from the previous preview — getAuraByItemId
+    // returns a fresh CachedAura on each call (no caching), so leaving them
+    // alive would leak Sprite pools as the user browses different items.
+    for (const particle of this.auraPreviewParticles) {
+      particle.destroy();
+    }
+    this.auraPreviewParticles = [];
   }
 
   private destroyAuraPreview() {

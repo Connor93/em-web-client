@@ -10,7 +10,30 @@ export type AuraEffectName =
   | 'godray'
   | 'glitch'
   | 'float'
-  | 'colorshift';
+  | 'colorshift'
+  | 'displace'
+  | 'shockwave'
+  | 'twist'
+  | 'zoomblur'
+  | 'rgbsplit'
+  | 'kawaseblur'
+  | 'lightning'
+  | 'embers'
+  | 'smoke'
+  | 'bubbles'
+  | 'ash'
+  | 'snow'
+  | 'petals'
+  | 'leaves'
+  | 'sparks'
+  | 'shards'
+  | 'runes'
+  | 'stardust'
+  | 'orbs'
+  | 'fireflies'
+  | 'swarm'
+  | 'vortex'
+  | 'shockwave_ring';
 
 export type AuraRenderMode = 'front' | 'back';
 
@@ -78,6 +101,164 @@ export interface AuraConfig {
 
   // ColorShift
   colorshiftRate?: number;
+
+  // Displace (rolling shadow / heat haze)
+  displaceScale?: number;
+  displaceSpeed?: number;
+  displaceNoiseScale?: number;
+
+  // Shockwave (radial pulse)
+  shockwaveAmplitude?: number;
+  shockwaveWavelength?: number;
+  shockwaveSpeed?: number;
+  shockwaveInterval?: number;
+
+  // Twist (vortex)
+  twistAngle?: number;
+  twistRadius?: number;
+  twistSpeed?: number;
+
+  // ZoomBlur
+  zoomblurStrength?: number;
+  zoomblurSpeed?: number;
+
+  // RGBSplit (spectral / glitched ghost)
+  rgbsplitOffset?: number;
+  rgbsplitSpeed?: number;
+
+  // KawaseBlur (soft dreamy bleed)
+  kawaseblurStrength?: number;
+  kawaseblurQuality?: number;
+
+  // Lightning (graphics overlay)
+  lightningBoltCount?: number;
+  lightningWidth?: number;
+  lightningJaggedness?: number;
+  lightningFlickerRate?: number;
+  lightningRadius?: number;
+  lightningGlowAlpha?: number;
+
+  // Particles — standardized 6-field tuning per effect: Count (max active),
+  // Rate (spawns/sec), Lifetime (sec), Speed (multiplier), Size (px),
+  // Alpha (peak). Plus effect-specific extras at the end.
+
+  embersCount?: number;
+  embersRate?: number;
+  embersLifetime?: number;
+  embersSpeed?: number;
+  embersSize?: number;
+  embersAlpha?: number;
+
+  smokeCount?: number;
+  smokeRate?: number;
+  smokeLifetime?: number;
+  smokeSpeed?: number;
+  smokeSize?: number;
+  smokeAlpha?: number;
+
+  bubblesCount?: number;
+  bubblesRate?: number;
+  bubblesLifetime?: number;
+  bubblesSpeed?: number;
+  bubblesSize?: number;
+  bubblesAlpha?: number;
+
+  ashCount?: number;
+  ashRate?: number;
+  ashLifetime?: number;
+  ashSpeed?: number;
+  ashSize?: number;
+  ashAlpha?: number;
+
+  snowCount?: number;
+  snowRate?: number;
+  snowLifetime?: number;
+  snowSpeed?: number;
+  snowSize?: number;
+  snowAlpha?: number;
+
+  petalsCount?: number;
+  petalsRate?: number;
+  petalsLifetime?: number;
+  petalsSpeed?: number;
+  petalsSize?: number;
+  petalsAlpha?: number;
+
+  leavesCount?: number;
+  leavesRate?: number;
+  leavesLifetime?: number;
+  leavesSpeed?: number;
+  leavesSize?: number;
+  leavesAlpha?: number;
+
+  sparksCount?: number;
+  sparksRate?: number;
+  sparksLifetime?: number;
+  sparksSpeed?: number;
+  sparksSize?: number;
+  sparksAlpha?: number;
+
+  shardsCount?: number;
+  shardsRate?: number;
+  shardsLifetime?: number;
+  shardsSpeed?: number;
+  shardsSize?: number;
+  shardsAlpha?: number;
+
+  runesCount?: number;
+  runesRate?: number;
+  runesLifetime?: number;
+  runesSpeed?: number;
+  runesSize?: number;
+  runesAlpha?: number;
+  runesGlyphSize?: number;
+
+  stardustCount?: number;
+  stardustRate?: number;
+  stardustLifetime?: number;
+  stardustSpeed?: number;
+  stardustSize?: number;
+  stardustAlpha?: number;
+
+  /** orbs orbit a fixed circle — no Rate (count is fixed), uses Radius. */
+  orbsCount?: number;
+  orbsSpeed?: number;
+  orbsSize?: number;
+  orbsAlpha?: number;
+  orbsRadius?: number;
+
+  firefliesCount?: number;
+  firefliesRate?: number;
+  firefliesLifetime?: number;
+  firefliesSpeed?: number;
+  firefliesSize?: number;
+  firefliesAlpha?: number;
+  firefliesBlinkRate?: number;
+
+  swarmCount?: number;
+  swarmRate?: number;
+  swarmLifetime?: number;
+  swarmSpeed?: number;
+  swarmSize?: number;
+  swarmAlpha?: number;
+  swarmJitter?: number;
+
+  vortexCount?: number;
+  vortexRate?: number;
+  vortexLifetime?: number;
+  vortexSpeed?: number;
+  vortexSize?: number;
+  vortexAlpha?: number;
+  vortexRadius?: number;
+
+  /** shockwave_ring bursts particles in a ring; no continuous Rate. */
+  shockwaveRingCount?: number;
+  shockwaveRingLifetime?: number;
+  shockwaveRingSpeed?: number;
+  shockwaveRingSize?: number;
+  shockwaveRingAlpha?: number;
+  shockwaveRingInterval?: number;
+  shockwaveRingMaxRadius?: number;
 }
 
 export interface AuraResponse {
@@ -136,6 +317,160 @@ export interface PlayerAuraConfig {
   floatRate?: number;
 
   colorshiftRate?: number;
+
+  // Displace (rolling shadow / heat haze)
+  displaceScale?: number;
+  displaceSpeed?: number;
+  displaceNoiseScale?: number;
+
+  // Shockwave (radial pulse)
+  shockwaveAmplitude?: number;
+  shockwaveWavelength?: number;
+  shockwaveSpeed?: number;
+  shockwaveInterval?: number;
+
+  // Twist (vortex)
+  twistAngle?: number;
+  twistRadius?: number;
+  twistSpeed?: number;
+
+  // ZoomBlur
+  zoomblurStrength?: number;
+  zoomblurSpeed?: number;
+
+  // RGBSplit
+  rgbsplitOffset?: number;
+  rgbsplitSpeed?: number;
+
+  // KawaseBlur
+  kawaseblurStrength?: number;
+  kawaseblurQuality?: number;
+
+  // Lightning
+  lightningBoltCount?: number;
+  lightningWidth?: number;
+  lightningJaggedness?: number;
+  lightningFlickerRate?: number;
+  lightningRadius?: number;
+  lightningGlowAlpha?: number;
+
+  // Particles — standardized 6-field tuning per effect.
+
+  embersCount?: number;
+  embersRate?: number;
+  embersLifetime?: number;
+  embersSpeed?: number;
+  embersSize?: number;
+  embersAlpha?: number;
+
+  smokeCount?: number;
+  smokeRate?: number;
+  smokeLifetime?: number;
+  smokeSpeed?: number;
+  smokeSize?: number;
+  smokeAlpha?: number;
+
+  bubblesCount?: number;
+  bubblesRate?: number;
+  bubblesLifetime?: number;
+  bubblesSpeed?: number;
+  bubblesSize?: number;
+  bubblesAlpha?: number;
+
+  ashCount?: number;
+  ashRate?: number;
+  ashLifetime?: number;
+  ashSpeed?: number;
+  ashSize?: number;
+  ashAlpha?: number;
+
+  snowCount?: number;
+  snowRate?: number;
+  snowLifetime?: number;
+  snowSpeed?: number;
+  snowSize?: number;
+  snowAlpha?: number;
+
+  petalsCount?: number;
+  petalsRate?: number;
+  petalsLifetime?: number;
+  petalsSpeed?: number;
+  petalsSize?: number;
+  petalsAlpha?: number;
+
+  leavesCount?: number;
+  leavesRate?: number;
+  leavesLifetime?: number;
+  leavesSpeed?: number;
+  leavesSize?: number;
+  leavesAlpha?: number;
+
+  sparksCount?: number;
+  sparksRate?: number;
+  sparksLifetime?: number;
+  sparksSpeed?: number;
+  sparksSize?: number;
+  sparksAlpha?: number;
+
+  shardsCount?: number;
+  shardsRate?: number;
+  shardsLifetime?: number;
+  shardsSpeed?: number;
+  shardsSize?: number;
+  shardsAlpha?: number;
+
+  runesCount?: number;
+  runesRate?: number;
+  runesLifetime?: number;
+  runesSpeed?: number;
+  runesSize?: number;
+  runesAlpha?: number;
+  runesGlyphSize?: number;
+
+  stardustCount?: number;
+  stardustRate?: number;
+  stardustLifetime?: number;
+  stardustSpeed?: number;
+  stardustSize?: number;
+  stardustAlpha?: number;
+
+  orbsCount?: number;
+  orbsSpeed?: number;
+  orbsSize?: number;
+  orbsAlpha?: number;
+  orbsRadius?: number;
+
+  firefliesCount?: number;
+  firefliesRate?: number;
+  firefliesLifetime?: number;
+  firefliesSpeed?: number;
+  firefliesSize?: number;
+  firefliesAlpha?: number;
+  firefliesBlinkRate?: number;
+
+  swarmCount?: number;
+  swarmRate?: number;
+  swarmLifetime?: number;
+  swarmSpeed?: number;
+  swarmSize?: number;
+  swarmAlpha?: number;
+  swarmJitter?: number;
+
+  vortexCount?: number;
+  vortexRate?: number;
+  vortexLifetime?: number;
+  vortexSpeed?: number;
+  vortexSize?: number;
+  vortexAlpha?: number;
+  vortexRadius?: number;
+
+  shockwaveRingCount?: number;
+  shockwaveRingLifetime?: number;
+  shockwaveRingSpeed?: number;
+  shockwaveRingSize?: number;
+  shockwaveRingAlpha?: number;
+  shockwaveRingInterval?: number;
+  shockwaveRingMaxRadius?: number;
 }
 
 export interface PlayerAuraResponse {
@@ -153,4 +488,33 @@ export interface AuraEffect {
 export interface FloatEffect {
   type: 'float';
   getYOffset: (now: number) => number;
+}
+
+/**
+ * Overlay effect — repaints into a Graphics positioned at the same screen
+ * coords as the body/weapon sprite. Bounds are sprite-local (the canvas size,
+ * typically 100×100 in-world or 64×64 in encyclopedia previews).
+ */
+export interface OverlayEffect {
+  type: 'overlay';
+  layer: 'front' | 'back';
+  draw: (
+    graphics: import('pixi.js').Graphics,
+    now: number,
+    bounds: { width: number; height: number },
+  ) => void;
+}
+
+/**
+ * Particle effect — owns a Container of particle Sprites, advanced each frame
+ * by `update(dt, bounds)`. The render layer reparents the Container into the
+ * world container at the appropriate z-order and positions it at the body
+ * sprite's coords.
+ */
+export interface ParticleEffect {
+  type: 'particle';
+  layer: 'front' | 'back';
+  container: import('pixi.js').Container;
+  update: (dt: number, bounds: { width: number; height: number }) => void;
+  destroy: () => void;
 }

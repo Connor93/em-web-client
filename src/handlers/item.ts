@@ -9,6 +9,7 @@ import {
   ItemJunkServerPacket,
   ItemKickServerPacket,
   ItemMapInfo,
+  ItemObtainServerPacket,
   ItemRemoveServerPacket,
   ItemReplyServerPacket,
   ItemSpecial,
@@ -82,6 +83,37 @@ function handleItemGet(client: Client, reader: EoReader) {
     tab: ChatTab.System,
     icon: ChatIcon.UpArrow,
     message: `${client.getResourceString(EOResourceID.STATUS_LABEL_ITEM_PICKUP_YOU_PICKED_UP)} ${packet.takenItem.amount} ${itemName}`,
+  });
+
+  client.emit('inventoryChanged', undefined);
+  client.requestQuestProgressUpdate();
+}
+
+function handleItemObtain(client: Client, reader: EoReader) {
+  const packet = ItemObtainServerPacket.deserialize(reader);
+
+  client.weight.current = packet.currentWeight;
+
+  const existingItem = client.items.find((i) => i.id === packet.item.id);
+  if (existingItem) {
+    existingItem.amount += packet.item.amount;
+  } else {
+    const item = new Item();
+    item.id = packet.item.id;
+    item.amount = packet.item.amount;
+    client.items.push(item);
+  }
+
+  const record = client.getEifRecordById(packet.item.id);
+  const itemName = record?.name ?? `Item #${packet.item.id}`;
+  client.setStatusLabel(
+    EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+    `${client.getResourceString(EOResourceID.STATUS_LABEL_ITEM_PICKUP_YOU_PICKED_UP)} ${packet.item.amount} ${itemName}`,
+  );
+  client.emit('chat', {
+    tab: ChatTab.System,
+    icon: ChatIcon.UpArrow,
+    message: `${client.getResourceString(EOResourceID.STATUS_LABEL_ITEM_PICKUP_YOU_PICKED_UP)} ${packet.item.amount} ${itemName}`,
   });
 
   client.emit('inventoryChanged', undefined);
@@ -397,6 +429,11 @@ export function registerItemHandlers(client: Client) {
     PacketFamily.Item,
     PacketAction.Get,
     (reader) => handleItemGet(client, reader),
+  );
+  client.bus.registerPacketHandler(
+    PacketFamily.Item,
+    PacketAction.Obtain,
+    (reader) => handleItemObtain(client, reader),
   );
   client.bus.registerPacketHandler(
     PacketFamily.Item,

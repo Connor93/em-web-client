@@ -4,6 +4,8 @@ import type {
   AuraEffect,
   AuraResponse,
   FloatEffect,
+  OverlayEffect,
+  ParticleEffect,
   PlayerAuraConfig,
   PlayerAuraResponse,
 } from './types';
@@ -12,12 +14,16 @@ export interface CachedAura {
   config: AuraConfig;
   effects: AuraEffect[];
   floatEffect?: FloatEffect;
+  overlayEffects: OverlayEffect[];
+  particleEffects: ParticleEffect[];
 }
 
 export interface CachedPlayerAura {
   config: PlayerAuraConfig;
   effects: AuraEffect[];
   floatEffect?: FloatEffect;
+  overlayEffects: OverlayEffect[];
+  particleEffects: ParticleEffect[];
 }
 
 export class AuraManager {
@@ -101,12 +107,20 @@ export class AuraManager {
     const config = this.configs.get(weaponGraphicId);
     if (!config) return undefined;
 
-    let cached = this.characterAuras.get(playerId);
-    if (cached && cached.config === config) return cached;
+    const existing = this.characterAuras.get(playerId);
+    if (existing && existing.config === config) return existing;
+    if (existing) this.disposeCachedAura(existing);
 
     // Build fresh filter instances for this character
-    const { filters, floatEffect } = buildEffects(config);
-    cached = { config, effects: filters, floatEffect };
+    const { filters, floatEffect, overlayEffects, particleEffects } =
+      buildEffects(config);
+    const cached: CachedAura = {
+      config,
+      effects: filters,
+      floatEffect,
+      overlayEffects,
+      particleEffects,
+    };
     this.characterAuras.set(playerId, cached);
     return cached;
   }
@@ -119,11 +133,19 @@ export class AuraManager {
     const config = this.configsByItemId.get(weaponItemId);
     if (!config) return undefined;
 
-    let cached = this.characterAuras.get(playerId);
-    if (cached && cached.config === config) return cached;
+    const existing = this.characterAuras.get(playerId);
+    if (existing && existing.config === config) return existing;
+    if (existing) this.disposeCachedAura(existing);
 
-    const { filters, floatEffect } = buildEffects(config);
-    cached = { config, effects: filters, floatEffect };
+    const { filters, floatEffect, overlayEffects, particleEffects } =
+      buildEffects(config);
+    const cached: CachedAura = {
+      config,
+      effects: filters,
+      floatEffect,
+      overlayEffects,
+      particleEffects,
+    };
     this.characterAuras.set(playerId, cached);
     return cached;
   }
@@ -132,8 +154,15 @@ export class AuraManager {
   getAuraByItemId(itemId: number): CachedAura | undefined {
     const config = this.configsByItemId.get(itemId);
     if (!config) return undefined;
-    const { filters, floatEffect } = buildEffects(config);
-    return { config, effects: filters, floatEffect };
+    const { filters, floatEffect, overlayEffects, particleEffects } =
+      buildEffects(config);
+    return {
+      config,
+      effects: filters,
+      floatEffect,
+      overlayEffects,
+      particleEffects,
+    };
   }
 
   /** Get or create per-character effect instances for a player aura. */
@@ -144,19 +173,72 @@ export class AuraManager {
     const config = this.playerAuraConfigs.get(auraId);
     if (!config) return undefined;
 
-    let cached = this.characterPlayerAuras.get(playerId);
-    if (cached && cached.config === config) return cached;
+    const existing = this.characterPlayerAuras.get(playerId);
+    if (existing && existing.config === config) return existing;
+    if (existing) this.disposeCachedAura(existing);
 
-    const { filters, floatEffect } = buildEffects(config);
-    cached = { config, effects: filters, floatEffect };
+    const { filters, floatEffect, overlayEffects, particleEffects } =
+      buildEffects(config);
+    const cached: CachedPlayerAura = {
+      config,
+      effects: filters,
+      floatEffect,
+      overlayEffects,
+      particleEffects,
+    };
     this.characterPlayerAuras.set(playerId, cached);
     return cached;
   }
 
+  /**
+   * Tear down particle effects on a cache entry — removes containers from
+   * their parent and calls destroy() so sprites are released. Used by both
+   * cache-replacement and the explicit clear* methods below.
+   */
+  private disposeCachedAura(cache: CachedAura | CachedPlayerAura): void {
+    for (const p of cache.particleEffects) {
+      p.container.parent?.removeChild(p.container);
+      p.destroy();
+    }
+  }
+
+  /** Clear just the player-aura cache (called on $playeraura <name> 0). */
+  clearCharacterPlayerAura(playerId: number): void {
+    const cache = this.characterPlayerAuras.get(playerId);
+    if (cache) {
+      this.disposeCachedAura(cache);
+      this.characterPlayerAuras.delete(playerId);
+    }
+  }
+
+  /** Clear just the weapon-aura cache (called when weapon item id changes). */
+  clearCharacterWeaponAura(playerId: number): void {
+    const cache = this.characterAuras.get(playerId);
+    if (cache) {
+      this.disposeCachedAura(cache);
+      this.characterAuras.delete(playerId);
+    }
+  }
+
   /** Drop both weapon and player aura caches for a departing player. */
   clearCharacter(playerId: number): void {
-    this.characterAuras.delete(playerId);
-    this.characterPlayerAuras.delete(playerId);
+    this.clearCharacterWeaponAura(playerId);
+    this.clearCharacterPlayerAura(playerId);
+  }
+
+  /**
+   * Iterate every active particle effect across all cached auras. Used by the
+   * MapRenderer to sweep visibility for off-screen characters each frame.
+   */
+  forEachParticleEffect(
+    callback: (effect: import('./types').ParticleEffect) => void,
+  ): void {
+    for (const cached of this.characterAuras.values()) {
+      for (const p of cached.particleEffects) callback(p);
+    }
+    for (const cached of this.characterPlayerAuras.values()) {
+      for (const p of cached.particleEffects) callback(p);
+    }
   }
 
   hasAuras(): boolean {
