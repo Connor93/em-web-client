@@ -1,6 +1,7 @@
 import { ItemSpecial, TalkReportClientPacket } from 'eolib';
 import type { Client } from '../client';
 import { ChatTab, GameState } from '../client';
+import { dashboardUrlForHost } from '../config';
 import {
   LOCKER_MAX_ITEM_AMOUNT,
   LOCKER_UPGRADE_BASE_COST,
@@ -212,8 +213,17 @@ export function wireUiEvents(deps: UiEventDeps): void {
   });
 
   deps.mainMenu.on('host-change', (host: unknown) => {
-    client.config.host = host as string;
+    const newHost = host as string;
+    client.config.host = newHost;
     client.disconnect();
+    // Re-target the aura dashboard fetch to whichever server's dashboard the
+    // new host points at. Without this, switching from prod to test (or vice
+    // versa) leaves auraManager pinned to the original startup URL — auras
+    // either go missing or show stale entries from the wrong environment.
+    const newDashboardUrl = dashboardUrlForHost(client.config, newHost);
+    if (newDashboardUrl !== undefined && client.auraManager) {
+      client.auraManager.setDashboardUrl(newDashboardUrl);
+    }
   });
 
   // Create account

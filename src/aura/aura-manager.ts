@@ -45,16 +45,37 @@ export class AuraManager {
 
   async fetch(): Promise<void> {
     const data = await this.fetchWithRetry<AuraResponse>(
-      `${this.dashboardUrl}/api/weapon-auras`,
+      `${this.dashboardUrl}/weapon-auras`,
     );
     if (data) this.rebuild(data.auras);
   }
 
   async fetchPlayerAuras(): Promise<void> {
     const data = await this.fetchWithRetry<PlayerAuraResponse>(
-      `${this.dashboardUrl}/api/player-auras`,
+      `${this.dashboardUrl}/player-auras`,
     );
     if (data) this.rebuildPlayerAuras(data.auras);
+  }
+
+  /**
+   * Swap the dashboard base URL — used when the user picks a different game
+   * server from the landing-screen dropdown. Configs and per-character caches
+   * built against the old URL are dropped, then both fetches re-run.
+   */
+  setDashboardUrl(url: string): void {
+    if (this.dashboardUrl === url) return;
+    this.dashboardUrl = url;
+    // Existing per-character caches reference Configs from the old server. Tear
+    // them down so the next render rebuilds against the new server's configs.
+    for (const [playerId] of this.characterAuras)
+      this.clearCharacterWeaponAura(playerId);
+    for (const [playerId] of this.characterPlayerAuras)
+      this.clearCharacterPlayerAura(playerId);
+    this.configs.clear();
+    this.configsByItemId.clear();
+    this.playerAuraConfigs.clear();
+    this.fetch();
+    this.fetchPlayerAuras();
   }
 
   /**

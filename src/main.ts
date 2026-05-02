@@ -28,6 +28,7 @@ import {
   toggleAutoBattle,
 } from './managers/auto-battle-manager';
 import { settings } from './settings';
+import { AuctionHouseDialog } from './ui/auction-house-dialog';
 import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { AutolootPanel } from './ui/autoloot-panel';
@@ -255,6 +256,7 @@ const questDialog = new QuestDialog(client);
 const questProgress = new QuestProgress(client);
 const chestDialog = new ChestDialog(client);
 const shopDialog = new ShopDialog(client);
+const _auctionHouseDialog = new AuctionHouseDialog(client);
 const boardDialog = new BoardDialog(client);
 const bankDialog = new BankDialog(client);
 const barberDialog = new BarberDialog(client);
@@ -535,6 +537,7 @@ initDraggableDialogs([
   'chest',
   'locker',
   'shop',
+  'auction-house',
   'skill-master',
   'settings-dialog',
   'auto-battle-dialog',

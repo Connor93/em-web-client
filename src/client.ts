@@ -44,7 +44,7 @@ import { AuraManager } from './aura/aura-manager';
 import type { PacketBus } from './bus';
 import type { ChatBubble } from './chat-bubble';
 import { clearRectangles } from './collision';
-import { getDefaultConfig, loadConfig } from './config';
+import { dashboardUrlForHost, getDefaultConfig, loadConfig } from './config';
 import { HALF_TILE_HEIGHT, INITIAL_IDLE_TICKS, USAGE_TICKS } from './consts';
 import { getEcf, getEdf, getEif, getEmf, getEnf, getEsf } from './db';
 import type { Door } from './door';
@@ -222,6 +222,8 @@ export class Client {
   /** Tracks which NPC indices are awakened bosses and their status */
   awakenedBosses: Map<number, { enraged: boolean; shielded: boolean }> =
     new Map();
+  /** Cached auction house config snapshot from the most recent OPEN packet. */
+  auctionConfig: import('./handlers/auction').AuctionConfig | null = null;
   /** Tracks NPC indices that are summoned adds (for glow effect) */
   bossAdds: Set<number> = new Set();
   /** Tracks NPC indices that are expedition combat encounters (for glow effect) */
@@ -460,8 +462,12 @@ export class Client {
         document.querySelector<HTMLDivElement>('#main-menu-logo')!;
       mainMenuLogo!.setAttribute('data-slogan', config.slogan);
 
-      if (config.dashboardUrl !== undefined) {
-        this.auraManager = new AuraManager(config.dashboardUrl);
+      // Resolve the dashboard URL for the currently-selected host (per-server
+      // override wins; top-level dashboardUrl is the fallback). Always create
+      // the manager so it can be re-targeted later via setDashboardUrl().
+      const initialDashboardUrl = dashboardUrlForHost(config, config.host);
+      if (initialDashboardUrl !== undefined) {
+        this.auraManager = new AuraManager(initialDashboardUrl);
         this.auraManager.fetch();
         this.auraManager.fetchPlayerAuras();
       }

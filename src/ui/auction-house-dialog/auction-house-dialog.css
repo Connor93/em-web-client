@@ -1,0 +1,606 @@
+/* ── Auction House Dialog ────────────────────────────────────────── */
+
+#auction-house {
+  width: 500px;
+  min-height: 480px;
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#auction-house .dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-right: 8px;
+}
+
+#auction-house .ah-meta {
+  font-size: 10px;
+  color: var(--theme-dim);
+  letter-spacing: 0.4px;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.ah-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+
+.ah-tabs .themed-btn {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 2px solid transparent;
+  opacity: 0.55;
+  font-size: 11px;
+  padding: 5px 6px;
+  min-width: 0;
+  transition:
+    opacity 0.12s,
+    border-color 0.12s;
+}
+
+.ah-tabs .themed-btn:hover {
+  opacity: 0.85;
+}
+
+.ah-tabs .themed-btn.active {
+  opacity: 1;
+  border-bottom-color: var(--theme-accent);
+}
+
+/* ── Toolbar (browse) ─────────────────────────────────────────────── */
+.ah-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 4px 12px 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ah-toolbar .ah-search {
+  flex: 1 1 140px;
+  font-size: 11px;
+  padding: 4px 6px;
+}
+
+.ah-toolbar .themed-btn.sm {
+  font-size: 10px;
+  padding: 3px 7px;
+}
+
+.ah-toolbar .ah-filter {
+  opacity: 0.55;
+  transition:
+    opacity 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+.ah-toolbar .ah-filter:hover {
+  opacity: 0.9;
+}
+.ah-toolbar .ah-filter.active {
+  opacity: 1;
+  border-color: var(--theme-accent);
+  color: var(--theme-accent);
+}
+
+/* ── Listings list ────────────────────────────────────────────────── */
+.ah-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 220px;
+}
+
+.ah-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 10px;
+  padding: 7px 10px;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
+  border-radius: 4px;
+  align-items: center;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+
+.ah-row:hover {
+  border-color: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.32
+  );
+}
+
+.ah-row.ah-instant {
+  border-left: 3px solid #5fa850;
+}
+
+.ah-row.ah-auction {
+  border-left: 3px solid #c79b3a;
+}
+
+.ah-row.ah-row-winning {
+  background: linear-gradient(
+    90deg,
+    rgba(95, 168, 80, 0.1) 0%,
+    var(--theme-bg-dark) 100%
+  );
+}
+
+.ah-row .ah-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ah-row .ah-icon img {
+  max-width: 40px;
+  max-height: 40px;
+  image-rendering: pixelated;
+}
+
+.ah-row .ah-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ah-row .ah-name {
+  font-size: 12px;
+  color: var(--theme-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+.ah-row .ah-price {
+  font-size: 10px;
+  color: var(--theme-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ah-row .ah-price-tag,
+.ah-row .ah-price-bid {
+  color: var(--theme-accent);
+  font-weight: 600;
+}
+.ah-row .ah-price-buyout {
+  color: #c79b3a;
+}
+.ah-row .ah-price-mine {
+  color: #6fbf60;
+  font-weight: 600;
+}
+
+.ah-row .ah-time {
+  font-size: 9px;
+  color: var(--theme-very-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ah-row .ah-time-text {
+  color: var(--theme-dim);
+}
+
+.ah-row .ah-time.ah-time-soon .ah-time-text {
+  color: #c79b3a;
+}
+
+.ah-row .ah-time.ah-time-urgent .ah-time-text {
+  color: #d56;
+  animation: ah-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ah-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.ah-row .ah-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: stretch;
+}
+
+.ah-row .ah-actions .themed-btn {
+  font-size: 10px;
+  padding: 3px 10px;
+  min-width: 64px;
+}
+
+.ah-row .ah-actions .themed-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ah-pill {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+.ah-pill-winning {
+  background: rgba(95, 168, 80, 0.18);
+  color: #6fbf60;
+  border: 1px solid rgba(95, 168, 80, 0.45);
+}
+
+/* ── Inline bid input ─────────────────────────────────────────────── */
+.ah-actions-bidding {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 3px !important;
+}
+
+.ah-bid-input {
+  width: 88px;
+  font-size: 11px;
+  padding: 3px 5px;
+  text-align: right;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.4
+    );
+  color: var(--theme-accent);
+  border-radius: 3px;
+}
+
+.ah-bid-input.ah-input-error {
+  border-color: #d56;
+  animation: ah-shake 0.3s;
+}
+
+@keyframes ah-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+.ah-bid-confirm,
+.ah-bid-cancel {
+  min-width: 24px !important;
+  padding: 3px 6px !important;
+  font-size: 11px !important;
+}
+
+.ah-bid-confirm {
+  color: #6fbf60;
+}
+.ah-bid-cancel {
+  color: var(--theme-very-dim);
+}
+
+/* ── Empty state ──────────────────────────────────────────────────── */
+.ah-empty {
+  text-align: center;
+  color: var(--theme-very-dim);
+  font-size: 11px;
+  padding: 28px 12px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── Tooltip (shared, body-positioned) ───────────────────────────── */
+.ah-tooltip {
+  position: fixed;
+  display: none;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.35
+    );
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--theme-accent);
+  font-size: 10px;
+  white-space: pre-line;
+  z-index: 3000;
+  pointer-events: none;
+  min-width: 120px;
+  max-width: 240px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.ah-tooltip.visible {
+  display: block;
+}
+
+/* ── Post-new tab ─────────────────────────────────────────────────── */
+.ah-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px 4px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ah-post-form label,
+.ah-post-form .ah-field {
+  font-size: 10px;
+  color: var(--theme-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ah-post-form .ah-field-label {
+  font-size: 10px;
+  color: var(--theme-very-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.ah-post-form input[type="number"],
+.ah-post-form input[type="text"] {
+  font-size: 11px;
+  padding: 4px 6px;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.18
+    );
+  color: var(--theme-accent);
+  border-radius: 3px;
+}
+
+.ah-post-form input[type="number"]:focus,
+.ah-post-form input[type="text"]:focus {
+  border-color: var(--theme-accent);
+  outline: none;
+}
+
+.ah-post-form .ah-row-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ah-radio-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ah-radio-pill {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px !important;
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.18
+    );
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px !important;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+
+.ah-radio-pill:has(input:checked) {
+  border-color: var(--theme-accent);
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.12
+  );
+  color: var(--theme-accent);
+}
+
+.ah-radio-pill input[type="radio"] {
+  display: none;
+}
+
+.ah-post-form .ah-error {
+  color: #d56;
+  font-size: 10px;
+  min-height: 12px;
+  font-weight: 500;
+}
+
+.ah-summary-line {
+  font-size: 10px;
+  color: var(--theme-very-dim);
+  padding-top: 4px;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.ah-post-submit {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+/* ── Post: item picker grid ──────────────────────────────────────── */
+.ah-inventory-picker {
+  max-height: 240px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.1
+    );
+  border-radius: 4px;
+  background: var(--theme-bg-dark);
+}
+
+.ah-inv-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.18);
+  min-height: 50px;
+  transition:
+    border-color 0.12s,
+    transform 0.12s;
+}
+
+.ah-inv-cell:hover {
+  border-color: var(--theme-accent);
+  transform: translateY(-1px);
+}
+
+.ah-inv-cell img {
+  max-width: 28px;
+  max-height: 28px;
+  image-rendering: pixelated;
+}
+
+.ah-inv-cell .ah-inv-amount {
+  font-size: 9px;
+  color: var(--theme-dim);
+  margin-top: 2px;
+}
+
+/* ── Post: selected-item banner ──────────────────────────────────── */
+.ah-post-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--theme-bg-dark);
+  border: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.2
+    );
+  border-radius: 4px;
+}
+
+.ah-banner-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.ah-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ah-banner-name {
+  font-size: 12px;
+  color: var(--theme-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ah-banner-meta {
+  font-size: 10px;
+  color: var(--theme-very-dim);
+}
+
+/* ── Pager ───────────────────────────────────────────────────────── */
+.ah-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 12px 6px;
+  font-size: 10px;
+  color: var(--theme-very-dim);
+}
+
+.ah-pager .themed-btn.sm {
+  font-size: 10px;
+  padding: 3px 9px;
+  min-width: 56px;
+}
+
+.ah-pager .themed-btn.sm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ah-pager-info {
+  min-width: 110px;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+#auction-house .dialog-footer {
+  padding: 8px 12px;
+  border-top: 1px solid
+    rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.08
+    );
+}

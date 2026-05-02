@@ -4,15 +4,17 @@
   "title": "Endless Memories",
   "slogan": "Web Edition!",
   "creditsUrl": "https://endless-memories.net",
-  "dashboardUrl": "",
+  "dashboardUrl": "/api",
   "servers": [
     {
       "name": "Production",
-      "host": "wss://client.calamity-online.cloud/ws"
+      "host": "wss://client.calamity-online.cloud/ws",
+      "dashboardUrl": "/api"
     },
     {
       "name": "Test Server",
-      "host": "wss://client.calamity-online.cloud/ws-test"
+      "host": "wss://client.calamity-online.cloud/ws-test",
+      "dashboardUrl": "/api-test"
     }
   ]
 }

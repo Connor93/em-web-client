@@ -3,6 +3,7 @@ import { registerAccountHandlers } from './account';
 import { registerAdminInteractHandlers } from './admin-interact';
 import { registerArenaHandlers } from './arena';
 import { registerAttackHandlers } from './attack';
+import { registerAuctionHandlers } from './auction';
 import { registerAvatarHandlers } from './avatar';
 import { registerBankHandlers } from './bank';
 import { registerBarberHandlers } from './barber';
@@ -53,6 +54,7 @@ export {
   registerAdminInteractHandlers,
   registerArenaHandlers,
   registerAttackHandlers,
+  registerAuctionHandlers,
   registerAvatarHandlers,
   registerBankHandlers,
   registerBarberHandlers,
@@ -145,4 +147,5 @@ export function registerAllHandlers(client: Client): void {
   registerLookupCommandHandlers(client);
   registerWeaponInfoHandlers(client);
   registerPlayerAuraHandlers(client);
+  registerAuctionHandlers(client);
 }

@@ -300,4 +300,23 @@ export type ClientEvents = {
   buffExpired: { playerId: number; type: string };
   npcTargetChanged: undefined;
   npcHealthChanged: { npcIndex: number; percentage: number };
+
+  // Auction house — see src/handlers/auction.ts for the full payload types.
+  auctionOpened: import('../handlers/auction').AuctionConfig;
+  auctionListings: import('../handlers/auction').AuctionSearchPage;
+  auctionMyListings: import('../handlers/auction').AuctionMinePage;
+  auctionPostResult: import('../handlers/auction').AuctionPostResult;
+  auctionBidResult: import('../handlers/auction').AuctionBidResult;
+  auctionBuyoutResult: {
+    result: number;
+    message: string;
+    auctionId: number;
+  };
+  auctionCancelResult: {
+    result: number;
+    message: string;
+    auctionId: number;
+  };
+  auctionPriceInfo: import('../handlers/auction').AuctionPriceInfo;
+  auctionError: { result: number; message: string };
 };

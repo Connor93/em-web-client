@@ -13,12 +13,26 @@ import {
   StatSkillOpenClientPacket,
 } from 'eolib';
 import type { Client } from '../client';
+import { sendAuctionOpen } from '../handlers/auction';
 import { SpellTarget } from '../types';
 import { setTarget } from './target-manager';
+
+// Custom NPC type added by the etheos server (`ENF::AuctionHouse = 16`).
+// Not in eolib's NpcType enum, which only knows the standard 0–15 range.
+const AUCTION_HOUSE_TYPE_RAW = 16;
 
 export function clickNpc(client: Client, npc: NpcMapInfo): void {
   const record = client.getEnfRecordById(npc.id);
   if (!record) {
+    return;
+  }
+
+  // Custom auction-house type — checked before the standard switch since
+  // eolib's NpcType enum doesn't include it and the switch's default
+  // would otherwise silently drop the click.
+  if ((record.type as number) === AUCTION_HOUSE_TYPE_RAW) {
+    sendAuctionOpen(client, npc.index);
+    client.interactNpcIndex = npc.index;
     return;
   }
 

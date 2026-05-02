@@ -523,6 +523,82 @@
           </div>
         </div>
 
+        <div id="auction-house" class="dialog-md hidden">
+          <div class="dialog-header">
+            <span class="ah-title">Auction House</span>
+            <span class="ah-meta"></span>
+          </div>
+          <div class="ah-tabs">
+            <button class="themed-btn active" type="button" data-tab="browse">Browse</button>
+            <button class="themed-btn" type="button" data-tab="mine">My Listings</button>
+            <button class="themed-btn" type="button" data-tab="bids">My Bids</button>
+            <button class="themed-btn" type="button" data-tab="post">Post New</button>
+          </div>
+          <div class="ah-toolbar">
+            <input class="ah-search" type="text" placeholder="Search items…" />
+            <button class="themed-btn sm ah-filter active" type="button" data-filter="all">All</button>
+            <button class="themed-btn sm ah-filter" type="button" data-filter="instant">Instant Buy</button>
+            <button class="themed-btn sm ah-filter" type="button" data-filter="auction">Auction</button>
+            <button class="themed-btn sm" type="button" data-id="refresh">Refresh</button>
+          </div>
+          <div class="ah-list"></div>
+          <div class="ah-pager hidden">
+            <button class="themed-btn sm" type="button" data-id="prev">‹ Prev</button>
+            <span class="ah-pager-info">—</span>
+            <button class="themed-btn sm" type="button" data-id="next">Next ›</button>
+          </div>
+          <form class="ah-post-form hidden">
+            <div class="ah-post-banner hidden">
+              <img class="ah-banner-img" alt="" />
+              <div class="ah-banner-text">
+                <span class="ah-banner-name"></span>
+                <span class="ah-banner-meta"></span>
+              </div>
+              <button class="themed-btn sm" type="button" data-id="change-item">Change</button>
+            </div>
+            <div class="ah-inventory-picker"></div>
+            <div class="ah-post-details hidden">
+              <div class="ah-row-fields">
+                <label>
+                  <span class="ah-field-label">Quantity</span>
+                  <input type="number" name="qty" min="1" value="1" />
+                </label>
+                <div class="ah-field">
+                  <span class="ah-field-label">Listing type</span>
+                  <div class="ah-radio-group">
+                    <label class="ah-radio-pill"><input type="radio" name="type" value="instant" checked /> Instant Buy</label>
+                    <label class="ah-radio-pill"><input type="radio" name="type" value="auction" /> Auction</label>
+                  </div>
+                </div>
+              </div>
+              <div class="ah-row-fields">
+                <label data-field="start" class="hidden">
+                  <span class="ah-field-label">Starting bid</span>
+                  <input type="number" name="start" min="1" />
+                </label>
+                <label data-field="buyout">
+                  <span class="ah-field-label">Price</span>
+                  <input type="number" name="buyout" min="1" />
+                </label>
+              </div>
+              <div class="ah-field">
+                <span class="ah-field-label">Duration</span>
+                <div class="ah-radio-group">
+                  <label class="ah-radio-pill"><input type="radio" name="duration" value="0" /> 12 hr</label>
+                  <label class="ah-radio-pill"><input type="radio" name="duration" value="1" checked /> 24 hr</label>
+                  <label class="ah-radio-pill"><input type="radio" name="duration" value="2" /> 48 hr</label>
+                </div>
+              </div>
+              <div class="ah-summary-line"></div>
+              <div class="ah-error"></div>
+              <button class="themed-btn ah-post-submit" type="submit">Post Listing</button>
+            </div>
+          </form>
+          <div class="dialog-footer">
+            <button class="themed-btn" type="button" data-id="close">Close</button>
+          </div>
+        </div>
+
         <div id="locker" class="dialog-md hidden">
           <div class="dialog-header"><span class="title"></span></div>
           <input class="dialog-search" type="text" placeholder="Search items…" />
