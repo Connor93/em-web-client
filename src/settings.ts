@@ -21,6 +21,7 @@ export interface GameSettings {
   inventoryWidth: 'default' | '25%' | '50%' | '75%' | '100%';
   inventoryHeight: 'default' | '200px' | '300px' | '400px' | '500px';
   inventoryScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x';
+  bannerNotifications: 'enabled' | 'disabled';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -46,6 +47,7 @@ const DEFAULTS: GameSettings = {
   inventoryWidth: 'default',
   inventoryHeight: 'default',
   inventoryScale: '1x',
+  bannerNotifications: 'enabled',
 };
 
 export const SETTING_OPTIONS: {
@@ -71,6 +73,7 @@ export const SETTING_OPTIONS: {
   inventoryWidth: ['default', '25%', '50%', '75%', '100%'] as const,
   inventoryHeight: ['default', '200px', '300px', '400px', '500px'] as const,
   inventoryScale: ['1x', '1.25x', '1.5x', '1.75x', '2x'] as const,
+  bannerNotifications: ['enabled', 'disabled'] as const,
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -94,6 +97,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   inventoryWidth: 'Inventory Width',
   inventoryHeight: 'Inventory Height',
   inventoryScale: 'Inventory Scale',
+  bannerNotifications: 'Banner Notifications',
 };
 
 type SettingsEvents = {

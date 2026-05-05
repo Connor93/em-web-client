@@ -55,6 +55,10 @@ export function chat(client: Client, message: string): void {
       message: `${packet.message}`,
       name: `${capitalize(client.name)}`,
     });
+    client.emit('bannerNotification', {
+      tier: 'event',
+      text: `${capitalize(client.name)}: ${packet.message}`,
+    });
     playSfxById(SfxId.AdminAnnounceReceived);
     client.bus.send(packet);
     return;

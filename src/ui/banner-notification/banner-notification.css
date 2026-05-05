@@ -1,0 +1,202 @@
+#banner-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 56px 10px 24px;
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-align: center;
+  z-index: 1100;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition:
+    opacity 280ms ease-out,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  border-bottom: 1px solid transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+#banner-notification.hidden {
+  display: none;
+}
+
+#banner-notification.banner-notification--show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#banner-notification.banner-notification--exiting {
+  opacity: 0;
+  transform: translateY(-100%);
+  transition:
+    opacity 240ms ease-in,
+    transform 280ms ease-in;
+}
+
+/* Push the boss bar down while the banner is visible. */
+body.has-banner #boss-bars {
+  top: 60px;
+}
+
+#banner-notification .banner-notification__icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+#banner-notification .banner-notification__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#banner-notification .banner-notification__close {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+  pointer-events: auto;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+#banner-notification .banner-notification__close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Critical (red, pulse) ──────────────────────────────────────── */
+
+#banner-notification.banner-notification--critical {
+  background: linear-gradient(
+    180deg,
+    rgba(120, 18, 18, 0.95) 0%,
+    rgba(80, 10, 10, 0.92) 100%
+  );
+  color: #ffe6e0;
+  border-bottom-color: rgba(255, 90, 80, 0.6);
+  box-shadow: 0 4px 20px rgba(180, 30, 30, 0.4);
+}
+
+#banner-notification.banner-notification--critical.banner-notification--show {
+  animation: banner-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes banner-pulse {
+  0%,
+  100% {
+    box-shadow: 0 4px 20px rgba(180, 30, 30, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(255, 70, 70, 0.7);
+  }
+}
+
+/* ── Event (gold, glow) ─────────────────────────────────────────── */
+
+#banner-notification.banner-notification--event {
+  background: linear-gradient(
+    180deg,
+    rgba(80, 60, 16, 0.94) 0%,
+    rgba(46, 34, 8, 0.92) 100%
+  );
+  color: #ffd76b;
+  border-bottom-color: rgba(255, 200, 80, 0.55);
+  box-shadow: 0 4px 24px rgba(200, 150, 40, 0.32);
+  text-shadow: 0 0 10px rgba(255, 200, 80, 0.55);
+}
+
+#banner-notification.banner-notification--event .banner-notification__icon {
+  filter: drop-shadow(0 0 6px rgba(255, 200, 80, 0.8));
+}
+
+/* ── Awakened (purple, cosmic shimmer) ──────────────────────────── */
+
+#banner-notification.banner-notification--awakened {
+  background: linear-gradient(
+    180deg,
+    rgba(60, 22, 92, 0.96) 0%,
+    rgba(38, 12, 64, 0.94) 100%
+  );
+  color: #e8c8ff;
+  border-bottom-color: rgba(190, 130, 255, 0.6);
+  box-shadow:
+    0 4px 24px rgba(140, 60, 220, 0.42),
+    inset 0 0 18px rgba(180, 100, 255, 0.18);
+  text-shadow:
+    0 0 8px rgba(220, 150, 255, 0.85),
+    0 0 18px rgba(160, 80, 240, 0.55);
+}
+
+#banner-notification.banner-notification--awakened .banner-notification__icon {
+  filter: drop-shadow(0 0 8px rgba(220, 150, 255, 0.95));
+}
+
+#banner-notification.banner-notification--awakened.banner-notification--show {
+  animation: banner-shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes banner-shimmer {
+  0%,
+  100% {
+    box-shadow:
+      0 4px 24px rgba(140, 60, 220, 0.42),
+      inset 0 0 18px rgba(180, 100, 255, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 4px 34px rgba(190, 100, 255, 0.7),
+      inset 0 0 28px rgba(210, 140, 255, 0.32);
+  }
+}
+
+/* ── Info (blue, flat) ──────────────────────────────────────────── */
+
+#banner-notification.banner-notification--info {
+  background: rgba(20, 36, 58, 0.92);
+  color: #b8d8f5;
+  border-bottom-color: rgba(120, 170, 220, 0.4);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────── */
+
+body.is-mobile #banner-notification {
+  font-size: 12px;
+  padding: 8px 44px 8px 14px;
+  min-height: 38px;
+  letter-spacing: 0.2px;
+}
+
+body.is-mobile #banner-notification .banner-notification__icon {
+  font-size: 14px;
+}
+
+body.is-mobile #banner-notification .banner-notification__close {
+  right: 10px;
+  padding: 6px 10px;
+  font-size: 16px;
+}
+
+body.is-mobile.has-banner #boss-bars {
+  top: 50px;
+}

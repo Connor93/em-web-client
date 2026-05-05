@@ -78,6 +78,10 @@ export class BossBar {
     this.updateVisibility();
   }
 
+  getName(npcIndex: number): string | null {
+    return this.entries.get(npcIndex)?.name ?? null;
+  }
+
   removeBoss(npcIndex: number): void {
     const entry = this.entries.get(npcIndex);
     if (!entry) return;

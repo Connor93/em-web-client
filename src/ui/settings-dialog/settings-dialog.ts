@@ -150,6 +150,7 @@ const LEFT_KEYS: (keyof GameSettings)[] = [
   'gameMusic',
   'privateMessage',
   'logChat',
+  'bannerNotifications',
   'interactions',
   'ghostNpcs',
   'chatWidth',

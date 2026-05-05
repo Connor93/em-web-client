@@ -45,10 +45,57 @@ function handleTalkPlayer(client: Client, reader: EoReader) {
   });
 }
 
+// Server-side prefix protocol for routing world broadcasts to a banner tier.
+// Recognized forms: "[BANNER:critical] text", "[BANNER:event] text",
+// "[BANNER:awakened] text", "[BANNER:info] text".
+const BANNER_PREFIX_PATTERN = /^\[BANNER:(critical|event|awakened|info)\]\s*/;
+
+// Heuristic fallback used until the server prefixes its broadcasts.
+// Server schedules shutdowns with i18n string "Attention!! Server will be {shut down|reloaded} in {N} seconds"
+// and cancels with "Attention!! Server shutdown was cancelled."
+function inferBannerTier(message: string): 'critical' | 'awakened' | null {
+  const lowered = message.toLowerCase();
+  if (
+    lowered.includes('restart') ||
+    lowered.includes('shutdown') ||
+    lowered.includes('shut down') ||
+    lowered.includes('shutting down') ||
+    lowered.includes('will be reloaded')
+  ) {
+    return 'critical';
+  }
+  if (
+    lowered.includes('awaken') ||
+    lowered.includes('has fallen') ||
+    lowered.includes('has been slain') ||
+    lowered.includes('has been defeated')
+  ) {
+    return 'awakened';
+  }
+  return null;
+}
+
 function handleTalkServer(client: Client, reader: EoReader) {
   const packet = TalkServerServerPacket.deserialize(reader);
+  let displayMessage = packet.message;
+
+  const prefixMatch = packet.message.match(BANNER_PREFIX_PATTERN);
+  if (prefixMatch) {
+    const tier = prefixMatch[1] as 'critical' | 'event' | 'awakened' | 'info';
+    displayMessage = packet.message.replace(BANNER_PREFIX_PATTERN, '');
+    client.emit('bannerNotification', { tier, text: displayMessage });
+  } else {
+    const inferredTier = inferBannerTier(packet.message);
+    if (inferredTier) {
+      client.emit('bannerNotification', {
+        tier: inferredTier,
+        text: packet.message,
+      });
+    }
+  }
+
   client.emit('serverChat', {
-    message: packet.message,
+    message: displayMessage,
   });
 }
 
@@ -109,6 +156,10 @@ function handleTalkAnnounce(client: Client, reader: EoReader) {
     name: capitalize(packet.playerName),
     message: packet.message,
     icon: ChatIcon.GlobalAnnounce,
+  });
+  client.emit('bannerNotification', {
+    tier: 'event',
+    text: `${capitalize(packet.playerName)}: ${packet.message}`,
   });
   playSfxById(SfxId.AdminAnnounceReceived);
 }

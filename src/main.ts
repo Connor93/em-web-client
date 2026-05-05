@@ -33,6 +33,7 @@ import { AutoBattleDialog } from './ui/auto-battle-dialog/auto-battle-dialog';
 import { AutoBattleHud } from './ui/auto-battle-hud/auto-battle-hud';
 import { AutolootPanel } from './ui/autoloot-panel';
 import { BankDialog } from './ui/bank-dialog/bank-dialog';
+import { BannerNotification } from './ui/banner-notification';
 import { BarberDialog } from './ui/barber-dialog/barber-dialog';
 import { initDraggableDialogs } from './ui/base-ui';
 import { BoardDialog } from './ui/board-dialog';
@@ -279,6 +280,7 @@ const autoBattleDialog = new AutoBattleDialog();
 const autoBattleHud = new AutoBattleHud();
 const autolootPanel = new AutolootPanel(client);
 const bossBar = new BossBar();
+const bannerNotification = new BannerNotification();
 const bossDamageReport = new BossDamageReportPanel();
 const bossStatusPanel = new BossStatusPanel();
 const damageTrackerPanel = new DamageTrackerPanel();
@@ -466,6 +468,7 @@ wireClientEvents({
   autolootPanel,
   buffBar,
   bossBar,
+  bannerNotification,
   bossDamageReport,
   bossStatusPanel,
   damageTracker: damageTrackerPanel,

@@ -249,6 +249,11 @@ export type ClientEvents = {
     minimumPercent: number | null;
   };
   bossBarsReset: undefined;
+  bannerNotification: {
+    tier: 'critical' | 'event' | 'awakened' | 'info';
+    text: string;
+    icon?: string;
+  };
   damageDealt: { npcIndex: number; npcName: string; damage: number };
   thornsHit: { damage: number };
   toggleDamageTracker: undefined;

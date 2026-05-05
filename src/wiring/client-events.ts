@@ -7,6 +7,7 @@ import { loadAutolootSettings } from '../managers/autoloot-manager';
 import { startFriendPolling } from '../managers/social-manager';
 import { playSfxById, SfxId } from '../sfx';
 import { socialStore } from '../social-store';
+import type { BannerNotification } from '../ui/banner-notification';
 import type { BossBar } from '../ui/boss-bar';
 import { ChatIcon } from '../ui/chat/chat';
 import type { ExpeditionTracker } from '../ui/expedition-tracker/expedition-tracker';
@@ -153,6 +154,7 @@ export interface ClientEventDeps {
   autolootPanel: { show(): void; hide(): void };
   buffBar: { update(): void; clear(): void };
   bossBar: BossBar;
+  bannerNotification: BannerNotification;
   bossDamageReport: {
     show(report: {
       bossName: string;
@@ -372,6 +374,7 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     resetReconnectAttempts();
     deps.reconnectOverlay.classList.add('hidden');
     deps.bossBar.clear();
+    deps.bannerNotification.clear();
     deps.buffBar.clear();
     client.clearStaleVisualState();
     client.refresh();
@@ -623,14 +626,39 @@ export function wireClientEvents(deps: ClientEventDeps): void {
 
   client.on('bossEnraged', ({ npcIndex }) => {
     bossBar.setEnraged(npcIndex);
+    const name = bossBar.getName(npcIndex);
+    if (name) {
+      client.emit('bannerNotification', {
+        tier: 'info',
+        text: `${name} has enraged!`,
+      });
+    }
   });
 
   client.on('bossShielded', ({ npcIndex, shielded }) => {
     bossBar.setShielded(npcIndex, shielded);
+    const name = bossBar.getName(npcIndex);
+    if (name && shielded) {
+      client.emit('bannerNotification', {
+        tier: 'info',
+        text: `${name} has raised a shield!`,
+      });
+    }
   });
 
   client.on('bossTimeout', ({ npcIndex }) => {
+    const name = bossBar.getName(npcIndex);
     bossBar.revertBoss(npcIndex);
+    if (name) {
+      client.emit('bannerNotification', {
+        tier: 'info',
+        text: `${name} has retreated.`,
+      });
+    }
+  });
+
+  client.on('bannerNotification', (payload) => {
+    deps.bannerNotification.show(payload);
   });
 
   // Update boss bar debuff tags when NPC debuffs change

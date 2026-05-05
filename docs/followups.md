@@ -4,6 +4,16 @@ Ongoing list of deferred work, improvements, and ideas. Check this file anytime 
 
 ## Open
 
+### Banner Notifications — Server-Side Prefix Tagging
+**Added:** 2026-05-04
+**Context:** Client now shows on-screen banners for awakened NPC announcements, admin `/announce`, and server restart/shutdown. Critical/Event tier routing relies on either a `[BANNER:critical|event|info]` prefix on world-broadcast `ServerMsg()` text, or a heuristic text-pattern fallback. The fallback is brittle (matches "awaken", "restart", "has fallen", etc.). Prefix the broadcasts in etheos `src/awakened_system.cpp` (awaken + death) and the shutdown broadcast site so client routing is reliable.
+**Related:** `src/handlers/talk.ts` (`handleTalkServer`), etheos `src/awakened_system.cpp`, etheos shutdown broadcast logic
+
+### Banner Notifications — Per-Tier Toggle
+**Added:** 2026-05-04
+**Context:** Currently a single on/off setting. If players want to silence info banners but keep critical ones (or vice versa), expand to three checkboxes. Defer until usage feedback demands it.
+**Related:** `src/settings.ts`, `src/ui/settings-dialog/`
+
 ### Player Tooltip — Mobile Touch Tooltips
 **Added:** 2026-03-30
 **Context:** Currently mobile falls back to canvas nameplate (name only). Could add tap-to-show or long-press tooltip interaction for mobile. Needs its own interaction design to avoid conflicts with tap-to-move.
