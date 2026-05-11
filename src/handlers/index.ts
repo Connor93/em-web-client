@@ -26,6 +26,7 @@ import { registerItemHandlers } from './item';
 import { registerLockerHandlers } from './locker';
 import { registerLoginHandlers } from './login';
 import { registerLookupCommandHandlers } from './lookup-commands';
+import { registerMarriageHandlers } from './marriage';
 import { registerMessageHandlers } from './message';
 import { registerMusicHandlers } from './music';
 import { registerNpcHandlers } from './npc';
@@ -33,6 +34,7 @@ import { registerPaperdollHandlers } from './paperdoll';
 import { registerPartyHandlers } from './party';
 import { registerPlayerAuraHandlers } from './player-aura';
 import { registerPlayersHandlers } from './players';
+import { registerPriestHandlers } from './priest';
 import { registerQuestHandlers } from './quest';
 import { registerRangeHandlers } from './range';
 import { registerRecoverHandlers } from './recover';
@@ -76,6 +78,7 @@ export {
   registerItemHandlers,
   registerLockerHandlers,
   registerLoginHandlers,
+  registerMarriageHandlers,
   registerMessageHandlers,
   registerMusicHandlers,
   registerNpcHandlers,
@@ -83,6 +86,7 @@ export {
   registerPartyHandlers,
   registerPlayerAuraHandlers,
   registerPlayersHandlers,
+  registerPriestHandlers,
   registerQuestHandlers,
   registerRangeHandlers,
   registerRecoverHandlers,
@@ -148,4 +152,6 @@ export function registerAllHandlers(client: Client): void {
   registerWeaponInfoHandlers(client);
   registerPlayerAuraHandlers(client);
   registerAuctionHandlers(client);
+  registerMarriageHandlers(client);
+  registerPriestHandlers(client);
 }

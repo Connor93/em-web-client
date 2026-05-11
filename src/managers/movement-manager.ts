@@ -15,12 +15,28 @@ import {
 } from 'eolib';
 import type { Client } from '../client';
 import { INITIAL_IDLE_TICKS } from '../consts';
+import { EOResourceID } from '../edf';
 import { EffectAnimation, EffectTargetCharacter, Emote } from '../render';
 import { playSfxById } from '../sfx';
 import { SfxId } from '../types';
+import { showGameToast } from '../ui/game-toast/game-toast';
 import { randomRange } from '../utils';
 import type { Vector2 } from '../vector';
 import { autolootNearby } from './autoloot-manager';
+
+const OVERWEIGHT_TOAST_COOLDOWN_MS = 2500;
+let lastOverweightToastAt = 0;
+
+function notifyOverweight(client: Client): void {
+  const now = Date.now();
+  if (now - lastOverweightToastAt < OVERWEIGHT_TOAST_COOLDOWN_MS) return;
+  lastOverweightToastAt = now;
+  const text =
+    client.getResourceString(
+      EOResourceID.STATUS_LABEL_CANNOT_ATTACK_OVERWEIGHT,
+    ) ?? 'You are too heavy to attack.';
+  showGameToast(EOResourceID.STATUS_LABEL_TYPE_WARNING, text);
+}
 
 export function face(client: Client, direction: Direction): void {
   const packet = new FacePlayerClientPacket();
@@ -77,6 +93,11 @@ export function attack(
   direction: Direction,
   timestamp: number,
 ): void {
+  if (client.weight.current >= client.weight.max) {
+    notifyOverweight(client);
+    return;
+  }
+
   const packet = new AttackUseClientPacket();
   packet.direction = direction;
   packet.timestamp = timestamp;

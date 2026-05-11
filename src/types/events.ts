@@ -87,6 +87,11 @@ export type ClientEvents = {
   citizenSlept: undefined;
   citizenSubscribeResult: { questionsWrong: number };
   citizenUnsubscribeResult: { success: boolean };
+  marriageOpened: undefined;
+  marriageReply: { code: number };
+  priestOpened: undefined;
+  priestReply: { code: number };
+  priestPartnerRequest: { partnerName: string };
   tradeRequested: { playerId: number; playerName: string };
   tradeOpened: {
     partnerPlayerId: number;

@@ -105,6 +105,8 @@ export interface ClientEventDeps {
     ): void;
     show(): void;
   };
+  marriageDialog: { show(): void };
+  priestDialog: { show(): void };
   boardDialog: { setData(posts: unknown): void; show(): void };
   lockerDialog: {
     setItems(items: unknown, title?: string): void;
@@ -487,6 +489,14 @@ export function wireClientEvents(deps: ClientEventDeps): void {
       data.questions,
     );
     deps.citizenDialog.show();
+  });
+
+  client.on('marriageOpened', () => {
+    deps.marriageDialog.show();
+  });
+
+  client.on('priestOpened', () => {
+    deps.priestDialog.show();
   });
 
   client.on('tradeRequested', ({ playerId, playerName }) => {

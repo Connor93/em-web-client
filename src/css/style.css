@@ -91,6 +91,46 @@ body {
   height: 100%;
   z-index: 1;
   overflow: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(
+      var(--theme-accent-r),
+      var(--theme-accent-g),
+      var(--theme-accent-b),
+      0.3
+    )
+    transparent;
+}
+
+#ui ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+#ui ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#ui ::-webkit-scrollbar-thumb {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.3
+  );
+  border-radius: 3px;
+}
+
+#ui ::-webkit-scrollbar-thumb:hover {
+  background: rgba(
+    var(--theme-accent-r),
+    var(--theme-accent-g),
+    var(--theme-accent-b),
+    0.5
+  );
+}
+
+#ui ::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 #dialogs {

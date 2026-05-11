@@ -10,7 +10,7 @@ import {
 } from 'eolib';
 import { ChatBubble } from '../chat-bubble';
 import type { Client } from '../client';
-import { COLORS, MAX_CHAT_LENGTH } from '../consts';
+import { COLORS, INITIAL_IDLE_TICKS, MAX_CHAT_LENGTH } from '../consts';
 import { playSfxById } from '../sfx';
 import { ChatIcon, ChatTab, SfxId } from '../types';
 import { capitalize, makeDrunk } from '../utils';
@@ -20,6 +20,8 @@ export function chat(client: Client, message: string): void {
   if (!message) {
     return;
   }
+
+  client.idleTicks = INITIAL_IDLE_TICKS;
 
   const trimmed = (client.drunk ? makeDrunk(message) : message).substring(
     0,

@@ -102,7 +102,12 @@ export class AuraManager {
   private rebuild(configs: AuraConfig[]): void {
     this.configs.clear();
     this.configsByItemId.clear();
-    this.characterAuras.clear();
+    // Dispose per-character caches so particle containers attached to the world
+    // get torn down — bare Map.clear() would orphan them and they'd freeze on
+    // screen until the player left view.
+    for (const [playerId] of this.characterAuras) {
+      this.clearCharacterWeaponAura(playerId);
+    }
 
     for (const config of configs) {
       if (config.graphicId <= 0 || config.effects.length === 0) continue;
@@ -115,7 +120,9 @@ export class AuraManager {
 
   private rebuildPlayerAuras(configs: PlayerAuraConfig[]): void {
     this.playerAuraConfigs.clear();
-    this.characterPlayerAuras.clear();
+    for (const [playerId] of this.characterPlayerAuras) {
+      this.clearCharacterPlayerAura(playerId);
+    }
 
     for (const config of configs) {
       if (config.auraId <= 0 || config.effects.length === 0) continue;
