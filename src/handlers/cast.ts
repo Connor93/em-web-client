@@ -31,7 +31,7 @@ function handleCastReply(client: Client, reader: EoReader) {
 
   if (reader.remaining === 0) {
     // NPC cast visual — play effect on the target player, don't touch stats
-    client.playSpellEffect(spellId, new EffectTargetCharacter(secondShort));
+    client.playSpellEffect(spellId, new EffectTargetCharacter(secondShort), 0);
     return;
   }
 
@@ -73,7 +73,7 @@ function handleCastReply(client: Client, reader: EoReader) {
     });
   }
 
-  client.playSpellEffect(spellId, new EffectTargetNpc(npcIndex));
+  client.playSpellEffect(spellId, new EffectTargetNpc(npcIndex), secondShort);
 }
 
 function handleCastSpec(client: Client, reader: EoReader) {
@@ -100,6 +100,7 @@ function handleCastSpec(client: Client, reader: EoReader) {
   client.playSpellEffect(
     packet.spellId,
     new EffectTargetNpc(packet.npcKilledData.npcIndex),
+    packet.npcKilledData.killerId,
   );
 
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);
@@ -199,6 +200,7 @@ function handleCastAccept(client: Client, reader: EoReader) {
   client.playSpellEffect(
     packet.spellId,
     new EffectTargetNpc(packet.npcKilledData.npcIndex),
+    packet.npcKilledData.killerId,
   );
 
   client.setNpcDeathAnimation(packet.npcKilledData.npcIndex);

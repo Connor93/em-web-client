@@ -75,6 +75,7 @@ function handleSpellTargetSelf(client: Client, reader: EoReader) {
   client.playSpellEffect(
     packet.spellId,
     new EffectTargetCharacter(packet.playerId),
+    packet.playerId,
   );
 }
 
@@ -118,7 +119,11 @@ function handleSpellTargetOther(client: Client, reader: EoReader) {
   );
   updatePartyMemberHp(client, victimId, hpPercentage);
 
-  client.playSpellEffect(spellId, new EffectTargetCharacter(victimId));
+  client.playSpellEffect(
+    spellId,
+    new EffectTargetCharacter(victimId),
+    casterId,
+  );
 }
 
 function handleSpellTargetGroup(client: Client, reader: EoReader) {
@@ -153,6 +158,7 @@ function handleSpellTargetGroup(client: Client, reader: EoReader) {
     client.playSpellEffect(
       packet.spellId,
       new EffectTargetCharacter(player.playerId),
+      packet.casterId,
     );
   }
 

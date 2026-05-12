@@ -22,6 +22,7 @@ import {
   CharacterWalkAnimation,
 } from './render';
 import { playSfxById, SfxId } from './sfx';
+import { showGameToast } from './ui/game-toast/game-toast';
 import { bigCoordsToCoords, getNextCoords } from './utils';
 
 function inputToDirection(input: Input): Direction | null {
@@ -125,6 +126,10 @@ export class MovementController {
 
     if (isOrWasInputHeld(Input.Refresh) && this.refreshTicks === 0) {
       this.client.refresh();
+      showGameToast(
+        EOResourceID.STATUS_LABEL_TYPE_INFORMATION,
+        'Game state refreshed',
+      );
       this.refreshTicks = WALK_TICKS;
     }
 

@@ -2,7 +2,7 @@
 
 #auction-house {
   width: 500px;
-  height: 480px;
+  min-height: 480px;
   max-height: 84vh;
   display: flex;
   flex-direction: column;

@@ -74,6 +74,11 @@ export function clearUnheldInput() {
   }
 }
 
+export function clearAllInputs() {
+  for (let i = 0; i < held.length; i++) held[i] = false;
+  lastInputHeld.length = 0;
+}
+
 function updateInputHeld(input: Input, down: boolean) {
   held[input] = down;
   const index = lastInputHeld.indexOf(input);
@@ -268,7 +273,7 @@ window.addEventListener('keydown', (e) => {
       }
       break;
     case 'KeyF':
-      if (!inTextInput) {
+      if (!inTextInput && !e.shiftKey) {
         updateInputHeld(Input.TargetCast, true);
         e.preventDefault();
       }
@@ -506,6 +511,10 @@ window.addEventListener(
   },
   { passive: false },
 );
+
+window.addEventListener('blur', () => {
+  clearAllInputs();
+});
 
 /*
 window.addEventListener('contextmenu', (e) => {

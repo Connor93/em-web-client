@@ -167,8 +167,11 @@ function handleEnterGame(
   }
 
   client.usageTicks = USAGE_TICKS;
+  // Capture reconnecting before setState clears it — the enterGame handler
+  // uses this to preserve chat across reconnects.
+  const isReconnect = client.reconnecting;
   client.setState(GameState.InGame);
-  client.emit('enterGame', { news: data.news });
+  client.emit('enterGame', { news: data.news, isReconnect });
   client.bus.send(new GlobalOpenClientPacket());
   client.atlas.reset();
   client.atlas.mapId = -1; // Always force full rebuild — map data may differ from initial build

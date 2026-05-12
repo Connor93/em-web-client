@@ -52,6 +52,7 @@ import { type DialogResourceID, type Edf, EOResourceID } from './edf';
 import { Sans11Font } from './fonts/sans-11';
 import { HALF_GAME_HEIGHT, HALF_GAME_WIDTH } from './game-state';
 import { registerAllHandlers } from './handlers';
+import { clearAllInputs } from './input';
 import * as Managers from './managers';
 import * as AudioManager from './managers/audio-manager';
 import * as AuthManager from './managers/auth-manager';
@@ -219,6 +220,8 @@ export class Client {
   /** Active spell cooldowns: spell ID → end timestamp and total duration */
   activeSpellCooldowns: Map<number, { endTime: number; duration: number }> =
     new Map();
+  /** Per-caster last spell-effect timestamp used by the 'reduced' spell-effect filter. */
+  _lastSpellEffectByCaster: Map<number, number> = new Map();
   /** Tracks which NPC indices are awakened bosses and their status */
   awakenedBosses: Map<number, { enraged: boolean; shielded: boolean }> =
     new Map();
@@ -274,6 +277,12 @@ export class Client {
   hatMetadata = getHatMetadata();
   doors: Door[] = [];
   typing = false;
+  /** Counts watchdog cycles where typing looked stuck; cleared automatically when legitimate. */
+  _typingStuckChecks = 0;
+  /** Throttle counter for the recovery watchdog (runs ~4x per second). */
+  _recoveryWatchdogTicks = 0;
+  /** Updated by PacketBus on every incoming packet; consumed by the staleness detector. */
+  lastPacketReceivedTime = Date.now();
   clearOutofRangeTicks = 0;
   pingStart = 0;
   quakeTicks = 0;
@@ -325,6 +334,7 @@ export class Client {
   hotbarSlots: ISlot[] = [];
   selectedSpellId = 0;
   queuedSpellId = 0;
+  lastRequestedSpellId = 0;
   spellCastTimestamp = 0;
   spellTarget: SpellTarget | null = null;
   spellTargetId = 0;
@@ -732,6 +742,7 @@ export class Client {
       Managers.tickNpcDebuffs(this);
       Managers.tickSpellCooldowns(this);
       Managers.tickCharacterBuffs(this);
+      Managers.tickRecoveryWatchdog(this);
     }
   }
 
@@ -885,6 +896,10 @@ export class Client {
 
   setBus(bus: PacketBus) {
     this.bus = bus;
+    this.lastPacketReceivedTime = Date.now();
+    this.bus.onPacketReceived(() => {
+      this.lastPacketReceivedTime = Date.now();
+    });
     registerAllHandlers(this);
   }
 
@@ -1043,6 +1058,7 @@ export class Client {
     this.characterHots.clear();
     this.npcDebuffs.clear();
     this.activeSpellCooldowns.clear();
+    this._lastSpellEffectByCaster.clear();
     this.autoWalkPath = [];
     this.spellTarget = null;
     this.downloadQueue = [];
@@ -1051,6 +1067,7 @@ export class Client {
     this.drunkEmoteTicks = 0;
     this.selectedSpellId = 0;
     this.queuedSpellId = 0;
+    this.lastRequestedSpellId = 0;
     this.spellCooldownTicks = 0;
     this.targetedNpcIndex = null;
     this.targetCycleStamp = 0;
@@ -1210,7 +1227,33 @@ export class Client {
   }
 
   refresh() {
-    this.bus.send(new RefreshRequestClientPacket());
+    clearAllInputs();
+    this.clearStaleVisualState();
+    this.typing = false;
+    if (!this.app.ticker.started) {
+      this.app.ticker.start();
+    }
+    // Full local atlas + scene reset. Without these, refresh() relies on the
+    // server reply for full atlas rebuild and never resets MapRenderer's
+    // sprite pool — leaving stale texture refs after GPU/atlas corruption.
+    this.mapRenderer.resetScene();
+    this.atlas.reset();
+    this.atlas.refresh();
+
+    // Force an explicit paint to bypass PixiJS's auto-render path. Players
+    // have reported a state where game logic ticks fine and audio plays,
+    // but the canvas stops repainting — symptom of the auto-render callback
+    // silently dying while our user callback keeps running. Calling
+    // renderer.render directly produces a fresh frame regardless.
+    try {
+      this.app.renderer.render(this.app.stage);
+    } catch (err) {
+      console.error('[refresh] forced renderer.render threw', err);
+    }
+
+    if (this.bus) {
+      this.bus.send(new RefreshRequestClientPacket());
+    }
   }
 
   depositGold(amount: number) {
@@ -1305,8 +1348,8 @@ export class Client {
     Managers.castSpell(this, spellId);
   }
 
-  playSpellEffect(spellId: number, target: EffectTarget) {
-    Managers.playSpellEffect(this, spellId, target);
+  playSpellEffect(spellId: number, target: EffectTarget, casterId: number) {
+    Managers.playSpellEffect(this, spellId, target, casterId);
   }
 
   cycleTarget() {

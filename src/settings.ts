@@ -22,6 +22,7 @@ export interface GameSettings {
   inventoryHeight: 'default' | '200px' | '300px' | '400px' | '500px';
   inventoryScale: '1x' | '1.25x' | '1.5x' | '1.75x' | '2x';
   bannerNotifications: 'enabled' | 'disabled';
+  otherPlayerSpellEffects: 'all' | 'reduced' | 'off';
 }
 
 const STORAGE_KEY = 'game-settings';
@@ -48,6 +49,7 @@ const DEFAULTS: GameSettings = {
   inventoryHeight: 'default',
   inventoryScale: '1x',
   bannerNotifications: 'enabled',
+  otherPlayerSpellEffects: 'all',
 };
 
 export const SETTING_OPTIONS: {
@@ -74,6 +76,7 @@ export const SETTING_OPTIONS: {
   inventoryHeight: ['default', '200px', '300px', '400px', '500px'] as const,
   inventoryScale: ['1x', '1.25x', '1.5x', '1.75x', '2x'] as const,
   bannerNotifications: ['enabled', 'disabled'] as const,
+  otherPlayerSpellEffects: ['all', 'reduced', 'off'] as const,
 };
 
 export const SETTING_LABELS: Record<keyof GameSettings, string> = {
@@ -98,6 +101,7 @@ export const SETTING_LABELS: Record<keyof GameSettings, string> = {
   inventoryHeight: 'Inventory Height',
   inventoryScale: 'Inventory Scale',
   bannerNotifications: 'Banner Notifications',
+  otherPlayerSpellEffects: "Others' Spell Effects",
 };
 
 type SettingsEvents = {

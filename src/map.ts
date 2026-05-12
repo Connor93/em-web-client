@@ -536,6 +536,13 @@ export class MapRenderer {
     this.client = client;
   }
 
+  /** Resets the scene graph — destroys all sprite-pool entries so the next
+   *  render frame rebuilds them from current state. Used by client.refresh()
+   *  during recovery to drop sprites that reference invalidated textures. */
+  resetScene() {
+    this.clearSceneNodes();
+  }
+
   buildCaches() {
     this._npcGlowFilters.clear();
     this._npcGlowArrays.clear();

@@ -24,6 +24,7 @@ export class PacketBus {
     PacketFamily,
     Map<PacketAction, (reader: EoReader) => void>
   > = new Map();
+  private _onPacketReceived: (() => void) | null = null;
   constructor(socket: WebSocket) {
     this.socket = socket;
     this.sequencer = new PacketSequencer(SequenceStart.zero());
@@ -46,6 +47,10 @@ export class PacketBus {
 
   disconnect() {
     this.socket.close();
+  }
+
+  onPacketReceived(cb: () => void) {
+    this._onPacketReceived = cb;
   }
 
   setSequence(sequence: SequenceStart) {
@@ -91,6 +96,7 @@ export class PacketBus {
     const packetBuf = data.slice(2);
 
     const reader = new EoReader(packetBuf);
+    this._onPacketReceived?.();
     const familyHandlers = this.handlers.get(family);
     if (familyHandlers) {
       const handler = familyHandlers.get(action);

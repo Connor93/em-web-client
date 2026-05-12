@@ -21,6 +21,7 @@ import {
   type EffectTarget,
   NpcDeathAnimation,
 } from '../render';
+import { settings } from '../settings';
 import { playSfxById } from '../sfx';
 import { SfxId, SlotType, SpellTarget } from '../types';
 
@@ -105,6 +106,13 @@ export function beginSpellChant(client: Client): void {
     return;
   }
 
+  const activeCooldown = client.activeSpellCooldowns.get(client.queuedSpellId);
+  if (activeCooldown && activeCooldown.endTime > Date.now()) {
+    client.queuedSpellId = 0;
+    client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
+    return;
+  }
+
   if (
     record.type === SkillType.Heal &&
     client.spellTarget === SpellTarget.Npc
@@ -157,6 +165,7 @@ export function beginSpellChant(client: Client): void {
   }
 
   client.spellCastTimestamp = getTimestamp();
+  client.lastRequestedSpellId = client.queuedSpellId;
   const packet = new SpellRequestClientPacket();
   packet.spellId = client.queuedSpellId;
   packet.timestamp = client.spellCastTimestamp;
@@ -214,11 +223,42 @@ export function castSpell(client: Client, spellId: number): void {
   client.spellCooldownTicks = SPELL_COOLDOWN_TICKS;
 }
 
+const SPELL_EFFECT_THROTTLE_MS = 500;
+
+type EffectDecision = 'full' | 'silent' | 'skip';
+
+function shouldPlayOtherPlayerEffect(
+  client: Client,
+  casterId: number,
+): EffectDecision {
+  // casterId 0 = non-player caster (NPC). Always full.
+  if (casterId === 0) return 'full';
+  // Local player's own casts. Always full.
+  if (casterId === client.playerId) return 'full';
+
+  const mode = settings.get('otherPlayerSpellEffects');
+  if (mode === 'all') return 'full';
+  if (mode === 'off') return 'skip';
+
+  // 'reduced' — per-caster throttle, silent (no SFX), visual passes through.
+  const now = Date.now();
+  const last = client._lastSpellEffectByCaster.get(casterId) ?? 0;
+  if (now - last < SPELL_EFFECT_THROTTLE_MS) return 'skip';
+  client._lastSpellEffectByCaster.set(casterId, now);
+  return 'silent';
+}
+
 export function playSpellEffect(
   client: Client,
   spellId: number,
   target: EffectTarget,
+  casterId: number,
 ): void {
+  const decision = shouldPlayOtherPlayerEffect(client, casterId);
+  if (decision === 'skip') {
+    return;
+  }
+
   const record = client.getEsfRecordById(spellId);
   if (!record) {
     return;
@@ -231,7 +271,7 @@ export function playSpellEffect(
 
   client.effects.push(new EffectAnimation(record.graphicId, target, metadata));
 
-  if (metadata.sfx) {
+  if (metadata.sfx && decision === 'full') {
     playSfxById(metadata.sfx);
   }
 }

@@ -3,4 +3,5 @@ export abstract class Animation {
   animationFrame = 0;
   abstract tick(): void;
   renderedFirstFrame = false;
+  createdAt = Date.now();
 }

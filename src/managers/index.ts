@@ -95,6 +95,7 @@ export {
   tickOutOfRange,
   tickQuake,
   tickQueuedNpcChats,
+  tickRecoveryWatchdog,
   tickShieldExpiry,
   tickSpellCooldowns,
   tickSpellQueue,

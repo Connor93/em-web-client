@@ -641,7 +641,10 @@ function handleCooldownBlockedMessage(client: Client, message: string): void {
   if (!match) return;
 
   const remaining = Number(match[1]);
-  const spellId = client.queuedSpellId || client.selectedSpellId;
+  const spellId =
+    client.lastRequestedSpellId ||
+    client.queuedSpellId ||
+    client.selectedSpellId;
   if (spellId) {
     client.activeSpellCooldowns.set(spellId, {
       endTime: Date.now() + remaining * 1000,

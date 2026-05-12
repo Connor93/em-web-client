@@ -162,6 +162,15 @@ export function tickCharacterAnimations(
       client.characterAnimations.delete(id);
       continue;
     }
+    // Watchdog: kill local-player animations that have lived >30s.
+    // Catches stuck spell-chant / attack animations that block input.
+    if (id === client.playerId && Date.now() - animation.createdAt > 30000) {
+      console.warn(
+        `[recovery] local-player animation alive >30s; force-clearing (${animation.constructor.name})`,
+      );
+      client.characterAnimations.delete(id);
+      continue;
+    }
     if (id === client.playerId && animation instanceof CharacterWalkAnimation) {
       playerWalking = true;
     }
@@ -323,6 +332,64 @@ export function tickSpellCooldowns(client: Client): void {
     if (now >= cooldown.endTime) {
       client.activeSpellCooldowns.delete(spellId);
     }
+  }
+}
+
+function isTypingLockLegitimate(): boolean {
+  // Visible dialog inside #dialogs container
+  const dialogs = document.getElementById('dialogs');
+  if (dialogs && !dialogs.classList.contains('hidden')) {
+    if (dialogs.querySelector(':scope > :not(.hidden)')) return true;
+  }
+  // Visible dialog-md anywhere (catches dialogs nested outside #dialogs)
+  if (document.querySelector('.dialog-md:not(.hidden)')) return true;
+  // Standalone panels that lock typing
+  const panels = [
+    'encyclopedia',
+    'online-list',
+    'autoloot-panel',
+    'guild-panel',
+    'social-panel',
+    'stats',
+  ];
+  for (const id of panels) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains('hidden')) return true;
+  }
+  // Focused text input. Exclude the desktop chat input — it auto-refocuses
+  // itself via document focusout and is effectively always the active
+  // element, but chat focus deliberately does NOT block typing on desktop
+  // (see ui-events.ts comment near `deps.chat.on('chat', ...)`). If we
+  // counted it as legitimate the watchdog could never fire.
+  const active = document.activeElement;
+  if (
+    (active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement) &&
+    active.id !== 'chat-message'
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function tickRecoveryWatchdog(client: Client): void {
+  // Throttle to ~4Hz at 120tps so DOM queries don't run every frame.
+  client._recoveryWatchdogTicks++;
+  if (client._recoveryWatchdogTicks < 30) return;
+  client._recoveryWatchdogTicks = 0;
+
+  if (client.typing && !isTypingLockLegitimate()) {
+    client._typingStuckChecks++;
+    // 8 checks * 250ms = 2s grace before we conclude it's stuck.
+    if (client._typingStuckChecks >= 8) {
+      console.warn(
+        '[recovery] typing lock stuck with no visible owner; auto-clearing',
+      );
+      client.typing = false;
+      client._typingStuckChecks = 0;
+    }
+  } else {
+    client._typingStuckChecks = 0;
   }
 }
 

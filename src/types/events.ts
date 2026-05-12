@@ -30,7 +30,7 @@ export type ClientEvents = {
   characterCreated: CharacterSelectionListEntry[];
   characterDeleted: CharacterSelectionListEntry[];
   selectCharacter: undefined;
-  enterGame: { news: string[] };
+  enterGame: { news: string[]; isReconnect: boolean };
   chat: {
     tab: ChatTab;
     message: string;

@@ -67,6 +67,7 @@ import { LargeConfirmSmallHeader } from './ui/large-confirm-small-header';
 import { LockerDialog } from './ui/locker-dialog';
 import { LoginForm } from './ui/login';
 import { MainMenu } from './ui/main-menu/main-menu';
+import { MarriageDialog } from './ui/marriage-dialog/marriage-dialog';
 import { MobileChat } from './ui/mobile-chat/mobile-chat';
 import { MobileControls } from './ui/mobile-controls/mobile-controls';
 import { MobileHUD } from './ui/mobile-hud/mobile-hud';
@@ -81,6 +82,7 @@ import { PartyHud } from './ui/party-hud';
 import { PlayerContextMenu } from './ui/player-context-menu';
 import { PlayerTooltip } from './ui/player-tooltip';
 import { PmChatManager } from './ui/pm-chat-bubble/pm-chat-manager';
+import { PriestDialog } from './ui/priest-dialog/priest-dialog';
 import { QuestDialog } from './ui/quest-dialog';
 import { QuestProgress } from './ui/quest-progress';
 import { SettingsDialog } from './ui/settings-dialog';
@@ -207,6 +209,20 @@ let accumulator = 0;
 const TICK = 120;
 const MAX_TICKS_PER_FRAME = 3;
 
+// Updated every frame by the PixiJS ticker callback. The game-loop
+// watchdog (below) reads this to detect stalls — frames frozen mid-
+// animation while UI keeps working.
+let lastTickerCallback = Date.now();
+
+// Tracks consecutive client.render() failures. PixiJS keeps calling
+// the ticker callback even when render throws on every frame, so a
+// render-only failure looks like a frozen world while the loop is
+// technically "running". RENDER_ERRORS_BEFORE_RECOVERY frames in a
+// row trigger an automatic client.refresh() (atlas + scene reset).
+const RENDER_ERRORS_BEFORE_RECOVERY = 60;
+let consecutiveRenderErrors = 0;
+let renderRecoveryAttempted = false;
+
 // FPS counter
 let fpsFrameCount = 0;
 let fpsLastSample = 0;
@@ -262,6 +278,8 @@ const boardDialog = new BoardDialog(client);
 const bankDialog = new BankDialog(client);
 const barberDialog = new BarberDialog(client);
 const citizenDialog = new CitizenDialog(client);
+const marriageDialog = new MarriageDialog(client);
+const priestDialog = new PriestDialog(client);
 const lockerDialog = new LockerDialog(client);
 const skillMasterDialog = new SkillMasterDialog(client);
 const tradeDialog = new TradeDialog(client);
@@ -418,6 +436,66 @@ const initializeSocket = (next: 'login' | 'create' | '' = '') => {
   });
 };
 
+// ── Staleness Detector ──────────────────────────────────────────────────
+// Server sends Connection.Player pings every PingRate seconds (default 60s).
+// If we go 1.5x that without receiving ANY packet, the connection is dead;
+// force a reconnect by closing the socket — the existing close handler does the rest.
+const STALENESS_THRESHOLD_MS = 90_000;
+const STALENESS_CHECK_INTERVAL_MS = 5_000;
+
+setInterval(() => {
+  if (client.state !== GameState.InGame) return;
+  if (client.reconnecting) return;
+  if (!client.bus) return;
+
+  const elapsed = Date.now() - client.lastPacketReceivedTime;
+  if (elapsed > STALENESS_THRESHOLD_MS) {
+    console.warn(
+      `[recovery] No packets received for ${Math.round(elapsed / 1000)}s; forcing reconnect`,
+    );
+    client.bus.disconnect();
+  }
+}, STALENESS_CHECK_INTERVAL_MS);
+
+// ── Game Loop Watchdog ──────────────────────────────────────────────────
+// Detects when the PixiJS ticker callback stops firing (whole world
+// frozen while UI keeps working). Two stages of recovery:
+//   - >5s stale: restart the ticker if it's stopped, then attempt
+//     client.refresh() to rebuild atlas+scene against the live context.
+//   - >30s stale: give up auto-recovery — user must press R or refresh
+//     the browser. Logged once so we don't spam.
+const GAME_LOOP_STALE_RECOVER_MS = 5_000;
+const GAME_LOOP_STALE_GIVEUP_MS = 30_000;
+let gameLoopRecoveryAttempted = false;
+
+setInterval(() => {
+  if (!client.app?.renderer) return;
+  if (client.state !== GameState.InGame) return;
+
+  const elapsed = Date.now() - lastTickerCallback;
+  if (elapsed > GAME_LOOP_STALE_GIVEUP_MS) {
+    // Already attempted recovery and it didn't help. Stop trying.
+    return;
+  }
+  if (elapsed > GAME_LOOP_STALE_RECOVER_MS && !gameLoopRecoveryAttempted) {
+    console.warn(
+      `[recovery] ticker callback stale for ${Math.round(elapsed / 1000)}s; attempting recovery`,
+    );
+    gameLoopRecoveryAttempted = true;
+    try {
+      if (!client.app.ticker.started) {
+        client.app.ticker.start();
+      }
+      client.refresh();
+    } catch (err) {
+      console.error('[recovery] game-loop recovery threw', err);
+    }
+  } else if (elapsed < GAME_LOOP_STALE_RECOVER_MS) {
+    // Frame is fresh — reset the attempt flag so a future stall can recover.
+    gameLoopRecoveryAttempted = false;
+  }
+}, 2_000);
+
 // ── Tooltip Wiring ───────────────────────────────────────────────────────
 
 spellBook.setSpellTooltip(spellTooltip);
@@ -455,6 +533,8 @@ wireClientEvents({
   bankDialog,
   barberDialog,
   citizenDialog,
+  marriageDialog,
+  priestDialog,
   boardDialog,
   lockerDialog,
   skillMasterDialog,
@@ -632,6 +712,9 @@ window.addEventListener('keydown', (e) => {
       return;
     }
   }
+
+  // Escape is the user's "let me out" signal — never let typing-lock outlive it.
+  client.typing = false;
 });
 
 window.addEventListener(
@@ -711,31 +794,114 @@ window.addEventListener('DOMContentLoaded', async () => {
   await client.initPixi();
   resizeCanvases();
 
-  client.app.ticker.add((ticker) => {
-    accumulator += ticker.deltaMS;
-    let ticks = 0;
-    while (accumulator >= TICK && ticks < MAX_TICKS_PER_FRAME) {
-      client.tick();
-      accumulator -= TICK;
-      ticks++;
+  // WebGL context loss recovery. GPUs can drop the context (mobile
+  // backgrounded, driver hiccup, long idle). preventDefault on lost
+  // tells the browser we want it restored. On restore we run a full
+  // client.refresh() so atlases + sprite pool rebuild against the new
+  // context. Wired after initPixi because client.app is created there.
+  const gameCanvas = client.app.renderer.canvas as HTMLCanvasElement;
+  gameCanvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    console.warn('[recovery] WebGL context lost');
+    client.app.ticker.stop();
+    const text = reconnectOverlay.querySelector('.reconnect-text');
+    if (text) text.textContent = 'Restoring graphics...';
+    reconnectOverlay.classList.remove('hidden');
+  });
+  gameCanvas.addEventListener('webglcontextrestored', () => {
+    console.log('[recovery] WebGL context restored');
+    if (!client.reconnecting) {
+      reconnectOverlay.classList.add('hidden');
     }
-    if (accumulator >= TICK) accumulator = TICK - 1;
-    const interpolation = accumulator / TICK;
-    client.render(interpolation);
+    if (!client.app.ticker.started) {
+      client.app.ticker.start();
+    }
+    if (client.state === GameState.InGame) {
+      client.refresh();
+    }
+  });
 
-    // Per-frame UI updates for timers and cooldowns
-    buffBar.update();
-    hotbar.updateCooldowns();
+  client.app.ticker.add((ticker) => {
+    // Watchdog timestamp — read by the game-loop watchdog setInterval
+    // below to detect ticker stalls / silent freezes where the callback
+    // stops being invoked or throws every frame.
+    lastTickerCallback = Date.now();
 
-    // FPS tracking
-    if (client.showFps) {
-      fpsFrameCount++;
-      const now = performance.now();
-      if (now - fpsLastSample >= 1000) {
-        getFpsDisplay().textContent = `${fpsFrameCount} FPS`;
-        fpsFrameCount = 0;
-        fpsLastSample = now;
+    // Per-frame errors in client.tick or client.render must NOT kill the
+    // loop. PixiJS keeps calling the callback even after a throw, but if
+    // every frame throws, the world freezes while UI keeps working. The
+    // try/catch here logs and continues so transient failures self-heal
+    // on the next frame.
+    try {
+      accumulator += ticker.deltaMS;
+      let ticks = 0;
+      while (accumulator >= TICK && ticks < MAX_TICKS_PER_FRAME) {
+        try {
+          client.tick();
+        } catch (err) {
+          console.error('[recovery] client.tick() threw', err);
+        }
+        accumulator -= TICK;
+        ticks++;
       }
+      if (accumulator >= TICK) accumulator = TICK - 1;
+      const interpolation = accumulator / TICK;
+      try {
+        client.render(interpolation);
+        // Explicit paint. Players have reported a state where game logic
+        // ticks fine and audio plays but the canvas stops repainting —
+        // PixiJS's auto-render path (registered at LOW priority by
+        // Application.start) silently dies while our callback continues.
+        // Calling renderer.render here from our NORMAL-priority callback
+        // produces a fresh frame regardless of the auto-render path.
+        // Cost is one extra render per frame; modern GPUs handle this fine.
+        client.app.renderer.render(client.app.stage);
+        consecutiveRenderErrors = 0;
+        renderRecoveryAttempted = false;
+      } catch (err) {
+        console.error('[recovery] client.render() threw', err);
+        consecutiveRenderErrors++;
+        // If render keeps failing the canvas freezes at the last good
+        // frame while the rest of the loop continues — exact symptom
+        // players are seeing. Attempt one refresh after ~1s of failures.
+        if (
+          consecutiveRenderErrors >= RENDER_ERRORS_BEFORE_RECOVERY &&
+          !renderRecoveryAttempted
+        ) {
+          console.warn(
+            `[recovery] render failed ${consecutiveRenderErrors} frames in a row; attempting refresh`,
+          );
+          renderRecoveryAttempted = true;
+          try {
+            client.refresh();
+          } catch (refreshErr) {
+            console.error(
+              '[recovery] refresh() during render-failure recovery threw',
+              refreshErr,
+            );
+          }
+        }
+      }
+
+      // Per-frame UI updates for timers and cooldowns
+      buffBar.update();
+      hotbar.updateCooldowns();
+
+      // FPS tracking
+      if (client.showFps) {
+        fpsFrameCount++;
+        const now = performance.now();
+        if (now - fpsLastSample >= 1000) {
+          getFpsDisplay().textContent = `${fpsFrameCount} FPS`;
+          fpsFrameCount = 0;
+          fpsLastSample = now;
+        }
+      }
+    } catch (err) {
+      console.error(
+        '[recovery] ticker callback threw outside tick/render',
+        err,
+      );
     }
   });
 
@@ -749,9 +915,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       client.app.ticker.start();
 
       if (client.state === GameState.InGame) {
-        client.clearStaleVisualState();
         client.refresh();
-        client.atlas.refresh();
       }
     }
   });

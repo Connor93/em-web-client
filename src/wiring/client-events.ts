@@ -292,9 +292,9 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     }
   });
 
-  client.on('enterGame', ({ news }) => {
+  client.on('enterGame', ({ news, isReconnect }) => {
     deps.mainMenu.hide();
-    if (!client.reconnecting) {
+    if (!isReconnect) {
       deps.chat.clear();
       deps.mobileChat.clear();
     }
@@ -378,7 +378,6 @@ export function wireClientEvents(deps: ClientEventDeps): void {
     deps.bossBar.clear();
     deps.bannerNotification.clear();
     deps.buffBar.clear();
-    client.clearStaleVisualState();
     client.refresh();
     console.log('Successfully reconnected to server');
   });

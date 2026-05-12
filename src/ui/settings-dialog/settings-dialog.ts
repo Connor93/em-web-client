@@ -164,6 +164,7 @@ const RIGHT_KEYS: (keyof GameSettings)[] = [
   'wasdMovement',
   'weaponAuras',
   'playerAuras',
+  'otherPlayerSpellEffects',
   'hotbarSlots',
   'uiScale',
   'fpsLimit',
